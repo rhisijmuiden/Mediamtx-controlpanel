@@ -47,22 +47,30 @@ Plak dit in de shell van de Proxmox-host (als root, bijvoorbeeld via *Datacenter
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/proxmox/create-lxc.sh)"
 ```
 
+Net als de scripts van [community-scripts.org](https://community-scripts.org) vraagt het script eerst hoe de container gemaakt moet worden:
+
+- **Standaard**: 2 cores, 2048 MB geheugen, 8 GB schijf, DHCP op `vmbr0`.
+- **Geavanceerd**: je kiest zelf container-ID, hostnaam, cores, geheugen, swap, schijfgrootte, opslag (uit de lijst van je Proxmox-host), netwerkbrug, vast IP of DHCP, gateway, VLAN, DNS, root-wachtwoord, SSH-sleutel, of MediaMTX ook in de container komt, de poort van het paneel, het e-mailadres van de beheerder en het publieke adres voor de streams.
+
+Voordat er iets wordt aangemaakt, toont het script een overzicht om te bevestigen.
+
 Het script haalt de broncode zelf van GitHub (`REPO_BRANCH=…` kiest een andere branch). Vanuit een uitgepakte kopie van deze repository werkt `bash deploy/proxmox/create-lxc.sh` ook; dan wordt die code gebruikt.
 
 Als het klaar is, toont het script in de shell het adres (`http://<ip-van-de-container>:8080`), de beheerderslogin en een **eenmalig wachtwoord**. Bij de eerste keer inloggen vraagt het paneel meteen om een eigen wachtwoord; het eenmalige wachtwoord wordt nergens in de container bewaard.
 
 .NET 10 komt uit de pakketbron van Microsoft (`packages.microsoft.com`), omdat Debian zelf geen .NET levert. De Debian 13-template vereist Proxmox VE 8.4 of nieuwer.
 
-Alles is met omgevingsvariabelen aan te passen, bijvoorbeeld:
+Zonder vragen (bijvoorbeeld voor automatisering) zet je `INTERACTIVE=no` en geef je de instellingen als omgevingsvariabelen mee:
 
 ```bash
-CT_ID=150 CT_IP=192.168.1.50/24 CT_GW=192.168.1.1 CT_STORAGE=local-zfs \
+INTERACTIVE=no CT_ID=150 CT_IP=192.168.1.50/24 CT_GW=192.168.1.1 CT_STORAGE=local-zfs \
 PUBLIC_HOST=stream.example.com ADMIN_EMAIL=ik@example.com \
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/proxmox/create-lxc.sh)"
 ```
 
 | Variabele | Standaard | Betekenis |
 |---|---|---|
+| `INTERACTIVE` | `yes` | `no` = niets vragen, alleen deze variabelen gebruiken |
 | `TEMPLATE_NAME` | `debian-13-standard` | Specifieke Debian 13-template |
 | `CT_ID` | volgende vrije ID | Container-ID |
 | `CT_HOSTNAME` | `mediamtx-panel` | Hostnaam |
