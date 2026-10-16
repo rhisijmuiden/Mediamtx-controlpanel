@@ -32,13 +32,23 @@ random_secret() { LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom 2>/dev/null | head -
 [[ $EUID -eq 0 ]] || { echo "Run as root." >&2; exit 1; }
 [[ -f "$SOURCE_TARBALL" ]] || { echo "Sources not found at $SOURCE_TARBALL." >&2; exit 1; }
 export DEBIAN_FRONTEND=noninteractive
+# Debian templates only ship the C.UTF-8 locale. XDG_RUNTIME_DIR from another system (e.g. /run/user/0
+# passed on by pct exec) makes the .NET SDK fail to create its NuGet mutex.
+export LANG=C.UTF-8 LC_ALL=C.UTF-8
+unset LANGUAGE XDG_RUNTIME_DIR
 
 # ---------------------------------------------------------------- packages
 install_packages() {
   # shellcheck source=/dev/null
   . /etc/os-release
   apt-get update -qq
-  apt-get install -y -qq curl ca-certificates tar sqlite3 iproute2 >/dev/null
+  apt-get install -y -qq curl ca-certificates tar sqlite3 iproute2 locales >/dev/null
+  # English (en_US.UTF-8) as the container's default language, so logins from a host shell with that LANG work.
+  if ! locale -a 2>/dev/null | grep -qi '^en_US\.utf-\?8$'; then
+    sed -i 's/^# *\(en_US.UTF-8 UTF-8\)/\1/' /etc/locale.gen
+    locale-gen >/dev/null
+  fi
+  update-locale LANG=en_US.UTF-8
   if [[ "$ID" != "debian" ]]; then
     echo "Unsupported OS '$ID': this installer is made for Debian 13." >&2
     exit 1
