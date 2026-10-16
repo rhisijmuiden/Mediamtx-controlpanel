@@ -3,11 +3,11 @@
 @rendermode InteractiveServer
 @inject UserAdminService UserAdmin
 
-<PageTitle>Gebruikers</PageTitle>
+<PageTitle>Users</PageTitle>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="mb-0">Gebruikers</h1>
-    <a class="btn btn-primary" href="users/new">+ Nieuwe gebruiker</a>
+    <h1 class="mb-0">Users</h1>
+    <a class="btn btn-primary" href="users/new">+ New user</a>
 </div>
 
 @if (message is not null)
@@ -17,37 +17,37 @@
 
 @if (users is null)
 {
-    <p>Laden…</p>
+    <p>Loading…</p>
 }
 else
 {
     <div class="table-responsive">
         <table class="table table-hover align-middle">
             <thead>
-                <tr><th>E-mailadres</th><th>Naam</th><th>Rol</th><th class="text-end">Streams</th><th>Status</th><th>Aangemaakt</th><th></th></tr>
+                <tr><th>Email address</th><th>Name</th><th>Role</th><th class="text-end">Streams</th><th>Status</th><th>Created</th><th></th></tr>
             </thead>
             <tbody>
                 @foreach (var u in users)
                 {
                     <tr>
-                        <td>@u.Email @if (u.Id == myId) { <span class="badge text-bg-light border">jij</span> }</td>
+                        <td>@u.Email @if (u.Id == myId) { <span class="badge text-bg-light border">you</span> }</td>
                         <td>@(u.DisplayName ?? "–")</td>
                         <td>@Roles.Label(u.Role)</td>
                         <td class="text-end">@u.StreamCount</td>
-                        <td>@if (u.Locked) { <span class="badge text-bg-danger">Geblokkeerd</span> } else { <span class="badge text-bg-success">Actief</span> }</td>
+                        <td>@if (u.Locked) { <span class="badge text-bg-danger">Blocked</span> } else { <span class="badge text-bg-success">Active</span> }</td>
                         <td class="small">@u.CreatedAt.ToLocalTime().ToString("d")</td>
                         <td class="text-end text-nowrap">
-                            <a class="btn btn-sm btn-outline-primary" href="users/@u.Id">Bewerken</a>
+                            <a class="btn btn-sm btn-outline-primary" href="users/@u.Id">Edit</a>
                             @if (u.Id != myId)
                             {
-                                <button class="btn btn-sm btn-outline-secondary" @onclick="() => ToggleLock(u)">@(u.Locked ? "Deblokkeren" : "Blokkeren")</button>
+                                <button class="btn btn-sm btn-outline-secondary" @onclick="() => ToggleLock(u)">@(u.Locked ? "Unblock" : "Block")</button>
                                 @if (confirmDelete == u.Id)
                                 {
-                                    <button class="btn btn-sm btn-danger" @onclick="() => Delete(u)">Bevestig</button>
+                                    <button class="btn btn-sm btn-danger" @onclick="() => Delete(u)">Confirm</button>
                                 }
                                 else
                                 {
-                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => confirmDelete = u.Id">Verwijderen</button>
+                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => confirmDelete = u.Id">Delete</button>
                                 }
                             }
                         </td>
@@ -76,7 +76,7 @@ else
     private async Task ToggleLock(UserSummary u)
     {
         var r = await UserAdmin.SetLockedAsync(u.Id, !u.Locked, myId);
-        Report(r, u.Locked ? $"{u.Email} is gedeblokkeerd." : $"{u.Email} is geblokkeerd en uitgelogd.");
+        Report(r, u.Locked ? $"{u.Email} has been unblocked." : $"{u.Email} has been blocked and signed out.");
         users = await UserAdmin.ListAsync();
     }
 
@@ -84,7 +84,7 @@ else
     {
         confirmDelete = null;
         var r = await UserAdmin.DeleteAsync(u.Id, myId);
-        Report(r, $"{u.Email} is verwijderd. Eventuele streams van deze gebruiker blijven bestaan zonder eigenaar.");
+        Report(r, $"{u.Email} has been deleted. Any streams of this user remain, without an owner.");
         users = await UserAdmin.ListAsync();
     }
 

@@ -14,7 +14,7 @@ public class MediaMtxOptions
 
     // --- First server, created on startup when no servers exist ---
 
-    public string ServerName { get; set; } = "Standaard";
+    public string ServerName { get; set; } = "Default";
     public string ApiUrl { get; set; } = "";
     public string ApiUser { get; set; } = "panel";
     public string ApiPassword { get; set; } = "";

@@ -47,7 +47,7 @@ public class MollieGateway(IHttpClientFactory httpClientFactory) : IPaymentGatew
     private HttpClient Client(PaymentCredentials c)
     {
         if (string.IsNullOrEmpty(c.MollieApiKey))
-            throw new PaymentException("Er is geen Mollie API-sleutel ingesteld.");
+            throw new PaymentException("No Mollie API key has been set.");
         var http = httpClientFactory.CreateClient("payments");
         http.BaseAddress = new Uri("https://api.mollie.com/v2/");
         http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", c.MollieApiKey);
@@ -74,7 +74,7 @@ public class MollieGateway(IHttpClientFactory httpClientFactory) : IPaymentGatew
         var id = json["id"]?.GetValue<string>();
         var checkout = json["_links"]?["checkout"]?["href"]?.GetValue<string>();
         if (id is null || checkout is null)
-            throw new PaymentException("Mollie gaf geen betaallink terug.");
+            throw new PaymentException("Mollie did not return a payment link.");
         return new CheckoutStart(id, checkout);
     }
 
@@ -111,7 +111,7 @@ public class PayPalGateway(IHttpClientFactory httpClientFactory) : IPaymentGatew
     private async Task<HttpClient> ClientAsync(PaymentCredentials c, CancellationToken ct)
     {
         if (string.IsNullOrEmpty(c.PayPalClientId) || string.IsNullOrEmpty(c.PayPalSecret))
-            throw new PaymentException("Er zijn geen PayPal-gegevens ingesteld.");
+            throw new PaymentException("No PayPal credentials have been set.");
         var http = httpClientFactory.CreateClient("payments");
         http.BaseAddress = new Uri(c.PayPalSandbox ? "https://api-m.sandbox.paypal.com/" : "https://api-m.paypal.com/");
 
@@ -123,7 +123,7 @@ public class PayPalGateway(IHttpClientFactory httpClientFactory) : IPaymentGatew
             Convert.ToBase64String(Encoding.UTF8.GetBytes($"{c.PayPalClientId}:{c.PayPalSecret}")));
         using var tokenResponse = await http.SendAsync(tokenRequest, ct);
         var token = (await ReadAsync(tokenResponse, ct))["access_token"]?.GetValue<string>()
-            ?? throw new PaymentException("PayPal gaf geen toegangstoken terug.");
+            ?? throw new PaymentException("PayPal did not return an access token.");
         http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         return http;
     }
@@ -163,7 +163,7 @@ public class PayPalGateway(IHttpClientFactory httpClientFactory) : IPaymentGatew
         var link = json["links"]?.AsArray()
             .FirstOrDefault(l => l?["rel"]?.GetValue<string>() is "payer-action" or "approve")?["href"]?.GetValue<string>();
         if (id is null || link is null)
-            throw new PaymentException("PayPal gaf geen betaallink terug.");
+            throw new PaymentException("PayPal did not return a payment link.");
         return new CheckoutStart(id, link);
     }
 

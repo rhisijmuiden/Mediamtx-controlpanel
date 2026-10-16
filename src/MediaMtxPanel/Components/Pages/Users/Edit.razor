@@ -4,20 +4,20 @@
 @using System.ComponentModel.DataAnnotations
 @inject UserAdminService UserAdmin
 
-<PageTitle>Gebruiker bewerken</PageTitle>
+<PageTitle>Edit user</PageTitle>
 
 @if (notFound)
 {
-    <h1>Gebruiker niet gevonden</h1>
-    <a href="users">Terug</a>
+    <h1>User not found</h1>
+    <a href="users">Back</a>
 }
 else if (input is null)
 {
-    <p>Laden…</p>
+    <p>Loading…</p>
 }
 else
 {
-    <h1>Gebruiker bewerken</h1>
+    <h1>Edit user</h1>
 
     @if (message is not null)
     {
@@ -29,35 +29,35 @@ else
             <EditForm Model="input" OnValidSubmit="Save" FormName="edit-user">
                 <DataAnnotationsValidator />
                 <div class="mb-3">
-                    <label class="form-label" for="email">E-mailadres (login)</label>
+                    <label class="form-label" for="email">Email address (login)</label>
                     <InputText id="email" class="form-control" @bind-Value="input.Email" />
                     <ValidationMessage For="() => input.Email" />
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" for="dn">Naam</label>
+                    <label class="form-label" for="dn">Name</label>
                     <InputText id="dn" class="form-control" @bind-Value="input.DisplayName" />
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" for="role">Rol</label>
+                    <label class="form-label" for="role">Role</label>
                     <InputSelect id="role" class="form-select" @bind-Value="input.Role" disabled="@(Id == myId)">
-                        <option value="@Roles.User">Gebruiker</option>
-                        <option value="@Roles.Customer">Klant</option>
-                        <option value="@Roles.Admin">Beheerder</option>
+                        <option value="@Roles.User">User</option>
+                        <option value="@Roles.Customer">Customer</option>
+                        <option value="@Roles.Admin">Administrator</option>
                     </InputSelect>
                 </div>
-                <button type="submit" class="btn btn-primary">Opslaan</button>
-                <a class="btn btn-outline-secondary" href="users">Terug</a>
+                <button type="submit" class="btn btn-primary">Save</button>
+                <a class="btn btn-outline-secondary" href="users">Back</a>
             </EditForm>
         </div>
         <div class="col-lg-6">
             <div class="card">
-                <div class="card-header"><strong>Wachtwoord opnieuw instellen</strong></div>
+                <div class="card-header"><strong>Reset password</strong></div>
                 <div class="card-body">
                     <div class="input-group mb-2">
-                        <input class="form-control font-monospace" @bind="newPassword" placeholder="Nieuw wachtwoord" />
-                        <button type="button" class="btn btn-outline-secondary" @onclick="GeneratePassword">Genereer</button>
+                        <input class="form-control font-monospace" @bind="newPassword" placeholder="New password" />
+                        <button type="button" class="btn btn-outline-secondary" @onclick="GeneratePassword">Generate</button>
                     </div>
-                    <button class="btn btn-warning" @onclick="ResetPassword" disabled="@string.IsNullOrWhiteSpace(newPassword)">Wachtwoord instellen</button>
+                    <button class="btn btn-warning" @onclick="ResetPassword" disabled="@string.IsNullOrWhiteSpace(newPassword)">Set password</button>
                 </div>
             </div>
         </div>
@@ -90,7 +90,7 @@ else
     private async Task Save()
     {
         var r = await UserAdmin.UpdateAsync(Id, input!.Email.Trim(), input.DisplayName, input.Role, myId);
-        Report(r, "Opgeslagen.");
+        Report(r, "Saved.");
     }
 
     private void GeneratePassword() => newPassword = CredentialGenerator.Password(14) + "a1";
@@ -98,7 +98,7 @@ else
     private async Task ResetPassword()
     {
         var r = await UserAdmin.ResetPasswordAsync(Id, newPassword!);
-        Report(r, "Wachtwoord is ingesteld. Geef het nieuwe wachtwoord door aan de gebruiker.");
+        Report(r, "Password has been set. Pass the new password on to the user.");
     }
 
     private void Report(Microsoft.AspNetCore.Identity.IdentityResult r, string ok)
@@ -109,7 +109,7 @@ else
 
     private class EditUserInput
     {
-        [Required(ErrorMessage = "Vul een e-mailadres in."), EmailAddress(ErrorMessage = "Ongeldig e-mailadres.")]
+        [Required(ErrorMessage = "Enter an email address."), EmailAddress(ErrorMessage = "Invalid email address.")]
         public string Email { get; set; } = "";
         public string? DisplayName { get; set; }
         public string Role { get; set; } = Roles.User;

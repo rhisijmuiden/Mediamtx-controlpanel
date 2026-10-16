@@ -145,7 +145,7 @@ configure_panel() {
     echo "Panel__HookBaseUrl=http://${PANEL_HOST}:${PANEL_PORT}"
     if [[ "$INSTALL_MEDIAMTX" == "yes" ]]; then
       echo "# First server (the MediaMTX in this container). Only used when the panel has no servers yet."
-      echo "MediaMtx__ServerName=Lokaal"
+      echo "MediaMtx__ServerName=Local"
       echo "MediaMtx__ApiUrl=http://127.0.0.1:9997"
       echo "MediaMtx__ApiUser=panel"
       echo "MediaMtx__ApiPassword=${api_password}"

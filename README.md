@@ -1,140 +1,140 @@
 # MediaMTX Panel
 
-Een beheerpaneel voor [MediaMTX](https://github.com/bluenviron/mediamtx), geschreven in ASP.NET Core (.NET 10, Blazor Server).
+A control panel for [MediaMTX](https://github.com/bluenviron/mediamtx), written in ASP.NET Core (.NET 10, Blazor Server).
 
-- **Gebruikers**: beheerders maken accounts aan (geen open registratie). Rollen: *Beheerder* (alle streams en gebruikers), *Gebruiker* (alleen eigen streams) en *Klant* (alleen het klantportaal). Blokkeren, wachtwoord resetten en verwijderen kan vanuit het paneel.
-- **Streams**: aanmaken, bewerken, in-/uitschakelen en verwijderen. Een stream is een *publisher*-stream (OBS, ffmpeg, camera of browser stuurt naar de server) of een *ophaal*-stream (de server haalt een externe RTSP/RTMP/SRT/HLS/WHEP-bron op). Opties: openbaar bekijken, opnemen, maximaal aantal kijkers.
-- **Direct na het aanmaken** toont het paneel de inloggegevens (publiceren en bekijken), de OBS-instellingen, alle endpoints (RTSP, RTMP, SRT, WebRTC WHIP/WHEP, HLS) met kopieerknoppen, en voorbeeldcommando's voor ffmpeg/ffplay.
-- **Live status**: dashboard en streampagina's tonen live/offline, codecs, kijkers en verkeer; publishers en kijkers kun je verbreken.
-- **Meerdere MediaMTX-servers**: beheerders koppelen onder *Servers* zoveel MediaMTX-instanties als nodig. Bij elke stream kies je de server; de URL's gebruiken het publieke adres en de poorten van die server. Het dashboard toont per server of hij online is.
-- **Klantportaal**: klanten loggen in en zien hun eigen streams met een live preview, een tabblad met precies wat ze nodig hebben om uit te zenden, en een balk met CPU, RAM, load, netwerk, bitrate en kijkers (zie [Klantportaal en paywall](#klantportaal-en-paywall)).
-- **Paywall**: klanten verkopen tickets voor hun stream (bijv. dagticket of weekpas) en laten kijkers betalen met iDEAL (Mollie) of PayPal.
-- **Proxmox**: met één script een LXC-container met paneel en MediaMTX aanmaken (zie [Proxmox LXC](#proxmox-lxc)).
+- **Users**: administrators create accounts (no open registration). Roles: *Administrator* (all streams and users), *User* (own streams only) and *Customer* (customer portal only). Blocking, resetting passwords and deleting are done from the panel.
+- **Streams**: create, edit, enable/disable and delete. A stream is either a *publisher* stream (OBS, ffmpeg, a camera or a browser sends to the server) or a *pull* stream (the server pulls an external RTSP/RTMP/SRT/HLS/WHEP source). Options: public viewing, recording, maximum number of viewers.
+- **Right after creating a stream** the panel shows the credentials (publish and view), the OBS settings, all endpoints (RTSP, RTMP, SRT, WebRTC WHIP/WHEP, HLS) with copy buttons, and example commands for ffmpeg/ffplay.
+- **Live status**: the dashboard and stream pages show live/offline, codecs, viewers and traffic; publishers and viewers can be disconnected.
+- **Multiple MediaMTX servers**: administrators add as many MediaMTX instances as needed under *Servers*. Each stream is assigned to a server; its URLs use that server's public address and ports. The dashboard shows whether each server is online.
+- **Customer portal**: customers log in and see their own streams with a live preview, a tab with exactly what they need to broadcast, and a bar with CPU, RAM, load, network, bitrate and viewers (see [Customer portal and paywall](#customer-portal-and-paywall)).
+- **Paywall**: customers sell tickets for their stream (e.g. a day ticket or a week pass) and let viewers pay with iDEAL (Mollie) or PayPal.
+- **Proxmox**: create an LXC container with the panel and MediaMTX using a single script (see [Proxmox LXC](#proxmox-lxc)).
 
-## Hoe het werkt
+## How it works
 
 ```
- encoder / kijker ──RTSP/RTMP/SRT/WebRTC/HLS──▶ MediaMTX ──(auth hook)──▶ Panel  ──▶ SQLite
+ encoder / viewer ──RTSP/RTMP/SRT/WebRTC/HLS──▶ MediaMTX ──(auth hook)──▶ Panel  ──▶ SQLite
                                                    ▲                         │
                                                    └──── Control API v3 ─────┘
 ```
 
-- Het paneel is de bron van waarheid. Streams staan in de database (SQLite) en worden via de MediaMTX Control API (`/v3/config/paths/...`) als *paths* aangemaakt.
-- MediaMTX draait met `authMethod: http`: bij elke publish/read/API-aanvraag vraagt MediaMTX aan het paneel (`POST /api/mediamtx/auth`) of het mag. Elke stream heeft eigen gebruikersnamen en wachtwoorden; nieuwe wachtwoorden gelden direct zonder MediaMTX te herstarten.
-- Wijzigingen via de API bewaart MediaMTX alleen in het geheugen. Het paneel controleert daarom elke 30 seconden of de configuratie in MediaMTX nog klopt en zet ontbrekende streams terug (bijv. na een herstart van MediaMTX).
-- Paden die niet in het paneel bestaan, weigert MediaMTX (`paths: {}` in `deploy/mediamtx.yml`).
+- The panel is the source of truth. Streams are stored in the database (SQLite) and created as *paths* through the MediaMTX Control API (`/v3/config/paths/...`).
+- MediaMTX runs with `authMethod: http`: for every publish/read/API request, MediaMTX asks the panel (`POST /api/mediamtx/auth`) whether it is allowed. Each stream has its own usernames and passwords; new passwords take effect immediately without restarting MediaMTX.
+- MediaMTX keeps changes made through the API in memory only. The panel therefore checks every 30 seconds whether the configuration in MediaMTX is still correct and restores missing streams (e.g. after a MediaMTX restart).
+- MediaMTX refuses paths that do not exist in the panel (`paths: {}` in `deploy/mediamtx.yml`).
 
-## Starten met Docker
+## Running with Docker
 
 ```bash
-cp .env.example .env      # vul PUBLIC_HOST en de wachtwoorden in
+cp .env.example .env      # fill in PUBLIC_HOST and the passwords
 docker compose up -d --build
 ```
 
-Open daarna `http://<server>:8080` en log in met `ADMIN_EMAIL` / `ADMIN_PASSWORD`. Laat je `ADMIN_PASSWORD` leeg, dan genereert het paneel een wachtwoord en schrijft het één keer naar de log (`docker compose logs panel`).
+Then open `http://<server>:8080` and log in with `ADMIN_EMAIL` / `ADMIN_PASSWORD`. If you leave `ADMIN_PASSWORD` empty, the panel generates a password and writes it to the log once (`docker compose logs panel`).
 
-Poorten van MediaMTX: 8554 (RTSP), 1935 (RTMP), 8890/udp (SRT), 8888 (HLS), 8889 + 8189/udp (WebRTC). De Control API (9997) is alleen binnen het docker-netwerk bereikbaar.
+MediaMTX ports: 8554 (RTSP), 1935 (RTMP), 8890/udp (SRT), 8888 (HLS), 8889 + 8189/udp (WebRTC). The Control API (9997) is only reachable inside the docker network.
 
-Zet het paneel in productie achter een reverse proxy met HTTPS (Caddy, nginx, Traefik). Forwarded headers worden ondersteund.
+In production, put the panel behind a reverse proxy with HTTPS (Caddy, nginx, Traefik). Forwarded headers are supported.
 
 ## Proxmox LXC
 
-Het script `deploy/proxmox/create-lxc.sh` maakt op een Proxmox VE-host een Debian 13-container aan en installeert daarin het paneel als systemd-service, plus (standaard) MediaMTX als eerste server.
+The script `deploy/proxmox/create-lxc.sh` creates a Debian 13 container on a Proxmox VE host and installs the panel in it as a systemd service, plus (by default) MediaMTX as the first server.
 
-Plak dit in de shell van de Proxmox-host (als root, bijvoorbeeld via *Datacenter → node → Shell*):
+Paste this into the shell of the Proxmox host (as root, e.g. via *Datacenter → node → Shell*):
 
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/proxmox/create-lxc.sh)"
 ```
 
-Net als de scripts van [community-scripts.org](https://community-scripts.org) vraagt het script eerst hoe de container gemaakt moet worden:
+Like the scripts from [community-scripts.org](https://community-scripts.org), the script first asks how the container should be created:
 
-- **Standaard**: 2 cores, 2048 MB geheugen, 8 GB schijf, DHCP op `vmbr0`.
-- **Geavanceerd**: je kiest zelf container-ID, hostnaam, cores, geheugen, swap, schijfgrootte, opslag (uit de lijst van je Proxmox-host), netwerkbrug, vast IP of DHCP, gateway, VLAN, DNS, root-wachtwoord, SSH-sleutel, of MediaMTX ook in de container komt, de poort van het paneel, het e-mailadres van de beheerder en het publieke adres voor de streams.
+- **Default**: 2 cores, 2048 MB memory, 8 GB disk, DHCP on `vmbr0`.
+- **Advanced**: you choose the container ID, hostname, cores, memory, swap, disk size, storage (from the list on your Proxmox host), network bridge, static IP or DHCP, gateway, VLAN, DNS, root password, SSH key, whether MediaMTX is installed in the container too, the panel port, the administrator's email address and the public address for the streams.
 
-Voordat er iets wordt aangemaakt, toont het script een overzicht om te bevestigen.
+Before anything is created, the script shows a summary to confirm.
 
-Het script haalt de broncode zelf van GitHub (`REPO_BRANCH=…` kiest een andere branch). Vanuit een uitgepakte kopie van deze repository werkt `bash deploy/proxmox/create-lxc.sh` ook; dan wordt die code gebruikt.
+The script fetches the source code from GitHub itself (`REPO_BRANCH=…` selects another branch). Running `bash deploy/proxmox/create-lxc.sh` from an extracted copy of this repository also works; that code is then used.
 
-Als het klaar is, toont het script in de shell het adres (`http://<ip-van-de-container>:8080`), de beheerderslogin en een **eenmalig wachtwoord**. Bij de eerste keer inloggen vraagt het paneel meteen om een eigen wachtwoord; het eenmalige wachtwoord wordt nergens in de container bewaard.
+When it is done, the script shows the address (`http://<container-ip>:8080`), the administrator login and a **one-time password** in the shell. On first login the panel immediately asks for a new password; the one-time password is not stored anywhere in the container.
 
-.NET 10 komt uit de pakketbron van Microsoft (`packages.microsoft.com`), omdat Debian zelf geen .NET levert. De Debian 13-template vereist Proxmox VE 8.4 of nieuwer.
+.NET 10 comes from Microsoft's package feed (`packages.microsoft.com`), because Debian does not ship .NET itself. The Debian 13 template requires Proxmox VE 8.4 or newer.
 
-Zonder vragen (bijvoorbeeld voor automatisering) zet je `INTERACTIVE=no` en geef je de instellingen als omgevingsvariabelen mee:
+To run without questions (e.g. for automation), set `INTERACTIVE=no` and pass the settings as environment variables:
 
 ```bash
 INTERACTIVE=no CT_ID=150 CT_IP=192.168.1.50/24 CT_GW=192.168.1.1 CT_STORAGE=local-zfs \
-PUBLIC_HOST=stream.example.com ADMIN_EMAIL=ik@example.com \
+PUBLIC_HOST=stream.example.com ADMIN_EMAIL=me@example.com \
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/proxmox/create-lxc.sh)"
 ```
 
-| Variabele | Standaard | Betekenis |
+| Variable | Default | Meaning |
 |---|---|---|
-| `INTERACTIVE` | `yes` | `no` = niets vragen, alleen deze variabelen gebruiken |
-| `TEMPLATE_NAME` | `debian-13-standard` | Specifieke Debian 13-template |
-| `CT_ID` | volgende vrije ID | Container-ID |
-| `CT_HOSTNAME` | `mediamtx-panel` | Hostnaam |
-| `CT_CORES` / `CT_MEMORY` / `CT_DISK` | 2 / 2048 MB / 8 GB | Resources (bouwen vraagt ±1,5 GB geheugen) |
-| `CT_STORAGE` / `TEMPLATE_STORAGE` | `local-lvm` / `local` | Opslag voor de schijf en voor de template |
-| `CT_BRIDGE` / `CT_VLAN` | `vmbr0` / leeg | Netwerk |
-| `CT_IP` / `CT_GW` / `CT_DNS` | `dhcp` / leeg / leeg | IP-instellingen |
-| `CT_PASSWORD` / `CT_SSH_KEY` | willekeurig / leeg | Root-toegang tot de container |
-| `INSTALL_MEDIAMTX` | `yes` | MediaMTX in dezelfde container installeren |
-| `MEDIAMTX_VERSION` | `1.21.2` | MediaMTX-versie (van GitHub releases) |
-| `PANEL_PORT` | `8080` | Poort van het paneel |
-| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | `admin@localhost` / willekeurig | Eerste beheerder (wachtwoord is eenmalig) |
-| `REPO` / `REPO_BRANCH` | `rhisijmuiden/Mediamtx-controlpanel` / `main` | Waar de broncode vandaan komt |
-| `PUBLIC_HOST` | IP van de container | Adres in de stream-URL's |
+| `INTERACTIVE` | `yes` | `no` = ask nothing, use only these variables |
+| `TEMPLATE_NAME` | `debian-13-standard` | Specific Debian 13 template |
+| `CT_ID` | next free ID | Container ID |
+| `CT_HOSTNAME` | `mediamtx-panel` | Hostname |
+| `CT_CORES` / `CT_MEMORY` / `CT_DISK` | 2 / 2048 MB / 8 GB | Resources (building needs ~1.5 GB memory) |
+| `CT_STORAGE` / `TEMPLATE_STORAGE` | `local-lvm` / `local` | Storage for the disk and for the template |
+| `CT_BRIDGE` / `CT_VLAN` | `vmbr0` / empty | Network |
+| `CT_IP` / `CT_GW` / `CT_DNS` | `dhcp` / empty / empty | IP settings |
+| `CT_PASSWORD` / `CT_SSH_KEY` | random / empty | Root access to the container |
+| `INSTALL_MEDIAMTX` | `yes` | Install MediaMTX in the same container |
+| `MEDIAMTX_VERSION` | `1.21.2` | MediaMTX version (from GitHub releases) |
+| `PANEL_PORT` | `8080` | Panel port |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | `admin@localhost` / random | First administrator (the password is one-time) |
+| `REPO` / `REPO_BRANCH` | `rhisijmuiden/Mediamtx-controlpanel` / `main` | Where the source code comes from |
+| `PUBLIC_HOST` | IP of the container | Address in the stream URLs |
 
-In de container:
+Inside the container:
 
-- paneel: `/opt/mediamtx-panel`, configuratie `/etc/mediamtx-panel/panel.env`, data `/var/lib/mediamtx-panel`, service `mediamtx-panel`
-- MediaMTX: `/opt/mediamtx`, configuratie `/etc/mediamtx/mediamtx.yml`, opnames `/var/lib/mediamtx/recordings`, service `mediamtx`
+- panel: `/opt/mediamtx-panel`, configuration `/etc/mediamtx-panel/panel.env`, data `/var/lib/mediamtx-panel`, service `mediamtx-panel`
+- MediaMTX: `/opt/mediamtx`, configuration `/etc/mediamtx/mediamtx.yml`, recordings `/var/lib/mediamtx/recordings`, service `mediamtx`
 
-Bijwerken naar nieuwe code (database en instellingen blijven):
+Updating to new code (database and settings are kept):
 
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/proxmox/create-lxc.sh)" _ update <CTID>
 ```
 
-Andere Proxmox-containers of VM's met alleen MediaMTX koppel je daarna via **Servers** in het paneel.
+Other Proxmox containers or VMs running only MediaMTX can then be added under **Servers** in the panel.
 
-## Klantportaal en paywall
+## Customer portal and paywall
 
-![Klantportaal](docs/klantportaal.png)
+![Customer portal](docs/customer-portal.png)
 
-Maak onder **Gebruikers** een account met de rol *Klant* en kies die klant als *Eigenaar* bij een stream. Na het inloggen komt de klant in **Mijn portaal** (`/portal`):
+Under **Users**, create an account with the *Customer* role and select that customer as *Owner* of a stream. After logging in, the customer lands in **My portal** (`/portal`):
 
-- **Preview**: de stream speelt af in de browser (WebRTC, of HLS als de browser de codec niet via WebRTC kan afspelen), zodat de klant ziet of het beeld goed binnenkomt.
-- **Statistiekenbalk**: CPU, RAM, load en netwerkverkeer van de server, plus bitrate in/uit, kijkers, codecs en hoe lang de stream live is. Draait MediaMTX op dezelfde machine als het paneel (API-URL op `127.0.0.1`), dan leest het paneel dit zelf. Voor andere servers installeer je `prometheus-node-exporter` op die server en vul je bij **Servers** de *Statistieken-URL* in (bijv. `http://10.0.0.21:9100/metrics`).
-- **Tabblad Verbinden**: OBS-server en streamsleutel, gebruikersnaam en wachtwoord, en de URL's voor RTSP, RTMP, SRT en WHIP.
-- **Tabblad Delen**: de openbare kijkpagina `/watch/<code>` en de kijkgegevens.
-- **Tabblad Paywall**: aanbiedingen beheren (naam, prijs, toegangsduur, zoals "Dagticket HD" of "Weekpas"), de paywall aan- en uitzetten, en verkopen en omzet bekijken.
+- **Preview**: the stream plays in the browser (WebRTC, or HLS if the browser cannot play the codec over WebRTC), so the customer can see whether the video is coming in properly.
+- **Statistics bar**: CPU, RAM, load and network traffic of the server, plus bitrate in/out, viewers, codecs and how long the stream has been live. If MediaMTX runs on the same machine as the panel (API URL on `127.0.0.1`), the panel reads this itself. For other servers, install `prometheus-node-exporter` on that server and fill in the *Statistics URL* under **Servers** (e.g. `http://10.0.0.21:9100/metrics`).
+- **Connect tab**: OBS server and stream key, username and password, and the URLs for RTSP, RTMP, SRT and WHIP.
+- **Share tab**: the public watch page `/watch/<code>` and the viewing credentials.
+- **Paywall tab**: manage offers (name, price, access duration, such as "Day ticket HD" or "Week pass"), turn the paywall on and off, and view sales and revenue.
 
-### Betalen
+### Payments
 
-Onder **Betaalinstellingen** koppelt de klant een eigen account; het geld komt rechtstreeks bij de klant binnen. Sleutels worden versleuteld opgeslagen.
+Under **Payment settings** the customer connects their own account; the money goes directly to the customer. Keys are stored encrypted.
 
-- **iDEAL via Mollie**: API-sleutel uit het Mollie-dashboard (`test_…` om te proberen, `live_…` voor echt).
-- **PayPal**: Client ID en Secret van een REST-app op developer.paypal.com, met een schakelaar voor sandbox of live.
+- **iDEAL via Mollie**: API key from the Mollie dashboard (`test_…` to try it out, `live_…` for real payments).
+- **PayPal**: Client ID and Secret of a REST app on developer.paypal.com, with a switch for sandbox or live.
 
-De kijker opent de kijkpagina, kiest een aanbieding en betaalt. Daarna stuurt de provider de kijker terug en speelt de stream direct af. De kijker krijgt een persoonlijke link en kan ook kijken via VLC, een smart-tv of een ander apparaat: daarvoor gebruikt hij de gebruikersnaam `ticket` en de ticketcode als wachtwoord (RTSP, HLS, SRT). Na de gekochte toegangsduur werkt het ticket niet meer. Kijken zonder ticket wordt geweigerd, ook als de stream op *openbaar* staat.
+The viewer opens the watch page, picks an offer and pays. The provider then sends the viewer back and the stream starts playing immediately. The viewer gets a personal link and can also watch via VLC, a smart TV or another device: they use the username `ticket` with the ticket code as the password (RTSP, HLS, SRT). Once the purchased access duration has passed, the ticket stops working. Viewing without a ticket is refused, even if the stream is set to *public*.
 
-![Kijkpagina met tickets](docs/kijkpagina-tickets.png)
+![Watch page with tickets](docs/watch-page-tickets.png)
 
-Voor betalingen moet het paneel op een publiek adres bereikbaar zijn. Zet dat adres in `Panel__PublicUrl` (bijv. `https://panel.example.com`); dat adres gebruiken de betaalproviders om de kijker terug te sturen, en Mollie stuurt er de betaalstatus heen (`/api/payments/mollie/webhook`).
+For payments, the panel must be reachable at a public address. Set that address in `Panel__PublicUrl` (e.g. `https://panel.example.com`); the payment providers use it to send the viewer back, and Mollie sends the payment status there (`/api/payments/mollie/webhook`).
 
-Met `Panel__EnableTestPayments=true` verschijnt er een knop *Testbetaling* waarmee je de hele flow zonder echt geld kunt doorlopen. Zet die in productie uit.
+With `Panel__EnableTestPayments=true` a *Test payment* button appears that lets you go through the whole flow without real money. Turn it off in production.
 
-## Lokaal ontwikkelen
+## Local development
 
-Vereist: .NET 10 SDK en een MediaMTX-binary.
+Requires: .NET 10 SDK and a MediaMTX binary.
 
-1. Start MediaMTX met `deploy/mediamtx.yml`, maar laat de hook naar je lokale paneel wijzen (het geheim moet gelijk zijn aan `MediaMtx__AuthHookSecret`, waarmee de eerste server wordt aangemaakt):
+1. Start MediaMTX with `deploy/mediamtx.yml`, but point the hook at your local panel (the secret must equal `MediaMtx__AuthHookSecret`, which is used to create the first server):
    ```bash
    MTX_AUTHHTTPADDRESS="http://127.0.0.1:5080/api/mediamtx/auth?secret=dev" ./mediamtx deploy/mediamtx.yml
    ```
-2. Start het paneel:
+2. Start the panel:
    ```bash
    cd src/MediaMtxPanel
    export ASPNETCORE_URLS=http://127.0.0.1:5080
@@ -145,52 +145,52 @@ Vereist: .NET 10 SDK en een MediaMTX-binary.
    dotnet run --no-launch-profile
    ```
 
-## Configuratie
+## Configuration
 
-Alle instellingen staan in `appsettings.json` en zijn met omgevingsvariabelen te overschrijven (`Sectie__Sleutel`). Servers zelf beheer je in het paneel; de `MediaMtx__…`-instellingen dienen alleen om bij de eerste start automatisch een server aan te maken.
+All settings live in `appsettings.json` and can be overridden with environment variables (`Section__Key`). Servers themselves are managed in the panel; the `MediaMtx__…` settings only serve to create a server automatically on first start.
 
-| Instelling | Standaard | Betekenis |
+| Setting | Default | Meaning |
 |---|---|---|
-| `ConnectionStrings__DefaultConnection` | `DataSource=Data/panel.db` | SQLite-database |
-| `Panel__AdminEmail` / `Panel__AdminPassword` | `admin@localhost` / leeg | Eerste beheerder (alleen als er nog geen beheerder is) |
-| `Panel__AdminMustChangePassword` | `true` | Het wachtwoord van de eerste beheerder is eenmalig: bij de eerste login moet een eigen wachtwoord gekozen worden |
-| `Panel__DataProtectionKeysPath` | leeg | Map voor cookie-sleutels (zodat logins een herstart overleven) |
-| `Panel__HttpsRedirect` | `false` | HTTP → HTTPS doorsturen |
-| `Panel__PublicUrl` | leeg | Publiek adres van het paneel voor betaalproviders (terugkeer-URL en Mollie-webhook) |
-| `Panel__EnableTestPayments` | `false` | Testbetalingen zonder echt geld toestaan (alleen om te testen) |
-| `Panel__HookBaseUrl` | leeg | Adres waarop MediaMTX-servers het paneel bereiken (voor de getoonde configuratie) |
-| `MediaMtx__ApiUrl` | leeg | Als gezet en er nog geen servers zijn: maakt hiermee de eerste server aan |
-| `MediaMtx__ServerName` | `Standaard` | Naam van die eerste server |
-| `MediaMtx__ApiUser` / `MediaMtx__ApiPassword` | `panel` / leeg | API-gegevens van de eerste server |
-| `MediaMtx__AuthHookSecret` | leeg | Hook-geheim van de eerste server (leeg = willekeurig) |
-| `MediaMtx__PublicHost`, `…Port`, `HttpsUrls` | `localhost`, standaardpoorten | Publiek adres van de eerste server |
-| `MediaMtx__SyncIntervalSeconds` | `30` | Interval van de synchronisatie |
+| `ConnectionStrings__DefaultConnection` | `DataSource=Data/panel.db` | SQLite database |
+| `Panel__AdminEmail` / `Panel__AdminPassword` | `admin@localhost` / empty | First administrator (only if no administrator exists yet) |
+| `Panel__AdminMustChangePassword` | `true` | The first administrator's password is one-time: a new password must be chosen at first login |
+| `Panel__DataProtectionKeysPath` | empty | Folder for cookie keys (so logins survive a restart) |
+| `Panel__HttpsRedirect` | `false` | Redirect HTTP → HTTPS |
+| `Panel__PublicUrl` | empty | Public address of the panel for payment providers (return URL and Mollie webhook) |
+| `Panel__EnableTestPayments` | `false` | Allow test payments without real money (for testing only) |
+| `Panel__HookBaseUrl` | empty | Address at which MediaMTX servers reach the panel (for the configuration shown) |
+| `MediaMtx__ApiUrl` | empty | If set and there are no servers yet: creates the first server with it |
+| `MediaMtx__ServerName` | `Default` | Name of that first server |
+| `MediaMtx__ApiUser` / `MediaMtx__ApiPassword` | `panel` / empty | API credentials of the first server |
+| `MediaMtx__AuthHookSecret` | empty | Hook secret of the first server (empty = random) |
+| `MediaMtx__PublicHost`, `…Port`, `HttpsUrls` | `localhost`, default ports | Public address of the first server |
+| `MediaMtx__SyncIntervalSeconds` | `30` | Synchronization interval |
 
-## Verbinden
+## Connecting
 
-| Protocol | Publiceren | Bekijken |
+| Protocol | Publish | View |
 |---|---|---|
-| RTSP | `rtsp://user:pass@host:8554/pad` | `rtsp://user:pass@host:8554/pad` |
-| RTMP | `rtmp://host:1935/pad?user=..&pass=..` | idem |
-| SRT | `srt://host:8890?streamid=publish:pad:user:pass&pkt_size=1316` | `srt://host:8890?streamid=read:pad:user:pass` |
-| WebRTC | WHIP: `http://host:8889/pad/whip` (Basic auth) | WHEP: `http://host:8889/pad/whep`, browser: `http://host:8889/pad` |
-| HLS | – | `http://host:8888/pad/index.m3u8` |
+| RTSP | `rtsp://user:pass@host:8554/path` | `rtsp://user:pass@host:8554/path` |
+| RTMP | `rtmp://host:1935/path?user=..&pass=..` | same |
+| SRT | `srt://host:8890?streamid=publish:path:user:pass&pkt_size=1316` | `srt://host:8890?streamid=read:path:user:pass` |
+| WebRTC | WHIP: `http://host:8889/path/whip` (Basic auth) | WHEP: `http://host:8889/path/whep`, browser: `http://host:8889/path` |
+| HLS | – | `http://host:8888/path/index.m3u8` |
 
-OBS: *Instellingen → Stream → Aangepast*, server `rtmp://host:1935`, streamsleutel `pad?user=..&pass=..` (het paneel toont beide kant-en-klaar).
+OBS: *Settings → Stream → Custom*, server `rtmp://host:1935`, stream key `path?user=..&pass=..` (the panel shows both ready to copy).
 
-## Projectstructuur
+## Project structure
 
 ```
 src/MediaMtxPanel/
-  Components/Pages/        Dashboard, Streams (lijst, nieuw, details, bewerken), Servers, Users,
-                           Portal (klantportaal, betaalinstellingen), Watch (openbare kijk- en betaalpagina)
-  Components/Shared/       Formulier, kopieervelden, endpoint-tabel, status-badges, speler, statistiekenbalk
-  Data/                    EF Core-context, entiteiten, migraties, seeding van rollen/beheerder
-  Endpoints/               Authenticatie-hook voor MediaMTX, betaal-endpoints (kopen, Mollie-webhook)
-  Services/                MediaMTX API-client, stream- en serverbeheer, synchronisatie, live status, URL-builder, gebruikersbeheer,
-                           serverstatistieken, Payments/ (Mollie, PayPal, paywall en tickets)
-deploy/mediamtx.yml        MediaMTX-configuratie voor gebruik met het paneel
-deploy/proxmox/            create-lxc.sh (op de Proxmox-host) en install-in-lxc.sh (in de container)
+  Components/Pages/        Dashboard, Streams (list, new, details, edit), Servers, Users,
+                           Portal (customer portal, payment settings), Watch (public watch and payment page)
+  Components/Shared/       Form, copy fields, endpoint table, status badges, player, statistics bar
+  Data/                    EF Core context, entities, migrations, seeding of roles/administrator
+  Endpoints/               Authentication hook for MediaMTX, payment endpoints (purchase, Mollie webhook)
+  Services/                MediaMTX API client, stream and server management, synchronization, live status, URL builder, user management,
+                           server statistics, Payments/ (Mollie, PayPal, paywall and tickets)
+deploy/mediamtx.yml        MediaMTX configuration for use with the panel
+deploy/proxmox/            create-lxc.sh (on the Proxmox host) and install-in-lxc.sh (in the container)
 ```
 
-Database-migratie toevoegen: `dotnet tool restore && cd src/MediaMtxPanel && dotnet ef migrations add <Naam> -o Data/Migrations`. Migraties worden bij het starten automatisch toegepast.
+Adding a database migration: `dotnet tool restore && cd src/MediaMtxPanel && dotnet ef migrations add <Name> -o Data/Migrations`. Migrations are applied automatically at startup.

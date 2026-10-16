@@ -6,23 +6,23 @@ namespace MediaMtxPanel.Services;
 
 public class ServerInput
 {
-    [Required(ErrorMessage = "Geef de server een naam."), StringLength(64)]
+    [Required(ErrorMessage = "Give the server a name."), StringLength(64)]
     public string Name { get; set; } = "";
 
     [StringLength(512)]
     public string? Description { get; set; }
 
-    [Required(ErrorMessage = "Vul de API-URL in.")]
-    [RegularExpression(@"^https?://\S+$", ErrorMessage = "Gebruik een URL als http://10.0.0.5:9997.")]
+    [Required(ErrorMessage = "Enter the API URL.")]
+    [RegularExpression(@"^https?://\S+$", ErrorMessage = "Use a URL such as http://10.0.0.5:9997.")]
     public string ApiUrl { get; set; } = "http://";
 
     [Required, StringLength(64)]
     public string ApiUser { get; set; } = "panel";
 
-    [Required(ErrorMessage = "Vul een API-wachtwoord in."), StringLength(128)]
+    [Required(ErrorMessage = "Enter an API password."), StringLength(128)]
     public string ApiPassword { get; set; } = CredentialGenerator.Password(24);
 
-    [Required(ErrorMessage = "Vul het publieke adres in."), StringLength(256)]
+    [Required(ErrorMessage = "Enter the public address."), StringLength(256)]
     public string PublicHost { get; set; } = "";
 
     [Range(1, 65535)] public int RtspPort { get; set; } = 8554;
@@ -33,7 +33,7 @@ public class ServerInput
 
     public bool HttpsUrls { get; set; }
 
-    [StringLength(256), Url(ErrorMessage = "Geef een volledige URL, bijvoorbeeld http://10.0.0.21:9100/metrics.")]
+    [StringLength(256), Url(ErrorMessage = "Enter a full URL, for example http://10.0.0.21:9100/metrics.")]
     public string? MetricsUrl { get; set; }
 
     public bool RemoveUnmanagedPaths { get; set; }
@@ -152,9 +152,9 @@ public class ServerService(
         await using var db = await dbFactory.CreateDbContextAsync(ct);
         var server = await db.Servers.Include(s => s.Streams).FirstOrDefaultAsync(s => s.Id == id, ct);
         if (server is null)
-            return "Server niet gevonden.";
+            return "Server not found.";
         if (server.Streams.Count > 0)
-            return $"Er staan nog {server.Streams.Count} stream(s) op deze server. Verplaats of verwijder die eerst.";
+            return $"This server still has {server.Streams.Count} stream(s). Move or delete them first.";
         db.Servers.Remove(server);
         await db.SaveChangesAsync(ct);
         status.Forget(id);
@@ -171,25 +171,25 @@ public class ServerService(
         await using var db = await dbFactory.CreateDbContextAsync(ct);
         var server = await db.Servers.AsNoTracking().Include(s => s.Streams).FirstOrDefaultAsync(s => s.Id == id, ct);
         if (server is null)
-            return new(false, "Server niet gevonden.");
+            return new(false, "Server not found.");
 
         var mtx = clients.Create(server);
         try
         {
             var info = await mtx.GetInfoAsync(ct);
             await sync.SyncServerAsync(mtx, server, ct);
-            return new(true, $"Verbonden met MediaMTX {info?.Version}. {server.Streams.Count} stream(s) gesynchroniseerd.");
+            return new(true, $"Connected to MediaMTX {info?.Version}. {server.Streams.Count} stream(s) synchronized.");
         }
         catch (MediaMtxException ex) when (ex.Status == System.Net.HttpStatusCode.Unauthorized)
         {
             status.Report(id, false, null, ex.Message);
-            return new(false, "MediaMTX weigert de API-gegevens. Controleer of authHTTPAddress op deze server naar het paneel wijst " +
-                              "met het juiste geheim, en of de API-gebruiker en het wachtwoord kloppen.");
+            return new(false, "MediaMTX rejects the API credentials. Check that authHTTPAddress on this server points to the panel " +
+                              "with the correct secret, and that the API user and password are correct.");
         }
         catch (Exception ex) when (ex is HttpRequestException or MediaMtxException or TaskCanceledException)
         {
             status.Report(id, false, null, ex.Message);
-            return new(false, $"Geen verbinding met {server.ApiUrl}: {ex.Message}");
+            return new(false, $"Cannot connect to {server.ApiUrl}: {ex.Message}");
         }
     }
 }

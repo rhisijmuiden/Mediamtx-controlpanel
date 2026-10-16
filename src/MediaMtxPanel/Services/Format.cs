@@ -4,7 +4,7 @@ namespace MediaMtxPanel.Services;
 
 public static class Format
 {
-    private static readonly CultureInfo Nl = CultureInfo.GetCultureInfo("nl-NL");
+    private static readonly CultureInfo Euro = CultureInfo.GetCultureInfo("en-IE");
 
     public static string Bytes(ulong bytes)
     {
@@ -36,14 +36,14 @@ public static class Format
     }
 
     public static string Money(int cents, string currency = "EUR") =>
-        (cents / 100m).ToString("C", currency == "EUR" ? Nl : CultureInfo.InvariantCulture)
+        (cents / 100m).ToString("C", currency == "EUR" ? Euro : CultureInfo.InvariantCulture)
         + (currency == "EUR" ? "" : $" {currency}");
 
     public static string Duration(TimeSpan t) =>
-        t.TotalDays >= 1 ? $"{(int)t.TotalDays}d {t.Hours}u" :
-        t.TotalHours >= 1 ? $"{(int)t.TotalHours}u {t.Minutes}m" :
+        t.TotalDays >= 1 ? $"{(int)t.TotalDays}d {t.Hours}h" :
+        t.TotalHours >= 1 ? $"{(int)t.TotalHours}h {t.Minutes}m" :
         $"{t.Minutes}m {t.Seconds}s";
 
     public static string Hours(int hours) =>
-        hours % 24 == 0 ? (hours == 24 ? "1 dag" : $"{hours / 24} dagen") : $"{hours} uur";
+        hours % 24 == 0 ? (hours == 24 ? "1 day" : $"{hours / 24} days") : (hours == 1 ? "1 hour" : $"{hours} hours");
 }

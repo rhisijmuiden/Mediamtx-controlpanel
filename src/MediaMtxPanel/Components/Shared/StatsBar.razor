@@ -7,7 +7,7 @@
     {
         <div class="stat">
             <div class="label">CPU@(host.CpuCores is { } c ? $" ({c} cores)" : "")</div>
-            <div>@(host.CpuPercent is { } cpu ? $"{cpu:0}%" : "meten…")</div>
+            <div>@(host.CpuPercent is { } cpu ? $"{cpu:0}%" : "measuring…")</div>
             <div class="meter"><div class="@(host.CpuPercent > 85 ? "high" : "")" style="width:@Pct(host.CpuPercent)%"></div></div>
         </div>
         <div class="stat">
@@ -20,29 +20,29 @@
             <div class="stat"><div class="label">Load</div><div>@load.ToString("0.00")</div></div>
         }
         <div class="stat">
-            <div class="label">Netwerk server</div>
+            <div class="label">Server network</div>
             <div>↓ @Format.Bitrate(host.NetRxBytesPerSec) · ↑ @Format.Bitrate(host.NetTxBytesPerSec)</div>
         </div>
     }
     else if (hostUnsupported)
     {
-        <div class="stat text-secondary small align-self-center">Serverstatistieken niet beschikbaar (stel een node_exporter-URL in bij de server).</div>
+        <div class="stat text-secondary small align-self-center">Server statistics unavailable (set a node_exporter URL on the server).</div>
     }
     <div class="stat">
-        <div class="label">Stream binnen</div>
+        <div class="label">Stream in</div>
         <div>@(live?.IsLive == true ? Format.Bitrate(inRate) : "offline")</div>
     </div>
     <div class="stat">
-        <div class="label">Stream uit</div>
+        <div class="label">Stream out</div>
         <div>@(live?.IsLive == true ? Format.Bitrate(outRate) : "–")</div>
     </div>
     <div class="stat">
-        <div class="label">Kijkers</div>
+        <div class="label">Viewers</div>
         <div>@(live?.Readers.Count ?? 0)</div>
     </div>
     @if ((live?.OnlineTime ?? live?.ReadyTime) is { } since && live!.IsLive)
     {
-        <div class="stat"><div class="label">Live sinds</div><div>@Format.Duration(DateTime.UtcNow - since.ToUniversalTime())</div></div>
+        <div class="stat"><div class="label">Live since</div><div>@Format.Duration(DateTime.UtcNow - since.ToUniversalTime())</div></div>
     }
     @if (live?.Codecs.Any() == true)
     {

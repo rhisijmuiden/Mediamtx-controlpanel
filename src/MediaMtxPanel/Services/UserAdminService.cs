@@ -62,10 +62,10 @@ public class UserAdminService(IServiceScopeFactory scopeFactory)
         var um = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var user = await um.FindByIdAsync(id);
         if (user is null)
-            return Failed("Gebruiker niet gevonden.");
+            return Failed("User not found.");
 
         if (id == currentAdminId && role != Roles.Admin)
-            return Failed("Je kunt je eigen beheerdersrol niet intrekken.");
+            return Failed("You cannot revoke your own administrator role.");
 
         if (!string.Equals(user.Email, email, StringComparison.OrdinalIgnoreCase))
         {
@@ -98,7 +98,7 @@ public class UserAdminService(IServiceScopeFactory scopeFactory)
         var um = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var user = await um.FindByIdAsync(id);
         if (user is null)
-            return Failed("Gebruiker niet gevonden.");
+            return Failed("User not found.");
         var token = await um.GeneratePasswordResetTokenAsync(user);
         return await um.ResetPasswordAsync(user, token, password);
     }
@@ -106,12 +106,12 @@ public class UserAdminService(IServiceScopeFactory scopeFactory)
     public async Task<IdentityResult> SetLockedAsync(string id, bool locked, string currentAdminId)
     {
         if (id == currentAdminId)
-            return Failed("Je kunt jezelf niet blokkeren.");
+            return Failed("You cannot block yourself.");
         using var scope = scopeFactory.CreateScope();
         var um = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var user = await um.FindByIdAsync(id);
         if (user is null)
-            return Failed("Gebruiker niet gevonden.");
+            return Failed("User not found.");
         await um.SetLockoutEnabledAsync(user, true);
         var result = await um.SetLockoutEndDateAsync(user, locked ? DateTimeOffset.MaxValue : null);
         // Invalidate existing sessions; the revalidating auth state provider signs them out.
@@ -122,12 +122,12 @@ public class UserAdminService(IServiceScopeFactory scopeFactory)
     public async Task<IdentityResult> DeleteAsync(string id, string currentAdminId)
     {
         if (id == currentAdminId)
-            return Failed("Je kunt jezelf niet verwijderen.");
+            return Failed("You cannot delete yourself.");
         using var scope = scopeFactory.CreateScope();
         var um = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var user = await um.FindByIdAsync(id);
         if (user is null)
-            return Failed("Gebruiker niet gevonden.");
+            return Failed("User not found.");
         // Streams of a deleted user stay (owner becomes empty) so running broadcasts are not cut off.
         return await um.DeleteAsync(user);
     }

@@ -6,38 +6,38 @@
 @inject UserAdminService UserAdmin
 @inject NavigationManager Nav
 
-<PageTitle>Nieuwe stream</PageTitle>
+<PageTitle>New stream</PageTitle>
 
-<h1>Nieuwe stream</h1>
+<h1>New stream</h1>
 
 @if (servers is null)
 {
-    <p>Laden…</p>
+    <p>Loading…</p>
 }
 else if (servers.Count == 0)
 {
     <div class="alert alert-warning">
-        Er is nog geen MediaMTX-server om de stream op te zetten.
+        There is no MediaMTX server to set up the stream on yet.
         @if (isAdmin)
         {
-            <a href="servers/new" class="alert-link">Voeg eerst een server toe.</a>
+            <a href="servers/new" class="alert-link">Add a server first.</a>
         }
         else
         {
-            <span>Vraag een beheerder om een server toe te voegen.</span>
+            <span>Ask an administrator to add a server.</span>
         }
     </div>
 }
 else
 {
-    <p class="text-secondary">Na het aanmaken krijg je meteen de inloggegevens en alle verbindings-URL's te zien.</p>
+    <p class="text-secondary">After creating it you will immediately see the credentials and all connection URLs.</p>
 
     @if (error is not null)
     {
         <div class="alert alert-danger">@error</div>
     }
 
-    <StreamForm Model="input" OnValidSubmit="Save" SubmitText="Stream aanmaken" Busy="busy" Users="users" Servers="servers" />
+    <StreamForm Model="input" OnValidSubmit="Save" SubmitText="Create stream" Busy="busy" Users="users" Servers="servers" />
 }
 
 @code {
@@ -69,7 +69,7 @@ else
         error = null;
         if (await Streams.NameExistsAsync(input.ServerId, input.Name.Trim()))
         {
-            error = $"Op deze server bestaat al een stream met de naam '{input.Name}'.";
+            error = $"A stream named '{input.Name}' already exists on this server.";
             return;
         }
 

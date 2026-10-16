@@ -6,23 +6,23 @@
 @inject ServerService ServerAdmin
 @inject NavigationManager Nav
 
-<PageTitle>Stream bewerken</PageTitle>
+<PageTitle>Edit stream</PageTitle>
 
 @if (notFound)
 {
-    <h1>Stream niet gevonden</h1>
-    <a href="streams">Terug naar streams</a>
+    <h1>Stream not found</h1>
+    <a href="streams">Back to streams</a>
 }
 else if (input is null)
 {
-    <p>Laden…</p>
+    <p>Loading…</p>
 }
 else
 {
-    <h1>Stream bewerken</h1>
+    <h1>Edit stream</h1>
     @if (input.Name != originalName || input.ServerId != originalServerId)
     {
-        <div class="alert alert-warning">Let op: bij het wijzigen van de padnaam of server veranderen de URL's en worden lopende verbindingen verbroken.</div>
+        <div class="alert alert-warning">Note: changing the path name or server changes the URLs and drops active connections.</div>
     }
     @if (error is not null)
     {
@@ -67,7 +67,7 @@ else
         error = null;
         if (await Streams.NameExistsAsync(input!.ServerId, input.Name.Trim(), Id))
         {
-            error = $"Op deze server bestaat al een stream met de naam '{input.Name}'.";
+            error = $"A stream named '{input.Name}' already exists on this server.";
             return;
         }
         busy = true;

@@ -8,7 +8,7 @@
     </div>
 </div>
 
-<input type="checkbox" title="Navigatiemenu" class="navbar-toggler" />
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="nav flex-column">
@@ -27,18 +27,18 @@
                     </div>
                     <div class="nav-item px-3">
                         <NavLink class="nav-link" href="streams/new">
-                            <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Nieuwe stream
+                            <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> New stream
                         </NavLink>
                     </div>
                 </AuthorizeView>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="portal">
-                        <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Mijn portaal
+                        <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> My portal
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="portal/payments">
-                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Betaalinstellingen
+                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Payment settings
                     </NavLink>
                 </div>
                 <AuthorizeView Roles="Admin" Context="adminContext">
@@ -49,7 +49,7 @@
                     </div>
                     <div class="nav-item px-3">
                         <NavLink class="nav-link" href="users">
-                            <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Gebruikers
+                            <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Users
                         </NavLink>
                     </div>
                 </AuthorizeView>
@@ -63,7 +63,7 @@
                         <AntiforgeryToken />
                         <input type="hidden" name="ReturnUrl" value="@currentUrl" />
                         <button type="submit" class="nav-link">
-                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Uitloggen
+                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Log out
                         </button>
                     </form>
                 </div>
@@ -71,7 +71,7 @@
             <NotAuthorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Login">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Inloggen
+                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Log in
                     </NavLink>
                 </div>
             </NotAuthorized>
