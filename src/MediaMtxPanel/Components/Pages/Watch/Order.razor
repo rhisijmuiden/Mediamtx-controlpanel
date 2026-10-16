@@ -4,13 +4,13 @@
 @inject PaywallService Paywall
 @inject NavigationManager Nav
 
-<PageTitle>Betaling</PageTitle>
+<PageTitle>Payment</PageTitle>
 
 @if (order is null || order.Stream?.WatchSlug != Slug)
 {
     <div class="text-center py-5">
-        <h1 class="h3">Bestelling niet gevonden</h1>
-        <a href="watch/@Slug">Terug naar de stream</a>
+        <h1 class="h3">Order not found</h1>
+        <a href="watch/@Slug">Back to the stream</a>
     </div>
 }
 else
@@ -23,33 +23,33 @@ else
             @switch (order.Status)
             {
                 case OrderStatus.Open when Canceled:
-                    <p>Je hebt de betaling afgebroken.</p>
-                    <a class="btn btn-primary" href="watch/@Slug" data-enhance-nav="false">Opnieuw proberen</a>
+                    <p>You canceled the payment.</p>
+                    <a class="btn btn-primary" href="watch/@Slug" data-enhance-nav="false">Try again</a>
                     break;
                 case OrderStatus.Open:
                     <meta http-equiv="refresh" content="3" />
                     <div class="spinner-border text-primary mb-3" role="status"></div>
-                    <p>We wachten op de bevestiging van je betaling. Deze pagina ververst vanzelf.</p>
+                    <p>Waiting for your payment to be confirmed. This page refreshes automatically.</p>
                     @if (order.Provider == PaymentProvider.Test)
                     {
                         <form method="post" action="watch/@Slug/order/@order.Id/simulate" data-enhance="false">
                             <AntiforgeryToken />
-                            <p class="small text-secondary">Dit is een testbetaling; er wordt geen geld afgeschreven.</p>
-                            <button type="submit" class="btn btn-success">Betaling simuleren</button>
+                            <p class="small text-secondary">This is a test payment; no money will be charged.</p>
+                            <button type="submit" class="btn btn-success">Simulate payment</button>
                         </form>
                     }
                     break;
                 case OrderStatus.Canceled:
-                    <p>De betaling is geannuleerd.</p>
-                    <a class="btn btn-primary" href="watch/@Slug" data-enhance-nav="false">Opnieuw proberen</a>
+                    <p>The payment was canceled.</p>
+                    <a class="btn btn-primary" href="watch/@Slug" data-enhance-nav="false">Try again</a>
                     break;
                 case OrderStatus.Expired:
-                    <p>De betaling is verlopen.</p>
-                    <a class="btn btn-primary" href="watch/@Slug" data-enhance-nav="false">Opnieuw proberen</a>
+                    <p>The payment has expired.</p>
+                    <a class="btn btn-primary" href="watch/@Slug" data-enhance-nav="false">Try again</a>
                     break;
                 default:
-                    <p>De betaling is mislukt. Er is niets afgeschreven.</p>
-                    <a class="btn btn-primary" href="watch/@Slug" data-enhance-nav="false">Opnieuw proberen</a>
+                    <p>The payment failed. Nothing was charged.</p>
+                    <a class="btn btn-primary" href="watch/@Slug" data-enhance-nav="false">Try again</a>
                     break;
             }
         </div>

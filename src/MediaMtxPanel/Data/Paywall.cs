@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MediaMtxPanel.Data;
 
-/// <summary>A way to buy access to a paywalled stream, e.g. "Dagticket € 4,95, 24 uur".</summary>
+/// <summary>A way to buy access to a paywalled stream, e.g. "Day pass €4.95, 24 hours".</summary>
 public class StreamOffer
 {
     public int Id { get; set; }

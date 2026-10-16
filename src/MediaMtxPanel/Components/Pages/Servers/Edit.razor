@@ -8,26 +8,26 @@
 @inject NavigationManager Nav
 @inject IOptions<PanelOptions> PanelOptions
 
-<PageTitle>@(IsNew ? "Server toevoegen" : "Server")</PageTitle>
+<PageTitle>@(IsNew ? "Add server" : "Server")</PageTitle>
 
 @if (notFound)
 {
-    <h1>Server niet gevonden</h1>
-    <a href="servers">Terug</a>
+    <h1>Server not found</h1>
+    <a href="servers">Back</a>
 }
 else if (input is null)
 {
-    <p>Laden…</p>
+    <p>Loading…</p>
 }
 else
 {
-    <h1>@(IsNew ? "MediaMTX-server toevoegen" : server!.Name)</h1>
+    <h1>@(IsNew ? "Add MediaMTX server" : server!.Name)</h1>
 
     @if (Created)
     {
         <div class="alert alert-success">
-            <strong>Server toegevoegd.</strong> Zet de configuratie hieronder in de <code>mediamtx.yml</code> van deze server,
-            herstart MediaMTX en klik daarna op <em>Verbinding testen</em>.
+            <strong>Server added.</strong> Put the configuration below in this server's <code>mediamtx.yml</code>,
+            restart MediaMTX and then click <em>Test connection</em>.
         </div>
     }
     @if (message is not null)
@@ -42,46 +42,46 @@ else
                 <ValidationSummary class="text-danger" />
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label class="form-label" for="name">Naam</label>
-                        <InputText id="name" class="form-control" @bind-Value="input.Name" placeholder="bijv. Amsterdam-1" />
+                        <label class="form-label" for="name">Name</label>
+                        <InputText id="name" class="form-control" @bind-Value="input.Name" placeholder="e.g. Amsterdam-1" />
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label" for="desc">Omschrijving</label>
+                        <label class="form-label" for="desc">Description</label>
                         <InputText id="desc" class="form-control" @bind-Value="input.Description" />
                     </div>
 
-                    <div class="col-12"><h2 class="h6 mb-0 mt-2">Control API (zoals het paneel de server bereikt)</h2></div>
+                    <div class="col-12"><h2 class="h6 mb-0 mt-2">Control API (how the panel reaches the server)</h2></div>
                     <div class="col-12">
-                        <label class="form-label" for="api">API-URL</label>
+                        <label class="form-label" for="api">API URL</label>
                         <InputText id="api" class="form-control font-monospace" @bind-Value="input.ApiUrl" placeholder="http://10.0.0.21:9997" />
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label" for="apiuser">API-gebruiker</label>
+                        <label class="form-label" for="apiuser">API user</label>
                         <InputText id="apiuser" class="form-control font-monospace" @bind-Value="input.ApiUser" />
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label" for="apipass">API-wachtwoord</label>
+                        <label class="form-label" for="apipass">API password</label>
                         <InputText id="apipass" class="form-control font-monospace" @bind-Value="input.ApiPassword" />
                     </div>
                     <div class="col-12">
-                        <label class="form-label" for="metrics">Statistieken-URL (optioneel)</label>
+                        <label class="form-label" for="metrics">Metrics URL (optional)</label>
                         <InputText id="metrics" class="form-control font-monospace" @bind-Value="input.MetricsUrl" placeholder="http://10.0.0.21:9100/metrics" />
                         <div class="form-text">
-                            Prometheus node_exporter op de server (<code>apt install prometheus-node-exporter</code>), voor CPU, RAM en netwerk in het klantportaal.
-                            Leeg laten kan als MediaMTX op dezelfde machine als het paneel draait (127.0.0.1).
+                            Prometheus node_exporter on the server (<code>apt install prometheus-node-exporter</code>), for CPU, RAM and network in the customer portal.
+                            You can leave this empty if MediaMTX runs on the same machine as the panel (127.0.0.1).
                         </div>
                         <ValidationMessage For="() => input.MetricsUrl" />
                     </div>
 
-                    <div class="col-12"><h2 class="h6 mb-0 mt-2">Publiek (zoals zenders en kijkers de server bereiken)</h2></div>
+                    <div class="col-12"><h2 class="h6 mb-0 mt-2">Public (how broadcasters and viewers reach the server)</h2></div>
                     <div class="col-md-6">
-                        <label class="form-label" for="host">Host of IP</label>
+                        <label class="form-label" for="host">Host or IP</label>
                         <InputText id="host" class="form-control font-monospace" @bind-Value="input.PublicHost" placeholder="stream1.example.com" />
                     </div>
                     <div class="col-md-6 d-flex align-items-end">
                         <div class="form-check form-switch">
                             <InputCheckbox class="form-check-input" id="https" @bind-Value="input.HttpsUrls" />
-                            <label class="form-check-label" for="https">https:// voor HLS en WebRTC</label>
+                            <label class="form-check-label" for="https">https:// for HLS and WebRTC</label>
                         </div>
                     </div>
                     <div class="col"><label class="form-label small" for="rtsp">RTSP</label><InputNumber id="rtsp" class="form-control" @bind-Value="input.RtspPort" /></div>
@@ -93,30 +93,30 @@ else
                     <div class="col-12">
                         <div class="form-check form-switch">
                             <InputCheckbox class="form-check-input" id="enabled" @bind-Value="input.Enabled" />
-                            <label class="form-check-label" for="enabled">Ingeschakeld (uitgeschakeld weigert de server alle verbindingen)</label>
+                            <label class="form-check-label" for="enabled">Enabled (when disabled, the server refuses all connections)</label>
                         </div>
                         <div class="form-check form-switch">
                             <InputCheckbox class="form-check-input" id="unmanaged" @bind-Value="input.RemoveUnmanagedPaths" />
-                            <label class="form-check-label" for="unmanaged">Paths die niet in het paneel staan verwijderen</label>
+                            <label class="form-check-label" for="unmanaged">Remove paths that are not in the panel</label>
                         </div>
                     </div>
                 </div>
                 <div class="mt-4 d-flex flex-wrap gap-2">
-                    <button type="submit" class="btn btn-primary">@(IsNew ? "Server toevoegen" : "Opslaan")</button>
+                    <button type="submit" class="btn btn-primary">@(IsNew ? "Add server" : "Save")</button>
                     @if (!IsNew)
                     {
-                        <button type="button" class="btn btn-outline-success" @onclick="Test" disabled="@testing">@(testing ? "Testen…" : "Verbinding testen")</button>
+                        <button type="button" class="btn btn-outline-success" @onclick="Test" disabled="@testing">@(testing ? "Testing…" : "Test connection")</button>
                         @if (!confirmDelete)
                         {
-                            <button type="button" class="btn btn-outline-danger" @onclick="() => confirmDelete = true">Verwijderen</button>
+                            <button type="button" class="btn btn-outline-danger" @onclick="() => confirmDelete = true">Delete</button>
                         }
                         else
                         {
-                            <button type="button" class="btn btn-danger" @onclick="Delete">Ja, verwijderen</button>
-                            <button type="button" class="btn btn-outline-secondary" @onclick="() => confirmDelete = false">Nee</button>
+                            <button type="button" class="btn btn-danger" @onclick="Delete">Yes, delete</button>
+                            <button type="button" class="btn btn-outline-secondary" @onclick="() => confirmDelete = false">No</button>
                         }
                     }
-                    <a class="btn btn-outline-secondary" href="servers">Terug</a>
+                    <a class="btn btn-outline-secondary" href="servers">Back</a>
                 </div>
             </EditForm>
         </div>
@@ -126,14 +126,14 @@ else
             <div class="col-xl-6">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <strong>Configuratie voor mediamtx.yml</strong>
-                        <button class="btn btn-link btn-sm p-0" @onclick="RegenerateSecret">Nieuw geheim</button>
+                        <strong>Configuration for mediamtx.yml</strong>
+                        <button class="btn btn-link btn-sm p-0" @onclick="RegenerateSecret">New secret</button>
                     </div>
                     <div class="card-body">
-                        <p class="small">Neem dit op in de <code>mediamtx.yml</code> van deze server en herstart MediaMTX. Het paneel moet bereikbaar zijn op het adres in <code>authHTTPAddress</code> en de server moet de API-poort voor het paneel openzetten.</p>
+                        <p class="small">Add this to this server's <code>mediamtx.yml</code> and restart MediaMTX. The panel must be reachable at the address in <code>authHTTPAddress</code>, and the server must open the API port to the panel.</p>
                         <pre class="cmd">@ConfigSnippet</pre>
-                        <CopyField Value="@ConfigSnippet" Label="Kopiëren" />
-                        <p class="small text-secondary mb-0">Of zet in plaats daarvan deze omgevingsvariabele (bijv. in docker of systemd):</p>
+                        <CopyField Value="@ConfigSnippet" Label="Copy" />
+                        <p class="small text-secondary mb-0">Or set this environment variable instead (e.g. in Docker or systemd):</p>
                         <CopyField Value="@($"MTX_AUTHHTTPADDRESS={HookUrl}")" />
                     </div>
                 </div>
@@ -201,7 +201,7 @@ else
         message = null;
         if (await ServerAdmin.NameExistsAsync(input!.Name.Trim(), Id))
         {
-            Show("Er bestaat al een server met deze naam.", true);
+            Show("A server with this name already exists.", true);
             return;
         }
 
@@ -214,7 +214,7 @@ else
 
         server = await ServerAdmin.UpdateAsync(Id!.Value, input);
         var test = server!.Enabled ? await ServerAdmin.TestAndSyncAsync(server.Id) : null;
-        Show(test is null ? "Opgeslagen." : $"Opgeslagen. {test.Message}", test is { Ok: false });
+        Show(test is null ? "Saved." : $"Saved. {test.Message}", test is { Ok: false });
     }
 
     private async Task Test()
@@ -228,7 +228,7 @@ else
     private async Task RegenerateSecret()
     {
         server = await ServerAdmin.RegenerateHookSecretAsync(Id!.Value);
-        Show("Nieuw geheim aangemaakt. Pas de configuratie op de server aan; tot dan weigert het paneel verzoeken van deze server.", false);
+        Show("New secret created. Update the configuration on the server; until then the panel rejects requests from this server.", false);
     }
 
     private async Task Delete()

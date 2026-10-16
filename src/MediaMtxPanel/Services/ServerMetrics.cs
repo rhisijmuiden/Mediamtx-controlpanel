@@ -104,7 +104,7 @@ public class ServerMetricsReader(IHttpClientFactory httpClientFactory, ILogger<S
 
         var sample = new RawSample(DateTime.UtcNow, total - idle, total, rx, tx);
         var (cpuPct, rxRate, txRate) = Rates(server.Id, sample);
-        return new HostMetrics(cpuPct, cores, load, memTotal, memUsed, rxRate, txRate, uptime, "lokaal");
+        return new HostMetrics(cpuPct, cores, load, memTotal, memUsed, rxRate, txRate, uptime, "local");
     }
 
     // ------------------------------------------------------------------ node_exporter

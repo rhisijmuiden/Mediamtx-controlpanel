@@ -21,8 +21,8 @@ public static class Roles
 
     public static string Label(string role) => role switch
     {
-        Admin => "Beheerder",
-        Customer => "Klant",
-        _ => "Gebruiker",
+        Admin => "Administrator",
+        Customer => "Customer",
+        _ => "User",
     };
 }

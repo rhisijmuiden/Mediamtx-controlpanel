@@ -12,7 +12,7 @@
                 const s = document.createElement("script");
                 s.src = src;
                 s.onload = resolve;
-                s.onerror = () => { delete scripts[src]; reject(new Error("kan " + src + " niet laden")); };
+                s.onerror = () => { delete scripts[src]; reject(new Error("could not load " + src)); };
                 document.head.appendChild(s);
             });
         }
@@ -40,7 +40,7 @@
 
     async function startWebRtc(video, o) {
         await loadScript(o.readerJsUrl);
-        setStatus(video, "Verbinden via WebRTC…", "wait");
+        setStatus(video, "Connecting via WebRTC…", "wait");
         const reader = new window.MediaMTXWebRTCReader({
             url: o.whepUrl,
             user: o.user || "",
@@ -49,12 +49,12 @@
                 if (String(err).includes("codecs not supported")) {
                     // This browser cannot decode the stream's codecs over WebRTC; HLS usually can.
                     stop(video);
-                    startHls(video, o).catch((e) => setStatus(video, "Speler kon niet starten: " + e.message, "error"));
+                    startHls(video, o).catch((e) => setStatus(video, "Player could not start: " + e.message, "error"));
                     return;
                 }
                 setStatus(video, String(err).includes("not found")
-                    ? "Nog geen beeld: de stream is nog niet live"
-                    : "Nog geen beeld: " + err, "error");
+                    ? "No picture yet: the stream is not live yet"
+                    : "No picture yet: " + err, "error");
             },
             onTrack: (evt) => {
                 if (video.srcObject !== evt.streams[0]) {
@@ -68,7 +68,7 @@
     }
 
     async function startHls(video, o) {
-        setStatus(video, "Verbinden via HLS…", "wait");
+        setStatus(video, "Connecting via HLS…", "wait");
         const withAuth = (xhr) => {
             if (o.user) xhr.setRequestHeader("Authorization", "Basic " + btoa(o.user + ":" + o.pass));
         };
@@ -78,14 +78,14 @@
         } else {
             await loadScript(HLS_JS);
             if (!window.Hls.isSupported()) {
-                setStatus(video, "Deze browser ondersteunt geen HLS.", "error");
+                setStatus(video, "This browser does not support HLS.", "error");
                 return;
             }
             const hls = new window.Hls({ xhrSetup: withAuth, liveSyncDurationCount: 2 });
             hls.on(window.Hls.Events.MANIFEST_PARSED, () => setStatus(video, "Live (HLS)", "live"));
             hls.on(window.Hls.Events.ERROR, (_, data) => {
                 if (data.fatal) {
-                    setStatus(video, "Nog geen beeld (HLS): " + (data.response?.code || data.details), "error");
+                    setStatus(video, "No picture yet (HLS): " + (data.response?.code || data.details), "error");
                     setTimeout(() => { if (players.get(video) === hls) { hls.loadSource(o.hlsUrl); } }, 4000);
                 }
             });
@@ -108,7 +108,7 @@
                 await startWebRtc(video, options);
             }
         } catch (e) {
-            setStatus(video, "Speler kon niet starten: " + e.message, "error");
+            setStatus(video, "Player could not start: " + e.message, "error");
         }
     }
 

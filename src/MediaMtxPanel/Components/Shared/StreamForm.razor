@@ -4,9 +4,9 @@
 
     <div class="row g-3">
         <div class="col-md-6">
-            <label class="form-label" for="name">Padnaam</label>
-            <InputText id="name" class="form-control" @bind-Value="Model.Name" placeholder="bijv. studio1 of events/hoofdzaal" />
-            <div class="form-text">Wordt onderdeel van alle URL's. Letters, cijfers, -, _, . en /.</div>
+            <label class="form-label" for="name">Path name</label>
+            <InputText id="name" class="form-control" @bind-Value="Model.Name" placeholder="e.g. studio1 or events/main-hall" />
+            <div class="form-text">Becomes part of all URLs. Letters, digits, -, _, . and /.</div>
             <ValidationMessage For="() => Model.Name" />
         </div>
         <div class="col-md-3">
@@ -14,7 +14,7 @@
             <InputSelect id="server" class="form-select" @bind-Value="Model.ServerId">
                 @if (Model.ServerId == 0)
                 {
-                    <option value="0">Kies een server…</option>
+                    <option value="0">Choose a server…</option>
                 }
                 @foreach (var srv in Servers)
                 {
@@ -24,24 +24,24 @@
             <ValidationMessage For="() => Model.ServerId" />
         </div>
         <div class="col-md-3">
-            <label class="form-label" for="displayName">Weergavenaam</label>
-            <InputText id="displayName" class="form-control" @bind-Value="Model.DisplayName" placeholder="Optioneel" />
+            <label class="form-label" for="displayName">Display name</label>
+            <InputText id="displayName" class="form-control" @bind-Value="Model.DisplayName" placeholder="Optional" />
         </div>
         <div class="col-12">
-            <label class="form-label" for="description">Omschrijving</label>
+            <label class="form-label" for="description">Description</label>
             <InputTextArea id="description" class="form-control" rows="2" @bind-Value="Model.Description" />
         </div>
 
         <div class="col-md-6">
-            <label class="form-label">Bron</label>
+            <label class="form-label">Source</label>
             <InputRadioGroup @bind-Value="Model.SourceType">
                 <div class="form-check">
                     <InputRadio class="form-check-input" id="src-pub" Value="StreamSourceType.Publisher" />
-                    <label class="form-check-label" for="src-pub">Publisher: een encoder (OBS, ffmpeg, camera, browser) stuurt de stream naar de server</label>
+                    <label class="form-check-label" for="src-pub">Publisher: an encoder (OBS, ffmpeg, camera, browser) sends the stream to the server</label>
                 </div>
                 <div class="form-check">
                     <InputRadio class="form-check-input" id="src-pull" Value="StreamSourceType.Pull" />
-                    <label class="form-check-label" for="src-pull">Ophalen: de server haalt de stream op van een externe URL</label>
+                    <label class="form-check-label" for="src-pull">Pull: the server pulls the stream from an external URL</label>
                 </div>
             </InputRadioGroup>
         </div>
@@ -49,12 +49,12 @@
         @if (Model.SourceType == StreamSourceType.Pull)
         {
             <div class="col-md-6">
-                <label class="form-label" for="sourceUrl">Bron-URL</label>
-                <InputText id="sourceUrl" class="form-control font-monospace" @bind-Value="Model.SourceUrl" placeholder="rtsp://gebruiker:wachtwoord@camera:554/stream" />
+                <label class="form-label" for="sourceUrl">Source URL</label>
+                <InputText id="sourceUrl" class="form-control font-monospace" @bind-Value="Model.SourceUrl" placeholder="rtsp://user:password@camera:554/stream" />
                 <ValidationMessage For="() => Model.SourceUrl" />
                 <div class="form-check mt-2">
                     <InputCheckbox class="form-check-input" id="ondemand" @bind-Value="Model.SourceOnDemand" />
-                    <label class="form-check-label" for="ondemand">Alleen ophalen als er een kijker is</label>
+                    <label class="form-check-label" for="ondemand">Only pull when there is a viewer</label>
                 </div>
             </div>
         }
@@ -62,29 +62,29 @@
         <div class="col-md-6">
             <div class="form-check form-switch">
                 <InputCheckbox class="form-check-input" id="enabled" @bind-Value="Model.Enabled" />
-                <label class="form-check-label" for="enabled">Ingeschakeld</label>
+                <label class="form-check-label" for="enabled">Enabled</label>
             </div>
             <div class="form-check form-switch">
                 <InputCheckbox class="form-check-input" id="public" @bind-Value="Model.PublicRead" />
-                <label class="form-check-label" for="public">Openbaar bekijken (kijkers hebben geen wachtwoord nodig)</label>
+                <label class="form-check-label" for="public">Public viewing (viewers don't need a password)</label>
             </div>
             <div class="form-check form-switch">
                 <InputCheckbox class="form-check-input" id="record" @bind-Value="Model.Record" />
-                <label class="form-check-label" for="record">Opnemen op de server</label>
+                <label class="form-check-label" for="record">Record on the server</label>
             </div>
         </div>
         <div class="col-md-3">
-            <label class="form-label" for="maxReaders">Maximaal aantal kijkers</label>
+            <label class="form-label" for="maxReaders">Maximum viewers</label>
             <InputNumber id="maxReaders" class="form-control" @bind-Value="Model.MaxReaders" />
-            <div class="form-text">0 = onbeperkt</div>
+            <div class="form-text">0 = unlimited</div>
         </div>
 
         @if (Users is not null)
         {
             <div class="col-md-3">
-                <label class="form-label" for="owner">Eigenaar</label>
+                <label class="form-label" for="owner">Owner</label>
                 <InputSelect id="owner" class="form-select" @bind-Value="Model.OwnerId">
-                    <option value="">(geen)</option>
+                    <option value="">(none)</option>
                     @foreach (var u in Users)
                     {
                         <option value="@u.Id">@u.Email (@Roles.Label(u.Role))</option>
@@ -96,14 +96,14 @@
 
     <div class="mt-4 d-flex gap-2">
         <button type="submit" class="btn btn-primary" disabled="@Busy">@SubmitText</button>
-        <a class="btn btn-outline-secondary" href="@CancelHref">Annuleren</a>
+        <a class="btn btn-outline-secondary" href="@CancelHref">Cancel</a>
     </div>
 </EditForm>
 
 @code {
     [Parameter, EditorRequired] public StreamInput Model { get; set; } = default!;
     [Parameter, EditorRequired] public EventCallback<EditContext> OnValidSubmit { get; set; }
-    [Parameter] public string SubmitText { get; set; } = "Opslaan";
+    [Parameter] public string SubmitText { get; set; } = "Save";
     [Parameter] public string CancelHref { get; set; } = "streams";
     [Parameter] public bool Busy { get; set; }
     [Parameter] public List<UserSummary>? Users { get; set; }

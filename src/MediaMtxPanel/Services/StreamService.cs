@@ -8,10 +8,10 @@ namespace MediaMtxPanel.Services;
 
 public partial class StreamInput : IValidatableObject
 {
-    [Required(ErrorMessage = "Geef de stream een padnaam.")]
+    [Required(ErrorMessage = "Give the stream a path name.")]
     [StringLength(64)]
     [RegularExpression(@"^[a-zA-Z0-9][a-zA-Z0-9_\-./]*$",
-        ErrorMessage = "Gebruik alleen letters, cijfers, '-', '_', '.' en '/', en begin met een letter of cijfer.")]
+        ErrorMessage = "Use only letters, digits, '-', '_', '.' and '/', and start with a letter or digit.")]
     public string Name { get; set; } = "";
 
     [StringLength(128)]
@@ -20,7 +20,7 @@ public partial class StreamInput : IValidatableObject
     [StringLength(1024)]
     public string? Description { get; set; }
 
-    [Range(1, int.MaxValue, ErrorMessage = "Kies een server.")]
+    [Range(1, int.MaxValue, ErrorMessage = "Choose a server.")]
     public int ServerId { get; set; }
 
     public StreamSourceType SourceType { get; set; } = StreamSourceType.Publisher;
@@ -41,13 +41,13 @@ public partial class StreamInput : IValidatableObject
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         if (Name.Contains("..") || Name.EndsWith('/') || Name.Contains("//"))
-            yield return new ValidationResult("Ongeldige padnaam.", [nameof(Name)]);
+            yield return new ValidationResult("Invalid path name.", [nameof(Name)]);
 
         if (SourceType == StreamSourceType.Pull)
         {
             if (string.IsNullOrWhiteSpace(SourceUrl) || !SourceUrlPattern().IsMatch(SourceUrl))
                 yield return new ValidationResult(
-                    "Geef een bron-URL op (rtsp://, rtsps://, rtmp://, rtmps://, srt://, http(s)://...m3u8, whep(s)://, udp://).",
+                    "Enter a source URL (rtsp://, rtsps://, rtmp://, rtmps://, srt://, http(s)://...m3u8, whep(s)://, udp://).",
                     [nameof(SourceUrl)]);
         }
     }
@@ -222,7 +222,7 @@ public class StreamService(
         catch (Exception ex) when (ex is HttpRequestException or MediaMtxException or TaskCanceledException)
         {
             logger.LogWarning(ex, "Could not remove path {Name} from {Server}", stream.Name, stream.Server!.Name);
-            return (true, $"De stream is verwijderd, maar server {stream.Server!.Name} kon niet worden bijgewerkt: {ex.Message}");
+            return (true, $"The stream was deleted, but server {stream.Server!.Name} could not be updated: {ex.Message}");
         }
     }
 
@@ -256,8 +256,8 @@ public class StreamService(
         catch (Exception ex) when (ex is HttpRequestException or MediaMtxException or TaskCanceledException)
         {
             logger.LogWarning(ex, "Could not apply stream {Name} to {Server}", stream.Name, server.Name);
-            return $"Opgeslagen, maar server {server.Name} kon niet worden bijgewerkt: {ex.Message}. " +
-                   "Het paneel probeert het automatisch opnieuw.";
+            return $"Saved, but server {server.Name} could not be updated: {ex.Message}. " +
+                   "The panel will retry automatically.";
         }
     }
     public static MtxPathConfig ToConfig(StreamDefinition s) => new()

@@ -3,12 +3,12 @@
 @rendermode InteractiveServer
 @inject PaywallService Paywall
 
-<PageTitle>Betaalinstellingen</PageTitle>
+<PageTitle>Payment settings</PageTitle>
 
-<h1>Betaalinstellingen</h1>
+<h1>Payment settings</h1>
 <p class="text-secondary">
-    Kijkers betalen voor je streams met deze accounts; het geld komt rechtstreeks bij jou binnen.
-    Sleutels en wachtwoorden worden versleuteld opgeslagen en hier niet meer getoond.
+    Viewers pay for your streams through these accounts; the money goes straight to you.
+    Keys and passwords are stored encrypted and are not shown here again.
 </p>
 
 @if (message is not null)
@@ -26,17 +26,17 @@
                         <strong>iDEAL via Mollie</strong>
                         <div class="form-check form-switch mb-0">
                             <InputCheckbox class="form-check-input" id="mollie" @bind-Value="input.MollieEnabled" />
-                            <label class="form-check-label" for="mollie">Aan</label>
+                            <label class="form-check-label" for="mollie">On</label>
                         </div>
                     </div>
                     <div class="card-body">
                         <ol class="small ps-3">
-                            <li>Maak een account op <a href="https://www.mollie.com/" target="_blank" rel="noopener">mollie.com</a> en zet iDEAL aan.</li>
-                            <li>Kopieer onder <em>Ontwikkelaars → API-sleutels</em> de sleutel (<code>test_…</code> om te proberen, <code>live_…</code> voor echte betalingen).</li>
+                            <li>Create an account at <a href="https://www.mollie.com/" target="_blank" rel="noopener">mollie.com</a> and enable iDEAL.</li>
+                            <li>Under <em>Developers → API keys</em>, copy the key (<code>test_…</code> to try it out, <code>live_…</code> for real payments).</li>
                         </ol>
-                        <label class="form-label" for="molliekey">API-sleutel</label>
+                        <label class="form-label" for="molliekey">API key</label>
                         <InputText id="molliekey" class="form-control font-monospace" @bind-Value="input.MollieApiKey"
-                                   placeholder="@(input.HasMollieKey ? "•••••••• (opgeslagen, leeg laten om te behouden)" : "live_… of test_…")" />
+                                   placeholder="@(input.HasMollieKey ? "•••••••• (saved, leave empty to keep)" : "live_… or test_…")" />
                     </div>
                 </div>
             </div>
@@ -46,35 +46,35 @@
                         <strong>PayPal</strong>
                         <div class="form-check form-switch mb-0">
                             <InputCheckbox class="form-check-input" id="paypal" @bind-Value="input.PayPalEnabled" />
-                            <label class="form-check-label" for="paypal">Aan</label>
+                            <label class="form-check-label" for="paypal">On</label>
                         </div>
                     </div>
                     <div class="card-body">
                         <ol class="small ps-3">
-                            <li>Ga naar <a href="https://developer.paypal.com/dashboard/applications" target="_blank" rel="noopener">developer.paypal.com</a> en maak een app (REST API).</li>
-                            <li>Kopieer de <em>Client ID</em> en het <em>Secret</em>. Gebruik eerst de sandbox om te testen.</li>
+                            <li>Go to <a href="https://developer.paypal.com/dashboard/applications" target="_blank" rel="noopener">developer.paypal.com</a> and create an app (REST API).</li>
+                            <li>Copy the <em>Client ID</em> and the <em>Secret</em>. Use the sandbox first to test.</li>
                         </ol>
                         <label class="form-label" for="ppid">Client ID</label>
                         <InputText id="ppid" class="form-control font-monospace mb-2" @bind-Value="input.PayPalClientId" />
                         <label class="form-label" for="ppsecret">Secret</label>
                         <InputText id="ppsecret" class="form-control font-monospace mb-2" @bind-Value="input.PayPalSecret"
-                                   placeholder="@(input.HasPayPalSecret ? "•••••••• (opgeslagen, leeg laten om te behouden)" : "")" />
+                                   placeholder="@(input.HasPayPalSecret ? "•••••••• (saved, leave empty to keep)" : "")" />
                         <div class="form-check form-switch">
                             <InputCheckbox class="form-check-input" id="sandbox" @bind-Value="input.PayPalSandbox" />
-                            <label class="form-check-label" for="sandbox">Sandbox (testomgeving, geen echt geld)</label>
+                            <label class="form-check-label" for="sandbox">Sandbox (test environment, no real money)</label>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="mt-3 d-flex gap-2">
-            <button type="submit" class="btn btn-primary">Opslaan</button>
-            <a href="portal" class="btn btn-outline-secondary">Terug</a>
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a href="portal" class="btn btn-outline-secondary">Back</a>
         </div>
     </EditForm>
     @if (Paywall.TestPaymentsEnabled)
     {
-        <p class="small text-secondary mt-3">Testbetalingen staan aan op deze server: kijkers kunnen ook met een gesimuleerde betaling een ticket krijgen.</p>
+        <p class="small text-secondary mt-3">Test payments are enabled on this server: viewers can also get a ticket with a simulated payment.</p>
     }
 }
 
@@ -95,6 +95,6 @@
     {
         await Paywall.SaveAccountAsync(userId, input!);
         input = await Paywall.GetAccountInputAsync(userId);
-        message = "Opgeslagen.";
+        message = "Saved.";
     }
 }

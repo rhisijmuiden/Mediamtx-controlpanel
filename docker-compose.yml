@@ -12,7 +12,7 @@ services:
       # Public address of the panel, used by payment providers to send viewers back (paywall).
       Panel__PublicUrl: ${PANEL_PUBLIC_URL:-}
       # The MediaMTX below becomes the first server on first start. Add more under "Servers" in the panel.
-      MediaMtx__ServerName: Standaard
+      MediaMtx__ServerName: Default
       MediaMtx__ApiUrl: http://mediamtx:9997
       MediaMtx__ApiUser: panel
       MediaMtx__ApiPassword: ${MTX_API_PASSWORD}

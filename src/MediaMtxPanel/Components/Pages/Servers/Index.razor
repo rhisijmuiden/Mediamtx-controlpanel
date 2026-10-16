@@ -7,8 +7,8 @@
 <PageTitle>Servers</PageTitle>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="mb-0">MediaMTX-servers</h1>
-    <a class="btn btn-primary" href="servers/new">+ Server toevoegen</a>
+    <h1 class="mb-0">MediaMTX servers</h1>
+    <a class="btn btn-primary" href="servers/new">+ Add server</a>
 </div>
 
 @if (message is not null)
@@ -18,13 +18,13 @@
 
 @if (servers is null)
 {
-    <p>Laden…</p>
+    <p>Loading…</p>
 }
 else if (servers.Count == 0)
 {
     <div class="text-center text-secondary py-5">
-        <p>Er zijn nog geen servers gekoppeld.</p>
-        <a class="btn btn-primary" href="servers/new">Voeg je eerste MediaMTX-server toe</a>
+        <p>No servers have been connected yet.</p>
+        <a class="btn btn-primary" href="servers/new">Add your first MediaMTX server</a>
     </div>
 }
 else
@@ -32,7 +32,7 @@ else
     <div class="table-responsive">
         <table class="table table-hover align-middle">
             <thead>
-                <tr><th>Naam</th><th>API</th><th>Publiek adres</th><th class="text-end">Streams</th><th>Status</th><th></th></tr>
+                <tr><th>Name</th><th>API</th><th>Public address</th><th class="text-end">Streams</th><th>Status</th><th></th></tr>
             </thead>
             <tbody>
                 @foreach (var s in servers)
@@ -46,11 +46,11 @@ else
                         <td>
                             @if (!s.Enabled)
                             {
-                                <span class="badge text-bg-secondary">Uitgeschakeld</span>
+                                <span class="badge text-bg-secondary">Disabled</span>
                             }
                             else if (state is null)
                             {
-                                <span class="badge text-bg-light border">Onbekend</span>
+                                <span class="badge text-bg-light border">Unknown</span>
                             }
                             else if (state.Connected)
                             {
@@ -58,12 +58,12 @@ else
                             }
                             else
                             {
-                                <span class="badge text-bg-danger" title="@state.Error">Niet bereikbaar</span>
+                                <span class="badge text-bg-danger" title="@state.Error">Unreachable</span>
                             }
                         </td>
                         <td class="text-end text-nowrap">
-                            <button class="btn btn-sm btn-outline-secondary" @onclick="() => Test(s)" disabled="@(testing == s.Id)">@(testing == s.Id ? "Testen…" : "Testen")</button>
-                            <a class="btn btn-sm btn-outline-primary" href="servers/@s.Id">Instellingen</a>
+                            <button class="btn btn-sm btn-outline-secondary" @onclick="() => Test(s)" disabled="@(testing == s.Id)">@(testing == s.Id ? "Testing…" : "Test")</button>
+                            <a class="btn btn-sm btn-outline-primary" href="servers/@s.Id">Settings</a>
                         </td>
                     </tr>
                 }

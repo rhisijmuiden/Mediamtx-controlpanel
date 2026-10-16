@@ -11,12 +11,12 @@
 
 @if (notFound)
 {
-    <h1>Stream niet gevonden</h1>
-    <a href="streams">Terug naar streams</a>
+    <h1>Stream not found</h1>
+    <a href="streams">Back to streams</a>
 }
 else if (stream is null)
 {
-    <p>Laden…</p>
+    <p>Loading…</p>
 }
 else
 {
@@ -25,18 +25,18 @@ else
         <StreamStateBadge Stream="stream" Live="live" />
         @if (stream.PublicRead)
         {
-            <span class="badge text-bg-info">Openbaar</span>
+            <span class="badge text-bg-info">Public</span>
         }
         @if (stream.Record)
         {
-            <span class="badge text-bg-danger">Opname</span>
+            <span class="badge text-bg-danger">Recording</span>
         }
     </div>
     <p class="text-secondary">
-        Pad <code>@stream.Name</code> op server <strong>@stream.Server!.Name</strong>
+        Path <code>@stream.Name</code> on server <strong>@stream.Server!.Name</strong>
         @if (stream.Owner is not null)
         {
-            <span> · eigenaar @stream.Owner.Email</span>
+            <span> · owner @stream.Owner.Email</span>
         }
         @if (!string.IsNullOrEmpty(stream.Description))
         {
@@ -47,13 +47,13 @@ else
     @if (Created)
     {
         <div class="alert alert-success">
-            <strong>Stream aangemaakt.</strong> Hieronder staan de inloggegevens en alle manieren om te verbinden.
-            Bewaar de wachtwoorden goed; je kunt ze hier later altijd terugvinden of opnieuw genereren.
+            <strong>Stream created.</strong> Below are the credentials and all the ways to connect.
+            Keep the passwords safe; you can always find them here later or regenerate them.
         </div>
     }
     else if (Saved)
     {
-        <div class="alert alert-success">Wijzigingen opgeslagen.</div>
+        <div class="alert alert-success">Changes saved.</div>
     }
     @if (!string.IsNullOrEmpty(Warning))
     {
@@ -68,19 +68,19 @@ else
     }
 
     <div class="d-flex flex-wrap gap-2 mb-4">
-        <a class="btn btn-outline-primary btn-sm" href="streams/@stream.Id/edit">Bewerken</a>
-        <a class="btn btn-outline-secondary btn-sm" href="portal/streams/@stream.Id">Preview en paywall</a>
-        <a class="btn btn-outline-secondary btn-sm" href="watch/@stream.WatchSlug" target="_blank" rel="noopener">Kijkpagina</a>
-        <button class="btn btn-outline-secondary btn-sm" @onclick="ToggleEnabled">@(stream.Enabled ? "Uitschakelen" : "Inschakelen")</button>
+        <a class="btn btn-outline-primary btn-sm" href="streams/@stream.Id/edit">Edit</a>
+        <a class="btn btn-outline-secondary btn-sm" href="portal/streams/@stream.Id">Preview and paywall</a>
+        <a class="btn btn-outline-secondary btn-sm" href="watch/@stream.WatchSlug" target="_blank" rel="noopener">Watch page</a>
+        <button class="btn btn-outline-secondary btn-sm" @onclick="ToggleEnabled">@(stream.Enabled ? "Disable" : "Enable")</button>
         @if (!confirmDelete)
         {
-            <button class="btn btn-outline-danger btn-sm" @onclick="() => confirmDelete = true">Verwijderen</button>
+            <button class="btn btn-outline-danger btn-sm" @onclick="() => confirmDelete = true">Delete</button>
         }
         else
         {
-            <span class="align-self-center small">Zeker weten?</span>
-            <button class="btn btn-danger btn-sm" @onclick="Delete">Ja, verwijderen</button>
-            <button class="btn btn-outline-secondary btn-sm" @onclick="() => confirmDelete = false">Nee</button>
+            <span class="align-self-center small">Are you sure?</span>
+            <button class="btn btn-danger btn-sm" @onclick="Delete">Yes, delete</button>
+            <button class="btn btn-outline-secondary btn-sm" @onclick="() => confirmDelete = false">No</button>
         }
     </div>
 
@@ -90,17 +90,17 @@ else
             <div class="col-lg-6">
                 <div class="card h-100">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <strong>Publiceren (zenden)</strong>
-                        <button class="btn btn-link btn-sm p-0" @onclick="() => Regenerate(CredentialKind.Publish)">Nieuwe gegevens</button>
+                        <strong>Publish (send)</strong>
+                        <button class="btn btn-link btn-sm p-0" @onclick="() => Regenerate(CredentialKind.Publish)">New credentials</button>
                     </div>
                     <div class="card-body">
-                        <CopyField Label="Gebruikersnaam" Value="@stream.PublishUser" />
-                        <CopyField Label="Wachtwoord" Value="@stream.PublishPassword" Secret="true" />
+                        <CopyField Label="Username" Value="@stream.PublishUser" />
+                        <CopyField Label="Password" Value="@stream.PublishPassword" Secret="true" />
                         <hr />
                         <h6>OBS Studio</h6>
-                        <p class="small text-secondary mb-2">Instellingen → Stream → Dienst: <em>Aangepast…</em></p>
+                        <p class="small text-secondary mb-2">Settings → Stream → Service: <em>Custom…</em></p>
                         <CopyField Label="Server" Value="@obs!.Server" />
-                        <CopyField Label="Streamsleutel" Value="@obs.StreamKey" Secret="true" />
+                        <CopyField Label="Stream key" Value="@obs.StreamKey" Secret="true" />
                     </div>
                 </div>
             </div>
@@ -109,9 +109,9 @@ else
         {
             <div class="col-lg-6">
                 <div class="card h-100">
-                    <div class="card-header"><strong>Bron</strong></div>
+                    <div class="card-header"><strong>Source</strong></div>
                     <div class="card-body">
-                        <p class="mb-2">De server haalt deze stream @(stream.SourceOnDemand ? "op zodra er een kijker is" : "continu") op van:</p>
+                        <p class="mb-2">The server pulls this stream @(stream.SourceOnDemand ? "as soon as there is a viewer" : "continuously") from:</p>
                         <CopyField Value="@(stream.SourceUrl ?? "")" Secret="true" />
                     </div>
                 </div>
@@ -121,24 +121,24 @@ else
         <div class="col-lg-6">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <strong>Bekijken (ontvangen)</strong>
+                    <strong>Watch (receive)</strong>
                     @if (!stream.PublicRead)
                     {
-                        <button class="btn btn-link btn-sm p-0" @onclick="() => Regenerate(CredentialKind.Read)">Nieuwe gegevens</button>
+                        <button class="btn btn-link btn-sm p-0" @onclick="() => Regenerate(CredentialKind.Read)">New credentials</button>
                     }
                 </div>
                 <div class="card-body">
                     @if (stream.PublicRead)
                     {
-                        <p class="mb-0">Deze stream is openbaar: kijkers hebben geen inloggegevens nodig.</p>
+                        <p class="mb-0">This stream is public: viewers don't need credentials.</p>
                     }
                     else
                     {
-                        <CopyField Label="Gebruikersnaam" Value="@stream.ReadUser" />
-                        <CopyField Label="Wachtwoord" Value="@stream.ReadPassword" Secret="true" />
+                        <CopyField Label="Username" Value="@stream.ReadUser" />
+                        <CopyField Label="Password" Value="@stream.ReadPassword" Secret="true" />
                         @if (stream.SourceType == StreamSourceType.Publisher)
                         {
-                            <p class="small text-secondary mb-0">De publicatiegegevens werken ook om te kijken.</p>
+                            <p class="small text-secondary mb-0">The publish credentials also work for watching.</p>
                         }
                     }
                 </div>
@@ -148,24 +148,24 @@ else
 
     @if (publish.Count > 0)
     {
-        <h2 class="h4 mt-4">Endpoints om te publiceren</h2>
+        <h2 class="h4 mt-4">Publish endpoints</h2>
         <EndpointTable Items="publish" />
     }
 
-    <h2 class="h4 mt-4">Endpoints om te bekijken</h2>
+    <h2 class="h4 mt-4">Watch endpoints</h2>
     <EndpointTable Items="read" />
 
-    <h2 class="h4 mt-4">Voorbeelden</h2>
+    <h2 class="h4 mt-4">Examples</h2>
     <div class="row g-3">
         @if (stream.SourceType == StreamSourceType.Publisher)
         {
             <div class="col-lg-6">
-                <label class="form-label small text-secondary">Een bestand publiceren met ffmpeg</label>
+                <label class="form-label small text-secondary">Publish a file with ffmpeg</label>
                 <pre class="cmd">@Endpoints.FfmpegPublishExample(stream)</pre>
             </div>
         }
         <div class="col-lg-6">
-            <label class="form-label small text-secondary">Bekijken met ffplay</label>
+            <label class="form-label small text-secondary">Watch with ffplay</label>
             <pre class="cmd">@Endpoints.FfplayExample(stream)</pre>
         </div>
     </div>
@@ -173,40 +173,40 @@ else
     <h2 class="h4 mt-4">Live status</h2>
     @if (liveError is not null)
     {
-        <div class="alert alert-warning">Server @stream.Server!.Name is niet bereikbaar: @liveError</div>
+        <div class="alert alert-warning">Server @stream.Server!.Name is unreachable: @liveError</div>
     }
     else if (live is null)
     {
-        <p class="text-secondary">@(stream.Enabled ? "Er is nog geen bron verbonden." : "De stream is uitgeschakeld.")</p>
+        <p class="text-secondary">@(stream.Enabled ? "No source is connected yet." : "The stream is disabled.")</p>
     }
     else
     {
         <div class="row g-3 mb-3">
-            <div class="col-sm-6 col-lg-3"><div class="card stat-card"><div class="card-body"><div class="text-secondary small">Status</div><div class="value">@(live.IsLive ? "Live" : "Wachten")</div></div></div></div>
-            <div class="col-sm-6 col-lg-3"><div class="card stat-card"><div class="card-body"><div class="text-secondary small">Kijkers</div><div class="value">@live.Readers.Count</div></div></div></div>
-            <div class="col-sm-6 col-lg-3"><div class="card stat-card"><div class="card-body"><div class="text-secondary small">Ontvangen</div><div class="value">@Format.Bytes(live.Received)</div></div></div></div>
-            <div class="col-sm-6 col-lg-3"><div class="card stat-card"><div class="card-body"><div class="text-secondary small">Verzonden</div><div class="value">@Format.Bytes(live.Sent)</div></div></div></div>
+            <div class="col-sm-6 col-lg-3"><div class="card stat-card"><div class="card-body"><div class="text-secondary small">Status</div><div class="value">@(live.IsLive ? "Live" : "Waiting")</div></div></div></div>
+            <div class="col-sm-6 col-lg-3"><div class="card stat-card"><div class="card-body"><div class="text-secondary small">Viewers</div><div class="value">@live.Readers.Count</div></div></div></div>
+            <div class="col-sm-6 col-lg-3"><div class="card stat-card"><div class="card-body"><div class="text-secondary small">Received</div><div class="value">@Format.Bytes(live.Received)</div></div></div></div>
+            <div class="col-sm-6 col-lg-3"><div class="card stat-card"><div class="card-body"><div class="text-secondary small">Sent</div><div class="value">@Format.Bytes(live.Sent)</div></div></div></div>
         </div>
         <p>
             <strong>Codecs:</strong> @(live.Codecs.Any() ? string.Join(", ", live.Codecs) : "–")
             @if ((live.OnlineTime ?? live.ReadyTime) is { } since)
             {
-                <span class="ms-3"><strong>Live sinds:</strong> @since.ToLocalTime().ToString("g")</span>
+                <span class="ms-3"><strong>Live since:</strong> @since.ToLocalTime().ToString("g")</span>
             }
         </p>
         @if (live.Source is not null || live.Readers.Count > 0)
         {
         <table class="table table-sm align-middle">
-            <thead><tr><th>Rol</th><th>Type</th><th>ID</th><th></th></tr></thead>
+            <thead><tr><th>Role</th><th>Type</th><th>ID</th><th></th></tr></thead>
             <tbody>
                 @if (live.Source is not null)
                 {
                     <tr>
-                        <td>Bron</td><td>@live.Source.Type</td><td class="font-monospace small">@live.Source.Id</td>
+                        <td>Source</td><td>@live.Source.Type</td><td class="font-monospace small">@live.Source.Id</td>
                         <td class="text-end">
                             @if (MediaMtxClient.CanKick(live.Source.Type))
                             {
-                                <button class="btn btn-outline-danger btn-sm" @onclick="() => Kick(live.Source)">Verbreken</button>
+                                <button class="btn btn-outline-danger btn-sm" @onclick="() => Kick(live.Source)">Disconnect</button>
                             }
                         </td>
                     </tr>
@@ -214,11 +214,11 @@ else
                 @foreach (var r in live.Readers)
                 {
                     <tr>
-                        <td>Kijker</td><td>@r.Type</td><td class="font-monospace small">@r.Id</td>
+                        <td>Viewer</td><td>@r.Type</td><td class="font-monospace small">@r.Id</td>
                         <td class="text-end">
                             @if (MediaMtxClient.CanKick(r.Type))
                             {
-                                <button class="btn btn-outline-danger btn-sm" @onclick="() => Kick(r)">Verbreken</button>
+                                <button class="btn btn-outline-danger btn-sm" @onclick="() => Kick(r)">Disconnect</button>
                             }
                         </td>
                     </tr>
@@ -313,7 +313,7 @@ else
         if (s is null) { notFound = true; return; }
         await LoadAsync();
         await RefreshLiveAsync();
-        Show(warning ?? (s.Enabled ? "Stream ingeschakeld." : "Stream uitgeschakeld; lopende verbindingen zijn verbroken."), warning is not null);
+        Show(warning ?? (s.Enabled ? "Stream enabled." : "Stream disabled; active connections have been dropped."), warning is not null);
     }
 
     private async Task Regenerate(CredentialKind kind)
@@ -321,8 +321,8 @@ else
         await Streams.RegenerateAsync((await AuthState).User, Id, kind);
         await LoadAsync();
         Show(kind == CredentialKind.Publish
-            ? "Nieuwe publicatiegegevens aangemaakt. Bestaande verbindingen blijven actief tot ze opnieuw verbinden."
-            : "Nieuwe kijkgegevens aangemaakt.", false);
+            ? "New publish credentials created. Existing connections stay active until they reconnect."
+            : "New viewer credentials created.", false);
     }
 
     private async Task Delete()
@@ -331,7 +331,7 @@ else
         if (deleted && warning is null)
             Nav.NavigateTo("streams");
         else
-            Show(warning ?? "Verwijderen is mislukt.", true);
+            Show(warning ?? "Delete failed.", true);
     }
 
     private async Task Kick(MtxConnRef conn)
@@ -339,7 +339,7 @@ else
         try
         {
             await Mtx.KickAsync(conn.Type, conn.Id);
-            Show("Verbinding verbroken.", false);
+            Show("Connection dropped.", false);
         }
         catch (Exception ex) when (ex is HttpRequestException or MediaMtxException or NotSupportedException)
         {

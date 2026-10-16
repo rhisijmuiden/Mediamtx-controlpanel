@@ -5,14 +5,14 @@
 <div data-player-root>
     <div class="player">
         <video @ref="video" autoplay muted playsinline controls></video>
-        <span class="player-status" data-player-status>Speler laden…</span>
+        <span class="player-status" data-player-status>Loading player…</span>
     </div>
     <div class="d-flex justify-content-between align-items-center mt-2">
         <div class="btn-group btn-group-sm" role="group">
             <button type="button" class="btn btn-outline-secondary @(mode == "webrtc" ? "active" : "")" @onclick='() => SwitchAsync("webrtc")'>WebRTC</button>
             <button type="button" class="btn btn-outline-secondary @(mode == "hls" ? "active" : "")" @onclick='() => SwitchAsync("hls")'>HLS</button>
         </div>
-        <button type="button" class="btn btn-sm btn-link" @onclick="() => SwitchAsync(mode)">Opnieuw verbinden</button>
+        <button type="button" class="btn btn-sm btn-link" @onclick="() => SwitchAsync(mode)">Reconnect</button>
     </div>
 </div>
 

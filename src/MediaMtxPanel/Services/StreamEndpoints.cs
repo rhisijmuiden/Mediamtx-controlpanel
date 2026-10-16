@@ -26,13 +26,13 @@ public class StreamEndpointBuilder
         var h = Srv(s).PublicHost;
         return
         [
-            new("RTSP", "Publiceren", $"rtsp://{u}:{p}@{h}:{Srv(s).RtspPort}/{s.Name}", HasCredentials: true),
-            new("RTMP", "Publiceren", $"rtmp://{h}:{Srv(s).RtmpPort}/{s.Name}?user={u}&pass={p}", HasCredentials: true),
-            new("SRT", "Publiceren", $"srt://{h}:{Srv(s).SrtPort}?streamid=publish:{s.Name}:{s.PublishUser}:{s.PublishPassword}&pkt_size=1316", HasCredentials: true),
-            new("WebRTC (WHIP)", "Publiceren", $"{Http(s)}://{h}:{Srv(s).WebRtcPort}/{s.Name}/whip",
-                "Gebruik de publicatie-gebruikersnaam en het wachtwoord als HTTP Basic-authenticatie (of als bearer token user:pass)."),
-            new("WebRTC (browser)", "Publiceren", $"{Http(s)}://{h}:{Srv(s).WebRtcPort}/{s.Name}/publish",
-                "Open in de browser om vanaf webcam of scherm te publiceren."),
+            new("RTSP", "Publish", $"rtsp://{u}:{p}@{h}:{Srv(s).RtspPort}/{s.Name}", HasCredentials: true),
+            new("RTMP", "Publish", $"rtmp://{h}:{Srv(s).RtmpPort}/{s.Name}?user={u}&pass={p}", HasCredentials: true),
+            new("SRT", "Publish", $"srt://{h}:{Srv(s).SrtPort}?streamid=publish:{s.Name}:{s.PublishUser}:{s.PublishPassword}&pkt_size=1316", HasCredentials: true),
+            new("WebRTC (WHIP)", "Publish", $"{Http(s)}://{h}:{Srv(s).WebRtcPort}/{s.Name}/whip",
+                "Use the publish username and password as HTTP Basic authentication (or as bearer token user:pass)."),
+            new("WebRTC (browser)", "Publish", $"{Http(s)}://{h}:{Srv(s).WebRtcPort}/{s.Name}/publish",
+                "Open in a browser to publish from a webcam or screen."),
         ];
     }
 
@@ -42,17 +42,17 @@ public class StreamEndpointBuilder
         var creds = s.PublicRead ? "" : $"{Enc(s.ReadUser)}:{Enc(s.ReadPassword)}@";
         var rtmpQuery = s.PublicRead ? "" : $"?user={Enc(s.ReadUser)}&pass={Enc(s.ReadPassword)}";
         var srtCreds = s.PublicRead ? "" : $":{s.ReadUser}:{s.ReadPassword}";
-        var httpNote = s.PublicRead ? null : "De browser vraagt om de kijk-gebruikersnaam en het wachtwoord.";
+        var httpNote = s.PublicRead ? null : "The browser asks for the viewer username and password.";
         return
         [
-            new("RTSP", "Bekijken", $"rtsp://{creds}{h}:{Srv(s).RtspPort}/{s.Name}", HasCredentials: !s.PublicRead),
-            new("RTMP", "Bekijken", $"rtmp://{h}:{Srv(s).RtmpPort}/{s.Name}{rtmpQuery}", HasCredentials: !s.PublicRead),
-            new("SRT", "Bekijken", $"srt://{h}:{Srv(s).SrtPort}?streamid=read:{s.Name}{srtCreds}", HasCredentials: !s.PublicRead),
-            new("WebRTC (WHEP)", "Bekijken", $"{Http(s)}://{h}:{Srv(s).WebRtcPort}/{s.Name}/whep",
-                s.PublicRead ? null : "Gebruik de kijk-gegevens als HTTP Basic-authenticatie."),
-            new("WebRTC (browser)", "Bekijken", $"{Http(s)}://{h}:{Srv(s).WebRtcPort}/{s.Name}", httpNote),
-            new("HLS", "Bekijken", $"{Http(s)}://{h}:{Srv(s).HlsPort}/{s.Name}/index.m3u8", httpNote),
-            new("HLS (browser)", "Bekijken", $"{Http(s)}://{h}:{Srv(s).HlsPort}/{s.Name}", httpNote),
+            new("RTSP", "Watch", $"rtsp://{creds}{h}:{Srv(s).RtspPort}/{s.Name}", HasCredentials: !s.PublicRead),
+            new("RTMP", "Watch", $"rtmp://{h}:{Srv(s).RtmpPort}/{s.Name}{rtmpQuery}", HasCredentials: !s.PublicRead),
+            new("SRT", "Watch", $"srt://{h}:{Srv(s).SrtPort}?streamid=read:{s.Name}{srtCreds}", HasCredentials: !s.PublicRead),
+            new("WebRTC (WHEP)", "Watch", $"{Http(s)}://{h}:{Srv(s).WebRtcPort}/{s.Name}/whep",
+                s.PublicRead ? null : "Use the viewer credentials as HTTP Basic authentication."),
+            new("WebRTC (browser)", "Watch", $"{Http(s)}://{h}:{Srv(s).WebRtcPort}/{s.Name}", httpNote),
+            new("HLS", "Watch", $"{Http(s)}://{h}:{Srv(s).HlsPort}/{s.Name}/index.m3u8", httpNote),
+            new("HLS (browser)", "Watch", $"{Http(s)}://{h}:{Srv(s).HlsPort}/{s.Name}", httpNote),
         ];
     }
 
@@ -84,9 +84,9 @@ public class StreamEndpointBuilder
         var t = Enc(token);
         return
         [
-            new("HLS (VLC, smart-tv, mobiel)", "Bekijken", $"{Http(s)}://ticket:{t}@{h}:{Srv(s).HlsPort}/{s.Name}/index.m3u8", HasCredentials: true),
-            new("RTSP (VLC, laagste vertraging)", "Bekijken", $"rtsp://ticket:{t}@{h}:{Srv(s).RtspPort}/{s.Name}", HasCredentials: true),
-            new("SRT", "Bekijken", $"srt://{h}:{Srv(s).SrtPort}?streamid=read:{s.Name}:ticket:{token}", HasCredentials: true),
+            new("HLS (VLC, smart TV, mobile)", "Watch", $"{Http(s)}://ticket:{t}@{h}:{Srv(s).HlsPort}/{s.Name}/index.m3u8", HasCredentials: true),
+            new("RTSP (VLC, lowest latency)", "Watch", $"rtsp://ticket:{t}@{h}:{Srv(s).RtspPort}/{s.Name}", HasCredentials: true),
+            new("SRT", "Watch", $"srt://{h}:{Srv(s).SrtPort}?streamid=read:{s.Name}:ticket:{token}", HasCredentials: true),
         ];
     }
 

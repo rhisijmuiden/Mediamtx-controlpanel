@@ -9,9 +9,9 @@
         <input class="form-control font-monospace" type="@(Secret && !revealed ? "password" : "text")" value="@Value" readonly />
         @if (Secret)
         {
-            <button type="button" class="btn btn-outline-secondary" @onclick="() => revealed = !revealed">@(revealed ? "Verberg" : "Toon")</button>
+            <button type="button" class="btn btn-outline-secondary" @onclick="() => revealed = !revealed">@(revealed ? "Hide" : "Show")</button>
         }
-        <button type="button" class="btn btn-outline-primary" @onclick="Copy">@(copied ? "Gekopieerd ✓" : "Kopieer")</button>
+        <button type="button" class="btn btn-outline-primary" @onclick="Copy">@(copied ? "Copied ✓" : "Copy")</button>
     </div>
     @if (!string.IsNullOrEmpty(Note))
     {

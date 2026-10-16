@@ -5,9 +5,9 @@
 @inject UserAdminService UserAdmin
 @inject NavigationManager Nav
 
-<PageTitle>Nieuwe gebruiker</PageTitle>
+<PageTitle>New user</PageTitle>
 
-<h1>Nieuwe gebruiker</h1>
+<h1>New user</h1>
 
 @if (errors is not null)
 {
@@ -17,33 +17,33 @@
 <EditForm Model="input" OnValidSubmit="Save" FormName="new-user" class="col-lg-6">
     <DataAnnotationsValidator />
     <div class="mb-3">
-        <label class="form-label" for="email">E-mailadres (login)</label>
+        <label class="form-label" for="email">Email address (login)</label>
         <InputText id="email" class="form-control" @bind-Value="input.Email" />
         <ValidationMessage For="() => input.Email" />
     </div>
     <div class="mb-3">
-        <label class="form-label" for="dn">Naam</label>
+        <label class="form-label" for="dn">Name</label>
         <InputText id="dn" class="form-control" @bind-Value="input.DisplayName" />
     </div>
     <div class="mb-3">
-        <label class="form-label" for="role">Rol</label>
+        <label class="form-label" for="role">Role</label>
         <InputSelect id="role" class="form-select" @bind-Value="input.Role">
-            <option value="@Roles.User">Gebruiker: beheert eigen streams</option>
-            <option value="@Roles.Customer">Klant: ziet alleen het klantportaal met eigen streams, preview en paywall</option>
-            <option value="@Roles.Admin">Beheerder: beheert alle streams en gebruikers</option>
+            <option value="@Roles.User">User: manages their own streams</option>
+            <option value="@Roles.Customer">Customer: sees only the customer portal with their own streams, preview and paywall</option>
+            <option value="@Roles.Admin">Administrator: manages all streams and users</option>
         </InputSelect>
     </div>
     <div class="mb-3">
-        <label class="form-label" for="pw">Wachtwoord</label>
+        <label class="form-label" for="pw">Password</label>
         <div class="input-group">
             <InputText id="pw" class="form-control font-monospace" @bind-Value="input.Password" />
-            <button type="button" class="btn btn-outline-secondary" @onclick="Generate">Genereer</button>
+            <button type="button" class="btn btn-outline-secondary" @onclick="Generate">Generate</button>
         </div>
-        <div class="form-text">Minimaal 8 tekens, met een hoofdletter, kleine letter en cijfer.</div>
+        <div class="form-text">At least 8 characters, with an uppercase letter, a lowercase letter and a digit.</div>
         <ValidationMessage For="() => input.Password" />
     </div>
-    <button type="submit" class="btn btn-primary">Gebruiker aanmaken</button>
-    <a class="btn btn-outline-secondary" href="users">Annuleren</a>
+    <button type="submit" class="btn btn-primary">Create user</button>
+    <a class="btn btn-outline-secondary" href="users">Cancel</a>
 </EditForm>
 
 @code {
@@ -63,11 +63,11 @@
 
     private class NewUserInput
     {
-        [Required(ErrorMessage = "Vul een e-mailadres in."), EmailAddress(ErrorMessage = "Ongeldig e-mailadres.")]
+        [Required(ErrorMessage = "Enter an email address."), EmailAddress(ErrorMessage = "Invalid email address.")]
         public string Email { get; set; } = "";
         public string? DisplayName { get; set; }
         public string Role { get; set; } = Roles.User;
-        [Required(ErrorMessage = "Vul een wachtwoord in."), MinLength(8, ErrorMessage = "Minimaal 8 tekens.")]
+        [Required(ErrorMessage = "Enter a password."), MinLength(8, ErrorMessage = "At least 8 characters.")]
         public string Password { get; set; } = "";
     }
 }

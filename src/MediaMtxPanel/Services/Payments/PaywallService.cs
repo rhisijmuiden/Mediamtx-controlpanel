@@ -11,16 +11,16 @@ namespace MediaMtxPanel.Services.Payments;
 
 public class OfferInput
 {
-    [Required(ErrorMessage = "Geef de aanbieding een naam."), StringLength(80)]
+    [Required(ErrorMessage = "Give the offer a name."), StringLength(80)]
     public string Name { get; set; } = "";
 
     [StringLength(300)]
     public string? Description { get; set; }
 
-    [Range(0.5, 10000, ErrorMessage = "Kies een prijs tussen € 0,50 en € 10.000.")]
+    [Range(0.5, 10000, ErrorMessage = "Choose a price between €0.50 and €10,000.")]
     public decimal Price { get; set; } = 4.95m;
 
-    [Range(1, 24 * 366, ErrorMessage = "Kies een toegangsduur van minimaal 1 uur.")]
+    [Range(1, 24 * 366, ErrorMessage = "Choose an access period of at least 1 hour.")]
     public int AccessHours { get; set; } = 24;
 
     public bool Active { get; set; } = true;
@@ -112,7 +112,7 @@ public class PaywallService(
         catch (System.Security.Cryptography.CryptographicException)
         {
             // The encryption keys changed (e.g. Panel__DataProtectionKeysPath not persisted); the owner must re-enter the secret.
-            throw new PaymentException("De betaalgegevens van de verkoper kunnen niet worden gelezen. Vraag de verkoper ze opnieuw in te voeren.");
+            throw new PaymentException("The seller's payment credentials cannot be read. Ask the seller to enter them again.");
         }
     }
 
@@ -195,13 +195,13 @@ public class PaywallService(
         await using var db = await dbFactory.CreateDbContextAsync(ct);
         var s = await ManagedStreamAsync(db, user, streamId, ct);
         if (s is null)
-            return "Stream niet gevonden.";
+            return "Stream not found.";
         if (enabled)
         {
             if (!await db.Offers.AnyAsync(o => o.StreamId == streamId && o.Active, ct))
-                return "Voeg eerst minstens één actieve aanbieding toe.";
+                return "Add at least one active offer first.";
             if ((await ProvidersForOwnerAsync(s.OwnerId, ct)).Count == 0)
-                return "Stel eerst een betaalaccount in (iDEAL via Mollie of PayPal).";
+                return "Set up a payment account first (iDEAL via Mollie, or PayPal).";
         }
         s.PaywallEnabled = enabled;
         s.UpdatedAt = DateTime.UtcNow;
@@ -236,13 +236,13 @@ public class PaywallService(
     {
         await using var db = await dbFactory.CreateDbContextAsync(ct);
         var stream = await db.Streams.AsNoTracking().FirstOrDefaultAsync(s => s.WatchSlug == slug, ct)
-            ?? throw new PaymentException("Stream niet gevonden.");
+            ?? throw new PaymentException("Stream not found.");
         if (!stream.PaywallEnabled || !stream.Enabled)
-            throw new PaymentException("Voor deze stream worden geen tickets verkocht.");
+            throw new PaymentException("Tickets are not sold for this stream.");
         var offer = await db.Offers.AsNoTracking().FirstOrDefaultAsync(o => o.Id == offerId && o.StreamId == stream.Id && o.Active, ct)
-            ?? throw new PaymentException("Deze aanbieding bestaat niet meer.");
+            ?? throw new PaymentException("This offer no longer exists.");
         if (!(await ProvidersForOwnerAsync(stream.OwnerId, ct)).Contains(provider))
-            throw new PaymentException("Deze betaalmethode is niet beschikbaar.");
+            throw new PaymentException("This payment method is not available.");
 
         var order = new TicketOrder
         {
@@ -282,7 +282,7 @@ public class PaywallService(
             order.Status = OrderStatus.Failed;
             await db.SaveChangesAsync(ct);
             logger.LogWarning("Starting payment for order {Order} failed: {Message}", order.Id, ex.Message);
-            throw ex as PaymentException ?? new PaymentException("De betaalprovider is niet bereikbaar. Probeer het later opnieuw.");
+            throw ex as PaymentException ?? new PaymentException("The payment provider cannot be reached. Please try again later.");
         }
     }
 
@@ -363,7 +363,7 @@ public class PaywallService(
     }
 
     private IPaymentGateway Gateway(PaymentProvider provider) =>
-        gateways.FirstOrDefault(g => g.Provider == provider) ?? throw new PaymentException("Deze betaalmethode is niet beschikbaar.");
+        gateways.FirstOrDefault(g => g.Provider == provider) ?? throw new PaymentException("This payment method is not available.");
 
     private static bool IsPubliclyReachable(string baseUrl)
     {

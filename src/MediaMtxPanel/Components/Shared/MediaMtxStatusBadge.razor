@@ -6,13 +6,13 @@
 }
 @if (states.Count == 0)
 {
-    <span class="badge text-bg-secondary">MediaMTX: verbinding controleren…</span>
+    <span class="badge text-bg-secondary">MediaMTX: checking connection…</span>
 }
 else if (up == states.Count)
 {
-    <span class="badge text-bg-success">@(states.Count == 1 ? "MediaMTX-server verbonden" : $"Alle {states.Count} MediaMTX-servers verbonden")</span>
+    <span class="badge text-bg-success">@(states.Count == 1 ? "MediaMTX server connected" : $"All {states.Count} MediaMTX servers connected")</span>
 }
 else
 {
-    <a href="servers" class="badge text-bg-danger text-decoration-none">@(states.Count - up) van @states.Count MediaMTX-server(s) niet bereikbaar</a>
+    <a href="servers" class="badge text-bg-danger text-decoration-none">@(states.Count - up) of @states.Count MediaMTX server(s) unreachable</a>
 }

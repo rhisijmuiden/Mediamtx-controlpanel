@@ -3,7 +3,7 @@
 
 @if (!Stream.Enabled)
 {
-    <span class="badge text-bg-secondary">Uitgeschakeld</span>
+    <span class="badge text-bg-secondary">Disabled</span>
 }
 else if (Live is { IsLive: true })
 {
@@ -11,7 +11,7 @@ else if (Live is { IsLive: true })
 }
 else if (Live is not null)
 {
-    <span class="badge text-bg-warning">Wacht op bron</span>
+    <span class="badge text-bg-warning">Waiting for source</span>
 }
 else
 {
