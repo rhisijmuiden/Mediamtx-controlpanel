@@ -37,23 +37,31 @@ Zet het paneel in productie achter een reverse proxy met HTTPS (Caddy, nginx, Tr
 
 ## Proxmox LXC
 
-Het script `deploy/proxmox/create-lxc.sh` maakt op een Proxmox VE-host een Ubuntu 24.04-container aan en installeert daarin het paneel als systemd-service, plus (standaard) MediaMTX als eerste server.
+Het script `deploy/proxmox/create-lxc.sh` maakt op een Proxmox VE-host een Debian 13-container aan en installeert daarin het paneel als systemd-service, plus (standaard) MediaMTX als eerste server.
+
+Plak dit in de shell van de Proxmox-host (als root, bijvoorbeeld via *Datacenter → node → Shell*):
 
 ```bash
-# op de Proxmox-host, in de uitgepakte mediamtx-panel map
-bash deploy/proxmox/create-lxc.sh
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/proxmox/create-lxc.sh)"
 ```
+
+Het script haalt de broncode zelf van GitHub (`REPO_BRANCH=…` kiest een andere branch). Vanuit een uitgepakte kopie van deze repository werkt `bash deploy/proxmox/create-lxc.sh` ook; dan wordt die code gebruikt.
+
+Als het klaar is, toont het script in de shell het adres (`http://<ip-van-de-container>:8080`), de beheerderslogin en een **eenmalig wachtwoord**. Bij de eerste keer inloggen vraagt het paneel meteen om een eigen wachtwoord; het eenmalige wachtwoord wordt nergens in de container bewaard.
+
+.NET 10 komt uit de pakketbron van Microsoft (`packages.microsoft.com`), omdat Debian zelf geen .NET levert. De Debian 13-template vereist Proxmox VE 8.4 of nieuwer.
 
 Alles is met omgevingsvariabelen aan te passen, bijvoorbeeld:
 
 ```bash
 CT_ID=150 CT_IP=192.168.1.50/24 CT_GW=192.168.1.1 CT_STORAGE=local-zfs \
 PUBLIC_HOST=stream.example.com ADMIN_EMAIL=ik@example.com \
-bash deploy/proxmox/create-lxc.sh
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/proxmox/create-lxc.sh)"
 ```
 
 | Variabele | Standaard | Betekenis |
 |---|---|---|
+| `TEMPLATE_NAME` | `debian-13-standard` | Specifieke Debian 13-template |
 | `CT_ID` | volgende vrije ID | Container-ID |
 | `CT_HOSTNAME` | `mediamtx-panel` | Hostnaam |
 | `CT_CORES` / `CT_MEMORY` / `CT_DISK` | 2 / 2048 MB / 8 GB | Resources (bouwen vraagt ±1,5 GB geheugen) |
@@ -64,10 +72,11 @@ bash deploy/proxmox/create-lxc.sh
 | `INSTALL_MEDIAMTX` | `yes` | MediaMTX in dezelfde container installeren |
 | `MEDIAMTX_VERSION` | `1.21.2` | MediaMTX-versie (van GitHub releases) |
 | `PANEL_PORT` | `8080` | Poort van het paneel |
-| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | `admin@localhost` / willekeurig | Eerste beheerder |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | `admin@localhost` / willekeurig | Eerste beheerder (wachtwoord is eenmalig) |
+| `REPO` / `REPO_BRANCH` | `rhisijmuiden/Mediamtx-controlpanel` / `main` | Waar de broncode vandaan komt |
 | `PUBLIC_HOST` | IP van de container | Adres in de stream-URL's |
 
-Na afloop toont het script het adres van het paneel en de wachtwoorden. In de container:
+In de container:
 
 - paneel: `/opt/mediamtx-panel`, configuratie `/etc/mediamtx-panel/panel.env`, data `/var/lib/mediamtx-panel`, service `mediamtx-panel`
 - MediaMTX: `/opt/mediamtx`, configuratie `/etc/mediamtx/mediamtx.yml`, opnames `/var/lib/mediamtx/recordings`, service `mediamtx`
@@ -75,7 +84,7 @@ Na afloop toont het script het adres van het paneel en de wachtwoorden. In de co
 Bijwerken naar nieuwe code (database en instellingen blijven):
 
 ```bash
-bash deploy/proxmox/create-lxc.sh update <CTID>
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/proxmox/create-lxc.sh)" _ update <CTID>
 ```
 
 Andere Proxmox-containers of VM's met alleen MediaMTX koppel je daarna via **Servers** in het paneel.
@@ -107,6 +116,7 @@ Alle instellingen staan in `appsettings.json` en zijn met omgevingsvariabelen te
 |---|---|---|
 | `ConnectionStrings__DefaultConnection` | `DataSource=Data/panel.db` | SQLite-database |
 | `Panel__AdminEmail` / `Panel__AdminPassword` | `admin@localhost` / leeg | Eerste beheerder (alleen als er nog geen beheerder is) |
+| `Panel__AdminMustChangePassword` | `true` | Het wachtwoord van de eerste beheerder is eenmalig: bij de eerste login moet een eigen wachtwoord gekozen worden |
 | `Panel__DataProtectionKeysPath` | leeg | Map voor cookie-sleutels (zodat logins een herstart overleven) |
 | `Panel__HttpsRedirect` | `false` | HTTP → HTTPS doorsturen |
 | `Panel__HookBaseUrl` | leeg | Adres waarop MediaMTX-servers het paneel bereiken (voor de getoonde configuratie) |

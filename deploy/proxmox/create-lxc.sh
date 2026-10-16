@@ -1,14 +1,19 @@
 #!/usr/bin/env bash
 # Creates a Proxmox LXC container with the MediaMTX Panel (and optionally MediaMTX itself).
 #
-# Run on the Proxmox host, from the root of the mediamtx-panel project:
+# Run in the shell of the Proxmox host (as root). Straight from GitHub:
+#     bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/proxmox/create-lxc.sh)"
+# or from a checkout of the repository:
 #     bash deploy/proxmox/create-lxc.sh
+# Without a checkout next to it, the script downloads the sources of $REPO_BRANCH from GitHub.
 #
-# Update the panel in an existing container with the code in this folder:
-#     bash deploy/proxmox/create-lxc.sh update <CTID>
+# Update the panel in an existing container to the latest code:
+#     bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/proxmox/create-lxc.sh)" _ update <CTID>
 #
 # Every setting below can be overridden with an environment variable, e.g.
 #     CT_ID=150 CT_IP=192.168.1.50/24 CT_GW=192.168.1.1 bash deploy/proxmox/create-lxc.sh
+#
+# The container runs Debian 13 (trixie); Proxmox VE 8.4 or newer has its template.
 set -euo pipefail
 
 # ---------------------------------------------------------------- settings
@@ -36,7 +41,13 @@ ADMIN_EMAIL="${ADMIN_EMAIL:-admin@localhost}"
 ADMIN_PASSWORD="${ADMIN_PASSWORD:-}"               # empty = random
 PUBLIC_HOST="${PUBLIC_HOST:-}"                     # empty = IP of the container
 
-TEMPLATE_NAME="${TEMPLATE_NAME:-ubuntu-24.04-standard}"
+# Where the sources come from when the script does not run from a checkout
+REPO="${REPO:-rhisijmuiden/Mediamtx-controlpanel}"
+REPO_BRANCH="${REPO_BRANCH:-main}"
+
+# Container OS: Debian 13. TEMPLATE_NAME picks a specific debian-13 template build.
+TEMPLATE_NAME="${TEMPLATE_NAME:-debian-13-standard}"
+NET_CHECK_HOST=deb.debian.org
 
 # ---------------------------------------------------------------- helpers
 c_info="\e[1;34m"; c_ok="\e[1;32m"; c_err="\e[1;31m"; c_off="\e[0m"
@@ -47,15 +58,33 @@ die()  { echo -e "${c_err}[✗]${c_off} $*" >&2; exit 1; }
 # '|| true': head closing the pipe makes tr exit with SIGPIPE, which pipefail would turn into a failure.
 random_secret() { LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom 2>/dev/null | head -c "${1:-24}" || true; }
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+# Run from a file: the checkout around it. Run through 'bash -c "$(curl …)"': nothing yet.
+SCRIPT_DIR=""
+PROJECT_DIR=""
+if [[ -n "${BASH_SOURCE[0]:-}" && -f "${BASH_SOURCE[0]}" ]]; then
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+fi
+
+# Downloads the sources from GitHub when there is no checkout next to the script.
+fetch_sources() {
+  [[ -n "$PROJECT_DIR" && -f "$PROJECT_DIR/src/MediaMtxPanel/MediaMtxPanel.csproj" ]] && return 0
+  command -v curl >/dev/null || die "curl is needed to download the sources."
+  SOURCE_TMP="$(mktemp -d)"
+  trap 'rm -rf "$SOURCE_TMP"' EXIT
+  info "Downloading the panel from github.com/${REPO} (${REPO_BRANCH})…"
+  curl -fsSL "https://codeload.github.com/${REPO}/tar.gz/refs/heads/${REPO_BRANCH}" | tar -xz -C "$SOURCE_TMP" --strip-components=1 \
+    || die "Could not download https://github.com/${REPO} (branch ${REPO_BRANCH})."
+  PROJECT_DIR="$SOURCE_TMP"
+  SCRIPT_DIR="$SOURCE_TMP/deploy/proxmox"
+}
 
 preflight() {
   [[ $EUID -eq 0 ]] || die "Run this script as root on the Proxmox host."
   command -v pct >/dev/null || die "pct not found: this script must run on a Proxmox VE host."
-  [[ -f "$PROJECT_DIR/src/MediaMtxPanel/MediaMtxPanel.csproj" ]] \
-    || die "Project not found in $PROJECT_DIR. Run the script from the extracted mediamtx-panel folder."
-  [[ -f "$SCRIPT_DIR/install-in-lxc.sh" ]] || die "install-in-lxc.sh is missing next to this script."
+  fetch_sources
+  [[ -f "$PROJECT_DIR/src/MediaMtxPanel/MediaMtxPanel.csproj" ]] || die "Panel sources not found in $PROJECT_DIR."
+  [[ -f "$SCRIPT_DIR/install-in-lxc.sh" ]] || die "install-in-lxc.sh is missing in $SCRIPT_DIR."
 }
 
 # Packs the panel sources and the in-container installer into the container and runs it.
@@ -75,7 +104,7 @@ wait_for_network() {
   local id="$1"
   info "Waiting for the network in container $id…"
   for _ in $(seq 1 60); do
-    if pct exec "$id" -- bash -c 'getent hosts archive.ubuntu.com >/dev/null 2>&1'; then
+    if pct exec "$id" -- getent hosts "$NET_CHECK_HOST" >/dev/null 2>&1; then
       return 0
     fi
     sleep 2
@@ -110,7 +139,7 @@ pct status "$CT_ID" >/dev/null 2>&1 && die "Container $CT_ID already exists. Set
 info "Looking up the $TEMPLATE_NAME template…"
 pveam update >/dev/null
 template="$(pveam available --section system | awk '{print $2}' | grep "^${TEMPLATE_NAME}" | sort -V | tail -n1)"
-[[ -n "$template" ]] || die "Template $TEMPLATE_NAME not found in 'pveam available'."
+[[ -n "$template" ]] || die "Template $TEMPLATE_NAME not found in 'pveam available'. Debian 13 templates need Proxmox VE 8.4 or newer."
 if ! pveam list "$TEMPLATE_STORAGE" | grep -q "$template"; then
   info "Downloading $template to $TEMPLATE_STORAGE…"
   pveam download "$TEMPLATE_STORAGE" "$template"
@@ -136,14 +165,14 @@ create_args=(
   --unprivileged 1
   --features nesting=1
   --onboot 1
-  --ostype ubuntu
+  --ostype debian
   --password "$CT_PASSWORD"
   --description "MediaMTX Panel"
 )
 [[ -n "$CT_DNS" ]] && create_args+=(--nameserver "$CT_DNS")
 [[ -n "$CT_SSH_KEY" ]] && create_args+=(--ssh-public-keys "$CT_SSH_KEY")
 
-info "Creating container $CT_ID ($CT_HOSTNAME)…"
+info "Creating container $CT_ID ($CT_HOSTNAME, $template)…"
 pct create "${create_args[@]}" >/dev/null
 pct start "$CT_ID"
 ok "Container $CT_ID started."
@@ -164,20 +193,32 @@ push_and_install "$CT_ID" \
   PUBLIC_HOST="$PUBLIC_HOST" \
   PANEL_HOST="$ct_ip"
 
+services=""
+if [[ $INSTALL_MEDIAMTX == yes ]]; then
+  services="
+  MediaMTX in the container: RTSP 8554, RTMP 1935, SRT 8890/udp, HLS 8888, WebRTC 8889 + 8189/udp
+  Public address in the stream URLs: ${PUBLIC_HOST} (change under Servers in the panel)
+"
+fi
+
 cat <<SUMMARY
 
-$(ok "MediaMTX Panel is installed in container $CT_ID")
+$(ok "MediaMTX Panel is installed in container $CT_ID (Debian 13)")
 
-  Panel:            http://${ct_ip}:${PANEL_PORT}
-  Login:            ${ADMIN_EMAIL}
-  Password:         ${ADMIN_PASSWORD}
-  Root password CT: ${CT_PASSWORD}
-$( [[ $INSTALL_MEDIAMTX == yes ]] && echo "
-  MediaMTX in the container: RTSP 8554, RTMP 1935, SRT 8890/udp, HLS 8888, WebRTC 8889 + 8189/udp
-  Public address in the URLs: ${PUBLIC_HOST} (change under Servers in the panel)")
+  ┌──────────────────────────────────────────────────────────────
+  │  Open:       http://${ct_ip}:${PANEL_PORT}
+  │  Login:      ${ADMIN_EMAIL}
+  │  Password:   ${ADMIN_PASSWORD}
+  │
+  │  This is a one-time password: the panel asks you to choose
+  │  your own password right after the first login.
+  └──────────────────────────────────────────────────────────────
 
+  Root password of the container: ${CT_PASSWORD}
+${services}
   Configuration in the container: /etc/mediamtx-panel/panel.env
-  Logs: pct exec ${CT_ID} -- journalctl -u mediamtx-panel -f
+  Logs:   pct exec ${CT_ID} -- journalctl -u mediamtx-panel -f
+  Update: bash -c "\$(curl -fsSL https://raw.githubusercontent.com/${REPO}/${REPO_BRANCH}/deploy/proxmox/create-lxc.sh)" _ update ${CT_ID}
 
-Store these passwords somewhere safe; they are not shown again.
+These passwords are not stored anywhere and are not shown again.
 SUMMARY

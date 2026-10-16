@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Installs or updates the MediaMTX Panel inside an Ubuntu 24.04 LXC container (or any Ubuntu 24.04 machine).
+# Installs or updates the MediaMTX Panel inside an LXC container (or machine) running
+# Debian 13 (Debian 12 works too).
 # Normally started by create-lxc.sh, which copies the sources to /tmp/mediamtx-panel-install/source.tar.gz.
 #
 # MODE=install  first installation: packages, users, configuration, services
@@ -34,9 +35,22 @@ export DEBIAN_FRONTEND=noninteractive
 
 # ---------------------------------------------------------------- packages
 install_packages() {
-  log "Installing packages (.NET 10 from the Ubuntu archive)…"
+  # shellcheck source=/dev/null
+  . /etc/os-release
   apt-get update -qq
-  apt-get install -y -qq curl ca-certificates tar sqlite3 >/dev/null
+  apt-get install -y -qq curl ca-certificates tar sqlite3 iproute2 >/dev/null
+  if [[ "$ID" != "debian" ]]; then
+    echo "Unsupported OS '$ID': this installer is made for Debian 13." >&2
+    exit 1
+  fi
+  # Debian does not ship .NET; use Microsoft's package feed for this Debian release.
+  log "Installing packages (.NET 10 from packages.microsoft.com, Debian ${VERSION_ID})…"
+  if ! dpkg -s packages-microsoft-prod >/dev/null 2>&1; then
+    curl -fsSL "https://packages.microsoft.com/config/debian/${VERSION_ID}/packages-microsoft-prod.deb" -o /tmp/packages-microsoft-prod.deb
+    dpkg -i /tmp/packages-microsoft-prod.deb >/dev/null
+    rm -f /tmp/packages-microsoft-prod.deb
+  fi
+  apt-get update -qq
   apt-get install -y -qq dotnet-sdk-10.0 aspnetcore-runtime-10.0 >/dev/null
 }
 
@@ -178,6 +192,8 @@ case "$MODE" in
     systemctl daemon-reload
     systemctl enable --now mediamtx-panel >/dev/null
     wait_for_panel
+    # The administrator now exists; the one-time password does not need to stay on disk.
+    sed -i '/^Panel__AdminPassword=/d' "$CONF_DIR/panel.env"
     if [[ "$INSTALL_MEDIAMTX" == "yes" ]]; then
       systemctl enable --now mediamtx >/dev/null
     fi

@@ -91,6 +91,7 @@ app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages:
 if (app.Configuration.GetValue("Panel:HttpsRedirect", false))
     app.UseHttpsRedirection();
 
+app.UseRequiredPasswordChange();
 app.UseAntiforgery();
 
 app.MapStaticAssets();
