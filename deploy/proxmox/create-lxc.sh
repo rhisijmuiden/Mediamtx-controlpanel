@@ -105,7 +105,10 @@ push_and_install() {
   pct push "$id" "$tarball" /tmp/mediamtx-panel-install/source.tar.gz
   pct push "$id" "$SCRIPT_DIR/install-in-lxc.sh" /tmp/mediamtx-panel-install/install-in-lxc.sh --perms 0755
   rm -f "$tarball"
-  pct exec "$id" -- env "$@" bash /tmp/mediamtx-panel-install/install-in-lxc.sh
+  # Start from a clean environment: pct exec passes on the host shell's variables, such as a
+  # LANG the container has no locale for and an XDG_RUNTIME_DIR (/run/user/0) that does not exist there.
+  pct exec "$id" -- env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+    HOME=/root LANG=C.UTF-8 LC_ALL=C.UTF-8 TERM="${TERM:-xterm}" "$@" bash /tmp/mediamtx-panel-install/install-in-lxc.sh
 }
 
 wait_for_network() {
