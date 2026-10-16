@@ -9,6 +9,9 @@
 #
 # Every setting below can be overridden with an environment variable, e.g.
 #     CT_ID=150 CT_IP=192.168.1.50/24 CT_GW=192.168.1.1 bash deploy/proxmox/create-lxc.sh
+#
+# Debian 13 (trixie) instead of Ubuntu 24.04:
+#     CT_OS=debian bash deploy/proxmox/create-lxc.sh
 set -euo pipefail
 
 # ---------------------------------------------------------------- settings
@@ -36,7 +39,13 @@ ADMIN_EMAIL="${ADMIN_EMAIL:-admin@localhost}"
 ADMIN_PASSWORD="${ADMIN_PASSWORD:-}"               # empty = random
 PUBLIC_HOST="${PUBLIC_HOST:-}"                     # empty = IP of the container
 
-TEMPLATE_NAME="${TEMPLATE_NAME:-ubuntu-24.04-standard}"
+# Container OS: "ubuntu" (24.04) or "debian" (13). TEMPLATE_NAME picks another template of that OS.
+CT_OS="${CT_OS:-ubuntu}"
+case "$CT_OS" in
+  ubuntu) TEMPLATE_NAME="${TEMPLATE_NAME:-ubuntu-24.04-standard}"; NET_CHECK_HOST=archive.ubuntu.com ;;
+  debian) TEMPLATE_NAME="${TEMPLATE_NAME:-debian-13-standard}";   NET_CHECK_HOST=deb.debian.org ;;
+  *) echo "CT_OS must be 'ubuntu' or 'debian' (got '$CT_OS')." >&2; exit 1 ;;
+esac
 
 # ---------------------------------------------------------------- helpers
 c_info="\e[1;34m"; c_ok="\e[1;32m"; c_err="\e[1;31m"; c_off="\e[0m"
@@ -75,7 +84,7 @@ wait_for_network() {
   local id="$1"
   info "Waiting for the network in container $id…"
   for _ in $(seq 1 60); do
-    if pct exec "$id" -- bash -c 'getent hosts archive.ubuntu.com >/dev/null 2>&1'; then
+    if pct exec "$id" -- getent hosts "$NET_CHECK_HOST" >/dev/null 2>&1; then
       return 0
     fi
     sleep 2
@@ -110,7 +119,7 @@ pct status "$CT_ID" >/dev/null 2>&1 && die "Container $CT_ID already exists. Set
 info "Looking up the $TEMPLATE_NAME template…"
 pveam update >/dev/null
 template="$(pveam available --section system | awk '{print $2}' | grep "^${TEMPLATE_NAME}" | sort -V | tail -n1)"
-[[ -n "$template" ]] || die "Template $TEMPLATE_NAME not found in 'pveam available'."
+[[ -n "$template" ]] || die "Template $TEMPLATE_NAME not found in 'pveam available'. Debian 13 templates need Proxmox VE 8.4 or newer."
 if ! pveam list "$TEMPLATE_STORAGE" | grep -q "$template"; then
   info "Downloading $template to $TEMPLATE_STORAGE…"
   pveam download "$TEMPLATE_STORAGE" "$template"
@@ -136,14 +145,14 @@ create_args=(
   --unprivileged 1
   --features nesting=1
   --onboot 1
-  --ostype ubuntu
+  --ostype "$CT_OS"
   --password "$CT_PASSWORD"
   --description "MediaMTX Panel"
 )
 [[ -n "$CT_DNS" ]] && create_args+=(--nameserver "$CT_DNS")
 [[ -n "$CT_SSH_KEY" ]] && create_args+=(--ssh-public-keys "$CT_SSH_KEY")
 
-info "Creating container $CT_ID ($CT_HOSTNAME)…"
+info "Creating container $CT_ID ($CT_HOSTNAME, $template)…"
 pct create "${create_args[@]}" >/dev/null
 pct start "$CT_ID"
 ok "Container $CT_ID started."

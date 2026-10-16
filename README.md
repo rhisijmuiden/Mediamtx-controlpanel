@@ -37,12 +37,20 @@ Zet het paneel in productie achter een reverse proxy met HTTPS (Caddy, nginx, Tr
 
 ## Proxmox LXC
 
-Het script `deploy/proxmox/create-lxc.sh` maakt op een Proxmox VE-host een Ubuntu 24.04-container aan en installeert daarin het paneel als systemd-service, plus (standaard) MediaMTX als eerste server.
+Het script `deploy/proxmox/create-lxc.sh` maakt op een Proxmox VE-host een Ubuntu 24.04- of Debian 13-container aan en installeert daarin het paneel als systemd-service, plus (standaard) MediaMTX als eerste server.
 
 ```bash
 # op de Proxmox-host, in de uitgepakte mediamtx-panel map
 bash deploy/proxmox/create-lxc.sh
 ```
+
+Een Debian 13-container in plaats van Ubuntu:
+
+```bash
+CT_OS=debian bash deploy/proxmox/create-lxc.sh
+```
+
+Op Debian komt .NET 10 uit de pakketbron van Microsoft (`packages.microsoft.com`), omdat Debian zelf geen .NET levert. Debian 13-templates vereisen Proxmox VE 8.4 of nieuwer.
 
 Alles is met omgevingsvariabelen aan te passen, bijvoorbeeld:
 
@@ -54,6 +62,8 @@ bash deploy/proxmox/create-lxc.sh
 
 | Variabele | Standaard | Betekenis |
 |---|---|---|
+| `CT_OS` | `ubuntu` | `ubuntu` (24.04) of `debian` (13) |
+| `TEMPLATE_NAME` | `ubuntu-24.04-standard` / `debian-13-standard` | Andere template van hetzelfde OS |
 | `CT_ID` | volgende vrije ID | Container-ID |
 | `CT_HOSTNAME` | `mediamtx-panel` | Hostnaam |
 | `CT_CORES` / `CT_MEMORY` / `CT_DISK` | 2 / 2048 MB / 8 GB | Resources (bouwen vraagt ±1,5 GB geheugen) |
