@@ -32,7 +32,7 @@ else
                     <tr>
                         <td>@u.Email @if (u.Id == myId) { <span class="badge text-bg-light border">jij</span> }</td>
                         <td>@(u.DisplayName ?? "–")</td>
-                        <td>@(u.Role == Roles.Admin ? "Beheerder" : "Gebruiker")</td>
+                        <td>@Roles.Label(u.Role)</td>
                         <td class="text-end">@u.StreamCount</td>
                         <td>@if (u.Locked) { <span class="badge text-bg-danger">Geblokkeerd</span> } else { <span class="badge text-bg-success">Actief</span> }</td>
                         <td class="small">@u.CreatedAt.ToLocalTime().ToString("d")</td>

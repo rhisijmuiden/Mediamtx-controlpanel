@@ -57,6 +57,15 @@ public class StreamDefinition
     [MaxLength(128)]
     public string ReadPassword { get; set; } = "";
 
+    /// <summary>Viewers must buy a ticket (see <see cref="StreamOffer"/>) to watch.</summary>
+    public bool PaywallEnabled { get; set; }
+
+    /// <summary>Random, unguessable part of the public watch page URL (/watch/{slug}).</summary>
+    [MaxLength(32)]
+    public string WatchSlug { get; set; } = "";
+
+    public List<StreamOffer> Offers { get; set; } = [];
+
     public string? OwnerId { get; set; }
     public ApplicationUser? Owner { get; set; }
 

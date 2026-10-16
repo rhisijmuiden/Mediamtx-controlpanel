@@ -130,6 +130,10 @@ namespace MediaMtxPanel.Data.Migrations
                     b.Property<bool>("HttpsUrls")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("MetricsUrl")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(64)
@@ -166,6 +170,49 @@ namespace MediaMtxPanel.Data.Migrations
                     b.ToTable("Servers");
                 });
 
+            modelBuilder.Entity("MediaMtxPanel.Data.PaymentAccount", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("MollieApiKeyProtected")
+                        .HasMaxLength(1024)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("MollieEnabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("PayPalClientId")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("PayPalEnabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("PayPalSandbox")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("PayPalSecretProtected")
+                        .HasMaxLength(1024)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("PaymentAccounts");
+                });
+
             modelBuilder.Entity("MediaMtxPanel.Data.StreamDefinition", b =>
                 {
                     b.Property<int>("Id")
@@ -197,6 +244,9 @@ namespace MediaMtxPanel.Data.Migrations
 
                     b.Property<string>("OwnerId")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("PaywallEnabled")
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("PublicRead")
                         .HasColumnType("INTEGER");
@@ -240,14 +290,133 @@ namespace MediaMtxPanel.Data.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("WatchSlug")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("OwnerId");
+
+                    b.HasIndex("WatchSlug")
+                        .IsUnique();
 
                     b.HasIndex("ServerId", "Name")
                         .IsUnique();
 
                     b.ToTable("Streams");
+                });
+
+            modelBuilder.Entity("MediaMtxPanel.Data.StreamOffer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AccessHours")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(300)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PriceCents")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("StreamId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StreamId");
+
+                    b.ToTable("Offers");
+                });
+
+            modelBuilder.Entity("MediaMtxPanel.Data.TicketOrder", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("AccessExpiresAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("AccessHours")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("AccessToken")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("AmountCents")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("BuyerEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("OfferId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("OfferName")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("PaidAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Provider")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ProviderPaymentId")
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("StreamId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccessToken");
+
+                    b.HasIndex("OfferId");
+
+                    b.HasIndex("ProviderPaymentId");
+
+                    b.HasIndex("StreamId");
+
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -399,6 +568,17 @@ namespace MediaMtxPanel.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("MediaMtxPanel.Data.PaymentAccount", b =>
+                {
+                    b.HasOne("MediaMtxPanel.Data.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("MediaMtxPanel.Data.StreamDefinition", b =>
                 {
                     b.HasOne("MediaMtxPanel.Data.ApplicationUser", "Owner")
@@ -415,6 +595,35 @@ namespace MediaMtxPanel.Data.Migrations
                     b.Navigation("Owner");
 
                     b.Navigation("Server");
+                });
+
+            modelBuilder.Entity("MediaMtxPanel.Data.StreamOffer", b =>
+                {
+                    b.HasOne("MediaMtxPanel.Data.StreamDefinition", "Stream")
+                        .WithMany("Offers")
+                        .HasForeignKey("StreamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Stream");
+                });
+
+            modelBuilder.Entity("MediaMtxPanel.Data.TicketOrder", b =>
+                {
+                    b.HasOne("MediaMtxPanel.Data.StreamOffer", "Offer")
+                        .WithMany()
+                        .HasForeignKey("OfferId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("MediaMtxPanel.Data.StreamDefinition", "Stream")
+                        .WithMany()
+                        .HasForeignKey("StreamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Offer");
+
+                    b.Navigation("Stream");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -527,6 +736,11 @@ namespace MediaMtxPanel.Data.Migrations
             modelBuilder.Entity("MediaMtxPanel.Data.MediaServer", b =>
                 {
                     b.Navigation("Streams");
+                });
+
+            modelBuilder.Entity("MediaMtxPanel.Data.StreamDefinition", b =>
+                {
+                    b.Navigation("Offers");
                 });
 #pragma warning restore 612, 618
         }

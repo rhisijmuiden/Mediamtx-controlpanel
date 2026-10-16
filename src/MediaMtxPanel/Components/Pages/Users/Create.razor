@@ -29,6 +29,7 @@
         <label class="form-label" for="role">Rol</label>
         <InputSelect id="role" class="form-select" @bind-Value="input.Role">
             <option value="@Roles.User">Gebruiker: beheert eigen streams</option>
+            <option value="@Roles.Customer">Klant: ziet alleen het klantportaal met eigen streams, preview en paywall</option>
             <option value="@Roles.Admin">Beheerder: beheert alle streams en gebruikers</option>
         </InputSelect>
     </div>

@@ -1,5 +1,5 @@
 @page "/streams/new"
-@attribute [Authorize]
+@attribute [Authorize(Roles = Roles.Staff)]
 @rendermode InteractiveServer
 @inject StreamService Streams
 @inject ServerService ServerAdmin

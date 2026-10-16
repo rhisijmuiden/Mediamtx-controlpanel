@@ -7,6 +7,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 {
     public DbSet<StreamDefinition> Streams => Set<StreamDefinition>();
     public DbSet<MediaServer> Servers => Set<MediaServer>();
+    public DbSet<StreamOffer> Offers => Set<StreamOffer>();
+    public DbSet<TicketOrder> Orders => Set<TicketOrder>();
+    public DbSet<PaymentAccount> PaymentAccounts => Set<PaymentAccount>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -20,10 +23,30 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .WithMany(m => m.Streams)
                 .HasForeignKey(s => s.ServerId)
                 .OnDelete(DeleteBehavior.Restrict);
+            e.HasIndex(s => s.WatchSlug).IsUnique();
             e.HasOne(s => s.Owner)
                 .WithMany(u => u.Streams)
                 .HasForeignKey(s => s.OwnerId)
                 .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        builder.Entity<StreamOffer>(e =>
+        {
+            e.HasOne(o => o.Stream).WithMany(s => s.Offers).HasForeignKey(o => o.StreamId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<TicketOrder>(e =>
+        {
+            e.HasIndex(o => o.AccessToken);
+            e.HasIndex(o => o.ProviderPaymentId);
+            e.HasOne(o => o.Stream).WithMany().HasForeignKey(o => o.StreamId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(o => o.Offer).WithMany().HasForeignKey(o => o.OfferId).OnDelete(DeleteBehavior.SetNull);
+        });
+
+        builder.Entity<PaymentAccount>(e =>
+        {
+            e.HasIndex(a => a.UserId).IsUnique();
+            e.HasOne(a => a.User).WithMany().HasForeignKey(a => a.UserId).OnDelete(DeleteBehavior.Cascade);
         });
 
         builder.Entity<MediaServer>(e =>

@@ -1,0 +1,123 @@
+@implements IAsyncDisposable
+@inject ServerMetricsReader Metrics
+@inject MediaMtxClientFactory Clients
+
+<div class="stats-bar">
+    @if (host is not null)
+    {
+        <div class="stat">
+            <div class="label">CPU@(host.CpuCores is { } c ? $" ({c} cores)" : "")</div>
+            <div>@(host.CpuPercent is { } cpu ? $"{cpu:0}%" : "meten…")</div>
+            <div class="meter"><div class="@(host.CpuPercent > 85 ? "high" : "")" style="width:@Pct(host.CpuPercent)%"></div></div>
+        </div>
+        <div class="stat">
+            <div class="label">RAM</div>
+            <div>@(host.MemUsedBytes is { } used && host.MemTotalBytes is { } total ? $"{Format.Bytes(used)} / {Format.Bytes(total)}" : "–")</div>
+            <div class="meter"><div class="@(host.MemPercent > 90 ? "high" : "")" style="width:@Pct(host.MemPercent)%"></div></div>
+        </div>
+        @if (host.Load1 is { } load)
+        {
+            <div class="stat"><div class="label">Load</div><div>@load.ToString("0.00")</div></div>
+        }
+        <div class="stat">
+            <div class="label">Netwerk server</div>
+            <div>↓ @Format.Bitrate(host.NetRxBytesPerSec) · ↑ @Format.Bitrate(host.NetTxBytesPerSec)</div>
+        </div>
+    }
+    else if (hostUnsupported)
+    {
+        <div class="stat text-secondary small align-self-center">Serverstatistieken niet beschikbaar (stel een node_exporter-URL in bij de server).</div>
+    }
+    <div class="stat">
+        <div class="label">Stream binnen</div>
+        <div>@(live?.IsLive == true ? Format.Bitrate(inRate) : "offline")</div>
+    </div>
+    <div class="stat">
+        <div class="label">Stream uit</div>
+        <div>@(live?.IsLive == true ? Format.Bitrate(outRate) : "–")</div>
+    </div>
+    <div class="stat">
+        <div class="label">Kijkers</div>
+        <div>@(live?.Readers.Count ?? 0)</div>
+    </div>
+    @if ((live?.OnlineTime ?? live?.ReadyTime) is { } since && live!.IsLive)
+    {
+        <div class="stat"><div class="label">Live sinds</div><div>@Format.Duration(DateTime.UtcNow - since.ToUniversalTime())</div></div>
+    }
+    @if (live?.Codecs.Any() == true)
+    {
+        <div class="stat"><div class="label">Codecs</div><div>@string.Join(", ", live.Codecs)</div></div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public StreamDefinition Stream { get; set; } = default!;
+
+    /// <summary>Raised with the latest path state, so the page can react to the stream going live.</summary>
+    [Parameter] public EventCallback<MtxPath?> OnLive { get; set; }
+
+    private HostMetrics? host;
+    private bool hostUnsupported;
+    private MtxPath? live;
+    private double? inRate, outRate;
+    private (DateTime At, ulong In, ulong Out)? lastBytes;
+    private readonly CancellationTokenSource cts = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        hostUnsupported = !ServerMetricsReader.IsSupported(Stream.Server!);
+        await RefreshAsync();
+        _ = PollAsync();
+    }
+
+    private async Task PollAsync()
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(3));
+        try
+        {
+            while (await timer.WaitForNextTickAsync(cts.Token))
+            {
+                await RefreshAsync();
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (OperationCanceledException) { }
+    }
+
+    private async Task RefreshAsync()
+    {
+        if (!hostUnsupported)
+            host = await Metrics.GetAsync(Stream.Server!, cts.Token);
+
+        try
+        {
+            live = await Clients.Create(Stream.Server!).GetPathAsync(Stream.Name, cts.Token);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or MediaMtxException or TaskCanceledException && !cts.IsCancellationRequested)
+        {
+            live = null;
+        }
+
+        var now = DateTime.UtcNow;
+        if (live is not null && lastBytes is { } prev && live.Received >= prev.In && live.Sent >= prev.Out)
+        {
+            var dt = (now - prev.At).TotalSeconds;
+            if (dt > 0)
+            {
+                inRate = (live.Received - prev.In) / dt;
+                outRate = (live.Sent - prev.Out) / dt;
+            }
+        }
+        lastBytes = live is null ? null : (now, live.Received, live.Sent);
+        await OnLive.InvokeAsync(live);
+    }
+
+    private static string Pct(double? v) => Math.Clamp(v ?? 0, 0, 100).ToString("0", System.Globalization.CultureInfo.InvariantCulture);
+
+    public ValueTask DisposeAsync()
+    {
+        cts.Cancel();
+        cts.Dispose();
+        return ValueTask.CompletedTask;
+    }
+}

@@ -32,6 +32,10 @@ public class ServerInput
     [Range(1, 65535)] public int WebRtcPort { get; set; } = 8889;
 
     public bool HttpsUrls { get; set; }
+
+    [StringLength(256), Url(ErrorMessage = "Geef een volledige URL, bijvoorbeeld http://10.0.0.21:9100/metrics.")]
+    public string? MetricsUrl { get; set; }
+
     public bool RemoveUnmanagedPaths { get; set; }
     public bool Enabled { get; set; } = true;
 
@@ -49,6 +53,7 @@ public class ServerInput
         HlsPort = s.HlsPort,
         WebRtcPort = s.WebRtcPort,
         HttpsUrls = s.HttpsUrls,
+        MetricsUrl = s.MetricsUrl,
         RemoveUnmanagedPaths = s.RemoveUnmanagedPaths,
         Enabled = s.Enabled,
     };
@@ -67,6 +72,7 @@ public class ServerInput
         s.HlsPort = HlsPort;
         s.WebRtcPort = WebRtcPort;
         s.HttpsUrls = HttpsUrls;
+        s.MetricsUrl = string.IsNullOrWhiteSpace(MetricsUrl) ? null : MetricsUrl.Trim();
         s.RemoveUnmanagedPaths = RemoveUnmanagedPaths;
         s.Enabled = Enabled;
     }

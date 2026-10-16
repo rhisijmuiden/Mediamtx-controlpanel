@@ -6,6 +6,9 @@ public record StreamEndpoint(string Protocol, string Purpose, string Url, string
 
 public record ObsSettings(string Server, string StreamKey);
 
+/// <summary>Options for wwwroot/js/player.js.</summary>
+public record PlayerOptions(string Mode, string ReaderJsUrl, string WhepUrl, string HlsUrl, string User, string Pass);
+
 /// <summary>Builds the public connection URLs for a stream, using the settings of the server it runs on.</summary>
 public class StreamEndpointBuilder
 {
@@ -64,6 +67,27 @@ public class StreamEndpointBuilder
     {
         var creds = s.PublicRead ? "" : $"{Enc(s.ReadUser)}:{Enc(s.ReadPassword)}@";
         return $"ffplay \"rtsp://{creds}{Srv(s).PublicHost}:{Srv(s).RtspPort}/{s.Name}\"";
+    }
+
+    /// <summary>Browser player settings. Pass the credentials the viewer watches with (read creds or a ticket).</summary>
+    public PlayerOptions Player(StreamDefinition s, string user, string pass, string mode = "webrtc")
+    {
+        var webrtc = $"{Http(s)}://{Srv(s).PublicHost}:{Srv(s).WebRtcPort}/{s.Name}";
+        return new PlayerOptions(mode, $"{webrtc}/reader.js", $"{webrtc}/whep",
+            $"{Http(s)}://{Srv(s).PublicHost}:{Srv(s).HlsPort}/{s.Name}/index.m3u8", user, pass);
+    }
+
+    /// <summary>URLs a paying viewer can open in VLC or another player, with the ticket as credentials.</summary>
+    public IReadOnlyList<StreamEndpoint> Ticket(StreamDefinition s, string token)
+    {
+        var h = Srv(s).PublicHost;
+        var t = Enc(token);
+        return
+        [
+            new("HLS (VLC, smart-tv, mobiel)", "Bekijken", $"{Http(s)}://ticket:{t}@{h}:{Srv(s).HlsPort}/{s.Name}/index.m3u8", HasCredentials: true),
+            new("RTSP (VLC, laagste vertraging)", "Bekijken", $"rtsp://ticket:{t}@{h}:{Srv(s).RtspPort}/{s.Name}", HasCredentials: true),
+            new("SRT", "Bekijken", $"srt://{h}:{Srv(s).SrtPort}?streamid=read:{s.Name}:ticket:{token}", HasCredentials: true),
+        ];
     }
 
     private static string Enc(string v) => Uri.EscapeDataString(v);
