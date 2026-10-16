@@ -305,8 +305,10 @@ prepare_sources
 
 info "Looking up the $TEMPLATE_NAME template…"
 pveam update >/dev/null
-template="$(pveam available --section system | awk '{print $2}' | grep "^${TEMPLATE_NAME}" | sort -V | tail -n1)"
-[[ -n "$template" ]] || die "Template $TEMPLATE_NAME not found in 'pveam available'. Debian 13 templates need Proxmox VE 8.4 or newer."
+# The template list holds builds for several architectures (amd64, arm64); take the one for this host.
+host_arch="$(dpkg --print-architecture 2>/dev/null || echo amd64)"
+template="$(pveam available --section system | awk '{print $2}' | grep "^${TEMPLATE_NAME}_.*_${host_arch}\.tar" | sort -V | tail -n1)"
+[[ -n "$template" ]] || die "Template $TEMPLATE_NAME ($host_arch) not found in 'pveam available'. Debian 13 templates need Proxmox VE 8.4 or newer."
 if ! pveam list "$TEMPLATE_STORAGE" | grep -q "$template"; then
   info "Downloading $template to $TEMPLATE_STORAGE…"
   pveam download "$TEMPLATE_STORAGE" "$template"
@@ -333,6 +335,7 @@ create_args=(
   --features nesting=1
   --onboot 1
   --ostype debian
+  --arch "$host_arch"
   --password "$CT_PASSWORD"
   --description "MediaMTX Panel"
 )
@@ -341,7 +344,10 @@ create_args=(
 
 info "Creating container $CT_ID ($CT_HOSTNAME, $template)…"
 pct create "${create_args[@]}" >/dev/null
-pct start "$CT_ID"
+if ! pct start "$CT_ID"; then
+  pct destroy "$CT_ID" --purge >/dev/null 2>&1 || true
+  die "Container $CT_ID could not start and has been removed again. Details: journalctl -u pve-container@${CT_ID}"
+fi
 ok "Container $CT_ID started."
 
 wait_for_network "$CT_ID"
