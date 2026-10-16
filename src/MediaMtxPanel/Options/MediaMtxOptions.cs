@@ -36,6 +36,9 @@ public class PanelOptions
     public string AdminEmail { get; set; } = "admin@localhost";
     public string AdminPassword { get; set; } = "";
 
+    /// <summary>Treat the first administrator password as one-time: it must be changed at the first login.</summary>
+    public bool AdminMustChangePassword { get; set; } = true;
+
     /// <summary>
     /// Address at which MediaMTX servers reach the panel's auth hook, e.g. http://10.0.0.10:8080.
     /// Only used to show ready-to-paste configuration; empty means "use the address of the current request".

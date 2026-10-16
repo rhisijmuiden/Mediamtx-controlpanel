@@ -1,4 +1,5 @@
 using MediaMtxPanel.Options;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -52,6 +53,8 @@ public static class DbInitializer
         }
 
         await userManager.AddToRoleAsync(admin, Roles.Admin);
+        if (panel.AdminMustChangePassword)
+            await userManager.AddClaimAsync(admin, new Claim(PasswordChange.ClaimType, "1"));
 
         if (generated)
             logger.LogWarning("Created administrator {Email} with generated password: {Password}  (set Panel__AdminPassword to choose one)",

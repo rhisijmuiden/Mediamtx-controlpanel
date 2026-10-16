@@ -199,6 +199,8 @@ case "$MODE" in
     systemctl daemon-reload
     systemctl enable --now mediamtx-panel >/dev/null
     wait_for_panel
+    # The administrator now exists; the one-time password does not need to stay on disk.
+    sed -i '/^Panel__AdminPassword=/d' "$CONF_DIR/panel.env"
     if [[ "$INSTALL_MEDIAMTX" == "yes" ]]; then
       systemctl enable --now mediamtx >/dev/null
     fi
