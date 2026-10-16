@@ -10,8 +10,11 @@
 # Update the panel in an existing container to the latest code:
 #     bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/proxmox/create-lxc.sh)" _ update <CTID>
 #
-# Every setting below can be overridden with an environment variable, e.g.
-#     CT_ID=150 CT_IP=192.168.1.50/24 CT_GW=192.168.1.1 bash deploy/proxmox/create-lxc.sh
+# In a terminal the script asks how to create the container (like the community-scripts.org
+# scripts): "Standaard" uses the defaults below, "Geavanceerd" asks for every setting.
+# Every setting below can also be set with an environment variable; with INTERACTIVE=no
+# nothing is asked, e.g.
+#     INTERACTIVE=no CT_ID=150 CT_IP=192.168.1.50/24 CT_GW=192.168.1.1 bash deploy/proxmox/create-lxc.sh
 #
 # The container runs Debian 13 (trixie); Proxmox VE 8.4 or newer has its template.
 set -euo pipefail
@@ -40,6 +43,8 @@ PANEL_PORT="${PANEL_PORT:-8080}"
 ADMIN_EMAIL="${ADMIN_EMAIL:-admin@localhost}"
 ADMIN_PASSWORD="${ADMIN_PASSWORD:-}"               # empty = random
 PUBLIC_HOST="${PUBLIC_HOST:-}"                     # empty = IP of the container
+
+INTERACTIVE="${INTERACTIVE:-yes}"                 # "no" = never ask, use the settings above
 
 # Where the sources come from when the script does not run from a checkout
 REPO="${REPO:-rhisijmuiden/Mediamtx-controlpanel}"
@@ -82,6 +87,9 @@ fetch_sources() {
 preflight() {
   [[ $EUID -eq 0 ]] || die "Run this script as root on the Proxmox host."
   command -v pct >/dev/null || die "pct not found: this script must run on a Proxmox VE host."
+}
+
+prepare_sources() {
   fetch_sources
   [[ -f "$PROJECT_DIR/src/MediaMtxPanel/MediaMtxPanel.csproj" ]] || die "Panel sources not found in $PROJECT_DIR."
   [[ -f "$SCRIPT_DIR/install-in-lxc.sh" ]] || die "install-in-lxc.sh is missing in $SCRIPT_DIR."
@@ -112,9 +120,163 @@ wait_for_network() {
   die "Container $id has no working network/DNS. Check bridge, IP and gateway settings."
 }
 
+# ---------------------------------------------------------------- questions
+TITLE="MediaMTX Panel LXC"
+
+header() {
+  clear
+  cat <<'BANNER'
+    __  ___         ___       __  ___________  __    ____                   __
+   /  |/  /__  ____/ (_)___ _/  |/  /_  __/ |/ /   / __ \____ _____  ___  / /
+  / /|_/ / _ \/ __  / / __ `/ /|_/ / / /  |   /   / /_/ / __ `/ __ \/ _ \/ /
+ / /  / /  __/ /_/ / / /_/ / /  / / / /  /   |   / ____/ /_/ / / / /  __/ /
+/_/  /_/\___/\__,_/_/\__,_/_/  /_/ /_/  /_/|_|  /_/    \__,_/_/ /_/\___/_/
+
+BANNER
+}
+
+can_ask() { [[ "$INTERACTIVE" == "yes" && -t 0 && -t 1 ]] && command -v whiptail >/dev/null; }
+
+cancelled() { clear; echo -e "${c_err}[✗]${c_off} Afgebroken, er is niets aangemaakt."; exit 0; }
+
+# ask_input <var> <question> [--password]: shows an input box prefilled with the current value.
+ask_input() {
+  local var="$1" question="$2" kind="${3:---inputbox}" value
+  value="$(whiptail --backtitle "Proxmox VE" --title "$TITLE" "$kind" "$question" 10 72 "${!var}" 3>&1 1>&2 2>&3)" || cancelled
+  printf -v "$var" '%s' "$value"
+}
+
+# ask_menu <var> <question> <tag> <description> ...: picks one of the options; the current value is preselected.
+ask_menu() {
+  local var="$1" question="$2"; shift 2
+  local value
+  value="$(whiptail --backtitle "Proxmox VE" --title "$TITLE" --default-item "${!var}" --menu "$question" 18 72 8 "$@" 3>&1 1>&2 2>&3)" || cancelled
+  printf -v "$var" '%s' "$value"
+}
+
+ask_yesno() {
+  local var="$1" question="$2" default=()
+  [[ "${!var}" == "yes" ]] || default=(--defaultno)
+  if whiptail --backtitle "Proxmox VE" --title "$TITLE" "${default[@]}" --yesno "$question" 10 72; then
+    printf -v "$var" yes
+  else
+    printf -v "$var" no
+  fi
+}
+
+# Storages that can hold the given content type, as menu items "<name> <type, free>".
+storage_items() {
+  pvesm status -content "$1" 2>/dev/null | awk 'NR>1 && $3=="active" {printf "%s\n%s, %.1f GB vrij\n", $1, $2, $6/1024/1024}'
+}
+
+bridge_items() {
+  local b
+  for b in $(ip -o link show type bridge 2>/dev/null | awk -F': ' '{print $2}' | cut -d@ -f1 | sort); do
+    printf '%s\nnetwerkbrug\n' "$b"
+  done
+}
+
+pick_storage() {
+  local var="$1" content="$2" question="$3" items=()
+  mapfile -t items < <(storage_items "$content")
+  case "${#items[@]}" in
+    0) die "Geen opslag gevonden die '$content' ondersteunt." ;;
+    2) printf -v "$var" '%s' "${items[0]}" ;;      # only one storage: nothing to choose
+    *) ask_menu "$var" "$question" "${items[@]}" ;;
+  esac
+}
+
+summary_text() {
+  local net="$CT_IP"
+  [[ "$CT_IP" != "dhcp" && -n "$CT_GW" ]] && net+=" via $CT_GW"
+  [[ -n "$CT_VLAN" ]] && net+=", VLAN $CT_VLAN"
+  cat <<TEXT
+Container ID:   $CT_ID
+Hostnaam:       $CT_HOSTNAME
+Besturing:      Debian 13 (unprivileged)
+CPU / RAM:      $CT_CORES cores / $CT_MEMORY MB (swap $CT_SWAP MB)
+Schijf:         $CT_DISK GB op $CT_STORAGE
+Netwerk:        $CT_BRIDGE, $net
+MediaMTX:       $( [[ $INSTALL_MEDIAMTX == yes ]] && echo "ook installeren ($MEDIAMTX_VERSION)" || echo "niet installeren" )
+Paneel:         poort $PANEL_PORT, beheerder $ADMIN_EMAIL
+TEXT
+}
+
+advanced_settings() {
+  ask_input CT_ID "Container ID"
+  ask_input CT_HOSTNAME "Hostnaam"
+  ask_input CT_CORES "Aantal CPU-cores"
+  ask_input CT_MEMORY "Geheugen in MB (minimaal 2048: het paneel wordt in de container gebouwd)"
+  ask_input CT_SWAP "Swap in MB"
+  ask_input CT_DISK "Schijfgrootte in GB"
+  pick_storage CT_STORAGE rootdir "Op welke opslag komt de schijf van de container?"
+  pick_storage TEMPLATE_STORAGE vztmpl "Op welke opslag staat (of komt) de Debian 13-template?"
+
+  local bridges=()
+  mapfile -t bridges < <(bridge_items)
+  if (( ${#bridges[@]} > 2 )); then
+    ask_menu CT_BRIDGE "Netwerkbrug" "${bridges[@]}"
+  else
+    ask_input CT_BRIDGE "Netwerkbrug"
+  fi
+  ask_input CT_IP "IPv4-adres: 'dhcp' of een vast adres met prefix, bijv. 192.168.1.50/24"
+  if [[ "$CT_IP" != "dhcp" ]]; then
+    ask_input CT_GW "Gateway, bijv. 192.168.1.1"
+  fi
+  ask_input CT_VLAN "VLAN-tag (leeg = geen)"
+  ask_input CT_DNS "DNS-server (leeg = die van de Proxmox-host)"
+  ask_input CT_PASSWORD "Root-wachtwoord van de container (leeg = willekeurig)" --passwordbox
+  ask_input CT_SSH_KEY "Pad naar een publieke SSH-sleutel voor root (leeg = geen)"
+
+  ask_yesno INSTALL_MEDIAMTX "MediaMTX ook in deze container installeren?\n\nKies 'Nee' als je alleen het paneel wilt en MediaMTX-servers later koppelt."
+  ask_input PANEL_PORT "Poort van het paneel"
+  ask_input ADMIN_EMAIL "E-mailadres (login) van de beheerder"
+  ask_input PUBLIC_HOST "Publiek adres van de streamserver voor zenders en kijkers (leeg = IP van de container)"
+}
+
+validate_settings() {
+  [[ "$CT_ID" =~ ^[0-9]+$ ]] || die "Container ID moet een getal zijn (kreeg '$CT_ID')."
+  [[ "$CT_CORES" =~ ^[0-9]+$ && "$CT_MEMORY" =~ ^[0-9]+$ && "$CT_SWAP" =~ ^[0-9]+$ && "$CT_DISK" =~ ^[0-9]+$ ]] \
+    || die "Cores, geheugen, swap en schijf moeten getallen zijn."
+  (( CT_MEMORY >= 1536 )) || die "Geef de container minimaal 1536 MB geheugen; het paneel wordt in de container gebouwd."
+  [[ "$PANEL_PORT" =~ ^[0-9]+$ ]] || die "Poort moet een getal zijn."
+  [[ "$CT_IP" == "dhcp" || "$CT_IP" =~ ^[0-9.]+/[0-9]+$ ]] || die "IP-adres moet 'dhcp' zijn of bijv. 192.168.1.50/24."
+  [[ -z "$CT_VLAN" || "$CT_VLAN" =~ ^[0-9]+$ ]] || die "VLAN-tag moet een getal zijn."
+  [[ -z "$CT_SSH_KEY" || -f "$CT_SSH_KEY" ]] || die "SSH-sleutel $CT_SSH_KEY bestaat niet."
+  pct status "$CT_ID" >/dev/null 2>&1 && die "Container $CT_ID bestaat al. Kies een vrij ID."
+  return 0
+}
+
+ask_settings() {
+  header
+  whiptail --backtitle "Proxmox VE" --title "$TITLE" --yesno \
+    "Dit maakt een nieuwe Debian 13-container met het MediaMTX Panel.\n\nDoorgaan?" 10 72 || cancelled
+
+  local mode=standaard
+  ask_menu mode "Hoe wil je de container aanmaken?" \
+    standaard "Standaardinstellingen ($CT_CORES cores, $CT_MEMORY MB, $CT_DISK GB, DHCP)" \
+    geavanceerd "Zelf instellen (resources, opslag, netwerk, paneel)"
+  if [[ "$mode" == "geavanceerd" ]]; then
+    advanced_settings
+  else
+    # Defaults, except that the storages must exist on this host.
+    pvesm status -content rootdir 2>/dev/null | awk 'NR>1{print $1}' | grep -qx "$CT_STORAGE" \
+      || pick_storage CT_STORAGE rootdir "Opslag '$CT_STORAGE' bestaat niet. Waar komt de schijf van de container?"
+    pvesm status -content vztmpl 2>/dev/null | awk 'NR>1{print $1}' | grep -qx "$TEMPLATE_STORAGE" \
+      || pick_storage TEMPLATE_STORAGE vztmpl "Opslag '$TEMPLATE_STORAGE' bestaat niet. Waar komt de template?"
+  fi
+  validate_settings
+
+  whiptail --backtitle "Proxmox VE" --title "$TITLE" --yesno \
+    "Container aanmaken met deze instellingen?\n\n$(summary_text)" 20 72 || cancelled
+  clear
+  header
+}
+
 # ---------------------------------------------------------------- update mode
 if [[ "${1:-}" == "update" ]]; then
   preflight
+  prepare_sources
   id="${2:-}"
   [[ -n "$id" ]] || die "Usage: $0 update <CTID>"
   pct status "$id" | grep -q running || pct start "$id"
@@ -131,7 +293,12 @@ preflight
 if [[ -z "$CT_ID" ]]; then
   CT_ID="$(pvesh get /cluster/nextid)"
 fi
-pct status "$CT_ID" >/dev/null 2>&1 && die "Container $CT_ID already exists. Set CT_ID to a free ID."
+if can_ask; then
+  ask_settings
+else
+  validate_settings
+fi
+prepare_sources
 
 [[ -n "$CT_PASSWORD" ]] || CT_PASSWORD="$(random_secret 20)"
 [[ -n "$ADMIN_PASSWORD" ]] || ADMIN_PASSWORD="$(random_secret 16)Aa1"
@@ -196,29 +363,29 @@ push_and_install "$CT_ID" \
 services=""
 if [[ $INSTALL_MEDIAMTX == yes ]]; then
   services="
-  MediaMTX in the container: RTSP 8554, RTMP 1935, SRT 8890/udp, HLS 8888, WebRTC 8889 + 8189/udp
-  Public address in the stream URLs: ${PUBLIC_HOST} (change under Servers in the panel)
+  MediaMTX in de container: RTSP 8554, RTMP 1935, SRT 8890/udp, HLS 8888, WebRTC 8889 + 8189/udp
+  Publiek adres in de stream-URL's: ${PUBLIC_HOST} (aan te passen onder Servers in het paneel)
 "
 fi
 
 cat <<SUMMARY
 
-$(ok "MediaMTX Panel is installed in container $CT_ID (Debian 13)")
+$(ok "MediaMTX Panel is geïnstalleerd in container $CT_ID (Debian 13)")
 
   ┌──────────────────────────────────────────────────────────────
-  │  Open:       http://${ct_ip}:${PANEL_PORT}
-  │  Login:      ${ADMIN_EMAIL}
-  │  Password:   ${ADMIN_PASSWORD}
+  │  Adres:        http://${ct_ip}:${PANEL_PORT}
+  │  Login:        ${ADMIN_EMAIL}
+  │  Wachtwoord:   ${ADMIN_PASSWORD}
   │
-  │  This is a one-time password: the panel asks you to choose
-  │  your own password right after the first login.
+  │  Dit is een eenmalig wachtwoord: na de eerste keer inloggen
+  │  vraagt het paneel je meteen een eigen wachtwoord te kiezen.
   └──────────────────────────────────────────────────────────────
 
-  Root password of the container: ${CT_PASSWORD}
+  Root-wachtwoord van de container: ${CT_PASSWORD}
 ${services}
-  Configuration in the container: /etc/mediamtx-panel/panel.env
-  Logs:   pct exec ${CT_ID} -- journalctl -u mediamtx-panel -f
-  Update: bash -c "\$(curl -fsSL https://raw.githubusercontent.com/${REPO}/${REPO_BRANCH}/deploy/proxmox/create-lxc.sh)" _ update ${CT_ID}
+  Instellingen in de container: /etc/mediamtx-panel/panel.env
+  Logs:      pct exec ${CT_ID} -- journalctl -u mediamtx-panel -f
+  Bijwerken: bash -c "\$(curl -fsSL https://raw.githubusercontent.com/${REPO}/${REPO_BRANCH}/deploy/proxmox/create-lxc.sh)" _ update ${CT_ID}
 
-These passwords are not stored anywhere and are not shown again.
+Deze wachtwoorden worden nergens bewaard en niet opnieuw getoond.
 SUMMARY
