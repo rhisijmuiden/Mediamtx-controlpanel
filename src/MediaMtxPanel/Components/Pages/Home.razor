@@ -5,6 +5,7 @@
 @inject StreamService Streams
 @inject ServerService ServerAdmin
 @inject LiveStatusReader LiveReader
+@inject NavigationManager Nav
 
 <PageTitle>Dashboard</PageTitle>
 
@@ -130,6 +131,11 @@ else
     protected override async Task OnInitializedAsync()
     {
         var user = (await AuthState).User;
+        if (!Roles.Staff.Split(',').Any(user.IsInRole))
+        {
+            Nav.NavigateTo("portal");
+            return;
+        }
         isAdmin = StreamService.IsAdmin(user);
         streams = await Streams.ListAsync(user);
         servers = await ServerAdmin.ListAsync();

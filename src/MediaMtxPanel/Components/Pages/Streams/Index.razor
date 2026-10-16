@@ -1,5 +1,5 @@
 @page "/streams"
-@attribute [Authorize]
+@attribute [Authorize(Roles = Roles.Staff)]
 @rendermode InteractiveServer
 @implements IAsyncDisposable
 @inject StreamService Streams

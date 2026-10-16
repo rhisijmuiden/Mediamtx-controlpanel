@@ -9,6 +9,8 @@ services:
       Panel__AdminPassword: ${ADMIN_PASSWORD}
       # Address at which other (remote) MediaMTX servers reach the panel, e.g. http://panel.example.com:8080
       Panel__HookBaseUrl: ${PANEL_URL:-}
+      # Public address of the panel, used by payment providers to send viewers back (paywall).
+      Panel__PublicUrl: ${PANEL_PUBLIC_URL:-}
       # The MediaMTX below becomes the first server on first start. Add more under "Servers" in the panel.
       MediaMtx__ServerName: Standaard
       MediaMtx__ApiUrl: http://mediamtx:9997

@@ -1,0 +1,100 @@
+@page "/portal/payments"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject PaywallService Paywall
+
+<PageTitle>Betaalinstellingen</PageTitle>
+
+<h1>Betaalinstellingen</h1>
+<p class="text-secondary">
+    Kijkers betalen voor je streams met deze accounts; het geld komt rechtstreeks bij jou binnen.
+    Sleutels en wachtwoorden worden versleuteld opgeslagen en hier niet meer getoond.
+</p>
+
+@if (message is not null)
+{
+    <div class="alert alert-success">@message</div>
+}
+
+@if (input is not null)
+{
+    <EditForm Model="input" OnValidSubmit="Save" FormName="payments">
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <strong>iDEAL via Mollie</strong>
+                        <div class="form-check form-switch mb-0">
+                            <InputCheckbox class="form-check-input" id="mollie" @bind-Value="input.MollieEnabled" />
+                            <label class="form-check-label" for="mollie">Aan</label>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <ol class="small ps-3">
+                            <li>Maak een account op <a href="https://www.mollie.com/" target="_blank" rel="noopener">mollie.com</a> en zet iDEAL aan.</li>
+                            <li>Kopieer onder <em>Ontwikkelaars → API-sleutels</em> de sleutel (<code>test_…</code> om te proberen, <code>live_…</code> voor echte betalingen).</li>
+                        </ol>
+                        <label class="form-label" for="molliekey">API-sleutel</label>
+                        <InputText id="molliekey" class="form-control font-monospace" @bind-Value="input.MollieApiKey"
+                                   placeholder="@(input.HasMollieKey ? "•••••••• (opgeslagen, leeg laten om te behouden)" : "live_… of test_…")" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <strong>PayPal</strong>
+                        <div class="form-check form-switch mb-0">
+                            <InputCheckbox class="form-check-input" id="paypal" @bind-Value="input.PayPalEnabled" />
+                            <label class="form-check-label" for="paypal">Aan</label>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <ol class="small ps-3">
+                            <li>Ga naar <a href="https://developer.paypal.com/dashboard/applications" target="_blank" rel="noopener">developer.paypal.com</a> en maak een app (REST API).</li>
+                            <li>Kopieer de <em>Client ID</em> en het <em>Secret</em>. Gebruik eerst de sandbox om te testen.</li>
+                        </ol>
+                        <label class="form-label" for="ppid">Client ID</label>
+                        <InputText id="ppid" class="form-control font-monospace mb-2" @bind-Value="input.PayPalClientId" />
+                        <label class="form-label" for="ppsecret">Secret</label>
+                        <InputText id="ppsecret" class="form-control font-monospace mb-2" @bind-Value="input.PayPalSecret"
+                                   placeholder="@(input.HasPayPalSecret ? "•••••••• (opgeslagen, leeg laten om te behouden)" : "")" />
+                        <div class="form-check form-switch">
+                            <InputCheckbox class="form-check-input" id="sandbox" @bind-Value="input.PayPalSandbox" />
+                            <label class="form-check-label" for="sandbox">Sandbox (testomgeving, geen echt geld)</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mt-3 d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Opslaan</button>
+            <a href="portal" class="btn btn-outline-secondary">Terug</a>
+        </div>
+    </EditForm>
+    @if (Paywall.TestPaymentsEnabled)
+    {
+        <p class="small text-secondary mt-3">Testbetalingen staan aan op deze server: kijkers kunnen ook met een gesimuleerde betaling een ticket krijgen.</p>
+    }
+}
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
+
+    private PaymentAccountInput? input;
+    private string userId = "";
+    private string? message;
+
+    protected override async Task OnInitializedAsync()
+    {
+        userId = StreamService.UserId((await AuthState).User)!;
+        input = await Paywall.GetAccountInputAsync(userId);
+    }
+
+    private async Task Save()
+    {
+        await Paywall.SaveAccountAsync(userId, input!);
+        input = await Paywall.GetAccountInputAsync(userId);
+        message = "Opgeslagen.";
+    }
+}

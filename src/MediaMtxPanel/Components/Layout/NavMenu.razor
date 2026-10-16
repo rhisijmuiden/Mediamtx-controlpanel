@@ -14,19 +14,31 @@
     <nav class="nav flex-column">
         <AuthorizeView>
             <Authorized>
+                <AuthorizeView Roles="@Roles.Staff" Context="staffContext">
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                            <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Dashboard
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="streams">
+                            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Streams
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="streams/new">
+                            <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Nieuwe stream
+                        </NavLink>
+                    </div>
+                </AuthorizeView>
                 <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                        <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Dashboard
+                    <NavLink class="nav-link" href="portal">
+                        <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Mijn portaal
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="streams">
-                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Streams
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="streams/new">
-                        <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Nieuwe stream
+                    <NavLink class="nav-link" href="portal/payments">
+                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Betaalinstellingen
                     </NavLink>
                 </div>
                 <AuthorizeView Roles="Admin" Context="adminContext">
