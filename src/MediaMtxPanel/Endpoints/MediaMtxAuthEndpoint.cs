@@ -11,6 +11,8 @@ namespace MediaMtxPanel.Endpoints;
 /// </summary>
 public static class MediaMtxAuthEndpoint
 {
+    public const string TicketUser = "ticket";
+
     public record AuthRequest(
         string? Ip, string? User, string? Password, string? Token,
         string? Action, string? Path, string? Protocol, string? Id, string? Query);
@@ -68,6 +70,13 @@ public static class MediaMtxAuthEndpoint
                 var stream = await db.Streams.AsNoTracking()
                     .FirstOrDefaultAsync(s => s.ServerId == server.Id && s.Name == path, ct);
                 allowed = stream is { Enabled: true } && IsAllowed(stream, req.Action, user, pass);
+                // Paying viewers watch with user "ticket" and their ticket token as password.
+                if (!allowed && stream is { Enabled: true, PaywallEnabled: true } && req.Action != "publish" && user == TicketUser)
+                {
+                    var now = DateTime.UtcNow;
+                    allowed = await db.Orders.AnyAsync(o => o.StreamId == stream.Id && o.AccessToken == pass
+                        && o.Status == OrderStatus.Paid && o.AccessExpiresAt > now, ct);
+                }
                 break;
 
             default:
@@ -98,8 +107,8 @@ public static class MediaMtxAuthEndpoint
         return action switch
         {
             "publish" => s.SourceType == StreamSourceType.Publisher && PublishCreds(),
-            // Publishers may always watch their own stream.
-            _ => s.PublicRead || ReadCreds() || PublishCreds(),
+            // Publishers may always watch their own stream. A paywall overrides "public".
+            _ => (s.PublicRead && !s.PaywallEnabled) || ReadCreds() || PublishCreds(),
         };
     }
 }

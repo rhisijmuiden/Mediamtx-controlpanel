@@ -87,7 +87,7 @@
                     <option value="">(geen)</option>
                     @foreach (var u in Users)
                     {
-                        <option value="@u.Id">@u.Email</option>
+                        <option value="@u.Id">@u.Email (@Roles.Label(u.Role))</option>
                     }
                 </InputSelect>
             </div>

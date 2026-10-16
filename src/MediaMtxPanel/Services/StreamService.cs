@@ -127,6 +127,7 @@ public class StreamService(
             PublishPassword = CredentialGenerator.Password(),
             ReadUser = CredentialGenerator.UserName("view"),
             ReadPassword = CredentialGenerator.Password(),
+            WatchSlug = CredentialGenerator.Slug(),
             OwnerId = IsAdmin(user) && !string.IsNullOrEmpty(input.OwnerId) ? input.OwnerId : UserId(user),
         };
         Apply(stream, input);

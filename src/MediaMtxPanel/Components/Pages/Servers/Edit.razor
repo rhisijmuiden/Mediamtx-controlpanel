@@ -63,6 +63,15 @@ else
                         <label class="form-label" for="apipass">API-wachtwoord</label>
                         <InputText id="apipass" class="form-control font-monospace" @bind-Value="input.ApiPassword" />
                     </div>
+                    <div class="col-12">
+                        <label class="form-label" for="metrics">Statistieken-URL (optioneel)</label>
+                        <InputText id="metrics" class="form-control font-monospace" @bind-Value="input.MetricsUrl" placeholder="http://10.0.0.21:9100/metrics" />
+                        <div class="form-text">
+                            Prometheus node_exporter op de server (<code>apt install prometheus-node-exporter</code>), voor CPU, RAM en netwerk in het klantportaal.
+                            Leeg laten kan als MediaMTX op dezelfde machine als het paneel draait (127.0.0.1).
+                        </div>
+                        <ValidationMessage For="() => input.MetricsUrl" />
+                    </div>
 
                     <div class="col-12"><h2 class="h6 mb-0 mt-2">Publiek (zoals zenders en kijkers de server bereiken)</h2></div>
                     <div class="col-md-6">

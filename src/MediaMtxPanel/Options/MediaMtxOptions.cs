@@ -44,4 +44,13 @@ public class PanelOptions
     /// Only used to show ready-to-paste configuration; empty means "use the address of the current request".
     /// </summary>
     public string? HookBaseUrl { get; set; }
+
+    /// <summary>
+    /// Public address of the panel, e.g. https://stream.example.com. Used for payment return and
+    /// webhook URLs and for watch links. Empty means "use the address of the current request".
+    /// </summary>
+    public string? PublicUrl { get; set; }
+
+    /// <summary>Offer a simulated payment method, to try the paywall without a Mollie or PayPal account.</summary>
+    public bool EnableTestPayments { get; set; }
 }

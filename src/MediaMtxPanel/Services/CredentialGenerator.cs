@@ -12,6 +12,9 @@ public static class CredentialGenerator
     public static string UserName(string prefix) =>
         $"{prefix}_{RandomNumberGenerator.GetString("abcdefghjkmnpqrstuvwxyz23456789", 6)}";
 
+    /// <summary>Lowercase random id for public URLs.</summary>
+    public static string Slug(int length = 16) => RandomNumberGenerator.GetString("abcdefghjkmnpqrstuvwxyz23456789", length);
+
     public static bool FixedTimeEquals(string? a, string? b)
     {
         if (a is null || b is null)

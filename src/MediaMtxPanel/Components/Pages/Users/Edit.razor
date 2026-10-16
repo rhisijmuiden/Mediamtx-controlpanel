@@ -41,6 +41,7 @@ else
                     <label class="form-label" for="role">Rol</label>
                     <InputSelect id="role" class="form-select" @bind-Value="input.Role" disabled="@(Id == myId)">
                         <option value="@Roles.User">Gebruiker</option>
+                        <option value="@Roles.Customer">Klant</option>
                         <option value="@Roles.Admin">Beheerder</option>
                     </InputSelect>
                 </div>

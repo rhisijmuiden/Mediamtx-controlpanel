@@ -1,0 +1,212 @@
+@page "/watch/{Slug}"
+@layout Layout.WatchLayout
+@attribute [AllowAnonymous]
+@using System.Text.Json
+@inject PaywallService Paywall
+@inject StreamEndpointBuilder Endpoints
+@inject MediaMtxClientFactory Clients
+
+<PageTitle>@(stream?.DisplayName ?? "Stream")</PageTitle>
+
+@if (stream is null || !stream.Enabled)
+{
+    <div class="text-center py-5">
+        <h1 class="h3">Stream niet gevonden</h1>
+        <p class="text-secondary">Deze link werkt niet (meer). Controleer het adres of vraag de organisator om een nieuwe link.</p>
+    </div>
+}
+else
+{
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+        <h1 class="mb-0 me-2">@stream.DisplayName</h1>
+        @if (isLive)
+        {
+            <span class="badge text-bg-danger">● Live</span>
+        }
+        else
+        {
+            <span class="badge text-bg-secondary">Nog niet live</span>
+        }
+    </div>
+    @if (!string.IsNullOrEmpty(stream.Description))
+    {
+        <p class="text-secondary">@stream.Description</p>
+    }
+
+    @if (!string.IsNullOrEmpty(Error))
+    {
+        <div class="alert alert-danger">@Error</div>
+    }
+
+    @if (player is not null)
+    {
+        <div class="row g-4 mt-1">
+            <div class="col-lg-8">
+                <div data-player-root>
+                    <div class="player">
+                        <video data-player="@JsonSerializer.Serialize(player, JsonOptions)" autoplay muted playsinline controls></video>
+                        <span class="player-status" data-player-status>Speler laden…</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn btn-outline-secondary active" data-player-mode="webrtc">WebRTC</button>
+                            <button type="button" class="btn btn-outline-secondary" data-player-mode="hls">HLS</button>
+                        </div>
+                        <span class="small text-secondary">Geluid staat uit tot je op de speler klikt.</span>
+                    </div>
+                </div>
+                @if (!isLive)
+                {
+                    <p class="mt-2 text-secondary small">De uitzending is nog niet begonnen. De speler start vanzelf zodra er beeld is.</p>
+                }
+            </div>
+            <div class="col-lg-4">
+                @if (ticket is not null)
+                {
+                    <div class="card">
+                        <div class="card-header"><strong>Je ticket</strong></div>
+                        <div class="card-body small">
+                            <p class="mb-2">
+                                @ticket.OfferName, geldig tot <strong>@ticket.AccessExpiresAt!.Value.ToLocalTime().ToString("dddd d MMMM HH:mm", Dutch)</strong>.
+                            </p>
+                            <p class="text-secondary">Bewaar deze pagina als bladwijzer; met de link kijk je ook op een ander apparaat.</p>
+                            <h6>Kijken in VLC of op tv</h6>
+                            @foreach (var e in ticketUrls)
+                            {
+                                <CopyField Label="@e.Protocol" Value="@e.Url" Secret="true" />
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else if (stream.PaywallEnabled)
+    {
+        @if (ticketExpired)
+        {
+            <div class="alert alert-warning" data-ticket-invalid>Je ticket is verlopen of ongeldig. Koop een nieuw ticket om verder te kijken.</div>
+        }
+        <div class="row g-3 mt-1">
+            @foreach (var o in offers)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body d-flex flex-column">
+                            <h2 class="h5">@o.Name</h2>
+                            <div class="fs-3 fw-semibold">@Format.Money(o.PriceCents, o.Currency)</div>
+                            <div class="text-secondary small mb-2">Toegang @Format.Hours(o.AccessHours)</div>
+                            @if (!string.IsNullOrEmpty(o.Description))
+                            {
+                                <p class="small">@o.Description</p>
+                            }
+                            <form method="post" action="watch/@stream.WatchSlug/buy" class="mt-auto" data-enhance="false">
+                                <AntiforgeryToken />
+                                <input type="hidden" name="offerId" value="@o.Id" />
+                                <input type="email" name="email" class="form-control form-control-sm mb-2" placeholder="E-mail (optioneel, voor je bonnetje)" />
+                                <div class="d-grid gap-2">
+                                    @foreach (var p in providers)
+                                    {
+                                        <button type="submit" name="provider" value="@p" class="btn @(p == PaymentProvider.Test ? "btn-outline-secondary" : "btn-primary")">
+                                            @ProviderLabel(p)
+                                        </button>
+                                    }
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        @if (offers.Count == 0 || providers.Count == 0)
+        {
+            <p class="text-secondary">Er worden op dit moment geen tickets verkocht.</p>
+        }
+        <p class="small text-secondary mt-3">
+            Al een ticket gekocht? Open de link die je na de betaling kreeg, of gebruik dezelfde browser als waarmee je betaalde.
+        </p>
+    }
+    else
+    {
+        <div class="alert alert-secondary mt-3">Deze stream is privé. Je hebt inloggegevens van de organisator nodig om te kijken.</div>
+    }
+
+    <script>
+        (function () {
+            const key = "mediamtx-ticket:@stream.WatchSlug";
+            const url = new URL(location.href);
+            const t = url.searchParams.get("t");
+            try {
+                if (document.querySelector("[data-ticket-invalid]")) {
+                    localStorage.removeItem(key);
+                } else if (t) {
+                    localStorage.setItem(key, t);
+                } else if (@(stream.PaywallEnabled && player is null ? "true" : "false")) {
+                    const saved = localStorage.getItem(key);
+                    if (saved) {
+                        url.searchParams.set("t", saved);
+                        location.replace(url.toString());
+                    }
+                }
+            } catch { /* storage blocked: the ticket link still works */ }
+        })();
+    </script>
+}
+
+@code {
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+    private static readonly System.Globalization.CultureInfo Dutch = System.Globalization.CultureInfo.GetCultureInfo("nl-NL");
+
+    [Parameter] public string Slug { get; set; } = "";
+    [SupplyParameterFromQuery(Name = "t")] public string? Token { get; set; }
+    [SupplyParameterFromQuery] public string? Error { get; set; }
+
+    private StreamDefinition? stream;
+    private bool isLive;
+    private PlayerOptions? player;
+    private TicketOrder? ticket;
+    private bool ticketExpired;
+    private IReadOnlyList<StreamEndpoint> ticketUrls = [];
+    private List<StreamOffer> offers = [];
+    private List<PaymentProvider> providers = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        stream = await Paywall.StreamBySlugAsync(Slug);
+        if (stream is null || !stream.Enabled)
+            return;
+
+        try
+        {
+            isLive = (await Clients.Create(stream.Server!).GetPathAsync(stream.Name))?.IsLive == true;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or MediaMtxException or TaskCanceledException) { }
+
+        if (stream.PaywallEnabled)
+        {
+            ticket = await Paywall.ValidTicketAsync(stream.Id, Token);
+            if (ticket is not null)
+            {
+                player = Endpoints.Player(stream, MediaMtxPanel.Endpoints.MediaMtxAuthEndpoint.TicketUser, ticket.AccessToken);
+                ticketUrls = Endpoints.Ticket(stream, ticket.AccessToken);
+            }
+            else
+            {
+                ticketExpired = !string.IsNullOrEmpty(Token);
+                offers = await Paywall.OffersAsync(stream.Id, activeOnly: true);
+                providers = await Paywall.ProvidersForOwnerAsync(stream.OwnerId);
+            }
+        }
+        else if (stream.PublicRead)
+        {
+            player = Endpoints.Player(stream, "", "");
+        }
+    }
+
+    private static string ProviderLabel(PaymentProvider p) => p switch
+    {
+        PaymentProvider.Mollie => "Betalen met iDEAL",
+        PaymentProvider.PayPal => "Betalen met PayPal",
+        _ => "Testbetaling (geen echt geld)",
+    };
+}

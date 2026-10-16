@@ -17,10 +17,14 @@ public class UserAdminService(IServiceScopeFactory scopeFactory)
     {
         using var scope = scopeFactory.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var admins = await (from ur in db.UserRoles
-                            join r in db.Roles on ur.RoleId equals r.Id
-                            where r.Name == Roles.Admin
-                            select ur.UserId).ToListAsync();
+        var roles = await (from ur in db.UserRoles
+                           join r in db.Roles on ur.RoleId equals r.Id
+                           select new { ur.UserId, r.Name }).ToListAsync();
+        string RoleOf(string id)
+        {
+            var mine = roles.Where(r => r.UserId == id).Select(r => r.Name).ToList();
+            return mine.Contains(Roles.Admin) ? Roles.Admin : mine.Contains(Roles.Customer) ? Roles.Customer : Roles.User;
+        }
         var users = await db.Users
             .Select(u => new { u, Count = u.Streams.Count })
             .OrderBy(x => x.u.Email)
@@ -28,7 +32,7 @@ public class UserAdminService(IServiceScopeFactory scopeFactory)
         var now = DateTimeOffset.UtcNow;
         return users.Select(x => new UserSummary(
             x.u.Id, x.u.Email ?? x.u.UserName ?? "", x.u.DisplayName,
-            admins.Contains(x.u.Id) ? Roles.Admin : Roles.User,
+            RoleOf(x.u.Id),
             x.u.LockoutEnd is { } end && end > now,
             x.Count, x.u.CreatedAt)).ToList();
     }

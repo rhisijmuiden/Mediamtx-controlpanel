@@ -1,0 +1,56 @@
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+@inject StreamEndpointBuilder Endpoints
+
+<div data-player-root>
+    <div class="player">
+        <video @ref="video" autoplay muted playsinline controls></video>
+        <span class="player-status" data-player-status>Speler laden…</span>
+    </div>
+    <div class="d-flex justify-content-between align-items-center mt-2">
+        <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn btn-outline-secondary @(mode == "webrtc" ? "active" : "")" @onclick='() => SwitchAsync("webrtc")'>WebRTC</button>
+            <button type="button" class="btn btn-outline-secondary @(mode == "hls" ? "active" : "")" @onclick='() => SwitchAsync("hls")'>HLS</button>
+        </div>
+        <button type="button" class="btn btn-sm btn-link" @onclick="() => SwitchAsync(mode)">Opnieuw verbinden</button>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public StreamDefinition Stream { get; set; } = default!;
+    [Parameter, EditorRequired] public string User { get; set; } = "";
+    [Parameter, EditorRequired] public string Pass { get; set; } = "";
+
+    private ElementReference video;
+    private string mode = "webrtc";
+    private bool started;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            started = true;
+            await StartAsync();
+        }
+    }
+
+    private async Task SwitchAsync(string newMode)
+    {
+        mode = newMode;
+        await StartAsync();
+    }
+
+    private Task StartAsync() =>
+        JS.InvokeVoidAsync("panelPlayer.start", video, Endpoints.Player(Stream, User, Pass, mode)).AsTask();
+
+    public async ValueTask DisposeAsync()
+    {
+        if (!started)
+            return;
+        try
+        {
+            await JS.InvokeVoidAsync("panelPlayer.stop", video);
+        }
+        catch (JSDisconnectedException) { }
+    }
+}

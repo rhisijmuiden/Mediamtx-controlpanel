@@ -1,5 +1,5 @@
 @page "/streams/{Id:int}/edit"
-@attribute [Authorize]
+@attribute [Authorize(Roles = Roles.Staff)]
 @rendermode InteractiveServer
 @inject StreamService Streams
 @inject UserAdminService UserAdmin

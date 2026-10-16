@@ -46,6 +46,13 @@ public class MediaServer
 
     public bool Enabled { get; set; } = true;
 
+    /// <summary>
+    /// Optional Prometheus node_exporter URL (e.g. http://10.0.0.21:9100/metrics) for CPU/RAM/network of
+    /// the server. Empty with a loopback API URL means "same machine as the panel": read /proc directly.
+    /// </summary>
+    [MaxLength(256)]
+    public string? MetricsUrl { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public List<StreamDefinition> Streams { get; set; } = [];

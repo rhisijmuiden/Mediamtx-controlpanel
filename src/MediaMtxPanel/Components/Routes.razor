@@ -3,7 +3,15 @@
     <Found Context="routeData">
         <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
             <NotAuthorized>
-                <RedirectToLogin />
+                @if (context.User.Identity?.IsAuthenticated == true)
+                {
+                    <h1>Geen toegang</h1>
+                    <p>Deze pagina is niet beschikbaar voor jouw account. <a href="portal">Naar mijn portaal</a></p>
+                }
+                else
+                {
+                    <RedirectToLogin />
+                }
             </NotAuthorized>
         </AuthorizeRouteView>
         <FocusOnNavigate RouteData="routeData" Selector="h1" />

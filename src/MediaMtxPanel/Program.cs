@@ -9,6 +9,7 @@ using MediaMtxPanel.Data;
 using MediaMtxPanel.Endpoints;
 using MediaMtxPanel.Options;
 using MediaMtxPanel.Services;
+using MediaMtxPanel.Services.Payments;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,6 +56,14 @@ builder.Services.AddSingleton<MediaMtxClientFactory>();
 builder.Services.AddScoped<StreamService>();
 builder.Services.AddScoped<ServerService>();
 builder.Services.AddSingleton<LiveStatusReader>();
+builder.Services.AddSingleton<ServerMetricsReader>();
+builder.Services.AddHttpClient("metrics");
+builder.Services.AddHttpClient("payments", c => c.Timeout = TimeSpan.FromSeconds(20));
+builder.Services.AddSingleton<IPaymentGateway, MollieGateway>();
+builder.Services.AddSingleton<IPaymentGateway, PayPalGateway>();
+if (builder.Configuration.GetValue("Panel:EnableTestPayments", false))
+    builder.Services.AddSingleton<IPaymentGateway, TestGateway>();
+builder.Services.AddScoped<PaywallService>();
 builder.Services.AddScoped<UserAdminService>();
 builder.Services.AddSingleton<StreamEndpointBuilder>();
 builder.Services.AddSingleton<MediaMtxStatus>();
@@ -100,5 +109,6 @@ app.MapRazorComponents<App>()
 
 app.MapAdditionalIdentityEndpoints();
 app.MapMediaMtxAuth();
+app.MapPaymentEndpoints();
 
 app.Run();

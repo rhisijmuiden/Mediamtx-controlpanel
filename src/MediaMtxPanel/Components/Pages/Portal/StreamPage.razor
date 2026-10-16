@@ -1,0 +1,398 @@
+@page "/portal/streams/{Id:int}"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject StreamService Streams
+@inject PaywallService Paywall
+@inject StreamEndpointBuilder Endpoints
+@inject NavigationManager Nav
+
+<PageTitle>@(stream?.DisplayName ?? "Stream")</PageTitle>
+
+@if (notFound)
+{
+    <h1>Stream niet gevonden</h1>
+    <a href="portal">Terug naar mijn streams</a>
+}
+else if (stream is null)
+{
+    <p>Laden…</p>
+}
+else
+{
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+        <a class="btn btn-sm btn-link px-0 me-1" href="portal">← Mijn streams</a>
+    </div>
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+        <h1 class="mb-0 me-2">@stream.DisplayName</h1>
+        <StreamStateBadge Stream="stream" Live="live" />
+        @if (stream.PaywallEnabled)
+        {
+            <span class="badge text-bg-warning">Paywall aan</span>
+        }
+        else if (stream.PublicRead)
+        {
+            <span class="badge text-bg-info">Openbaar</span>
+        }
+    </div>
+
+    <StatsBar Stream="stream" OnLive="OnLive" />
+
+    <div class="row g-4">
+        <div class="col-xl-8">
+            <StreamPlayer Stream="stream" User="@stream.ReadUser" Pass="@stream.ReadPassword" />
+            <p class="small text-secondary mt-2">
+                @if (live?.IsLive == true)
+                {
+                    <span>Je stream komt binnen. Zie je hierboven beeld, dan zien je kijkers het ook.</span>
+                }
+                else if (stream.SourceType == StreamSourceType.Publisher)
+                {
+                    <span>Nog geen beeld. Start je uitzending met de gegevens onder <em>Verbinden</em>; de preview start vanzelf.</span>
+                }
+                else
+                {
+                    <span>Nog geen beeld. De server haalt de bron op @(stream.SourceOnDemand ? "zodra iemand kijkt" : "zodra die bereikbaar is").</span>
+                }
+            </p>
+
+            <div class="card mt-3">
+                <div class="card-header"><strong>Gegevens</strong></div>
+                <div class="card-body">
+                    <dl class="row mb-0 small">
+                        <dt class="col-sm-4">Server</dt><dd class="col-sm-8">@stream.Server!.Name (@stream.Server.PublicHost)</dd>
+                        <dt class="col-sm-4">Pad</dt><dd class="col-sm-8"><code>@stream.Name</code></dd>
+                        <dt class="col-sm-4">Type</dt><dd class="col-sm-8">@(stream.SourceType == StreamSourceType.Publisher ? "Je zendt zelf uit" : "De server haalt een bron op")</dd>
+                        <dt class="col-sm-4">Status</dt><dd class="col-sm-8">@(stream.Enabled ? "Ingeschakeld" : "Uitgeschakeld door de beheerder")</dd>
+                        <dt class="col-sm-4">Opname</dt><dd class="col-sm-8">@(stream.Record ? "Aan" : "Uit")</dd>
+                        @if (stream.MaxReaders > 0)
+                        {
+                            <dt class="col-sm-4">Max. kijkers</dt><dd class="col-sm-8">@stream.MaxReaders</dd>
+                        }
+                        @if (!string.IsNullOrEmpty(stream.Description))
+                        {
+                            <dt class="col-sm-4">Omschrijving</dt><dd class="col-sm-8">@stream.Description</dd>
+                        }
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="card connect-panel">
+                <div class="card-header pb-0">
+                    <ul class="nav nav-tabs card-header-tabs">
+                        @foreach (var (key, label) in tabs)
+                        {
+                            <li class="nav-item">
+                                <button type="button" class="nav-link @(tab == key ? "active" : "")" @onclick="() => tab = key">@label</button>
+                            </li>
+                        }
+                    </ul>
+                </div>
+                <div class="card-body">
+                    @if (tab == "connect")
+                    {
+                        @if (stream.SourceType == StreamSourceType.Publisher)
+                        {
+                            <h6>OBS Studio / Streamlabs / vMix</h6>
+                            <p class="small text-secondary mb-2">Instellingen → Stream → Dienst: <em>Aangepast…</em></p>
+                            <CopyField Label="Server" Value="@obs!.Server" />
+                            <CopyField Label="Streamsleutel" Value="@obs.StreamKey" Secret="true" />
+                            <hr />
+                            <h6>Inloggegevens</h6>
+                            <CopyField Label="Gebruikersnaam" Value="@stream.PublishUser" />
+                            <CopyField Label="Wachtwoord" Value="@stream.PublishPassword" Secret="true" />
+                            <hr />
+                            <h6>Andere protocollen</h6>
+                            @foreach (var e in publish.Where(e => e.Protocol is not "WebRTC (browser)"))
+                            {
+                                <CopyField Label="@e.Protocol" Value="@e.Url" Secret="@e.HasCredentials" />
+                                @if (e.Note is not null)
+                                {
+                                    <p class="small text-secondary mt-n2">@e.Note</p>
+                                }
+                            }
+                            <p class="small mb-0">
+                                Geen software? <a href="@BrowserPublishUrl" target="_blank" rel="noopener">Zend uit vanuit je browser</a>
+                                (webcam of scherm, log in met de gegevens hierboven).
+                            </p>
+                        }
+                        else
+                        {
+                            <p class="small">Deze stream wordt door de server opgehaald; je hoeft zelf niets te verzenden.</p>
+                            <CopyField Label="Bron" Value="@(stream.SourceUrl ?? "")" Secret="true" />
+                        }
+                    }
+                    else if (tab == "share")
+                    {
+                        <h6>Kijkpagina</h6>
+                        <p class="small text-secondary mb-2">
+                            @if (stream.PaywallEnabled)
+                            {
+                                <span>Kijkers kopen hier een ticket en kijken daarna direct in de browser.</span>
+                            }
+                            else if (stream.PublicRead)
+                            {
+                                <span>Iedereen met deze link kan meekijken.</span>
+                            }
+                            else
+                            {
+                                <span>Deze stream is privé: zet de paywall aan om tickets te verkopen, of vraag de beheerder hem openbaar te maken.</span>
+                            }
+                        </p>
+                        <CopyField Value="@WatchUrl" />
+                        <a class="btn btn-sm btn-outline-primary mb-3" href="@WatchUrl" target="_blank" rel="noopener">Kijkpagina openen</a>
+                        <hr />
+                        <h6>Kijkgegevens</h6>
+                        <p class="small text-secondary mb-2">Voor eigen gebruik of vaste kijkers, los van de paywall.</p>
+                        <CopyField Label="Gebruikersnaam" Value="@stream.ReadUser" />
+                        <CopyField Label="Wachtwoord" Value="@stream.ReadPassword" Secret="true" />
+                        @foreach (var e in read.Where(e => e.Protocol is "HLS" or "RTSP" or "SRT"))
+                        {
+                            <CopyField Label="@e.Protocol" Value="@e.Url" Secret="@e.HasCredentials" />
+                        }
+                    }
+                    else
+                    {
+                        @if (paywallMessage is not null)
+                        {
+                            <div class="alert alert-@(paywallMessageIsError ? "danger" : "success") small py-2">@paywallMessage</div>
+                        }
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <strong>Paywall</strong>
+                                <span class="badge @(stream.PaywallEnabled ? "text-bg-warning" : "text-bg-secondary") ms-1">@(stream.PaywallEnabled ? "aan" : "uit")</span>
+                                <div class="small text-secondary">Kijkers betalen voor toegang.</div>
+                            </div>
+                            <button id="paywall" class="btn btn-sm @(stream.PaywallEnabled ? "btn-outline-secondary" : "btn-warning")" @onclick="TogglePaywall">
+                                @(stream.PaywallEnabled ? "Uitzetten" : "Aanzetten")
+                            </button>
+                        </div>
+                        <p class="small text-secondary">
+                            Betaling via @(providers.Count > 0 ? string.Join(", ", providers.Select(ProviderLabel)) : "nog geen betaalmethode")
+                            · <a href="portal/payments">Betaalinstellingen</a>
+                        </p>
+
+                        <h6 class="mt-3">Aanbiedingen</h6>
+                        @if (offers.Count == 0)
+                        {
+                            <p class="small text-secondary">Nog geen aanbiedingen. Voeg bijvoorbeeld een dagticket of een seizoenskaart toe.</p>
+                        }
+                        @foreach (var o in offers)
+                        {
+                            <div class="offer-card mb-2 @(o.Active ? "" : "opacity-50")">
+                                <div class="d-flex justify-content-between">
+                                    <strong>@o.Name</strong>
+                                    <span>@Format.Money(o.PriceCents, o.Currency)</span>
+                                </div>
+                                <div class="small text-secondary">Toegang @Format.Hours(o.AccessHours)@(o.Active ? "" : " · niet actief")</div>
+                                @if (!string.IsNullOrEmpty(o.Description))
+                                {
+                                    <div class="small">@o.Description</div>
+                                }
+                                <div class="mt-1">
+                                    <button class="btn btn-link btn-sm p-0 me-2" @onclick="() => EditOffer(o)">Bewerken</button>
+                                    <button class="btn btn-link btn-sm p-0 text-danger" @onclick="() => DeleteOffer(o)">Verwijderen</button>
+                                </div>
+                            </div>
+                        }
+
+                        @if (offerInput is null)
+                        {
+                            <button class="btn btn-sm btn-outline-primary" @onclick="NewOffer">+ Aanbieding toevoegen</button>
+                        }
+                        else
+                        {
+                            <EditForm Model="offerInput" OnValidSubmit="SaveOffer" FormName="offer" class="offer-card mb-2">
+                                <DataAnnotationsValidator />
+                                <div class="mb-2">
+                                    <label class="form-label small" for="offer-name">Naam</label>
+                                    <InputText id="offer-name" class="form-control form-control-sm" @bind-Value="offerInput.Name" placeholder="Dagticket, HD-versie, seizoenskaart…" />
+                                    <ValidationMessage For="() => offerInput.Name" />
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small" for="offer-desc">Omschrijving (optioneel)</label>
+                                    <InputText id="offer-desc" class="form-control form-control-sm" @bind-Value="offerInput.Description" />
+                                </div>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-6">
+                                        <label class="form-label small" for="offer-price">Prijs (€)</label>
+                                        <InputNumber id="offer-price" class="form-control form-control-sm" @bind-Value="offerInput.Price" step="0.01" />
+                                        <ValidationMessage For="() => offerInput.Price" />
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label small" for="offer-hours">Toegang (uren)</label>
+                                        <InputNumber id="offer-hours" class="form-control form-control-sm" @bind-Value="offerInput.AccessHours" />
+                                        <ValidationMessage For="() => offerInput.AccessHours" />
+                                    </div>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <InputCheckbox id="offer-active" class="form-check-input" @bind-Value="offerInput.Active" />
+                                    <label class="form-check-label small" for="offer-active">Te koop</label>
+                                </div>
+                                <button type="submit" class="btn btn-sm btn-primary">Opslaan</button>
+                                <button type="button" class="btn btn-sm btn-link" @onclick="() => offerInput = null">Annuleren</button>
+                            </EditForm>
+                        }
+
+                        <h6 class="mt-4">Verkoop</h6>
+                        @if (sales is not null)
+                        {
+                            <div class="d-flex gap-3 small mb-2">
+                                <div><div class="text-secondary">Verkocht</div><strong>@sales.PaidCount</strong></div>
+                                <div><div class="text-secondary">Omzet</div><strong>@Format.Money(sales.RevenueCents, "EUR")</strong></div>
+                                <div><div class="text-secondary">Geldige tickets</div><strong>@sales.ActiveTickets</strong></div>
+                            </div>
+                            @if (sales.Recent.Count > 0)
+                            {
+                                <table class="table table-sm small mb-0">
+                                    <tbody>
+                                        @foreach (var o in sales.Recent)
+                                        {
+                                            <tr>
+                                                <td>@o.CreatedAt.ToLocalTime().ToString("dd-MM HH:mm")</td>
+                                                <td>@o.OfferName<div class="text-secondary">@(o.BuyerEmail ?? ProviderLabel(o.Provider))</div></td>
+                                                <td class="text-end">@Format.Money(o.AmountCents, o.Currency)<div>@StatusLabel(o.Status)</div></td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
+
+    private static readonly (string Key, string Label)[] tabs = [("connect", "Verbinden"), ("share", "Delen"), ("paywall", "Paywall")];
+
+    private StreamDefinition? stream;
+    private List<StreamEndpoint> publish = [];
+    private List<StreamEndpoint> read = [];
+    private ObsSettings? obs;
+    private MtxPath? live;
+    private bool notFound;
+    private string tab = "connect";
+
+    private List<StreamOffer> offers = [];
+    private List<PaymentProvider> providers = [];
+    private SalesSummary? sales;
+    private OfferInput? offerInput;
+    private int? editingOfferId;
+    private string? paywallMessage;
+    private bool paywallMessageIsError;
+
+    private string WatchUrl => Nav.ToAbsoluteUri($"watch/{stream!.WatchSlug}").ToString();
+
+    private string BrowserPublishUrl => publish.FirstOrDefault(e => e.Protocol == "WebRTC (browser)")?.Url ?? "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+        if (stream is not null)
+            await LoadPaywallAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        var s = await Streams.GetAsync((await AuthState).User, Id);
+        if (s is null)
+        {
+            notFound = true;
+            return;
+        }
+        stream = s;
+        publish = Endpoints.Publish(s).ToList();
+        read = Endpoints.Read(s).ToList();
+        obs = Endpoints.Obs(s);
+    }
+
+    private async Task LoadPaywallAsync()
+    {
+        offers = await Paywall.OffersAsync(stream!.Id, activeOnly: false);
+        providers = await Paywall.ProvidersForOwnerAsync(stream.OwnerId);
+        sales = await Paywall.SalesAsync(stream.Id);
+    }
+
+    private void OnLive(MtxPath? path) => live = path;
+
+    private async Task TogglePaywall()
+    {
+        var enabled = !stream!.PaywallEnabled;
+        var error = await Paywall.SetPaywallAsync((await AuthState).User, stream.Id, enabled);
+        await LoadAsync();
+        await LoadPaywallAsync();
+        ShowPaywall(error ?? (enabled ? "Paywall staat aan. Deel de kijkpagina met je publiek." : "Paywall staat uit."), error is not null);
+    }
+
+    private void NewOffer()
+    {
+        editingOfferId = null;
+        offerInput = new OfferInput();
+    }
+
+    private void EditOffer(StreamOffer o)
+    {
+        editingOfferId = o.Id;
+        offerInput = new OfferInput
+        {
+            Name = o.Name,
+            Description = o.Description,
+            Price = o.PriceCents / 100m,
+            AccessHours = o.AccessHours,
+            Active = o.Active,
+        };
+    }
+
+    private async Task SaveOffer()
+    {
+        var ok = await Paywall.SaveOfferAsync((await AuthState).User, stream!.Id, editingOfferId, offerInput!);
+        offerInput = null;
+        await LoadPaywallAsync();
+        ShowPaywall(ok ? "Aanbieding opgeslagen." : "Opslaan is mislukt.", !ok);
+    }
+
+    private async Task DeleteOffer(StreamOffer o)
+    {
+        await Paywall.DeleteOfferAsync((await AuthState).User, stream!.Id, o.Id);
+        await LoadPaywallAsync();
+        if (stream.PaywallEnabled && !offers.Any(x => x.Active))
+        {
+            await Paywall.SetPaywallAsync((await AuthState).User, stream.Id, false);
+            await LoadAsync();
+            ShowPaywall("Aanbieding verwijderd. Er is geen actieve aanbieding meer, dus de paywall staat uit.", true);
+        }
+        else
+        {
+            ShowPaywall("Aanbieding verwijderd.", false);
+        }
+    }
+
+    private void ShowPaywall(string text, bool isError)
+    {
+        paywallMessage = text;
+        paywallMessageIsError = isError;
+    }
+
+    private static string ProviderLabel(PaymentProvider p) => p switch
+    {
+        PaymentProvider.Mollie => "iDEAL",
+        PaymentProvider.PayPal => "PayPal",
+        _ => "testbetaling",
+    };
+
+    private static string StatusLabel(OrderStatus s) => s switch
+    {
+        OrderStatus.Paid => "betaald",
+        OrderStatus.Failed => "mislukt",
+        OrderStatus.Canceled => "geannuleerd",
+        OrderStatus.Expired => "verlopen",
+        _ => "open",
+    };
+}

@@ -2,11 +2,13 @@
 
 Een beheerpaneel voor [MediaMTX](https://github.com/bluenviron/mediamtx), geschreven in ASP.NET Core (.NET 10, Blazor Server).
 
-- **Gebruikers**: beheerders maken accounts aan (geen open registratie). Rollen: *Beheerder* (alle streams en gebruikers) en *Gebruiker* (alleen eigen streams). Blokkeren, wachtwoord resetten en verwijderen kan vanuit het paneel.
+- **Gebruikers**: beheerders maken accounts aan (geen open registratie). Rollen: *Beheerder* (alle streams en gebruikers), *Gebruiker* (alleen eigen streams) en *Klant* (alleen het klantportaal). Blokkeren, wachtwoord resetten en verwijderen kan vanuit het paneel.
 - **Streams**: aanmaken, bewerken, in-/uitschakelen en verwijderen. Een stream is een *publisher*-stream (OBS, ffmpeg, camera of browser stuurt naar de server) of een *ophaal*-stream (de server haalt een externe RTSP/RTMP/SRT/HLS/WHEP-bron op). Opties: openbaar bekijken, opnemen, maximaal aantal kijkers.
 - **Direct na het aanmaken** toont het paneel de inloggegevens (publiceren en bekijken), de OBS-instellingen, alle endpoints (RTSP, RTMP, SRT, WebRTC WHIP/WHEP, HLS) met kopieerknoppen, en voorbeeldcommando's voor ffmpeg/ffplay.
 - **Live status**: dashboard en streampagina's tonen live/offline, codecs, kijkers en verkeer; publishers en kijkers kun je verbreken.
 - **Meerdere MediaMTX-servers**: beheerders koppelen onder *Servers* zoveel MediaMTX-instanties als nodig. Bij elke stream kies je de server; de URL's gebruiken het publieke adres en de poorten van die server. Het dashboard toont per server of hij online is.
+- **Klantportaal**: klanten loggen in en zien hun eigen streams met een live preview, een tabblad met precies wat ze nodig hebben om uit te zenden, en een balk met CPU, RAM, load, netwerk, bitrate en kijkers (zie [Klantportaal en paywall](#klantportaal-en-paywall)).
+- **Paywall**: klanten verkopen tickets voor hun stream (bijv. dagticket of weekpas) en laten kijkers betalen met iDEAL (Mollie) of PayPal.
 - **Proxmox**: met één script een LXC-container met paneel en MediaMTX aanmaken (zie [Proxmox LXC](#proxmox-lxc)).
 
 ## Hoe het werkt
@@ -89,6 +91,33 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-co
 
 Andere Proxmox-containers of VM's met alleen MediaMTX koppel je daarna via **Servers** in het paneel.
 
+## Klantportaal en paywall
+
+![Klantportaal](docs/klantportaal.png)
+
+Maak onder **Gebruikers** een account met de rol *Klant* en kies die klant als *Eigenaar* bij een stream. Na het inloggen komt de klant in **Mijn portaal** (`/portal`):
+
+- **Preview**: de stream speelt af in de browser (WebRTC, of HLS als de browser de codec niet via WebRTC kan afspelen), zodat de klant ziet of het beeld goed binnenkomt.
+- **Statistiekenbalk**: CPU, RAM, load en netwerkverkeer van de server, plus bitrate in/uit, kijkers, codecs en hoe lang de stream live is. Draait MediaMTX op dezelfde machine als het paneel (API-URL op `127.0.0.1`), dan leest het paneel dit zelf. Voor andere servers installeer je `prometheus-node-exporter` op die server en vul je bij **Servers** de *Statistieken-URL* in (bijv. `http://10.0.0.21:9100/metrics`).
+- **Tabblad Verbinden**: OBS-server en streamsleutel, gebruikersnaam en wachtwoord, en de URL's voor RTSP, RTMP, SRT en WHIP.
+- **Tabblad Delen**: de openbare kijkpagina `/watch/<code>` en de kijkgegevens.
+- **Tabblad Paywall**: aanbiedingen beheren (naam, prijs, toegangsduur, zoals "Dagticket HD" of "Weekpas"), de paywall aan- en uitzetten, en verkopen en omzet bekijken.
+
+### Betalen
+
+Onder **Betaalinstellingen** koppelt de klant een eigen account; het geld komt rechtstreeks bij de klant binnen. Sleutels worden versleuteld opgeslagen.
+
+- **iDEAL via Mollie**: API-sleutel uit het Mollie-dashboard (`test_…` om te proberen, `live_…` voor echt).
+- **PayPal**: Client ID en Secret van een REST-app op developer.paypal.com, met een schakelaar voor sandbox of live.
+
+De kijker opent de kijkpagina, kiest een aanbieding en betaalt. Daarna stuurt de provider de kijker terug en speelt de stream direct af. De kijker krijgt een persoonlijke link en kan ook kijken via VLC, een smart-tv of een ander apparaat: daarvoor gebruikt hij de gebruikersnaam `ticket` en de ticketcode als wachtwoord (RTSP, HLS, SRT). Na de gekochte toegangsduur werkt het ticket niet meer. Kijken zonder ticket wordt geweigerd, ook als de stream op *openbaar* staat.
+
+![Kijkpagina met tickets](docs/kijkpagina-tickets.png)
+
+Voor betalingen moet het paneel op een publiek adres bereikbaar zijn. Zet dat adres in `Panel__PublicUrl` (bijv. `https://panel.example.com`); dat adres gebruiken de betaalproviders om de kijker terug te sturen, en Mollie stuurt er de betaalstatus heen (`/api/payments/mollie/webhook`).
+
+Met `Panel__EnableTestPayments=true` verschijnt er een knop *Testbetaling* waarmee je de hele flow zonder echt geld kunt doorlopen. Zet die in productie uit.
+
 ## Lokaal ontwikkelen
 
 Vereist: .NET 10 SDK en een MediaMTX-binary.
@@ -119,6 +148,8 @@ Alle instellingen staan in `appsettings.json` en zijn met omgevingsvariabelen te
 | `Panel__AdminMustChangePassword` | `true` | Het wachtwoord van de eerste beheerder is eenmalig: bij de eerste login moet een eigen wachtwoord gekozen worden |
 | `Panel__DataProtectionKeysPath` | leeg | Map voor cookie-sleutels (zodat logins een herstart overleven) |
 | `Panel__HttpsRedirect` | `false` | HTTP → HTTPS doorsturen |
+| `Panel__PublicUrl` | leeg | Publiek adres van het paneel voor betaalproviders (terugkeer-URL en Mollie-webhook) |
+| `Panel__EnableTestPayments` | `false` | Testbetalingen zonder echt geld toestaan (alleen om te testen) |
 | `Panel__HookBaseUrl` | leeg | Adres waarop MediaMTX-servers het paneel bereiken (voor de getoonde configuratie) |
 | `MediaMtx__ApiUrl` | leeg | Als gezet en er nog geen servers zijn: maakt hiermee de eerste server aan |
 | `MediaMtx__ServerName` | `Standaard` | Naam van die eerste server |
@@ -143,11 +174,13 @@ OBS: *Instellingen → Stream → Aangepast*, server `rtmp://host:1935`, streams
 
 ```
 src/MediaMtxPanel/
-  Components/Pages/        Dashboard, Streams (lijst, nieuw, details, bewerken), Servers, Users
-  Components/Shared/       Formulier, kopieervelden, endpoint-tabel, status-badges
+  Components/Pages/        Dashboard, Streams (lijst, nieuw, details, bewerken), Servers, Users,
+                           Portal (klantportaal, betaalinstellingen), Watch (openbare kijk- en betaalpagina)
+  Components/Shared/       Formulier, kopieervelden, endpoint-tabel, status-badges, speler, statistiekenbalk
   Data/                    EF Core-context, entiteiten, migraties, seeding van rollen/beheerder
-  Endpoints/               Authenticatie-hook voor MediaMTX
-  Services/                MediaMTX API-client, stream- en serverbeheer, synchronisatie, live status, URL-builder, gebruikersbeheer
+  Endpoints/               Authenticatie-hook voor MediaMTX, betaal-endpoints (kopen, Mollie-webhook)
+  Services/                MediaMTX API-client, stream- en serverbeheer, synchronisatie, live status, URL-builder, gebruikersbeheer,
+                           serverstatistieken, Payments/ (Mollie, PayPal, paywall en tickets)
 deploy/mediamtx.yml        MediaMTX-configuratie voor gebruik met het paneel
 deploy/proxmox/            create-lxc.sh (op de Proxmox-host) en install-in-lxc.sh (in de container)
 ```

@@ -1,5 +1,5 @@
 @page "/streams/{Id:int}"
-@attribute [Authorize]
+@attribute [Authorize(Roles = Roles.Staff)]
 @rendermode InteractiveServer
 @implements IAsyncDisposable
 @inject StreamService Streams
@@ -69,6 +69,8 @@ else
 
     <div class="d-flex flex-wrap gap-2 mb-4">
         <a class="btn btn-outline-primary btn-sm" href="streams/@stream.Id/edit">Bewerken</a>
+        <a class="btn btn-outline-secondary btn-sm" href="portal/streams/@stream.Id">Preview en paywall</a>
+        <a class="btn btn-outline-secondary btn-sm" href="watch/@stream.WatchSlug" target="_blank" rel="noopener">Kijkpagina</a>
         <button class="btn btn-outline-secondary btn-sm" @onclick="ToggleEnabled">@(stream.Enabled ? "Uitschakelen" : "Inschakelen")</button>
         @if (!confirmDelete)
         {
