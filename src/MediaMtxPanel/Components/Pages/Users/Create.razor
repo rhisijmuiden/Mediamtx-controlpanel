@@ -1,0 +1,72 @@
+@page "/users/new"
+@attribute [Authorize(Roles = Roles.Admin)]
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@inject UserAdminService UserAdmin
+@inject NavigationManager Nav
+
+<PageTitle>Nieuwe gebruiker</PageTitle>
+
+<h1>Nieuwe gebruiker</h1>
+
+@if (errors is not null)
+{
+    <div class="alert alert-danger">@errors</div>
+}
+
+<EditForm Model="input" OnValidSubmit="Save" FormName="new-user" class="col-lg-6">
+    <DataAnnotationsValidator />
+    <div class="mb-3">
+        <label class="form-label" for="email">E-mailadres (login)</label>
+        <InputText id="email" class="form-control" @bind-Value="input.Email" />
+        <ValidationMessage For="() => input.Email" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label" for="dn">Naam</label>
+        <InputText id="dn" class="form-control" @bind-Value="input.DisplayName" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label" for="role">Rol</label>
+        <InputSelect id="role" class="form-select" @bind-Value="input.Role">
+            <option value="@Roles.User">Gebruiker: beheert eigen streams</option>
+            <option value="@Roles.Admin">Beheerder: beheert alle streams en gebruikers</option>
+        </InputSelect>
+    </div>
+    <div class="mb-3">
+        <label class="form-label" for="pw">Wachtwoord</label>
+        <div class="input-group">
+            <InputText id="pw" class="form-control font-monospace" @bind-Value="input.Password" />
+            <button type="button" class="btn btn-outline-secondary" @onclick="Generate">Genereer</button>
+        </div>
+        <div class="form-text">Minimaal 8 tekens, met een hoofdletter, kleine letter en cijfer.</div>
+        <ValidationMessage For="() => input.Password" />
+    </div>
+    <button type="submit" class="btn btn-primary">Gebruiker aanmaken</button>
+    <a class="btn btn-outline-secondary" href="users">Annuleren</a>
+</EditForm>
+
+@code {
+    private readonly NewUserInput input = new();
+    private string? errors;
+
+    private void Generate() => input.Password = CredentialGenerator.Password(14) + "a1";
+
+    private async Task Save()
+    {
+        var r = await UserAdmin.CreateAsync(input.Email.Trim(), input.DisplayName, input.Password, input.Role);
+        if (r.Succeeded)
+            Nav.NavigateTo("users");
+        else
+            errors = string.Join(" ", r.Errors.Select(e => e.Description));
+    }
+
+    private class NewUserInput
+    {
+        [Required(ErrorMessage = "Vul een e-mailadres in."), EmailAddress(ErrorMessage = "Ongeldig e-mailadres.")]
+        public string Email { get; set; } = "";
+        public string? DisplayName { get; set; }
+        public string Role { get; set; } = Roles.User;
+        [Required(ErrorMessage = "Vul een wachtwoord in."), MinLength(8, ErrorMessage = "Minimaal 8 tekens.")]
+        public string Password { get; set; } = "";
+    }
+}

@@ -1,0 +1,162 @@
+@page "/"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@implements IAsyncDisposable
+@inject StreamService Streams
+@inject ServerService ServerAdmin
+@inject LiveStatusReader LiveReader
+
+<PageTitle>Dashboard</PageTitle>
+
+<h1>Dashboard</h1>
+
+@if (servers is { Count: 0 })
+{
+    <div class="alert alert-info">
+        Er is nog geen MediaMTX-server gekoppeld.
+        @if (isAdmin)
+        {
+            <a class="alert-link" href="servers/new">Voeg een server toe</a>
+        }
+        else
+        {
+            <span>Vraag een beheerder om een server toe te voegen.</span>
+        }
+    </div>
+}
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3"><div class="card stat-card"><div class="card-body"><div class="text-secondary small">Streams</div><div class="value">@(streams?.Count ?? 0)</div></div></div></div>
+    <div class="col-sm-6 col-lg-3"><div class="card stat-card"><div class="card-body"><div class="text-secondary small">Nu live</div><div class="value text-success">@LiveStreams.Count</div></div></div></div>
+    <div class="col-sm-6 col-lg-3"><div class="card stat-card"><div class="card-body"><div class="text-secondary small">Kijkers</div><div class="value">@LiveStreams.Sum(x => x.Path.Readers.Count)</div></div></div></div>
+    <div class="col-sm-6 col-lg-3"><div class="card stat-card"><div class="card-body"><div class="text-secondary small">Servers online</div><div class="value">@OnlineCount / @(servers?.Count(s => s.Enabled) ?? 0)</div></div></div></div>
+</div>
+
+@if (servers is { Count: > 0 })
+{
+    <h2 class="h4">Servers</h2>
+    <div class="row g-3 mb-4">
+        @foreach (var srv in servers)
+        {
+            var online = srv.Enabled && !live.Errors.ContainsKey(srv.Id) && live.Paths.ContainsKey(srv.Id);
+            var paths = live.Paths.GetValueOrDefault(srv.Id);
+            <div class="col-md-6 col-xl-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h3 class="h5 mb-0">@srv.Name</h3>
+                                <div class="small text-secondary">@srv.PublicHost</div>
+                            </div>
+                            @if (!srv.Enabled)
+                            {
+                                <span class="badge text-bg-secondary">Uitgeschakeld</span>
+                            }
+                            else if (online)
+                            {
+                                <span class="badge text-bg-success">Online</span>
+                            }
+                            else
+                            {
+                                <span class="badge text-bg-danger" title="@live.Errors.GetValueOrDefault(srv.Id)">Niet bereikbaar</span>
+                            }
+                        </div>
+                        <div class="small mt-2">
+                            @if (live.Info.TryGetValue(srv.Id, out var info))
+                            {
+                                <div>MediaMTX @info.Version, gestart @info.Started.ToLocalTime().ToString("g")</div>
+                            }
+                            <div>
+                                @(streams?.Count(s => s.ServerId == srv.Id) ?? 0) stream(s),
+                                @(paths?.Values.Count(p => p.IsLive) ?? 0) live,
+                                @(paths?.Values.Sum(p => p.Readers.Count) ?? 0) kijker(s)
+                            </div>
+                        </div>
+                        @if (isAdmin)
+                        {
+                            <a class="stretched-link" href="servers/@srv.Id"></a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h2 class="h4 mb-0">Live streams</h2>
+    <a class="btn btn-sm btn-primary" href="streams/new">+ Nieuwe stream</a>
+</div>
+
+@if (LiveStreams.Count == 0)
+{
+    <p class="text-secondary">Er is op dit moment niets live.</p>
+}
+else
+{
+    <table class="table align-middle">
+        <thead><tr><th>Stream</th><th>Server</th><th>Codecs</th><th class="text-end">Kijkers</th><th class="text-end">Ontvangen</th><th class="text-end">Verzonden</th></tr></thead>
+        <tbody>
+            @foreach (var (s, p) in LiveStreams)
+            {
+                <tr>
+                    <td><a href="streams/@s.Id">@s.DisplayName</a> <code class="small">@s.Name</code></td>
+                    <td>@s.Server!.Name</td>
+                    <td class="small">@string.Join(", ", p.Codecs)</td>
+                    <td class="text-end">@p.Readers.Count</td>
+                    <td class="text-end">@Format.Bytes(p.Received)</td>
+                    <td class="text-end">@Format.Bytes(p.Sent)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
+
+    private List<StreamDefinition>? streams;
+    private List<MediaServer>? servers;
+    private LiveSnapshot live = new();
+    private bool isAdmin;
+    private readonly CancellationTokenSource cts = new();
+
+    private List<(StreamDefinition Stream, MtxPath Path)> LiveStreams =>
+        streams?.Select(s => (s, p: live.Find(s))).Where(x => x.p is { IsLive: true } && x.s.Enabled)
+            .Select(x => (x.s, x.p!)).ToList() ?? [];
+
+    private int OnlineCount => servers?.Count(s => s.Enabled && live.Paths.ContainsKey(s.Id) && !live.Errors.ContainsKey(s.Id)) ?? 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await AuthState).User;
+        isAdmin = StreamService.IsAdmin(user);
+        streams = await Streams.ListAsync(user);
+        servers = await ServerAdmin.ListAsync();
+        await RefreshAsync();
+        _ = PollAsync();
+    }
+
+    private async Task PollAsync()
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(5));
+        try
+        {
+            while (await timer.WaitForNextTickAsync(cts.Token))
+            {
+                await RefreshAsync();
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (OperationCanceledException) { }
+    }
+
+    private async Task RefreshAsync() => live = await LiveReader.ReadAsync(servers!, includeInfo: true, cts.Token);
+
+    public ValueTask DisposeAsync()
+    {
+        cts.Cancel();
+        cts.Dispose();
+        return ValueTask.CompletedTask;
+    }
+}

@@ -1,0 +1,242 @@
+@page "/servers/new"
+@page "/servers/{Id:int}"
+@attribute [Authorize(Roles = Roles.Admin)]
+@rendermode InteractiveServer
+@using MediaMtxPanel.Options
+@using Microsoft.Extensions.Options
+@inject ServerService ServerAdmin
+@inject NavigationManager Nav
+@inject IOptions<PanelOptions> PanelOptions
+
+<PageTitle>@(IsNew ? "Server toevoegen" : "Server")</PageTitle>
+
+@if (notFound)
+{
+    <h1>Server niet gevonden</h1>
+    <a href="servers">Terug</a>
+}
+else if (input is null)
+{
+    <p>Laden…</p>
+}
+else
+{
+    <h1>@(IsNew ? "MediaMTX-server toevoegen" : server!.Name)</h1>
+
+    @if (Created)
+    {
+        <div class="alert alert-success">
+            <strong>Server toegevoegd.</strong> Zet de configuratie hieronder in de <code>mediamtx.yml</code> van deze server,
+            herstart MediaMTX en klik daarna op <em>Verbinding testen</em>.
+        </div>
+    }
+    @if (message is not null)
+    {
+        <div class="alert alert-@(isError ? "danger" : "success")">@message</div>
+    }
+
+    <div class="row g-4">
+        <div class="col-xl-6">
+            <EditForm Model="input" OnValidSubmit="Save" FormName="server">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-danger" />
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label" for="name">Naam</label>
+                        <InputText id="name" class="form-control" @bind-Value="input.Name" placeholder="bijv. Amsterdam-1" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="desc">Omschrijving</label>
+                        <InputText id="desc" class="form-control" @bind-Value="input.Description" />
+                    </div>
+
+                    <div class="col-12"><h2 class="h6 mb-0 mt-2">Control API (zoals het paneel de server bereikt)</h2></div>
+                    <div class="col-12">
+                        <label class="form-label" for="api">API-URL</label>
+                        <InputText id="api" class="form-control font-monospace" @bind-Value="input.ApiUrl" placeholder="http://10.0.0.21:9997" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="apiuser">API-gebruiker</label>
+                        <InputText id="apiuser" class="form-control font-monospace" @bind-Value="input.ApiUser" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="apipass">API-wachtwoord</label>
+                        <InputText id="apipass" class="form-control font-monospace" @bind-Value="input.ApiPassword" />
+                    </div>
+
+                    <div class="col-12"><h2 class="h6 mb-0 mt-2">Publiek (zoals zenders en kijkers de server bereiken)</h2></div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="host">Host of IP</label>
+                        <InputText id="host" class="form-control font-monospace" @bind-Value="input.PublicHost" placeholder="stream1.example.com" />
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                        <div class="form-check form-switch">
+                            <InputCheckbox class="form-check-input" id="https" @bind-Value="input.HttpsUrls" />
+                            <label class="form-check-label" for="https">https:// voor HLS en WebRTC</label>
+                        </div>
+                    </div>
+                    <div class="col"><label class="form-label small" for="rtsp">RTSP</label><InputNumber id="rtsp" class="form-control" @bind-Value="input.RtspPort" /></div>
+                    <div class="col"><label class="form-label small" for="rtmp">RTMP</label><InputNumber id="rtmp" class="form-control" @bind-Value="input.RtmpPort" /></div>
+                    <div class="col"><label class="form-label small" for="srt">SRT</label><InputNumber id="srt" class="form-control" @bind-Value="input.SrtPort" /></div>
+                    <div class="col"><label class="form-label small" for="hls">HLS</label><InputNumber id="hls" class="form-control" @bind-Value="input.HlsPort" /></div>
+                    <div class="col"><label class="form-label small" for="webrtc">WebRTC</label><InputNumber id="webrtc" class="form-control" @bind-Value="input.WebRtcPort" /></div>
+
+                    <div class="col-12">
+                        <div class="form-check form-switch">
+                            <InputCheckbox class="form-check-input" id="enabled" @bind-Value="input.Enabled" />
+                            <label class="form-check-label" for="enabled">Ingeschakeld (uitgeschakeld weigert de server alle verbindingen)</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <InputCheckbox class="form-check-input" id="unmanaged" @bind-Value="input.RemoveUnmanagedPaths" />
+                            <label class="form-check-label" for="unmanaged">Paths die niet in het paneel staan verwijderen</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 d-flex flex-wrap gap-2">
+                    <button type="submit" class="btn btn-primary">@(IsNew ? "Server toevoegen" : "Opslaan")</button>
+                    @if (!IsNew)
+                    {
+                        <button type="button" class="btn btn-outline-success" @onclick="Test" disabled="@testing">@(testing ? "Testen…" : "Verbinding testen")</button>
+                        @if (!confirmDelete)
+                        {
+                            <button type="button" class="btn btn-outline-danger" @onclick="() => confirmDelete = true">Verwijderen</button>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-danger" @onclick="Delete">Ja, verwijderen</button>
+                            <button type="button" class="btn btn-outline-secondary" @onclick="() => confirmDelete = false">Nee</button>
+                        }
+                    }
+                    <a class="btn btn-outline-secondary" href="servers">Terug</a>
+                </div>
+            </EditForm>
+        </div>
+
+        @if (!IsNew)
+        {
+            <div class="col-xl-6">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <strong>Configuratie voor mediamtx.yml</strong>
+                        <button class="btn btn-link btn-sm p-0" @onclick="RegenerateSecret">Nieuw geheim</button>
+                    </div>
+                    <div class="card-body">
+                        <p class="small">Neem dit op in de <code>mediamtx.yml</code> van deze server en herstart MediaMTX. Het paneel moet bereikbaar zijn op het adres in <code>authHTTPAddress</code> en de server moet de API-poort voor het paneel openzetten.</p>
+                        <pre class="cmd">@ConfigSnippet</pre>
+                        <CopyField Value="@ConfigSnippet" Label="Kopiëren" />
+                        <p class="small text-secondary mb-0">Of zet in plaats daarvan deze omgevingsvariabele (bijv. in docker of systemd):</p>
+                        <CopyField Value="@($"MTX_AUTHHTTPADDRESS={HookUrl}")" />
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public int? Id { get; set; }
+    [SupplyParameterFromQuery] public bool Created { get; set; }
+
+    private bool IsNew => Id is null;
+    private ServerInput? input;
+    private MediaServer? server;
+    private bool notFound;
+    private bool testing;
+    private bool confirmDelete;
+    private string? message;
+    private bool isError;
+
+    private string HookBase => (string.IsNullOrWhiteSpace(PanelOptions.Value.HookBaseUrl)
+        ? Nav.BaseUri
+        : PanelOptions.Value.HookBaseUrl).TrimEnd('/');
+
+    private string HookUrl => $"{HookBase}/api/mediamtx/auth?secret={server!.HookSecret}";
+
+    private string ConfigSnippet => $"""
+        authMethod: http
+        authHTTPAddress: {HookUrl}
+        authHTTPExclude: []
+
+        api: true
+        apiAddress: :9997
+
+        rtspAddress: :{server!.RtspPort}
+        rtmpAddress: :{server.RtmpPort}
+        srtAddress: :{server.SrtPort}
+        hlsAddress: :{server.HlsPort}
+        webrtcAddress: :{server.WebRtcPort}
+        webrtcAdditionalHosts: [{server.PublicHost}]
+
+        # Paths are created by the panel.
+        paths: {"{}"}
+        """;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (IsNew)
+        {
+            input ??= new ServerInput();
+            return;
+        }
+        server = await ServerAdmin.GetAsync(Id!.Value);
+        if (server is null)
+        {
+            notFound = true;
+            return;
+        }
+        input = ServerInput.From(server);
+    }
+
+    private async Task Save()
+    {
+        message = null;
+        if (await ServerAdmin.NameExistsAsync(input!.Name.Trim(), Id))
+        {
+            Show("Er bestaat al een server met deze naam.", true);
+            return;
+        }
+
+        if (IsNew)
+        {
+            var created = await ServerAdmin.CreateAsync(input);
+            Nav.NavigateTo($"servers/{created.Id}?created=true");
+            return;
+        }
+
+        server = await ServerAdmin.UpdateAsync(Id!.Value, input);
+        var test = server!.Enabled ? await ServerAdmin.TestAndSyncAsync(server.Id) : null;
+        Show(test is null ? "Opgeslagen." : $"Opgeslagen. {test.Message}", test is { Ok: false });
+    }
+
+    private async Task Test()
+    {
+        testing = true;
+        var r = await ServerAdmin.TestAndSyncAsync(Id!.Value);
+        testing = false;
+        Show(r.Message, !r.Ok);
+    }
+
+    private async Task RegenerateSecret()
+    {
+        server = await ServerAdmin.RegenerateHookSecretAsync(Id!.Value);
+        Show("Nieuw geheim aangemaakt. Pas de configuratie op de server aan; tot dan weigert het paneel verzoeken van deze server.", false);
+    }
+
+    private async Task Delete()
+    {
+        var error = await ServerAdmin.DeleteAsync(Id!.Value);
+        if (error is null)
+            Nav.NavigateTo("servers");
+        else
+        {
+            confirmDelete = false;
+            Show(error, true);
+        }
+    }
+
+    private void Show(string text, bool error)
+    {
+        message = text;
+        isError = error;
+    }
+}

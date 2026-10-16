@@ -1,0 +1,96 @@
+@page "/users"
+@attribute [Authorize(Roles = Roles.Admin)]
+@rendermode InteractiveServer
+@inject UserAdminService UserAdmin
+
+<PageTitle>Gebruikers</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">Gebruikers</h1>
+    <a class="btn btn-primary" href="users/new">+ Nieuwe gebruiker</a>
+</div>
+
+@if (message is not null)
+{
+    <div class="alert alert-@(isError ? "danger" : "info")">@message</div>
+}
+
+@if (users is null)
+{
+    <p>Laden…</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr><th>E-mailadres</th><th>Naam</th><th>Rol</th><th class="text-end">Streams</th><th>Status</th><th>Aangemaakt</th><th></th></tr>
+            </thead>
+            <tbody>
+                @foreach (var u in users)
+                {
+                    <tr>
+                        <td>@u.Email @if (u.Id == myId) { <span class="badge text-bg-light border">jij</span> }</td>
+                        <td>@(u.DisplayName ?? "–")</td>
+                        <td>@(u.Role == Roles.Admin ? "Beheerder" : "Gebruiker")</td>
+                        <td class="text-end">@u.StreamCount</td>
+                        <td>@if (u.Locked) { <span class="badge text-bg-danger">Geblokkeerd</span> } else { <span class="badge text-bg-success">Actief</span> }</td>
+                        <td class="small">@u.CreatedAt.ToLocalTime().ToString("d")</td>
+                        <td class="text-end text-nowrap">
+                            <a class="btn btn-sm btn-outline-primary" href="users/@u.Id">Bewerken</a>
+                            @if (u.Id != myId)
+                            {
+                                <button class="btn btn-sm btn-outline-secondary" @onclick="() => ToggleLock(u)">@(u.Locked ? "Deblokkeren" : "Blokkeren")</button>
+                                @if (confirmDelete == u.Id)
+                                {
+                                    <button class="btn btn-sm btn-danger" @onclick="() => Delete(u)">Bevestig</button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => confirmDelete = u.Id">Verwijderen</button>
+                                }
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
+
+    private List<UserSummary>? users;
+    private string myId = "";
+    private string? confirmDelete;
+    private string? message;
+    private bool isError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        myId = StreamService.UserId((await AuthState).User) ?? "";
+        users = await UserAdmin.ListAsync();
+    }
+
+    private async Task ToggleLock(UserSummary u)
+    {
+        var r = await UserAdmin.SetLockedAsync(u.Id, !u.Locked, myId);
+        Report(r, u.Locked ? $"{u.Email} is gedeblokkeerd." : $"{u.Email} is geblokkeerd en uitgelogd.");
+        users = await UserAdmin.ListAsync();
+    }
+
+    private async Task Delete(UserSummary u)
+    {
+        confirmDelete = null;
+        var r = await UserAdmin.DeleteAsync(u.Id, myId);
+        Report(r, $"{u.Email} is verwijderd. Eventuele streams van deze gebruiker blijven bestaan zonder eigenaar.");
+        users = await UserAdmin.ListAsync();
+    }
+
+    private void Report(Microsoft.AspNetCore.Identity.IdentityResult r, string ok)
+    {
+        isError = !r.Succeeded;
+        message = r.Succeeded ? ok : string.Join(" ", r.Errors.Select(e => e.Description));
+    }
+}

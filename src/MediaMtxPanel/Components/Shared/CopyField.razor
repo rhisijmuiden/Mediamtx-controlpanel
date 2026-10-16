@@ -1,0 +1,39 @@
+@inject IJSRuntime JS
+
+<div class="mb-2">
+    @if (!string.IsNullOrEmpty(Label))
+    {
+        <label class="form-label small text-secondary mb-1">@Label</label>
+    }
+    <div class="input-group input-group-sm">
+        <input class="form-control font-monospace" type="@(Secret && !revealed ? "password" : "text")" value="@Value" readonly />
+        @if (Secret)
+        {
+            <button type="button" class="btn btn-outline-secondary" @onclick="() => revealed = !revealed">@(revealed ? "Verberg" : "Toon")</button>
+        }
+        <button type="button" class="btn btn-outline-primary" @onclick="Copy">@(copied ? "Gekopieerd ✓" : "Kopieer")</button>
+    </div>
+    @if (!string.IsNullOrEmpty(Note))
+    {
+        <div class="form-text">@Note</div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Value { get; set; } = "";
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? Note { get; set; }
+    [Parameter] public bool Secret { get; set; }
+
+    private bool revealed;
+    private bool copied;
+
+    private async Task Copy()
+    {
+        await JS.InvokeVoidAsync("panel.copy", Value);
+        copied = true;
+        StateHasChanged();
+        await Task.Delay(1500);
+        copied = false;
+    }
+}

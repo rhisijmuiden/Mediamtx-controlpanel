@@ -1,0 +1,41 @@
+# MediaMTX configuration for use with the MediaMTX Panel.
+# Only settings that differ from the MediaMTX defaults are listed here.
+
+logLevel: info
+
+# All publish/read/API requests are checked by the panel.
+authMethod: http
+# docker-compose overrides this with MTX_AUTHHTTPADDRESS so that it carries the shared secret
+# (?secret=...), which must match MediaMtx__AuthHookSecret of the panel.
+authHTTPAddress: http://panel:8080/api/mediamtx/auth
+authHTTPExclude: []
+
+# Control API, used by the panel. Not published to the host in docker-compose.
+api: true
+apiAddress: :9997
+
+metrics: false
+playback: false
+
+rtsp: true
+rtspAddress: :8554
+rtspTransports: [udp, multicast, tcp]
+rtmp: true
+rtmpAddress: :1935
+srt: true
+srtAddress: :8890
+hls: true
+hlsAddress: :8888
+webrtc: true
+webrtcAddress: :8889
+webrtcLocalUDPAddress: :8189
+# Public IP / host name of the server, so WebRTC works from outside the docker network.
+# docker-compose sets this with MTX_WEBRTCADDITIONALHOSTS.
+webrtcAdditionalHosts: []
+
+# Recordings (enabled per stream in the panel).
+pathDefaults:
+  recordPath: /recordings/%path/%Y-%m-%d_%H-%M-%S-%f
+
+# Paths are created by the panel through the API. Requests for unknown paths are refused.
+paths: {}

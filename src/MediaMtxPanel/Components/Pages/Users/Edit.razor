@@ -1,0 +1,116 @@
+@page "/users/{Id}"
+@attribute [Authorize(Roles = Roles.Admin)]
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@inject UserAdminService UserAdmin
+
+<PageTitle>Gebruiker bewerken</PageTitle>
+
+@if (notFound)
+{
+    <h1>Gebruiker niet gevonden</h1>
+    <a href="users">Terug</a>
+}
+else if (input is null)
+{
+    <p>Laden…</p>
+}
+else
+{
+    <h1>Gebruiker bewerken</h1>
+
+    @if (message is not null)
+    {
+        <div class="alert alert-@(isError ? "danger" : "success")">@message</div>
+    }
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <EditForm Model="input" OnValidSubmit="Save" FormName="edit-user">
+                <DataAnnotationsValidator />
+                <div class="mb-3">
+                    <label class="form-label" for="email">E-mailadres (login)</label>
+                    <InputText id="email" class="form-control" @bind-Value="input.Email" />
+                    <ValidationMessage For="() => input.Email" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="dn">Naam</label>
+                    <InputText id="dn" class="form-control" @bind-Value="input.DisplayName" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="role">Rol</label>
+                    <InputSelect id="role" class="form-select" @bind-Value="input.Role" disabled="@(Id == myId)">
+                        <option value="@Roles.User">Gebruiker</option>
+                        <option value="@Roles.Admin">Beheerder</option>
+                    </InputSelect>
+                </div>
+                <button type="submit" class="btn btn-primary">Opslaan</button>
+                <a class="btn btn-outline-secondary" href="users">Terug</a>
+            </EditForm>
+        </div>
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header"><strong>Wachtwoord opnieuw instellen</strong></div>
+                <div class="card-body">
+                    <div class="input-group mb-2">
+                        <input class="form-control font-monospace" @bind="newPassword" placeholder="Nieuw wachtwoord" />
+                        <button type="button" class="btn btn-outline-secondary" @onclick="GeneratePassword">Genereer</button>
+                    </div>
+                    <button class="btn btn-warning" @onclick="ResetPassword" disabled="@string.IsNullOrWhiteSpace(newPassword)">Wachtwoord instellen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string Id { get; set; } = "";
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
+
+    private EditUserInput? input;
+    private string myId = "";
+    private string? newPassword;
+    private bool notFound;
+    private string? message;
+    private bool isError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        myId = StreamService.UserId((await AuthState).User) ?? "";
+        var u = await UserAdmin.GetAsync(Id);
+        if (u is null)
+        {
+            notFound = true;
+            return;
+        }
+        input = new EditUserInput { Email = u.Email, DisplayName = u.DisplayName, Role = u.Role };
+    }
+
+    private async Task Save()
+    {
+        var r = await UserAdmin.UpdateAsync(Id, input!.Email.Trim(), input.DisplayName, input.Role, myId);
+        Report(r, "Opgeslagen.");
+    }
+
+    private void GeneratePassword() => newPassword = CredentialGenerator.Password(14) + "a1";
+
+    private async Task ResetPassword()
+    {
+        var r = await UserAdmin.ResetPasswordAsync(Id, newPassword!);
+        Report(r, "Wachtwoord is ingesteld. Geef het nieuwe wachtwoord door aan de gebruiker.");
+    }
+
+    private void Report(Microsoft.AspNetCore.Identity.IdentityResult r, string ok)
+    {
+        isError = !r.Succeeded;
+        message = r.Succeeded ? ok : string.Join(" ", r.Errors.Select(e => e.Description));
+    }
+
+    private class EditUserInput
+    {
+        [Required(ErrorMessage = "Vul een e-mailadres in."), EmailAddress(ErrorMessage = "Ongeldig e-mailadres.")]
+        public string Email { get; set; } = "";
+        public string? DisplayName { get; set; }
+        public string Role { get; set; } = Roles.User;
+    }
+}

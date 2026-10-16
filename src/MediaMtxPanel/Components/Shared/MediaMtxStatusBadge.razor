@@ -1,0 +1,18 @@
+@inject MediaMtxStatus Status
+
+@{
+    var states = Status.All.Values.ToList();
+    var up = states.Count(s => s.Connected);
+}
+@if (states.Count == 0)
+{
+    <span class="badge text-bg-secondary">MediaMTX: verbinding controleren…</span>
+}
+else if (up == states.Count)
+{
+    <span class="badge text-bg-success">@(states.Count == 1 ? "MediaMTX-server verbonden" : $"Alle {states.Count} MediaMTX-servers verbonden")</span>
+}
+else
+{
+    <a href="servers" class="badge text-bg-danger text-decoration-none">@(states.Count - up) van @states.Count MediaMTX-server(s) niet bereikbaar</a>
+}

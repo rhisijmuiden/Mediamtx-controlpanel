@@ -1,0 +1,24 @@
+@using MediaMtxPanel.Data
+@using MediaMtxPanel.Services
+
+@if (!Stream.Enabled)
+{
+    <span class="badge text-bg-secondary">Uitgeschakeld</span>
+}
+else if (Live is { IsLive: true })
+{
+    <span class="badge text-bg-success">● Live</span>
+}
+else if (Live is not null)
+{
+    <span class="badge text-bg-warning">Wacht op bron</span>
+}
+else
+{
+    <span class="badge text-bg-light border">Offline</span>
+}
+
+@code {
+    [Parameter, EditorRequired] public StreamDefinition Stream { get; set; } = default!;
+    [Parameter] public MtxPath? Live { get; set; }
+}

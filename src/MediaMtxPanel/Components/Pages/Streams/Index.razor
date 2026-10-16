@@ -1,0 +1,162 @@
+@page "/streams"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@implements IAsyncDisposable
+@inject StreamService Streams
+@inject LiveStatusReader LiveReader
+
+<PageTitle>Streams</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">Streams</h1>
+    <a class="btn btn-primary" href="streams/new">+ Nieuwe stream</a>
+</div>
+
+@foreach (var (serverId, err) in live.Errors)
+{
+    <div class="alert alert-warning py-2">Server @ServerName(serverId) is niet bereikbaar: @err</div>
+}
+@if (message is not null)
+{
+    <div class="alert alert-warning py-2">@message</div>
+}
+
+@if (streams is null)
+{
+    <p>Laden…</p>
+}
+else if (streams.Count == 0)
+{
+    <div class="text-center text-secondary py-5">
+        <p>Er zijn nog geen streams.</p>
+        <a class="btn btn-primary" href="streams/new">Maak je eerste stream aan</a>
+    </div>
+}
+else
+{
+    <div class="d-flex gap-2 mb-3">
+        <input class="form-control" placeholder="Zoeken…" @bind="filter" @bind:event="oninput" />
+        @if (serverNames.Count > 1)
+        {
+            <select class="form-select w-auto" @bind="serverFilter">
+                <option value="0">Alle servers</option>
+                @foreach (var (id, name) in serverNames)
+                {
+                    <option value="@id">@name</option>
+                }
+            </select>
+        }
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Naam</th>
+                    <th>Pad</th>
+                    <th>Server</th>
+                    <th>Bron</th>
+                    <th>Status</th>
+                    <th class="text-end">Kijkers</th>
+                    @if (isAdmin)
+                    {
+                        <th>Eigenaar</th>
+                    }
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var s in Filtered)
+                {
+                    var p = live.Find(s);
+                    <tr>
+                        <td><a href="streams/@s.Id">@s.DisplayName</a></td>
+                        <td><code>@s.Name</code></td>
+                        <td>@s.Server!.Name</td>
+                        <td>@(s.SourceType == StreamSourceType.Publisher ? "Publisher" : "Ophalen")</td>
+                        <td><StreamStateBadge Stream="s" Live="p" /></td>
+                        <td class="text-end">@(p?.Readers.Count ?? 0)</td>
+                        @if (isAdmin)
+                        {
+                            <td class="small">@(s.Owner?.Email ?? "–")</td>
+                        }
+                        <td class="text-end text-nowrap">
+                            <a class="btn btn-sm btn-outline-primary" href="streams/@s.Id">Gegevens</a>
+                            <button class="btn btn-sm btn-outline-secondary" @onclick="() => Toggle(s)">@(s.Enabled ? "Uitschakelen" : "Inschakelen")</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
+
+    private List<StreamDefinition>? streams;
+    private Dictionary<int, string> serverNames = [];
+    private LiveSnapshot live = new();
+    private string? message;
+    private string filter = "";
+    private int serverFilter;
+    private bool isAdmin;
+    private readonly CancellationTokenSource cts = new();
+
+    private IEnumerable<StreamDefinition> Filtered => streams!
+        .Where(s => serverFilter == 0 || s.ServerId == serverFilter)
+        .Where(s => string.IsNullOrWhiteSpace(filter)
+                    || s.Name.Contains(filter, StringComparison.OrdinalIgnoreCase)
+                    || s.DisplayName.Contains(filter, StringComparison.OrdinalIgnoreCase));
+
+    private string ServerName(int id) => serverNames.GetValueOrDefault(id, $"#{id}");
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await AuthState).User;
+        isAdmin = StreamService.IsAdmin(user);
+        await LoadAsync();
+        await RefreshLiveAsync();
+        _ = PollAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        streams = await Streams.ListAsync((await AuthState).User);
+        serverNames = streams.Select(s => s.Server!).DistinctBy(s => s.Id).ToDictionary(s => s.Id, s => s.Name);
+    }
+
+    private async Task PollAsync()
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(5));
+        try
+        {
+            while (await timer.WaitForNextTickAsync(cts.Token))
+            {
+                await RefreshLiveAsync();
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (OperationCanceledException) { }
+    }
+
+    private async Task RefreshLiveAsync()
+    {
+        if (streams is not null)
+            live = await LiveReader.ReadAsync(streams.Select(s => s.Server!), includeInfo: false, cts.Token);
+    }
+
+    private async Task Toggle(StreamDefinition s)
+    {
+        var (_, warning) = await Streams.SetEnabledAsync((await AuthState).User, s.Id, !s.Enabled);
+        message = warning;
+        await LoadAsync();
+        await RefreshLiveAsync();
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        cts.Cancel();
+        cts.Dispose();
+        return ValueTask.CompletedTask;
+    }
+}

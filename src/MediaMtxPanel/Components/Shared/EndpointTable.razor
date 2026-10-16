@@ -1,0 +1,20 @@
+<div class="table-responsive">
+    <table class="table table-sm endpoint-table">
+        <thead>
+            <tr><th style="width: 12rem">Protocol</th><th>URL</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var e in Items)
+            {
+                <tr>
+                    <td><strong>@e.Protocol</strong></td>
+                    <td><CopyField Value="@e.Url" Note="@e.Note" /></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public List<StreamEndpoint> Items { get; set; } = [];
+}

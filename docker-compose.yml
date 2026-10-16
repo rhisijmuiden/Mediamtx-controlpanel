@@ -1,0 +1,44 @@
+services:
+  panel:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      Panel__AdminEmail: ${ADMIN_EMAIL}
+      Panel__AdminPassword: ${ADMIN_PASSWORD}
+      # Address at which other (remote) MediaMTX servers reach the panel, e.g. http://panel.example.com:8080
+      Panel__HookBaseUrl: ${PANEL_URL:-}
+      # The MediaMTX below becomes the first server on first start. Add more under "Servers" in the panel.
+      MediaMtx__ServerName: Standaard
+      MediaMtx__ApiUrl: http://mediamtx:9997
+      MediaMtx__ApiUser: panel
+      MediaMtx__ApiPassword: ${MTX_API_PASSWORD}
+      MediaMtx__AuthHookSecret: ${AUTH_HOOK_SECRET}
+      MediaMtx__PublicHost: ${PUBLIC_HOST}
+    volumes:
+      - panel-data:/app/data
+
+  mediamtx:
+    image: bluenviron/mediamtx:1.21.2
+    restart: unless-stopped
+    environment:
+      MTX_AUTHHTTPADDRESS: http://panel:8080/api/mediamtx/auth?secret=${AUTH_HOOK_SECRET}
+      MTX_WEBRTCADDITIONALHOSTS: ${PUBLIC_HOST}
+    volumes:
+      - ./deploy/mediamtx.yml:/mediamtx.yml:ro
+      - recordings:/recordings
+    ports:
+      - "8554:8554"         # RTSP
+      - "8000:8000/udp"     # RTSP over UDP (RTP)
+      - "8001:8001/udp"     # RTSP over UDP (RTCP)
+      - "1935:1935"         # RTMP
+      - "8890:8890/udp"     # SRT
+      - "8888:8888"         # HLS
+      - "8889:8889"         # WebRTC (HTTP, WHIP/WHEP)
+      - "8189:8189/udp"     # WebRTC (ICE/UDP)
+      # The Control API (9997) stays inside the docker network on purpose.
+
+volumes:
+  panel-data:
+  recordings:
