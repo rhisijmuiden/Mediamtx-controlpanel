@@ -13,8 +13,7 @@
 # Every setting below can be overridden with an environment variable, e.g.
 #     CT_ID=150 CT_IP=192.168.1.50/24 CT_GW=192.168.1.1 bash deploy/proxmox/create-lxc.sh
 #
-# Debian 13 (trixie) instead of Ubuntu 24.04:
-#     CT_OS=debian bash deploy/proxmox/create-lxc.sh
+# The container runs Debian 13 (trixie); Proxmox VE 8.4 or newer has its template.
 set -euo pipefail
 
 # ---------------------------------------------------------------- settings
@@ -46,13 +45,9 @@ PUBLIC_HOST="${PUBLIC_HOST:-}"                     # empty = IP of the container
 REPO="${REPO:-rhisijmuiden/Mediamtx-controlpanel}"
 REPO_BRANCH="${REPO_BRANCH:-main}"
 
-# Container OS: "ubuntu" (24.04) or "debian" (13). TEMPLATE_NAME picks another template of that OS.
-CT_OS="${CT_OS:-ubuntu}"
-case "$CT_OS" in
-  ubuntu) TEMPLATE_NAME="${TEMPLATE_NAME:-ubuntu-24.04-standard}"; NET_CHECK_HOST=archive.ubuntu.com ;;
-  debian) TEMPLATE_NAME="${TEMPLATE_NAME:-debian-13-standard}";   NET_CHECK_HOST=deb.debian.org ;;
-  *) echo "CT_OS must be 'ubuntu' or 'debian' (got '$CT_OS')." >&2; exit 1 ;;
-esac
+# Container OS: Debian 13. TEMPLATE_NAME picks a specific debian-13 template build.
+TEMPLATE_NAME="${TEMPLATE_NAME:-debian-13-standard}"
+NET_CHECK_HOST=deb.debian.org
 
 # ---------------------------------------------------------------- helpers
 c_info="\e[1;34m"; c_ok="\e[1;32m"; c_err="\e[1;31m"; c_off="\e[0m"
@@ -170,7 +165,7 @@ create_args=(
   --unprivileged 1
   --features nesting=1
   --onboot 1
-  --ostype "$CT_OS"
+  --ostype debian
   --password "$CT_PASSWORD"
   --description "MediaMTX Panel"
 )
@@ -208,7 +203,7 @@ fi
 
 cat <<SUMMARY
 
-$(ok "MediaMTX Panel is installed in container $CT_ID ($CT_OS)")
+$(ok "MediaMTX Panel is installed in container $CT_ID (Debian 13)")
 
   ┌──────────────────────────────────────────────────────────────
   │  Open:       http://${ct_ip}:${PANEL_PORT}

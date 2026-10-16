@@ -37,7 +37,7 @@ Zet het paneel in productie achter een reverse proxy met HTTPS (Caddy, nginx, Tr
 
 ## Proxmox LXC
 
-Het script `deploy/proxmox/create-lxc.sh` maakt op een Proxmox VE-host een Ubuntu 24.04- of Debian 13-container aan en installeert daarin het paneel als systemd-service, plus (standaard) MediaMTX als eerste server.
+Het script `deploy/proxmox/create-lxc.sh` maakt op een Proxmox VE-host een Debian 13-container aan en installeert daarin het paneel als systemd-service, plus (standaard) MediaMTX als eerste server.
 
 Plak dit in de shell van de Proxmox-host (als root, bijvoorbeeld via *Datacenter → node → Shell*):
 
@@ -45,17 +45,11 @@ Plak dit in de shell van de Proxmox-host (als root, bijvoorbeeld via *Datacenter
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/proxmox/create-lxc.sh)"
 ```
 
-Een Debian 13-container in plaats van Ubuntu:
-
-```bash
-CT_OS=debian bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/proxmox/create-lxc.sh)"
-```
-
 Het script haalt de broncode zelf van GitHub (`REPO_BRANCH=…` kiest een andere branch). Vanuit een uitgepakte kopie van deze repository werkt `bash deploy/proxmox/create-lxc.sh` ook; dan wordt die code gebruikt.
 
 Als het klaar is, toont het script in de shell het adres (`http://<ip-van-de-container>:8080`), de beheerderslogin en een **eenmalig wachtwoord**. Bij de eerste keer inloggen vraagt het paneel meteen om een eigen wachtwoord; het eenmalige wachtwoord wordt nergens in de container bewaard.
 
-Op Debian komt .NET 10 uit de pakketbron van Microsoft (`packages.microsoft.com`), omdat Debian zelf geen .NET levert. Debian 13-templates vereisen Proxmox VE 8.4 of nieuwer.
+.NET 10 komt uit de pakketbron van Microsoft (`packages.microsoft.com`), omdat Debian zelf geen .NET levert. De Debian 13-template vereist Proxmox VE 8.4 of nieuwer.
 
 Alles is met omgevingsvariabelen aan te passen, bijvoorbeeld:
 
@@ -67,8 +61,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-co
 
 | Variabele | Standaard | Betekenis |
 |---|---|---|
-| `CT_OS` | `ubuntu` | `ubuntu` (24.04) of `debian` (13) |
-| `TEMPLATE_NAME` | `ubuntu-24.04-standard` / `debian-13-standard` | Andere template van hetzelfde OS |
+| `TEMPLATE_NAME` | `debian-13-standard` | Specifieke Debian 13-template |
 | `CT_ID` | volgende vrije ID | Container-ID |
 | `CT_HOSTNAME` | `mediamtx-panel` | Hostnaam |
 | `CT_CORES` / `CT_MEMORY` / `CT_DISK` | 2 / 2048 MB / 8 GB | Resources (bouwen vraagt ±1,5 GB geheugen) |

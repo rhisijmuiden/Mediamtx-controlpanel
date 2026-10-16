@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Installs or updates the MediaMTX Panel inside an LXC container (or machine) running
-# Ubuntu 24.04 or Debian 12/13.
+# Debian 13 (Debian 12 works too).
 # Normally started by create-lxc.sh, which copies the sources to /tmp/mediamtx-panel-install/source.tar.gz.
 #
 # MODE=install  first installation: packages, users, configuration, services
@@ -39,25 +39,18 @@ install_packages() {
   . /etc/os-release
   apt-get update -qq
   apt-get install -y -qq curl ca-certificates tar sqlite3 iproute2 >/dev/null
-  case "$ID" in
-    ubuntu)
-      log "Installing packages (.NET 10 from the Ubuntu archive)…"
-      ;;
-    debian)
-      # Debian does not ship .NET; use Microsoft's package feed for this Debian release.
-      log "Installing packages (.NET 10 from packages.microsoft.com, Debian ${VERSION_ID})…"
-      if ! dpkg -s packages-microsoft-prod >/dev/null 2>&1; then
-        curl -fsSL "https://packages.microsoft.com/config/debian/${VERSION_ID}/packages-microsoft-prod.deb" -o /tmp/packages-microsoft-prod.deb
-        dpkg -i /tmp/packages-microsoft-prod.deb >/dev/null
-        rm -f /tmp/packages-microsoft-prod.deb
-      fi
-      apt-get update -qq
-      ;;
-    *)
-      echo "Unsupported OS '$ID'. Use Ubuntu 24.04 or Debian 12/13." >&2
-      exit 1
-      ;;
-  esac
+  if [[ "$ID" != "debian" ]]; then
+    echo "Unsupported OS '$ID': this installer is made for Debian 13." >&2
+    exit 1
+  fi
+  # Debian does not ship .NET; use Microsoft's package feed for this Debian release.
+  log "Installing packages (.NET 10 from packages.microsoft.com, Debian ${VERSION_ID})…"
+  if ! dpkg -s packages-microsoft-prod >/dev/null 2>&1; then
+    curl -fsSL "https://packages.microsoft.com/config/debian/${VERSION_ID}/packages-microsoft-prod.deb" -o /tmp/packages-microsoft-prod.deb
+    dpkg -i /tmp/packages-microsoft-prod.deb >/dev/null
+    rm -f /tmp/packages-microsoft-prod.deb
+  fi
+  apt-get update -qq
   apt-get install -y -qq dotnet-sdk-10.0 aspnetcore-runtime-10.0 >/dev/null
 }
 
