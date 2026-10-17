@@ -1,3 +1,5 @@
+using System.Net;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -13,7 +15,11 @@ using MediaMtxPanel.Services;
 using MediaMtxPanel.Services.Localization;
 using MediaMtxPanel.Services.Payments;
 
-var builder = WebApplication.CreateBuilder(args);
+// "admin-reset" and "station-info" run a command for deploy/mediamtx-panel-station.sh instead of the web server.
+var stationCommand = StationCommands.Parse(args);
+var builder = WebApplication.CreateBuilder(stationCommand is null ? args : args[1..]);
+if (stationCommand is not null)
+    StationCommands.ConfigureLogging(builder);
 
 // Settings from the panel's Settings page; the web port has to be known before the server starts.
 var settingsStore = new PanelSettingsStore(PanelSettingsStore.ResolvePath(builder.Configuration, builder.Environment.ContentRootPath));
@@ -35,6 +41,9 @@ builder.Services.AddAuthentication(options =>
         options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
     })
     .AddIdentityCookies();
+// Station contract: "Authorization: Bearer <Panel:ServiceToken>" on /api/v1 only; does nothing without a token.
+builder.Services.AddAuthentication()
+    .AddScheme<AuthenticationSchemeOptions, ServiceTokenAuthenticationHandler>(ServiceTokenAuthenticationHandler.SchemeName, null);
 builder.Services.AddAuthorization();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
@@ -100,13 +109,59 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
     options.KnownIPNetworks.Clear();
     options.KnownProxies.Clear();
+    // Panel:TrustedProxies: only these addresses may set X-Forwarded-*; without it any address may (as before).
+    var trusted = builder.Configuration["Panel:TrustedProxies"];
+    if (!string.IsNullOrWhiteSpace(trusted))
+    {
+        options.ForwardedHeaders |= ForwardedHeaders.XForwardedHost;
+        foreach (var entry in trusted.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            if (System.Net.IPNetwork.TryParse(entry, out var network) && entry.Contains('/'))
+                options.KnownIPNetworks.Add(network);
+            else if (IPAddress.TryParse(entry, out var address))
+                options.KnownProxies.Add(address);
+            else
+                throw new InvalidOperationException($"Panel:TrustedProxies: '{entry}' is not an IP address or CIDR.");
+        }
+    }
 });
 
 var app = builder.Build();
 
 await DbInitializer.InitializeAsync(app.Services);
 
+if (stationCommand is not null)
+{
+    Environment.ExitCode = await StationCommands.RunAsync(app, stationCommand);
+    return;
+}
+
+if (app.Configuration["Panel:ServiceToken"] is { Length: > 0 and < ServiceTokenAuthenticationHandler.MinimumLength })
+    app.Logger.LogWarning("Panel:ServiceToken is shorter than {Length} characters and is ignored", ServiceTokenAuthenticationHandler.MinimumLength);
+
 app.UseForwardedHeaders();
+
+// Panel:PathBase (e.g. /channel1): pages, assets, APIs, redirects and cookies live under it. The proxy
+// forwards the full path. Requests outside it (/healthz, the MediaMTX auth hook on 127.0.0.1) still work.
+var pathBase = PanelOptions.NormalizePathBase(app.Configuration["Panel:PathBase"]);
+if (pathBase.Length > 0)
+{
+    app.Use((context, next) =>
+    {
+        if (context.Request.Path.Equals(pathBase, StringComparison.OrdinalIgnoreCase))
+        {
+            context.Response.Redirect($"{context.Request.PathBase}{pathBase}/{context.Request.QueryString}");
+            return Task.CompletedTask;
+        }
+        return next(context);
+    });
+    app.UsePathBase(pathBase);
+    // Routing and authentication must run after UsePathBase, so that routes and cookie paths see the base path.
+    app.UseRouting();
+    app.UseAuthentication();
+    app.UseAuthorization();
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
@@ -144,6 +199,7 @@ app.MapRazorComponents<App>()
 
 app.MapAdditionalIdentityEndpoints();
 app.MapMediaMtxAuth();
+app.MapStationEndpoints();
 app.MapPaymentEndpoints();
 app.MapLanguageEndpoint();
 

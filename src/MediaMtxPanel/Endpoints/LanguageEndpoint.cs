@@ -16,9 +16,9 @@ public static class LanguageEndpoint
             context.Response.Cookies.Append(
                 CookieRequestCultureProvider.DefaultCookieName,
                 CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(language)),
-                new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1), IsEssential = true, HttpOnly = true, SameSite = SameSiteMode.Lax });
+                new CookieOptions { Path = context.Request.PathBase.HasValue ? context.Request.PathBase.Value : "/", Expires = DateTimeOffset.UtcNow.AddYears(1), IsEssential = true, HttpOnly = true, SameSite = SameSiteMode.Lax });
             var target = string.IsNullOrEmpty(returnUrl) ? "/" : "/" + returnUrl.TrimStart('/');
-            // Only local paths: never redirect to another site.
-            return Results.LocalRedirect(target.StartsWith("//") || target.StartsWith("/\\") ? "/" : target);
+            // Only local paths: never redirect to another site. "~" keeps the redirect under the path base.
+            return Results.LocalRedirect("~" + (target.StartsWith("//") || target.StartsWith("/\\") ? "/" : target));
         }).AllowAnonymous();
 }

@@ -1,6 +1,6 @@
 name: Build
 
-# Every push and pull request: build the panel and check the translations.
+# Every push and pull request: build the panel, run the tests and check the translations.
 # Every push to main: also start the panel with MediaMTX, take fresh screenshots for the README
 # (docs/screenshots) and commit them when they changed.
 on:
@@ -28,6 +28,8 @@ jobs:
           dotnet-version: "10.0.x"
       - name: Build
         run: dotnet publish src/MediaMtxPanel/MediaMtxPanel.csproj -c Release -o publish -p:SourceRevisionId=${{ github.sha }}
+      - name: Test
+        run: dotnet test MediaMtxPanel.slnx
       - name: Check translations
         run: python3 tools/check-translations.py
       - uses: actions/upload-artifact@v4
