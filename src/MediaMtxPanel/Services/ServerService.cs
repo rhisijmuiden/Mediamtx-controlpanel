@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using MediaMtxPanel.Data;
+using MediaMtxPanel.Services.Setup;
 using Microsoft.EntityFrameworkCore;
 
 namespace MediaMtxPanel.Services;
@@ -80,12 +81,16 @@ public class ServerInput
 
 public record ServerTestResult(bool Ok, string Message);
 
+/// <param name="Configured">MediaMTX on the server now uses the panel (even when the API test failed).</param>
+public record SshConfigureResult(bool Ok, bool Configured, string Message);
+
 /// <summary>Management of the MediaMTX servers the panel controls.</summary>
 public class ServerService(
     IDbContextFactory<ApplicationDbContext> dbFactory,
     MediaMtxClientFactory clients,
     MediaMtxSyncService sync,
-    MediaMtxStatus status)
+    MediaMtxStatus status,
+    SshServerSetup sshSetup)
 {
     public async Task<List<MediaServer>> ListAsync(bool enabledOnly = false, CancellationToken ct = default)
     {
@@ -114,9 +119,9 @@ public class ServerService(
         return await db.Servers.AnyAsync(s => s.Name == name && s.Id != exceptId, ct);
     }
 
-    public async Task<MediaServer> CreateAsync(ServerInput input, CancellationToken ct = default)
+    public async Task<MediaServer> CreateAsync(ServerInput input, string? hookSecret = null, CancellationToken ct = default)
     {
-        var server = new MediaServer { HookSecret = CredentialGenerator.Password(32) };
+        var server = new MediaServer { HookSecret = hookSecret ?? CredentialGenerator.Password(32) };
         input.ApplyTo(server);
         await using var db = await dbFactory.CreateDbContextAsync(ct);
         db.Servers.Add(server);
@@ -191,5 +196,34 @@ public class ServerService(
             status.Report(id, false, null, ex.Message);
             return new(false, $"Cannot connect to {server.ApiUrl}: {ex.Message}");
         }
+    }
+
+    /// <summary>
+    /// Configures MediaMTX on the server over SSH so that it uses the panel (see <see cref="SshServerSetup"/>),
+    /// then waits for the Control API to answer and synchronizes the server's streams.
+    /// </summary>
+    public async Task<SshConfigureResult> ConfigureOverSshAsync(int id, SshLoginInput login, string hookUrl,
+        Action<string> log, CancellationToken ct = default)
+    {
+        var server = await GetAsync(id, ct);
+        if (server is null)
+            return new(false, false, "Server not found.");
+
+        var setup = await sshSetup.ConfigureAsync(server, login, hookUrl, log, ct);
+        if (!setup.Ok)
+            return new(false, false, setup.Message);
+
+        log($"Connecting to the Control API at {server.ApiUrl}…");
+        ServerTestResult test = new(false, "");
+        for (var attempt = 0; attempt < 5; attempt++)
+        {
+            if (attempt > 0)
+                await Task.Delay(TimeSpan.FromSeconds(2), ct);
+            test = await TestAndSyncAsync(id, ct);
+            if (test.Ok)
+                return new(true, true, $"{setup.Message} {test.Message}");
+        }
+        return new(false, true, $"{setup.Message} But the panel cannot use the Control API yet: {test.Message} " +
+                          $"Check that port {new Uri(server.ApiUrl).Port} on the server is reachable from the panel (firewall, NAT) and that the API URL is correct.");
     }
 }

@@ -1,0 +1,49 @@
+@* Manual instructions for preparing a MediaMTX server so the panel can manage it. *@
+@inject IJSRuntime JS
+
+<ol class="small ps-3 mb-0">
+    <li class="mb-2">
+        Install <a href="https://github.com/bluenviron/mediamtx/releases" target="_blank" rel="noopener">MediaMTX</a> v1.16 or newer
+        on the server, for example as a systemd service.
+    </li>
+    <li class="mb-2">
+        Put these settings in the server's <code>mediamtx.yml</code>, replacing the existing lines with the same names
+        (often <code>/usr/local/etc/mediamtx.yml</code> or <code>/etc/mediamtx/mediamtx.yml</code>):
+        <pre class="cmd mt-2">@Snippet</pre>
+        <button type="button" class="btn btn-outline-primary btn-sm mb-2" @onclick="Copy">@(copied ? "Copied ✓" : "Copy")</button>
+        <div class="text-secondary">
+            <code>authHTTPExclude: []</code> matters: otherwise MediaMTX lets API requests through without asking the panel.
+            In Docker, mount this <code>mediamtx.yml</code> into the container. When the file already has these settings,
+            the environment variable <code>MTX_AUTHHTTPADDRESS=@HookUrl</code> alone is enough.
+        </div>
+    </li>
+    <li class="mb-2">
+        Check the network in both directions: the server must reach the panel at <code>@PanelBase</code>, and the panel must reach
+        port <code>@ApiPort</code> on the server. Open that port to the panel only, for example
+        <code>ufw allow from &lt;panel IP&gt; to any port @ApiPort proto tcp</code>.
+    </li>
+    <li class="mb-2">Restart MediaMTX: <code>systemctl restart mediamtx</code>.</li>
+    <li>@LastStep</li>
+</ol>
+
+@code {
+    [Parameter, EditorRequired] public string HookUrl { get; set; } = "";
+    [Parameter] public int ApiPort { get; set; } = 9997;
+    [Parameter] public string? PublicHost { get; set; }
+    [Parameter] public string LastStep { get; set; } = "Click Test connection.";
+
+    private string Snippet => MediaMtxConfigEditor.ManualSnippet(HookUrl, ApiPort, PublicHost);
+
+    private bool copied;
+
+    private async Task Copy()
+    {
+        await JS.InvokeVoidAsync("panel.copy", Snippet);
+        copied = true;
+        StateHasChanged();
+        await Task.Delay(1500);
+        copied = false;
+    }
+
+    private string PanelBase => HookUrl.Split("/api/mediamtx/auth")[0];
+}

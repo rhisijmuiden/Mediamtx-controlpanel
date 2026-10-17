@@ -23,11 +23,24 @@ else
 {
     <h1>@(IsNew ? "Add MediaMTX server" : server!.Name)</h1>
 
-    @if (Created)
+    @if (Created && Setup == "ok")
     {
         <div class="alert alert-success">
-            <strong>Server added.</strong> Put the configuration below in this server's <code>mediamtx.yml</code>,
-            restart MediaMTX and then click <em>Test connection</em>.
+            <strong>Server added.</strong> MediaMTX on this server was configured over SSH and the panel is connected.
+        </div>
+    }
+    else if (Created && Setup == "api")
+    {
+        <div class="alert alert-warning">
+            <strong>Server added.</strong> MediaMTX on this server was configured over SSH, but the panel cannot reach its Control API yet.
+            Check that port @ApiPort on the server is open to the panel and that the API URL is correct, then click <em>Test connection</em>.
+        </div>
+    }
+    else if (Created)
+    {
+        <div class="alert alert-success">
+            <strong>Server added.</strong> Set up MediaMTX on the server as described on the right, or configure it over SSH,
+            and then click <em>Test connection</em>.
         </div>
     }
     @if (message is not null)
@@ -100,9 +113,31 @@ else
                             <label class="form-check-label" for="unmanaged">Remove paths that are not in the panel</label>
                         </div>
                     </div>
+                    @if (IsNew)
+                    {
+                        <div class="col-12"><h2 class="h6 mb-0 mt-2">Setup</h2></div>
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="usessh" @bind="useSsh" disabled="@running" />
+                                <label class="form-check-label" for="usessh">Configure MediaMTX on the server over SSH</label>
+                            </div>
+                            <div class="form-text">
+                                The panel logs in to the server, sets up MediaMTX for the panel (and installs it if needed), restarts it
+                                and adds the server once the connection works. Without SSH, follow the steps on the right.
+                            </div>
+                        </div>
+                        @if (useSsh)
+                        {
+                            <div class="col-12">
+                                <SshSetupFields Login="ssh" Disabled="running" HostChanged="FillFromSshHost" />
+                            </div>
+                        }
+                    }
                 </div>
                 <div class="mt-4 d-flex flex-wrap gap-2">
-                    <button type="submit" class="btn btn-primary">@(IsNew ? "Add server" : "Save")</button>
+                    <button type="submit" class="btn btn-primary" disabled="@running">
+                        @(running ? "Setting up…" : IsNew ? (useSsh ? "Set up and add server" : "Add server") : "Save")
+                    </button>
                     @if (!IsNew)
                     {
                         <button type="button" class="btn btn-outline-success" @onclick="Test" disabled="@testing">@(testing ? "Testing…" : "Test connection")</button>
@@ -119,32 +154,60 @@ else
                     <a class="btn btn-outline-secondary" href="servers">Back</a>
                 </div>
             </EditForm>
+
+            @if (setupLog.Count > 0)
+            {
+                <h2 class="h6 mt-4">Setup log</h2>
+                <pre class="cmd small">@string.Join("\n", setupLog)</pre>
+            }
         </div>
 
-        @if (!IsNew)
-        {
-            <div class="col-xl-6">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <strong>Configuration for mediamtx.yml</strong>
-                        <button class="btn btn-link btn-sm p-0" @onclick="RegenerateSecret">New secret</button>
-                    </div>
+        <div class="col-xl-6">
+            @if (!IsNew)
+            {
+                <div class="card mb-4">
+                    <div class="card-header"><strong>Configure over SSH</strong></div>
                     <div class="card-body">
-                        <p class="small">Add this to this server's <code>mediamtx.yml</code> and restart MediaMTX. The panel must be reachable at the address in <code>authHTTPAddress</code>, and the server must open the API port to the panel.</p>
-                        <pre class="cmd">@ConfigSnippet</pre>
-                        <CopyField Value="@ConfigSnippet" Label="Copy" />
-                        <p class="small text-secondary mb-0">Or set this environment variable instead (e.g. in Docker or systemd):</p>
-                        <CopyField Value="@($"MTX_AUTHHTTPADDRESS={HookUrl}")" />
+                        @if (!showSsh)
+                        {
+                            <p class="small mb-2">
+                                Let the panel log in to this server and set up MediaMTX for it, for example after creating a new secret
+                                or changing the API URL.
+                            </p>
+                            <button type="button" class="btn btn-outline-primary btn-sm" @onclick="() => showSsh = true">Configure over SSH</button>
+                        }
+                        else
+                        {
+                            <SshSetupFields Login="ssh" Disabled="running" />
+                            <button type="button" class="btn btn-primary mt-3" @onclick="ConfigureExisting" disabled="@running">
+                                @(running ? "Setting up…" : "Configure MediaMTX")
+                            </button>
+                        }
                     </div>
                 </div>
+            }
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <strong>Manual setup</strong>
+                    @if (!IsNew)
+                    {
+                        <button class="btn btn-link btn-sm p-0" @onclick="RegenerateSecret">New secret</button>
+                    }
+                </div>
+                <div class="card-body">
+                    <p class="small">To set up MediaMTX on the server yourself so that the panel can manage it:</p>
+                    <ServerSetupGuide HookUrl="@HookUrl" ApiPort="ApiPort" PublicHost="@input.PublicHost"
+                                      LastStep="@(IsNew ? "Fill in this form and click Add server, then Test connection." : "Click Test connection.")" />
+                </div>
             </div>
-        }
+        </div>
     </div>
 }
 
 @code {
     [Parameter] public int? Id { get; set; }
     [SupplyParameterFromQuery] public bool Created { get; set; }
+    [SupplyParameterFromQuery] public string? Setup { get; set; }
 
     private bool IsNew => Id is null;
     private ServerInput? input;
@@ -155,33 +218,28 @@ else
     private string? message;
     private bool isError;
 
+    // SSH setup. The login lives only in this page's memory and is never saved.
+    private SshLoginInput ssh = new();
+    private bool useSsh;
+    private bool showSsh;
+    private bool running;
+    private readonly List<string> setupLog = [];
+
+    /// <summary>A new server gets its secret up front, so the manual instructions can show the final configuration.</summary>
+    private readonly string newHookSecret = CredentialGenerator.Password(32);
+
     private string HookBase => (string.IsNullOrWhiteSpace(PanelOptions.Value.HookBaseUrl)
         ? Nav.BaseUri
         : PanelOptions.Value.HookBaseUrl).TrimEnd('/');
 
-    private string HookUrl => $"{HookBase}/api/mediamtx/auth?secret={server!.HookSecret}";
+    private string HookUrl => ssh.HookUrl(IsNew ? newHookSecret : server!.HookSecret);
 
-    private string ConfigSnippet => $"""
-        authMethod: http
-        authHTTPAddress: {HookUrl}
-        authHTTPExclude: []
-
-        api: true
-        apiAddress: :9997
-
-        rtspAddress: :{server!.RtspPort}
-        rtmpAddress: :{server.RtmpPort}
-        srtAddress: :{server.SrtPort}
-        hlsAddress: :{server.HlsPort}
-        webrtcAddress: :{server.WebRtcPort}
-        webrtcAdditionalHosts: [{server.PublicHost}]
-
-        # Paths are created by the panel.
-        paths: {"{}"}
-        """;
+    private int ApiPort => Uri.TryCreate(input?.ApiUrl, UriKind.Absolute, out var uri) && uri.Host.Length > 0 ? uri.Port : 9997;
 
     protected override async Task OnParametersSetAsync()
     {
+        if (string.IsNullOrEmpty(ssh.PanelUrl))
+            ssh.PanelUrl = HookBase;
         if (IsNew)
         {
             input ??= new ServerInput();
@@ -194,6 +252,8 @@ else
             return;
         }
         input = ServerInput.From(server);
+        if (string.IsNullOrEmpty(ssh.Host) && Uri.TryCreate(server.ApiUrl, UriKind.Absolute, out var api))
+            ssh.Host = api.Host;
     }
 
     private async Task Save()
@@ -205,9 +265,14 @@ else
             return;
         }
 
+        if (IsNew && useSsh)
+        {
+            await AddWithSsh();
+            return;
+        }
         if (IsNew)
         {
-            var created = await ServerAdmin.CreateAsync(input);
+            var created = await ServerAdmin.CreateAsync(input, newHookSecret);
             Nav.NavigateTo($"servers/{created.Id}?created=true");
             return;
         }
@@ -215,6 +280,68 @@ else
         server = await ServerAdmin.UpdateAsync(Id!.Value, input);
         var test = server!.Enabled ? await ServerAdmin.TestAndSyncAsync(server.Id) : null;
         Show(test is null ? "Saved." : $"Saved. {test.Message}", test is { Ok: false });
+    }
+
+    /// <summary>
+    /// Adds the server and configures it over SSH. When nothing could be changed on the server, the server is
+    /// removed again so the admin can correct the details; once MediaMTX points at the panel, the server stays.
+    /// </summary>
+    private async Task AddWithSsh()
+    {
+        if (SshSetupFields.Validate(ssh) is { } problem)
+        {
+            Show(problem, true);
+            return;
+        }
+        running = true;
+        setupLog.Clear();
+        var created = await ServerAdmin.CreateAsync(input!, newHookSecret);
+        var result = await ServerAdmin.ConfigureOverSshAsync(created.Id, ssh, ssh.HookUrl(newHookSecret), Log);
+        running = false;
+        if (result.Configured)
+        {
+            ssh.ForgetSecrets();
+            Nav.NavigateTo($"servers/{created.Id}?created=true&setup={(result.Ok ? "ok" : "api")}");
+            return;
+        }
+        await ServerAdmin.DeleteAsync(created.Id);
+        Show($"{result.Message} The server was not added.", true);
+    }
+
+    private async Task ConfigureExisting()
+    {
+        if (SshSetupFields.Validate(ssh) is { } problem)
+        {
+            Show(problem, true);
+            return;
+        }
+        running = true;
+        setupLog.Clear();
+        message = null;
+        var result = await ServerAdmin.ConfigureOverSshAsync(Id!.Value, ssh, HookUrl, Log);
+        running = false;
+        if (result.Ok)
+            ssh.ForgetSecrets();
+        Show(result.Message, !result.Ok);
+    }
+
+    /// <summary>Called from the setup's worker thread; shows each step as it happens.</summary>
+    private void Log(string line) => _ = InvokeAsync(() =>
+    {
+        setupLog.Add(line);
+        StateHasChanged();
+    });
+
+    /// <summary>Suggests the API URL and public address from the SSH host while they are still empty.</summary>
+    private void FillFromSshHost(string host)
+    {
+        host = host.Trim();
+        if (host.Length == 0)
+            return;
+        if (string.IsNullOrWhiteSpace(input!.ApiUrl) || input.ApiUrl.Trim() is "http://" or "https://")
+            input.ApiUrl = $"http://{host}:9997";
+        if (string.IsNullOrWhiteSpace(input.PublicHost))
+            input.PublicHost = host;
     }
 
     private async Task Test()

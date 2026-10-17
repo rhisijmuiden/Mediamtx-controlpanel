@@ -7,6 +7,7 @@ A control panel for [MediaMTX](https://github.com/bluenviron/mediamtx), written 
 - **Right after creating a stream** the panel shows the credentials (publish and view), the OBS settings, all endpoints (RTSP, RTMP, SRT, WebRTC WHIP/WHEP, HLS) with copy buttons, and example commands for ffmpeg/ffplay.
 - **Live status**: the dashboard and stream pages show live/offline, codecs, viewers and traffic; publishers and viewers can be disconnected.
 - **Multiple MediaMTX servers**: administrators add as many MediaMTX instances as needed under *Servers*. Each stream is assigned to a server; its URLs use that server's public address and ports. The dashboard shows whether each server is online.
+- **Server setup over SSH**: when adding a server, the administrator can enter its SSH login. The panel then logs in, installs MediaMTX if it is missing, points it at the panel, restarts it and adds the server as soon as the connection works (see [Adding a MediaMTX server](#adding-a-mediamtx-server)).
 - **Customer portal**: customers log in and see their own streams with a live preview, a tab with exactly what they need to broadcast, and a bar with CPU, RAM, load, network, bitrate and viewers (see [Customer portal and paywall](#customer-portal-and-paywall)).
 - **Paywall**: customers sell tickets for their stream (e.g. a day ticket or a week pass) and let viewers pay with iDEAL (Mollie) or PayPal.
 - **Proxmox**: create an LXC container with the panel and MediaMTX using a single command in the Proxmox shell (see [Proxmox LXC](#proxmox-lxc)).
@@ -100,7 +101,7 @@ The script `deploy/proxmox/create-lxc.sh` creates a Debian 13 container on a Pro
 - **Firewall and port forwarding**: open the MediaMTX ports you use: 8554 (RTSP), 1935 (RTMP), 8890/udp (SRT), 8888 (HLS), 8889 and 8189/udp (WebRTC), plus the panel port (8080).
 - **HTTPS**: for use on the internet, put the panel behind a reverse proxy with HTTPS (Caddy, nginx, Traefik). Forwarded headers are supported.
 - **Root password**: if you shared the container's root password anywhere, change it with `pct exec <CTID> -- passwd`.
-- **More servers**: other containers or VMs that run only MediaMTX can be added under **Servers** in the panel.
+- **More servers**: other containers or VMs that run only MediaMTX can be added under **Servers** in the panel, optionally set up over SSH (see [Adding a MediaMTX server](#adding-a-mediamtx-server)).
 
 Inside the container:
 
@@ -243,6 +244,21 @@ userdel mediamtx-panel; userdel mediamtx
 ```
 
 This deletes the database and recordings too.
+
+## Adding a MediaMTX server
+
+Under **Servers → Add server** you fill in the server's API URL and public address. Then there are two ways to prepare MediaMTX on that server:
+
+- **Over SSH**: turn on *Configure MediaMTX on the server over SSH* and enter the SSH host, user and password (or a private key). The user must be root or allowed to use sudo. The panel:
+  1. finds MediaMTX (a systemd service, a Docker container with a mounted `mediamtx.yml`, or the usual install locations) and installs MediaMTX v1.21.2 as `mediamtx.service` if it is missing (turn this off if you prefer to install it yourself);
+  2. checks that the server can reach the panel at the *panel address*; if not, it stops without changing anything;
+  3. sets `authMethod: http`, `authHTTPAddress` (with this server's secret), `authHTTPExclude: []`, `api: yes` and `apiAddress` in `mediamtx.yml`, keeping a backup next to it (`mediamtx.yml.bak-<date>`), and restarts MediaMTX. If MediaMTX does not start with the new file, the backup is put back;
+  4. connects to the Control API and adds the server. If nothing could be changed on the server, the server is not added and the page shows why.
+
+  The SSH password or key is only used for that run and is not saved. On an existing server's page, *Configure over SSH* runs the same steps again, for example after *New secret*.
+- **By hand**: the page shows the `mediamtx.yml` settings for this server and the steps to apply them. MediaMTX v1.16 or newer is needed.
+
+Either way, the server must reach the panel's address, and the panel must reach the server's API port (9997 by default). Open that port to the panel only.
 
 ## Customer portal and paywall
 
