@@ -1,0 +1,47 @@
+@* Manual instructions for preparing a MediaMTX server so the panel can manage it. *@
+@inject IJSRuntime JS
+
+<ol class="small ps-3 mb-0">
+    <li class="mb-2">
+        @L["Install MediaMTX v1.16 or newer on the server, for example as a systemd service:"]
+        <a href="https://github.com/bluenviron/mediamtx/releases" target="_blank" rel="noopener">github.com/bluenviron/mediamtx/releases</a>
+    </li>
+    <li class="mb-2">
+        @L["Put these settings in the server's mediamtx.yml, replacing the existing lines with the same names (often {0} or {1}):", "/usr/local/etc/mediamtx.yml", "/etc/mediamtx/mediamtx.yml"]
+        <pre class="cmd mt-2">@Snippet</pre>
+        <button type="button" class="btn btn-outline-primary btn-sm mb-2" @onclick="Copy">@(copied ? L["Copied ✓"] : L["Copy"])</button>
+        <div class="text-secondary">
+            @L["authHTTPExclude: [] matters: otherwise MediaMTX lets API requests through without asking the panel."]
+            @L["In Docker, mount this mediamtx.yml into the container. When the file already has these settings, this environment variable alone is enough:"]
+            <code>MTX_AUTHHTTPADDRESS=@HookUrl</code>
+        </div>
+    </li>
+    <li class="mb-2">
+        @L["Check the network in both directions: the server must reach the panel at {0}, and the panel must reach port {1} on the server. Open that port to the panel only, for example:", PanelBase, ApiPort]
+        <code>ufw allow from &lt;panel IP&gt; to any port @ApiPort proto tcp</code>
+    </li>
+    <li class="mb-2">@L["Restart MediaMTX:"] <code>systemctl restart mediamtx</code></li>
+    <li>@LastStep</li>
+</ol>
+
+@code {
+    [Parameter, EditorRequired] public string HookUrl { get; set; } = "";
+    [Parameter] public int ApiPort { get; set; } = 9997;
+    [Parameter] public string? PublicHost { get; set; }
+    [Parameter] public string LastStep { get; set; } = "";
+
+    private string Snippet => MediaMtxConfigEditor.ManualSnippet(HookUrl, ApiPort, PublicHost);
+
+    private bool copied;
+
+    private async Task Copy()
+    {
+        await JS.InvokeVoidAsync("panel.copy", Snippet);
+        copied = true;
+        StateHasChanged();
+        await Task.Delay(1500);
+        copied = false;
+    }
+
+    private string PanelBase => HookUrl.Split("/api/mediamtx/auth")[0];
+}

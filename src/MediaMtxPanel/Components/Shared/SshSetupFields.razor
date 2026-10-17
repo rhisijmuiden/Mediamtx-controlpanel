@@ -1,0 +1,79 @@
+@* SSH login fields for setting up MediaMTX on a server. Plain inputs, so it works inside and outside an EditForm. *@
+
+<div class="row g-3">
+    <div class="col-md-5">
+        <label class="form-label" for="sshhost">@L["SSH host"]</label>
+        <input id="sshhost" class="form-control font-monospace" @bind="Login.Host" @bind:after="OnHostChanged" placeholder="10.0.0.21" disabled="@Disabled" />
+    </div>
+    <div class="col-md-3">
+        <label class="form-label" for="sshport">@L["Port"]</label>
+        <input id="sshport" type="number" class="form-control" @bind="Login.Port" disabled="@Disabled" />
+    </div>
+    <div class="col-md-4">
+        <label class="form-label" for="sshuser">@L["User"]</label>
+        <input id="sshuser" class="form-control font-monospace" @bind="Login.User" autocomplete="off" disabled="@Disabled" />
+    </div>
+    <div class="col-12">
+        <label class="form-label" for="sshpass">@L["Password"]</label>
+        <input id="sshpass" type="password" class="form-control" @bind="Login.Password" autocomplete="new-password" disabled="@Disabled" />
+        <div class="form-text">@L["Used to log in and, for a user other than root, for sudo. The panel does not store it."]</div>
+    </div>
+    <div class="col-12">
+        @if (!showKey)
+        {
+            <button type="button" class="btn btn-link btn-sm p-0" @onclick="() => showKey = true">@L["Log in with a private key instead"]</button>
+        }
+        else
+        {
+            <label class="form-label" for="sshkey">@L["Private key"]</label>
+            <textarea id="sshkey" class="form-control font-monospace small" rows="4" @bind="Login.PrivateKey" disabled="@Disabled"
+                      placeholder="-----BEGIN OPENSSH PRIVATE KEY-----"></textarea>
+            <label class="form-label mt-2" for="sshkeypass">@L["Key passphrase (if any)"]</label>
+            <input id="sshkeypass" type="password" class="form-control" @bind="Login.KeyPassphrase" autocomplete="off" disabled="@Disabled" />
+        }
+    </div>
+    <div class="col-12">
+        <label class="form-label" for="panelurl">@L["Panel address, as the server reaches it"]</label>
+        <input id="panelurl" class="form-control font-monospace" @bind="Login.PanelUrl" placeholder="http://10.0.0.10:8080" disabled="@Disabled" />
+        <div class="form-text">@L["MediaMTX asks the panel at this address whether a broadcaster or viewer may connect."]</div>
+    </div>
+    <div class="col-12">
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="sshinstall" @bind="Login.InstallIfMissing" disabled="@Disabled" />
+            <label class="form-check-label" for="sshinstall">@L["Install MediaMTX v{0} when it is missing", SshServerSetup.MediaMtxVersion]</label>
+        </div>
+    </div>
+    <div class="col-12">
+        @if (!showAdvanced)
+        {
+            <button type="button" class="btn btn-link btn-sm p-0" @onclick="() => showAdvanced = true">@L["Advanced"]</button>
+        }
+        else
+        {
+            <label class="form-label" for="sshconf">@L["Path of mediamtx.yml (optional)"]</label>
+            <input id="sshconf" class="form-control font-monospace" @bind="Login.ConfigPath" placeholder="@L["found automatically"]" disabled="@Disabled" />
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public SshLoginInput Login { get; set; } = default!;
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public EventCallback<string> HostChanged { get; set; }
+
+    private bool showKey;
+    private bool showAdvanced;
+
+    private Task OnHostChanged() => HostChanged.InvokeAsync(Login.Host);
+
+    /// <summary>Returns what is missing or wrong in the SSH details, or null when they can be used.</summary>
+    public static string? Validate(SshLoginInput login, TextLocalizer l)
+    {
+        var results = new List<System.ComponentModel.DataAnnotations.ValidationResult>();
+        if (!System.ComponentModel.DataAnnotations.Validator.TryValidateObject(login, new(login), results, validateAllProperties: true))
+            return l[results[0].ErrorMessage ?? ""];
+        if (string.IsNullOrEmpty(login.Password) && string.IsNullOrWhiteSpace(login.PrivateKey))
+            return l["Enter the SSH password or a private key."];
+        return null;
+    }
+}

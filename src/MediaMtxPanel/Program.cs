@@ -12,6 +12,7 @@ using MediaMtxPanel.Options;
 using MediaMtxPanel.Services;
 using MediaMtxPanel.Services.Localization;
 using MediaMtxPanel.Services.Payments;
+using MediaMtxPanel.Services.Setup;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,6 +67,7 @@ builder.Services.AddHttpClient("mediamtx");
 builder.Services.AddSingleton<MediaMtxClientFactory>();
 builder.Services.AddScoped<StreamService>();
 builder.Services.AddScoped<ServerService>();
+builder.Services.AddSingleton<SshServerSetup>();
 builder.Services.AddSingleton<LiveStatusReader>();
 builder.Services.AddSingleton<ServerMetricsReader>();
 builder.Services.AddHttpClient("metrics");
