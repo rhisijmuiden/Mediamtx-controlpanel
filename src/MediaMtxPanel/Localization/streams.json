@@ -1,0 +1,469 @@
+{
+  "Dashboard": { "nl": "Dashboard", "de": "Dashboard", "fr": "Tableau de bord" },
+  "What is live right now, how many people are watching and whether your servers are reachable. Updates every few seconds.": {
+    "nl": "Wat er nu live is, hoeveel mensen kijken en of je servers bereikbaar zijn. Wordt om de paar seconden bijgewerkt.",
+    "de": "Was gerade live ist, wie viele Personen zuschauen und ob deine Server erreichbar sind. Wird alle paar Sekunden aktualisiert.",
+    "fr": "Ce qui est en direct, combien de personnes regardent et si vos serveurs sont joignables. Mis à jour toutes les quelques secondes."
+  },
+  "All streams": { "nl": "Alle streams", "de": "Alle Streams", "fr": "Tous les flux" },
+  "New stream": { "nl": "Nieuwe stream", "de": "Neuer Stream", "fr": "Nouveau flux" },
+  "No MediaMTX server has been connected yet.": {
+    "nl": "Er is nog geen MediaMTX-server gekoppeld.",
+    "de": "Es ist noch kein MediaMTX-Server verbunden.",
+    "fr": "Aucun serveur MediaMTX n'est encore connecté."
+  },
+  "Add a server": { "nl": "Server toevoegen", "de": "Server hinzufügen", "fr": "Ajouter un serveur" },
+  "Ask an administrator to add a server.": {
+    "nl": "Vraag een beheerder om een server toe te voegen.",
+    "de": "Bitte einen Administrator, einen Server hinzuzufügen.",
+    "fr": "Demandez à un administrateur d'ajouter un serveur."
+  },
+  "Streams": { "nl": "Streams", "de": "Streams", "fr": "Flux" },
+  "Live now": { "nl": "Nu live", "de": "Jetzt live", "fr": "En direct" },
+  "Viewers": { "nl": "Kijkers", "de": "Zuschauer", "fr": "Spectateurs" },
+  "Servers online": { "nl": "Servers online", "de": "Server online", "fr": "Serveurs en ligne" },
+  "Servers": { "nl": "Servers", "de": "Server", "fr": "Serveurs" },
+  "Disabled": { "nl": "Uitgeschakeld", "de": "Deaktiviert", "fr": "Désactivé" },
+  "Online": { "nl": "Online", "de": "Online", "fr": "En ligne" },
+  "Unreachable": { "nl": "Onbereikbaar", "de": "Nicht erreichbar", "fr": "Injoignable" },
+  "{0} stream(s)": { "nl": "{0} stream(s)", "de": "{0} Stream(s)", "fr": "{0} flux" },
+  "{0} live": { "nl": "{0} live", "de": "{0} live", "fr": "{0} en direct" },
+  "{0} viewer(s)": { "nl": "{0} kijker(s)", "de": "{0} Zuschauer", "fr": "{0} spectateur(s)" },
+  "MediaMTX {0}, started {1}": {
+    "nl": "MediaMTX {0}, gestart op {1}",
+    "de": "MediaMTX {0}, gestartet am {1}",
+    "fr": "MediaMTX {0}, démarré le {1}"
+  },
+  "Open server {0}": { "nl": "Server {0} openen", "de": "Server {0} öffnen", "fr": "Ouvrir le serveur {0}" },
+  "Live streams": { "nl": "Live streams", "de": "Live-Streams", "fr": "Flux en direct" },
+  "Nothing is live right now.": {
+    "nl": "Er is op dit moment niets live.",
+    "de": "Im Moment ist nichts live.",
+    "fr": "Rien n'est en direct pour le moment."
+  },
+  "View all streams": { "nl": "Alle streams bekijken", "de": "Alle Streams anzeigen", "fr": "Voir tous les flux" },
+  "Stream": { "nl": "Stream", "de": "Stream", "fr": "Flux" },
+  "Server": { "nl": "Server", "de": "Server", "fr": "Serveur" },
+  "Codecs": { "nl": "Codecs", "de": "Codecs", "fr": "Codecs" },
+  "Received": { "nl": "Ontvangen", "de": "Empfangen", "fr": "Reçu" },
+  "Sent": { "nl": "Verzonden", "de": "Gesendet", "fr": "Envoyé" },
+  "Back to streams": { "nl": "Terug naar streams", "de": "Zurück zu den Streams", "fr": "Retour aux flux" },
+  "After creating it you will immediately see the credentials and all connection URLs.": {
+    "nl": "Na het aanmaken zie je direct de inloggegevens en alle verbindings-URL's.",
+    "de": "Nach dem Anlegen siehst du sofort die Zugangsdaten und alle Verbindungs-URLs.",
+    "fr": "Après la création, vous verrez immédiatement les identifiants et toutes les URL de connexion."
+  },
+  "Loading…": { "nl": "Laden…", "de": "Wird geladen…", "fr": "Chargement…" },
+  "There is no MediaMTX server to set up the stream on yet.": {
+    "nl": "Er is nog geen MediaMTX-server om de stream op aan te maken.",
+    "de": "Es gibt noch keinen MediaMTX-Server, auf dem der Stream angelegt werden kann.",
+    "fr": "Il n'y a pas encore de serveur MediaMTX sur lequel créer le flux."
+  },
+  "Add a server first": { "nl": "Voeg eerst een server toe", "de": "Zuerst einen Server hinzufügen", "fr": "Ajoutez d'abord un serveur" },
+  "Create stream": { "nl": "Stream aanmaken", "de": "Stream anlegen", "fr": "Créer le flux" },
+  "A stream named '{0}' already exists on this server.": {
+    "nl": "Er bestaat al een stream met de naam '{0}' op deze server.",
+    "de": "Auf diesem Server gibt es bereits einen Stream namens „{0}“.",
+    "fr": "Un flux nommé « {0} » existe déjà sur ce serveur."
+  },
+  "Stream not found": { "nl": "Stream niet gevonden", "de": "Stream nicht gefunden", "fr": "Flux introuvable" },
+  "It may have been deleted, or you don't have access to it.": {
+    "nl": "Misschien is hij verwijderd, of heb je er geen toegang toe.",
+    "de": "Er wurde möglicherweise gelöscht, oder du hast keinen Zugriff darauf.",
+    "fr": "Il a peut-être été supprimé, ou vous n'y avez pas accès."
+  },
+  "Public": { "nl": "Openbaar", "de": "Öffentlich", "fr": "Public" },
+  "Recording": { "nl": "Opname", "de": "Aufnahme", "fr": "Enregistrement" },
+  "Path": { "nl": "Pad", "de": "Pfad", "fr": "Chemin" },
+  "Owner": { "nl": "Eigenaar", "de": "Eigentümer", "fr": "Propriétaire" },
+  "Open the public watch page in a new tab": {
+    "nl": "Open de openbare kijkpagina in een nieuw tabblad",
+    "de": "Öffentliche Zuschauerseite in einem neuen Tab öffnen",
+    "fr": "Ouvrir la page de visionnage publique dans un nouvel onglet"
+  },
+  "Watch page": { "nl": "Kijkpagina", "de": "Zuschauerseite", "fr": "Page de visionnage" },
+  "Preview and paywall": { "nl": "Voorbeeld en betaalmuur", "de": "Vorschau und Paywall", "fr": "Aperçu et paywall" },
+  "Disable": { "nl": "Uitschakelen", "de": "Deaktivieren", "fr": "Désactiver" },
+  "Enable": { "nl": "Inschakelen", "de": "Aktivieren", "fr": "Activer" },
+  "Edit": { "nl": "Bewerken", "de": "Bearbeiten", "fr": "Modifier" },
+  "Stream created.": { "nl": "Stream aangemaakt.", "de": "Stream angelegt.", "fr": "Flux créé." },
+  "Below are the credentials and all the ways to connect.": {
+    "nl": "Hieronder vind je de inloggegevens en alle manieren om te verbinden.",
+    "de": "Unten findest du die Zugangsdaten und alle Verbindungsmöglichkeiten.",
+    "fr": "Vous trouverez ci-dessous les identifiants et toutes les façons de vous connecter."
+  },
+  "Keep the passwords safe; you can always find them here later or regenerate them.": {
+    "nl": "Bewaar de wachtwoorden veilig; je vindt ze hier later altijd terug of kunt nieuwe genereren.",
+    "de": "Bewahre die Passwörter sicher auf; du findest sie hier jederzeit wieder oder kannst neue erzeugen.",
+    "fr": "Gardez les mots de passe en lieu sûr ; vous les retrouverez toujours ici ou pourrez en générer de nouveaux."
+  },
+  "Changes saved.": { "nl": "Wijzigingen opgeslagen.", "de": "Änderungen gespeichert.", "fr": "Modifications enregistrées." },
+  "Close": { "nl": "Sluiten", "de": "Schließen", "fr": "Fermer" },
+  "Credentials & OBS": { "nl": "Inloggegevens & OBS", "de": "Zugangsdaten & OBS", "fr": "Identifiants et OBS" },
+  "Endpoints": { "nl": "Endpoints", "de": "Endpunkte", "fr": "Points d'accès" },
+  "Live status": { "nl": "Livestatus", "de": "Live-Status", "fr": "État en direct" },
+  "Manage": { "nl": "Beheren", "de": "Verwalten", "fr": "Gérer" },
+  "OBS Studio": { "nl": "OBS Studio", "de": "OBS Studio", "fr": "OBS Studio" },
+  "In OBS open Settings → Stream, choose Service: Custom… and paste these two values.": {
+    "nl": "Open in OBS Instellingen → Stream, kies bij Service: Aangepast… en plak deze twee waarden.",
+    "de": "Öffne in OBS Einstellungen → Stream, wähle bei Dienst: Benutzerdefiniert… und füge diese beiden Werte ein.",
+    "fr": "Dans OBS, ouvrez Paramètres → Stream, choisissez Service : Personnalisé… et collez ces deux valeurs."
+  },
+  "Stream key": { "nl": "Streamsleutel", "de": "Streamschlüssel", "fr": "Clé de stream" },
+  "Other encoders: see the Endpoints tab for RTSP, SRT and WebRTC addresses.": {
+    "nl": "Andere encoders: zie het tabblad Endpoints voor RTSP-, SRT- en WebRTC-adressen.",
+    "de": "Andere Encoder: RTSP-, SRT- und WebRTC-Adressen findest du im Tab Endpunkte.",
+    "fr": "Autres encodeurs : consultez l'onglet Points d'accès pour les adresses RTSP, SRT et WebRTC."
+  },
+  "Publish (send)": { "nl": "Publiceren (verzenden)", "de": "Veröffentlichen (senden)", "fr": "Publier (envoyer)" },
+  "Create a new username and password for publishing": {
+    "nl": "Maak een nieuwe gebruikersnaam en wachtwoord voor publiceren",
+    "de": "Neuen Benutzernamen und neues Passwort zum Veröffentlichen erzeugen",
+    "fr": "Créer un nouveau nom d'utilisateur et mot de passe pour la publication"
+  },
+  "Regenerate": { "nl": "Opnieuw genereren", "de": "Neu erzeugen", "fr": "Régénérer" },
+  "The encoder uses these credentials to send the stream to the server.": {
+    "nl": "De encoder gebruikt deze gegevens om de stream naar de server te sturen.",
+    "de": "Der Encoder verwendet diese Zugangsdaten, um den Stream an den Server zu senden.",
+    "fr": "L'encodeur utilise ces identifiants pour envoyer le flux au serveur."
+  },
+  "Username": { "nl": "Gebruikersnaam", "de": "Benutzername", "fr": "Nom d'utilisateur" },
+  "Password": { "nl": "Wachtwoord", "de": "Passwort", "fr": "Mot de passe" },
+  "Source": { "nl": "Bron", "de": "Quelle", "fr": "Source" },
+  "The server pulls this stream as soon as there is a viewer from:": {
+    "nl": "De server haalt deze stream op zodra er een kijker is, vanaf:",
+    "de": "Der Server holt diesen Stream ab, sobald es einen Zuschauer gibt, von:",
+    "fr": "Le serveur récupère ce flux dès qu'il y a un spectateur, depuis :"
+  },
+  "The server pulls this stream continuously from:": {
+    "nl": "De server haalt deze stream continu op vanaf:",
+    "de": "Der Server holt diesen Stream ständig ab von:",
+    "fr": "Le serveur récupère ce flux en continu depuis :"
+  },
+  "Watch (receive)": { "nl": "Kijken (ontvangen)", "de": "Ansehen (empfangen)", "fr": "Regarder (recevoir)" },
+  "Create a new username and password for viewers": {
+    "nl": "Maak een nieuwe gebruikersnaam en wachtwoord voor kijkers",
+    "de": "Neuen Benutzernamen und neues Passwort für Zuschauer erzeugen",
+    "fr": "Créer un nouveau nom d'utilisateur et mot de passe pour les spectateurs"
+  },
+  "This stream is public: viewers don't need credentials.": {
+    "nl": "Deze stream is openbaar: kijkers hebben geen inloggegevens nodig.",
+    "de": "Dieser Stream ist öffentlich: Zuschauer brauchen keine Zugangsdaten.",
+    "fr": "Ce flux est public : les spectateurs n'ont pas besoin d'identifiants."
+  },
+  "Players and viewers use these credentials to watch.": {
+    "nl": "Spelers en kijkers gebruiken deze gegevens om te kijken.",
+    "de": "Player und Zuschauer verwenden diese Zugangsdaten zum Ansehen.",
+    "fr": "Les lecteurs et les spectateurs utilisent ces identifiants pour regarder."
+  },
+  "The publish credentials also work for watching.": {
+    "nl": "De publicatiegegevens werken ook om te kijken.",
+    "de": "Die Zugangsdaten zum Veröffentlichen funktionieren auch zum Ansehen.",
+    "fr": "Les identifiants de publication fonctionnent aussi pour regarder."
+  },
+  "Publish endpoints": { "nl": "Publicatie-endpoints", "de": "Endpunkte zum Veröffentlichen", "fr": "Points d'accès de publication" },
+  "Addresses an encoder can send the stream to. The publish credentials are already included where the protocol allows it.": {
+    "nl": "Adressen waar een encoder de stream naartoe kan sturen. De publicatiegegevens zitten er al in waar het protocol dat toestaat.",
+    "de": "Adressen, an die ein Encoder den Stream senden kann. Die Zugangsdaten sind bereits enthalten, wo das Protokoll es erlaubt.",
+    "fr": "Adresses vers lesquelles un encodeur peut envoyer le flux. Les identifiants de publication sont déjà inclus lorsque le protocole le permet."
+  },
+  "Watch endpoints": { "nl": "Kijk-endpoints", "de": "Endpunkte zum Ansehen", "fr": "Points d'accès de visionnage" },
+  "Addresses players and browsers can watch the stream on.": {
+    "nl": "Adressen waarop spelers en browsers de stream kunnen bekijken.",
+    "de": "Adressen, unter denen Player und Browser den Stream ansehen können.",
+    "fr": "Adresses sur lesquelles les lecteurs et navigateurs peuvent regarder le flux."
+  },
+  "Examples": { "nl": "Voorbeelden", "de": "Beispiele", "fr": "Exemples" },
+  "Publish a file with ffmpeg": { "nl": "Een bestand publiceren met ffmpeg", "de": "Eine Datei mit ffmpeg veröffentlichen", "fr": "Publier un fichier avec ffmpeg" },
+  "Watch with ffplay": { "nl": "Kijken met ffplay", "de": "Mit ffplay ansehen", "fr": "Regarder avec ffplay" },
+  "Server {0} is unreachable: {1}": {
+    "nl": "Server {0} is onbereikbaar: {1}",
+    "de": "Server {0} ist nicht erreichbar: {1}",
+    "fr": "Le serveur {0} est injoignable : {1}"
+  },
+  "No source is connected yet.": { "nl": "Er is nog geen bron verbonden.", "de": "Es ist noch keine Quelle verbunden.", "fr": "Aucune source n'est encore connectée." },
+  "The stream is disabled.": { "nl": "De stream is uitgeschakeld.", "de": "Der Stream ist deaktiviert.", "fr": "Le flux est désactivé." },
+  "Status": { "nl": "Status", "de": "Status", "fr": "État" },
+  "Live": { "nl": "Live", "de": "Live", "fr": "En direct" },
+  "Waiting": { "nl": "Wachten", "de": "Wartet", "fr": "En attente" },
+  "Connections": { "nl": "Verbindingen", "de": "Verbindungen", "fr": "Connexions" },
+  "Live since": { "nl": "Live sinds", "de": "Live seit", "fr": "En direct depuis" },
+  "Role": { "nl": "Rol", "de": "Rolle", "fr": "Rôle" },
+  "Type": { "nl": "Type", "de": "Typ", "fr": "Type" },
+  "ID": { "nl": "ID", "de": "ID", "fr": "ID" },
+  "Drop this connection; the encoder may reconnect": {
+    "nl": "Verbreek deze verbinding; de encoder kan opnieuw verbinden",
+    "de": "Diese Verbindung trennen; der Encoder kann sich erneut verbinden",
+    "fr": "Couper cette connexion ; l'encodeur peut se reconnecter"
+  },
+  "Disconnect": { "nl": "Verbreken", "de": "Trennen", "fr": "Déconnecter" },
+  "Viewer": { "nl": "Kijker", "de": "Zuschauer", "fr": "Spectateur" },
+  "Drop this viewer's connection": {
+    "nl": "Verbreek de verbinding van deze kijker",
+    "de": "Verbindung dieses Zuschauers trennen",
+    "fr": "Couper la connexion de ce spectateur"
+  },
+  "Nobody is connected right now.": { "nl": "Er is op dit moment niemand verbonden.", "de": "Im Moment ist niemand verbunden.", "fr": "Personne n'est connecté pour le moment." },
+  "Disable stream": { "nl": "Stream uitschakelen", "de": "Stream deaktivieren", "fr": "Désactiver le flux" },
+  "Enable stream": { "nl": "Stream inschakelen", "de": "Stream aktivieren", "fr": "Activer le flux" },
+  "Switch the stream off: active connections are dropped and nobody can publish or watch until you enable it again.": {
+    "nl": "Zet de stream uit: actieve verbindingen worden verbroken en niemand kan publiceren of kijken totdat je hem weer inschakelt.",
+    "de": "Schalte den Stream aus: Aktive Verbindungen werden getrennt und niemand kann veröffentlichen oder zuschauen, bis du ihn wieder aktivierst.",
+    "fr": "Désactivez le flux : les connexions actives sont coupées et personne ne peut publier ni regarder jusqu'à ce que vous le réactiviez."
+  },
+  "Switch the stream on again so the encoder can publish and viewers can watch.": {
+    "nl": "Zet de stream weer aan zodat de encoder kan publiceren en kijkers kunnen kijken.",
+    "de": "Schalte den Stream wieder ein, damit der Encoder senden und Zuschauer zusehen können.",
+    "fr": "Réactivez le flux pour que l'encodeur puisse publier et que les spectateurs puissent regarder."
+  },
+  "Regenerate credentials": { "nl": "Inloggegevens opnieuw genereren", "de": "Zugangsdaten neu erzeugen", "fr": "Régénérer les identifiants" },
+  "Create new usernames and passwords, for example when they have leaked. The old ones stop working; connections stay active until they reconnect.": {
+    "nl": "Maak nieuwe gebruikersnamen en wachtwoorden, bijvoorbeeld als ze uitgelekt zijn. De oude werken dan niet meer; verbindingen blijven actief tot ze opnieuw verbinden.",
+    "de": "Erzeuge neue Benutzernamen und Passwörter, zum Beispiel wenn sie bekannt geworden sind. Die alten funktionieren nicht mehr; Verbindungen bleiben aktiv, bis sie sich neu verbinden.",
+    "fr": "Créez de nouveaux noms d'utilisateur et mots de passe, par exemple s'ils ont fuité. Les anciens cessent de fonctionner ; les connexions restent actives jusqu'à leur reconnexion."
+  },
+  "New publish credentials": { "nl": "Nieuwe publicatiegegevens", "de": "Neue Zugangsdaten zum Senden", "fr": "Nouveaux identifiants de publication" },
+  "New viewer credentials": { "nl": "Nieuwe kijkgegevens", "de": "Neue Zuschauer-Zugangsdaten", "fr": "Nouveaux identifiants spectateur" },
+  "This stream has no credentials to regenerate.": {
+    "nl": "Deze stream heeft geen inloggegevens om opnieuw te genereren.",
+    "de": "Dieser Stream hat keine Zugangsdaten, die neu erzeugt werden können.",
+    "fr": "Ce flux n'a pas d'identifiants à régénérer."
+  },
+  "Delete stream": { "nl": "Stream verwijderen", "de": "Stream löschen", "fr": "Supprimer le flux" },
+  "Removes the stream from the panel and from the MediaMTX server. This cannot be undone.": {
+    "nl": "Verwijdert de stream uit het paneel en van de MediaMTX-server. Dit kan niet ongedaan worden gemaakt.",
+    "de": "Entfernt den Stream aus dem Panel und vom MediaMTX-Server. Das kann nicht rückgängig gemacht werden.",
+    "fr": "Supprime le flux du panneau et du serveur MediaMTX. Cette action est irréversible."
+  },
+  "Delete": { "nl": "Verwijderen", "de": "Löschen", "fr": "Supprimer" },
+  "Are you sure?": { "nl": "Weet je het zeker?", "de": "Bist du sicher?", "fr": "Êtes-vous sûr ?" },
+  "Yes, delete": { "nl": "Ja, verwijderen", "de": "Ja, löschen", "fr": "Oui, supprimer" },
+  "No": { "nl": "Nee", "de": "Nein", "fr": "Non" },
+  "Stream enabled.": { "nl": "Stream ingeschakeld.", "de": "Stream aktiviert.", "fr": "Flux activé." },
+  "Stream disabled; active connections have been dropped.": {
+    "nl": "Stream uitgeschakeld; actieve verbindingen zijn verbroken.",
+    "de": "Stream deaktiviert; aktive Verbindungen wurden getrennt.",
+    "fr": "Flux désactivé ; les connexions actives ont été coupées."
+  },
+  "New publish credentials created. Existing connections stay active until they reconnect.": {
+    "nl": "Nieuwe publicatiegegevens aangemaakt. Bestaande verbindingen blijven actief tot ze opnieuw verbinden.",
+    "de": "Neue Zugangsdaten zum Senden erzeugt. Bestehende Verbindungen bleiben aktiv, bis sie sich neu verbinden.",
+    "fr": "Nouveaux identifiants de publication créés. Les connexions existantes restent actives jusqu'à leur reconnexion."
+  },
+  "New viewer credentials created.": { "nl": "Nieuwe kijkgegevens aangemaakt.", "de": "Neue Zuschauer-Zugangsdaten erzeugt.", "fr": "Nouveaux identifiants spectateur créés." },
+  "Delete failed.": { "nl": "Verwijderen mislukt.", "de": "Löschen fehlgeschlagen.", "fr": "La suppression a échoué." },
+  "Connection dropped.": { "nl": "Verbinding verbroken.", "de": "Verbindung getrennt.", "fr": "Connexion coupée." },
+  "Edit stream": { "nl": "Stream bewerken", "de": "Stream bearbeiten", "fr": "Modifier le flux" },
+  "Back to the stream": { "nl": "Terug naar de stream", "de": "Zurück zum Stream", "fr": "Retour au flux" },
+  "Change the settings of {0}. Credentials stay the same; regenerate them on the stream page.": {
+    "nl": "Wijzig de instellingen van {0}. De inloggegevens blijven hetzelfde; genereer ze opnieuw op de streampagina.",
+    "de": "Ändere die Einstellungen von {0}. Die Zugangsdaten bleiben gleich; neu erzeugen kannst du sie auf der Stream-Seite.",
+    "fr": "Modifiez les paramètres de {0}. Les identifiants restent les mêmes ; régénérez-les depuis la page du flux."
+  },
+  "Note: changing the path name or server changes the URLs and drops active connections.": {
+    "nl": "Let op: als je de padnaam of server wijzigt, veranderen de URL's en worden actieve verbindingen verbroken.",
+    "de": "Hinweis: Wenn du den Pfadnamen oder Server änderst, ändern sich die URLs und aktive Verbindungen werden getrennt.",
+    "fr": "Attention : modifier le nom du chemin ou le serveur change les URL et coupe les connexions actives."
+  },
+  "Save changes": { "nl": "Wijzigingen opslaan", "de": "Änderungen speichern", "fr": "Enregistrer les modifications" },
+  "Every stream is a path on a MediaMTX server with its own credentials. Open one to see its connection details and live status.": {
+    "nl": "Elke stream is een pad op een MediaMTX-server met eigen inloggegevens. Open er een om de verbindingsgegevens en livestatus te zien.",
+    "de": "Jeder Stream ist ein Pfad auf einem MediaMTX-Server mit eigenen Zugangsdaten. Öffne einen, um Verbindungsdaten und Live-Status zu sehen.",
+    "fr": "Chaque flux est un chemin sur un serveur MediaMTX avec ses propres identifiants. Ouvrez-en un pour voir ses informations de connexion et son état en direct."
+  },
+  "There are no streams yet.": { "nl": "Er zijn nog geen streams.", "de": "Es gibt noch keine Streams.", "fr": "Il n'y a pas encore de flux." },
+  "Create your first stream": { "nl": "Maak je eerste stream", "de": "Lege deinen ersten Stream an", "fr": "Créez votre premier flux" },
+  "Search by name or path": { "nl": "Zoek op naam of pad", "de": "Nach Name oder Pfad suchen", "fr": "Rechercher par nom ou chemin" },
+  "All servers": { "nl": "Alle servers", "de": "Alle Server", "fr": "Tous les serveurs" },
+  "{0} of {1} stream(s)": { "nl": "{0} van {1} stream(s)", "de": "{0} von {1} Stream(s)", "fr": "{0} sur {1} flux" },
+  "No streams match this filter.": {
+    "nl": "Geen streams die aan dit filter voldoen.",
+    "de": "Keine Streams entsprechen diesem Filter.",
+    "fr": "Aucun flux ne correspond à ce filtre."
+  },
+  "Name": { "nl": "Naam", "de": "Name", "fr": "Nom" },
+  "Publisher": { "nl": "Publisher", "de": "Publisher", "fr": "Éditeur" },
+  "Pull": { "nl": "Ophalen", "de": "Abrufen", "fr": "Récupération" },
+  "Details": { "nl": "Details", "de": "Details", "fr": "Détails" },
+  "Basics": { "nl": "Basisgegevens", "de": "Grundlagen", "fr": "Informations de base" },
+  "Where the stream lives and how it is called. The path name becomes part of every URL, so keep it short.": {
+    "nl": "Waar de stream staat en hoe hij heet. De padnaam wordt onderdeel van elke URL, dus houd hem kort.",
+    "de": "Wo der Stream liegt und wie er heißt. Der Pfadname wird Teil jeder URL, halte ihn also kurz.",
+    "fr": "Où se trouve le flux et comment il s'appelle. Le nom du chemin fait partie de chaque URL, gardez-le court."
+  },
+  "Path name": { "nl": "Padnaam", "de": "Pfadname", "fr": "Nom du chemin" },
+  "e.g. studio1 or events/main-hall": { "nl": "bijv. studio1 of events/grote-zaal", "de": "z. B. studio1 oder events/hauptsaal", "fr": "p. ex. studio1 ou events/grande-salle" },
+  "Becomes part of all URLs. Letters, digits, -, _, . and /.": {
+    "nl": "Wordt onderdeel van alle URL's. Letters, cijfers, -, _, . en /.",
+    "de": "Wird Teil aller URLs. Buchstaben, Ziffern, -, _, . und /.",
+    "fr": "Fait partie de toutes les URL. Lettres, chiffres, -, _, . et /."
+  },
+  "Choose a server…": { "nl": "Kies een server…", "de": "Server auswählen…", "fr": "Choisissez un serveur…" },
+  "The MediaMTX server that hosts the stream.": {
+    "nl": "De MediaMTX-server waarop de stream draait.",
+    "de": "Der MediaMTX-Server, auf dem der Stream läuft.",
+    "fr": "Le serveur MediaMTX qui héberge le flux."
+  },
+  "Display name": { "nl": "Weergavenaam", "de": "Anzeigename", "fr": "Nom affiché" },
+  "Optional": { "nl": "Optioneel", "de": "Optional", "fr": "Facultatif" },
+  "A friendly name shown in the panel and on the watch page. Empty = the path name.": {
+    "nl": "Een leesbare naam voor het paneel en de kijkpagina. Leeg = de padnaam.",
+    "de": "Ein lesbarer Name im Panel und auf der Zuschauerseite. Leer = der Pfadname.",
+    "fr": "Un nom lisible affiché dans le panneau et sur la page de visionnage. Vide = le nom du chemin."
+  },
+  "Description": { "nl": "Beschrijving", "de": "Beschreibung", "fr": "Description" },
+  "How the video gets onto the server: an encoder sends it, or the server fetches it from another address.": {
+    "nl": "Hoe het beeld op de server komt: een encoder stuurt het, of de server haalt het op van een ander adres.",
+    "de": "Wie das Video auf den Server kommt: Ein Encoder sendet es, oder der Server holt es von einer anderen Adresse.",
+    "fr": "Comment la vidéo arrive sur le serveur : un encodeur l'envoie, ou le serveur la récupère depuis une autre adresse."
+  },
+  "An encoder (OBS, ffmpeg, camera, browser) sends the stream to the server. You get a username and password to publish with.": {
+    "nl": "Een encoder (OBS, ffmpeg, camera, browser) stuurt de stream naar de server. Je krijgt een gebruikersnaam en wachtwoord om mee te publiceren.",
+    "de": "Ein Encoder (OBS, ffmpeg, Kamera, Browser) sendet den Stream an den Server. Du bekommst einen Benutzernamen und ein Passwort zum Senden.",
+    "fr": "Un encodeur (OBS, ffmpeg, caméra, navigateur) envoie le flux au serveur. Vous recevez un nom d'utilisateur et un mot de passe pour publier."
+  },
+  "The server pulls the stream from an external URL, such as an IP camera or another streaming server.": {
+    "nl": "De server haalt de stream op van een externe URL, zoals een IP-camera of een andere streamingserver.",
+    "de": "Der Server holt den Stream von einer externen URL ab, etwa einer IP-Kamera oder einem anderen Streaming-Server.",
+    "fr": "Le serveur récupère le flux depuis une URL externe, comme une caméra IP ou un autre serveur de streaming."
+  },
+  "Source URL": { "nl": "Bron-URL", "de": "Quell-URL", "fr": "URL source" },
+  "For example rtsp://, rtmp://, srt://, an HLS address (http(s)://….m3u8), whep:// or udp://. Put credentials in the URL if the source needs them.": {
+    "nl": "Bijvoorbeeld rtsp://, rtmp://, srt://, een HLS-adres (http(s)://….m3u8), whep:// of udp://. Zet inloggegevens in de URL als de bron die nodig heeft.",
+    "de": "Zum Beispiel rtsp://, rtmp://, srt://, eine HLS-Adresse (http(s)://….m3u8), whep:// oder udp://. Zugangsdaten in die URL schreiben, falls die Quelle sie braucht.",
+    "fr": "Par exemple rtsp://, rtmp://, srt://, une adresse HLS (http(s)://….m3u8), whep:// ou udp://. Placez les identifiants dans l'URL si la source en a besoin."
+  },
+  "Only pull when there is a viewer": {
+    "nl": "Alleen ophalen als er een kijker is",
+    "de": "Nur abrufen, wenn es einen Zuschauer gibt",
+    "fr": "Ne récupérer que lorsqu'il y a un spectateur"
+  },
+  "Saves bandwidth: the server connects to the source when someone starts watching and disconnects when nobody is left.": {
+    "nl": "Bespaart bandbreedte: de server verbindt met de bron zodra iemand begint te kijken en verbreekt de verbinding als er niemand meer is.",
+    "de": "Spart Bandbreite: Der Server verbindet sich mit der Quelle, sobald jemand zuschaut, und trennt, wenn niemand mehr da ist.",
+    "fr": "Économise de la bande passante : le serveur se connecte à la source quand quelqu'un commence à regarder et se déconnecte quand il n'y a plus personne."
+  },
+  "Viewing": { "nl": "Kijken", "de": "Zuschauen", "fr": "Visionnage" },
+  "Who may watch, and how many people at the same time.": {
+    "nl": "Wie mag kijken, en hoeveel mensen tegelijk.",
+    "de": "Wer zuschauen darf und wie viele Personen gleichzeitig.",
+    "fr": "Qui peut regarder, et combien de personnes en même temps."
+  },
+  "Public viewing (viewers don't need a password)": {
+    "nl": "Openbaar kijken (kijkers hebben geen wachtwoord nodig)",
+    "de": "Öffentlich ansehen (Zuschauer brauchen kein Passwort)",
+    "fr": "Visionnage public (les spectateurs n'ont pas besoin de mot de passe)"
+  },
+  "Off: viewers need the viewer username and password (or a ticket). On: anyone with the link can watch.": {
+    "nl": "Uit: kijkers hebben de kijkgebruikersnaam en het wachtwoord (of een ticket) nodig. Aan: iedereen met de link kan kijken.",
+    "de": "Aus: Zuschauer brauchen den Zuschauer-Benutzernamen und das Passwort (oder ein Ticket). An: Jeder mit dem Link kann zuschauen.",
+    "fr": "Désactivé : les spectateurs ont besoin du nom d'utilisateur et du mot de passe spectateur (ou d'un billet). Activé : toute personne disposant du lien peut regarder."
+  },
+  "Maximum viewers": { "nl": "Maximaal aantal kijkers", "de": "Maximale Zuschauerzahl", "fr": "Nombre maximal de spectateurs" },
+  "Limit on simultaneous viewers. 0 = unlimited.": {
+    "nl": "Limiet voor het aantal gelijktijdige kijkers. 0 = onbeperkt.",
+    "de": "Begrenzung gleichzeitiger Zuschauer. 0 = unbegrenzt.",
+    "fr": "Limite de spectateurs simultanés. 0 = illimité."
+  },
+  "Options": { "nl": "Opties", "de": "Optionen", "fr": "Options" },
+  "Switch the stream on or off and choose whether the server keeps a recording.": {
+    "nl": "Zet de stream aan of uit en kies of de server een opname bewaart.",
+    "de": "Schalte den Stream ein oder aus und wähle, ob der Server eine Aufnahme speichert.",
+    "fr": "Activez ou désactivez le flux et choisissez si le serveur conserve un enregistrement."
+  },
+  "Enabled": { "nl": "Ingeschakeld", "de": "Aktiviert", "fr": "Activé" },
+  "When disabled, nobody can publish or watch and active connections are dropped.": {
+    "nl": "Uitgeschakeld kan niemand publiceren of kijken en worden actieve verbindingen verbroken.",
+    "de": "Deaktiviert kann niemand senden oder zuschauen, und aktive Verbindungen werden getrennt.",
+    "fr": "Désactivé, personne ne peut publier ni regarder et les connexions actives sont coupées."
+  },
+  "Record on the server": { "nl": "Opnemen op de server", "de": "Auf dem Server aufnehmen", "fr": "Enregistrer sur le serveur" },
+  "MediaMTX saves everything that is published to disk on the server. Mind the disk space.": {
+    "nl": "MediaMTX slaat alles wat gepubliceerd wordt op de schijf van de server op. Let op de schijfruimte.",
+    "de": "MediaMTX speichert alles, was gesendet wird, auf der Festplatte des Servers. Achte auf den Speicherplatz.",
+    "fr": "MediaMTX enregistre tout ce qui est publié sur le disque du serveur. Surveillez l'espace disque."
+  },
+  "The account that manages this stream. Users and customers only see their own streams.": {
+    "nl": "Het account dat deze stream beheert. Gebruikers en klanten zien alleen hun eigen streams.",
+    "de": "Das Konto, das diesen Stream verwaltet. Benutzer und Kunden sehen nur ihre eigenen Streams.",
+    "fr": "Le compte qui gère ce flux. Les utilisateurs et les clients ne voient que leurs propres flux."
+  },
+  "(none)": { "nl": "(geen)", "de": "(keiner)", "fr": "(aucun)" },
+  "Save": { "nl": "Opslaan", "de": "Speichern", "fr": "Enregistrer" },
+  "Cancel": { "nl": "Annuleren", "de": "Abbrechen", "fr": "Annuler" },
+  "Administrator": { "nl": "Beheerder", "de": "Administrator", "fr": "Administrateur" },
+  "User": { "nl": "Gebruiker", "de": "Benutzer", "fr": "Utilisateur" },
+  "Customer": { "nl": "Klant", "de": "Kunde", "fr": "Client" },
+  "The stream is switched off: nobody can publish or watch.": {
+    "nl": "De stream staat uit: niemand kan publiceren of kijken.",
+    "de": "Der Stream ist ausgeschaltet: Niemand kann senden oder zuschauen.",
+    "fr": "Le flux est désactivé : personne ne peut publier ni regarder."
+  },
+  "A source is connected and sending.": {
+    "nl": "Er is een bron verbonden die beeld verstuurt.",
+    "de": "Eine Quelle ist verbunden und sendet.",
+    "fr": "Une source est connectée et émet."
+  },
+  "The path is ready, but no source is sending yet.": {
+    "nl": "Het pad staat klaar, maar er verstuurt nog geen bron beeld.",
+    "de": "Der Pfad ist bereit, aber noch sendet keine Quelle.",
+    "fr": "Le chemin est prêt, mais aucune source n'émet encore."
+  },
+  "Waiting for source": { "nl": "Wachten op bron", "de": "Warte auf Quelle", "fr": "En attente de la source" },
+  "No source is connected.": { "nl": "Er is geen bron verbonden.", "de": "Es ist keine Quelle verbunden.", "fr": "Aucune source n'est connectée." },
+  "Offline": { "nl": "Offline", "de": "Offline", "fr": "Hors ligne" },
+  "Protocol": { "nl": "Protocol", "de": "Protokoll", "fr": "Protocole" },
+  "URL": { "nl": "URL", "de": "URL", "fr": "URL" },
+  "Low latency; VLC, ffmpeg, IP cameras": {
+    "nl": "Lage vertraging; VLC, ffmpeg, IP-camera's",
+    "de": "Geringe Latenz; VLC, ffmpeg, IP-Kameras",
+    "fr": "Faible latence ; VLC, ffmpeg, caméras IP"
+  },
+  "OBS and most encoders": { "nl": "OBS en de meeste encoders", "de": "OBS und die meisten Encoder", "fr": "OBS et la plupart des encodeurs" },
+  "Reliable over unstable networks": {
+    "nl": "Betrouwbaar via instabiele netwerken",
+    "de": "Zuverlässig über instabile Netzwerke",
+    "fr": "Fiable sur les réseaux instables"
+  },
+  "Sub-second latency from OBS or apps": {
+    "nl": "Vertraging onder een seconde vanuit OBS of apps",
+    "de": "Latenz unter einer Sekunde aus OBS oder Apps",
+    "fr": "Latence inférieure à la seconde depuis OBS ou des applications"
+  },
+  "Sub-second latency in players": {
+    "nl": "Vertraging onder een seconde in spelers",
+    "de": "Latenz unter einer Sekunde in Playern",
+    "fr": "Latence inférieure à la seconde dans les lecteurs"
+  },
+  "Open the link in a browser": { "nl": "Open de link in een browser", "de": "Link in einem Browser öffnen", "fr": "Ouvrez le lien dans un navigateur" },
+  "Widest device support, a few seconds delay": {
+    "nl": "Werkt op de meeste apparaten, enkele seconden vertraging",
+    "de": "Breiteste Geräteunterstützung, einige Sekunden Verzögerung",
+    "fr": "Compatible avec le plus d'appareils, quelques secondes de délai"
+  },
+  "Use the publish username and password as HTTP Basic authentication (or as bearer token user:pass).": {
+    "nl": "Gebruik de publicatiegebruikersnaam en het wachtwoord als HTTP Basic-authenticatie (of als bearer-token gebruiker:wachtwoord).",
+    "de": "Verwende Benutzername und Passwort zum Senden als HTTP-Basic-Authentifizierung (oder als Bearer-Token benutzer:passwort).",
+    "fr": "Utilisez le nom d'utilisateur et le mot de passe de publication en authentification HTTP Basic (ou comme jeton bearer utilisateur:motdepasse)."
+  },
+  "Open in a browser to publish from a webcam or screen.": {
+    "nl": "Open in een browser om vanaf een webcam of scherm te publiceren.",
+    "de": "Im Browser öffnen, um von einer Webcam oder dem Bildschirm zu senden.",
+    "fr": "Ouvrez dans un navigateur pour publier depuis une webcam ou l'écran."
+  },
+  "The browser asks for the viewer username and password.": {
+    "nl": "De browser vraagt om de kijkgebruikersnaam en het wachtwoord.",
+    "de": "Der Browser fragt nach dem Zuschauer-Benutzernamen und Passwort.",
+    "fr": "Le navigateur demande le nom d'utilisateur et le mot de passe spectateur."
+  },
+  "Use the viewer credentials as HTTP Basic authentication.": {
+    "nl": "Gebruik de kijkgegevens als HTTP Basic-authenticatie.",
+    "de": "Verwende die Zuschauer-Zugangsdaten als HTTP-Basic-Authentifizierung.",
+    "fr": "Utilisez les identifiants spectateur en authentification HTTP Basic."
+  },
+  "Hide": { "nl": "Verbergen", "de": "Verbergen", "fr": "Masquer" },
+  "Show": { "nl": "Tonen", "de": "Anzeigen", "fr": "Afficher" },
+  "Copy to clipboard": { "nl": "Kopiëren naar klembord", "de": "In die Zwischenablage kopieren", "fr": "Copier dans le presse-papiers" },
+  "Copied": { "nl": "Gekopieerd", "de": "Kopiert", "fr": "Copié" },
+  "Copy": { "nl": "Kopiëren", "de": "Kopieren", "fr": "Copier" }
+}

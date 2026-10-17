@@ -7,75 +7,106 @@
 @inject LiveStatusReader LiveReader
 @inject NavigationManager Nav
 
-<PageTitle>Dashboard</PageTitle>
+<AppPageTitle Text="@L["Dashboard"]" />
 
-<h1>Dashboard</h1>
+<div class="page-header">
+    <div>
+        <h1><i class="bi bi-speedometer2 text-primary"></i> @L["Dashboard"]</h1>
+        <p class="page-subtitle">@L["What is live right now, how many people are watching and whether your servers are reachable. Updates every few seconds."]</p>
+    </div>
+    <div class="page-actions">
+        <a class="btn btn-outline-secondary" href="streams"><i class="bi bi-list-ul"></i> @L["All streams"]</a>
+        <a class="btn btn-primary" href="streams/new"><i class="bi bi-plus-lg"></i> @L["New stream"]</a>
+    </div>
+</div>
 
 @if (servers is { Count: 0 })
 {
-    <div class="alert alert-info">
-        No MediaMTX server has been connected yet.
-        @if (isAdmin)
-        {
-            <a class="alert-link" href="servers/new">Add a server</a>
-        }
-        else
-        {
-            <span>Ask an administrator to add a server.</span>
-        }
+    <div class="alert alert-info d-flex align-items-center gap-2">
+        <i class="bi bi-info-circle"></i>
+        <span>
+            @L["No MediaMTX server has been connected yet."]
+            @if (isAdmin)
+            {
+                <a class="alert-link" href="servers/new">@L["Add a server"]</a>
+            }
+            else
+            {
+                <span>@L["Ask an administrator to add a server."]</span>
+            }
+        </span>
     </div>
 }
 
 <div class="row g-3 mb-4">
-    <div class="col-sm-6 col-lg-3"><div class="card stat-card"><div class="card-body"><div class="text-secondary small">Streams</div><div class="value">@(streams?.Count ?? 0)</div></div></div></div>
-    <div class="col-sm-6 col-lg-3"><div class="card stat-card"><div class="card-body"><div class="text-secondary small">Live now</div><div class="value text-success">@LiveStreams.Count</div></div></div></div>
-    <div class="col-sm-6 col-lg-3"><div class="card stat-card"><div class="card-body"><div class="text-secondary small">Viewers</div><div class="value">@LiveStreams.Sum(x => x.Path.Readers.Count)</div></div></div></div>
-    <div class="col-sm-6 col-lg-3"><div class="card stat-card"><div class="card-body"><div class="text-secondary small">Servers online</div><div class="value">@OnlineCount / @(servers?.Count(s => s.Enabled) ?? 0)</div></div></div></div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card stat-card h-100"><div class="card-body">
+            <div class="stat-icon"><i class="bi bi-camera-video"></i></div>
+            <div><div class="label">@L["Streams"]</div><div class="value">@(streams?.Count ?? 0)</div></div>
+        </div></div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card stat-card h-100"><div class="card-body">
+            <div class="stat-icon success"><i class="bi bi-broadcast"></i></div>
+            <div><div class="label">@L["Live now"]</div><div class="value text-success">@LiveStreams.Count</div></div>
+        </div></div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card stat-card h-100"><div class="card-body">
+            <div class="stat-icon info"><i class="bi bi-people"></i></div>
+            <div><div class="label">@L["Viewers"]</div><div class="value">@LiveStreams.Sum(x => x.Path.Readers.Count)</div></div>
+        </div></div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card stat-card h-100"><div class="card-body">
+            <div class="stat-icon warning"><i class="bi bi-hdd-network"></i></div>
+            <div><div class="label">@L["Servers online"]</div><div class="value">@OnlineCount / @(servers?.Count(s => s.Enabled) ?? 0)</div></div>
+        </div></div>
+    </div>
 </div>
 
 @if (servers is { Count: > 0 })
 {
-    <h2 class="h4">Servers</h2>
+    <h2 class="h5 mb-3">@L["Servers"]</h2>
     <div class="row g-3 mb-4">
         @foreach (var srv in servers)
         {
             var online = srv.Enabled && !live.Errors.ContainsKey(srv.Id) && live.Paths.ContainsKey(srv.Id);
             var paths = live.Paths.GetValueOrDefault(srv.Id);
             <div class="col-md-6 col-xl-4">
-                <div class="card h-100">
+                <div class="card entity-card h-100 position-relative">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <h3 class="h5 mb-0">@srv.Name</h3>
-                                <div class="small text-secondary">@srv.PublicHost</div>
+                        <div class="entity-head">
+                            <div class="stat-card"><div class="stat-icon @(online ? "success" : "")"><i class="bi bi-hdd-rack"></i></div></div>
+                            <div class="flex-grow-1" style="min-width:0">
+                                <div class="entity-title">@srv.Name</div>
+                                <div class="entity-sub">@srv.PublicHost</div>
                             </div>
                             @if (!srv.Enabled)
                             {
-                                <span class="badge text-bg-secondary">Disabled</span>
+                                <span class="badge bg-secondary-subtle text-secondary-emphasis">@L["Disabled"]</span>
                             }
                             else if (online)
                             {
-                                <span class="badge text-bg-success">Online</span>
+                                <span class="badge bg-success-subtle text-success-emphasis badge-dot">@L["Online"]</span>
                             }
                             else
                             {
-                                <span class="badge text-bg-danger" title="@live.Errors.GetValueOrDefault(srv.Id)">Unreachable</span>
+                                <span class="badge bg-danger-subtle text-danger-emphasis badge-dot" title="@live.Errors.GetValueOrDefault(srv.Id)">@L["Unreachable"]</span>
                             }
                         </div>
-                        <div class="small mt-2">
-                            @if (live.Info.TryGetValue(srv.Id, out var info))
-                            {
-                                <div>MediaMTX @info.Version, started @info.Started.ToLocalTime().ToString("g")</div>
-                            }
-                            <div>
-                                @(streams?.Count(s => s.ServerId == srv.Id) ?? 0) stream(s),
-                                @(paths?.Values.Count(p => p.IsLive) ?? 0) live,
-                                @(paths?.Values.Sum(p => p.Readers.Count) ?? 0) viewer(s)
-                            </div>
+                        <div class="entity-meta">
+                            <span class="badge text-bg-light border"><i class="bi bi-camera-video me-1"></i>@L["{0} stream(s)", streams?.Count(s => s.ServerId == srv.Id) ?? 0]</span>
+                            <span class="badge text-bg-light border"><i class="bi bi-broadcast me-1"></i>@L["{0} live", paths?.Values.Count(p => p.IsLive) ?? 0]</span>
+                            <span class="badge text-bg-light border"><i class="bi bi-people me-1"></i>@L["{0} viewer(s)", paths?.Values.Sum(p => p.Readers.Count) ?? 0]</span>
                         </div>
+                        @if (live.Info.TryGetValue(srv.Id, out var info))
+                        {
+                            <div class="small text-secondary">@L["MediaMTX {0}, started {1}", info.Version, info.Started.ToLocalTime().ToString("g")]</div>
+                        }
                         @if (isAdmin)
                         {
-                            <a class="stretched-link" href="servers/@srv.Id"></a>
+                            <a class="stretched-link" href="servers/@srv.Id" aria-label="@L["Open server {0}", srv.Name]"></a>
                         }
                     </div>
                 </div>
@@ -84,34 +115,49 @@
     </div>
 }
 
-<div class="d-flex justify-content-between align-items-center mb-2">
-    <h2 class="h4 mb-0">Live streams</h2>
-    <a class="btn btn-sm btn-primary" href="streams/new">+ New stream</a>
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-broadcast"></i> @L["Live streams"]</span>
+        @if (LiveStreams.Count > 0)
+        {
+            <span class="badge bg-success-subtle text-success-emphasis badge-dot">@L["{0} live", LiveStreams.Count]</span>
+        }
+    </div>
+    @if (LiveStreams.Count == 0)
+    {
+        <div class="card-body">
+            <div class="empty-state">
+                <i class="bi bi-moon-stars"></i>
+                <p class="mb-3">@L["Nothing is live right now."]</p>
+                <a class="btn btn-sm btn-outline-primary" href="streams"><i class="bi bi-list-ul"></i> @L["View all streams"]</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead><tr><th>@L["Stream"]</th><th>@L["Server"]</th><th>@L["Codecs"]</th><th class="text-end">@L["Viewers"]</th><th class="text-end">@L["Received"]</th><th class="text-end">@L["Sent"]</th></tr></thead>
+                <tbody>
+                    @foreach (var (s, p) in LiveStreams)
+                    {
+                        <tr>
+                            <td>
+                                <a class="fw-semibold" href="streams/@s.Id">@s.DisplayName</a>
+                                <div><code class="small">@s.Name</code></div>
+                            </td>
+                            <td>@s.Server!.Name</td>
+                            <td class="small">@string.Join(", ", p.Codecs)</td>
+                            <td class="text-end"><i class="bi bi-eye text-secondary me-1"></i>@p.Readers.Count</td>
+                            <td class="text-end">@Format.Bytes(p.Received)</td>
+                            <td class="text-end">@Format.Bytes(p.Sent)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 </div>
-
-@if (LiveStreams.Count == 0)
-{
-    <p class="text-secondary">Nothing is live right now.</p>
-}
-else
-{
-    <table class="table align-middle">
-        <thead><tr><th>Stream</th><th>Server</th><th>Codecs</th><th class="text-end">Viewers</th><th class="text-end">Received</th><th class="text-end">Sent</th></tr></thead>
-        <tbody>
-            @foreach (var (s, p) in LiveStreams)
-            {
-                <tr>
-                    <td><a href="streams/@s.Id">@s.DisplayName</a> <code class="small">@s.Name</code></td>
-                    <td>@s.Server!.Name</td>
-                    <td class="small">@string.Join(", ", p.Codecs)</td>
-                    <td class="text-end">@p.Readers.Count</td>
-                    <td class="text-end">@Format.Bytes(p.Received)</td>
-                    <td class="text-end">@Format.Bytes(p.Sent)</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
 
 @code {
     [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;

@@ -7,225 +7,397 @@
 @inject StreamEndpointBuilder Endpoints
 @inject NavigationManager Nav
 
-<PageTitle>@(stream?.DisplayName ?? "Stream")</PageTitle>
+<AppPageTitle Text="@(stream?.DisplayName ?? L["Stream"])" />
 
 @if (notFound)
 {
-    <h1>Stream not found</h1>
-    <a href="streams">Back to streams</a>
+    <div class="empty-state">
+        <i class="bi bi-question-circle"></i>
+        <h1 class="h4">@L["Stream not found"]</h1>
+        <p>@L["It may have been deleted, or you don't have access to it."]</p>
+        <a class="btn btn-outline-secondary" href="streams"><i class="bi bi-arrow-left"></i> @L["Back to streams"]</a>
+    </div>
 }
 else if (stream is null)
 {
-    <p>Loading…</p>
+    <p class="text-secondary"><span class="spinner-border spinner-border-sm me-2"></span>@L["Loading…"]</p>
 }
 else
 {
-    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-        <h1 class="mb-0 me-2">@stream.DisplayName</h1>
-        <StreamStateBadge Stream="stream" Live="live" />
-        @if (stream.PublicRead)
-        {
-            <span class="badge text-bg-info">Public</span>
-        }
-        @if (stream.Record)
-        {
-            <span class="badge text-bg-danger">Recording</span>
-        }
+    <a class="back-link" href="streams"><i class="bi bi-arrow-left"></i> @L["Back to streams"]</a>
+    <div class="page-header">
+        <div>
+            <h1 class="flex-wrap">
+                <i class="bi bi-camera-video text-primary"></i> @stream.DisplayName
+                <span class="d-inline-flex flex-wrap gap-1 fs-6">
+                    <StreamStateBadge Stream="stream" Live="live" />
+                    @if (stream.PublicRead)
+                    {
+                        <span class="badge bg-info-subtle text-info-emphasis"><i class="bi bi-globe me-1"></i>@L["Public"]</span>
+                    }
+                    @if (stream.Record)
+                    {
+                        <span class="badge bg-danger-subtle text-danger-emphasis"><i class="bi bi-record-circle me-1"></i>@L["Recording"]</span>
+                    }
+                </span>
+            </h1>
+            <p class="page-subtitle">
+                @L["Path"] <code>@stream.Name</code> · @L["Server"] <strong>@stream.Server!.Name</strong>
+                @if (stream.Owner is not null)
+                {
+                    <span> · @L["Owner"] @stream.Owner.Email</span>
+                }
+                @if (!string.IsNullOrEmpty(stream.Description))
+                {
+                    <br />@stream.Description
+                }
+            </p>
+        </div>
+        <div class="page-actions">
+            <a class="btn btn-outline-secondary" href="watch/@stream.WatchSlug" target="_blank" rel="noopener" title="@L["Open the public watch page in a new tab"]"><i class="bi bi-box-arrow-up-right"></i> @L["Watch page"]</a>
+            <a class="btn btn-outline-secondary" href="portal/streams/@stream.Id"><i class="bi bi-ticket-perforated"></i> @L["Preview and paywall"]</a>
+            <button class="btn @(stream.Enabled ? "btn-outline-warning" : "btn-outline-success")" @onclick="ToggleEnabled">
+                <i class="bi @(stream.Enabled ? "bi-pause-circle" : "bi-play-circle")"></i> @(stream.Enabled ? L["Disable"] : L["Enable"])
+            </button>
+            <a class="btn btn-primary" href="streams/@stream.Id/edit"><i class="bi bi-pencil"></i> @L["Edit"]</a>
+        </div>
     </div>
-    <p class="text-secondary">
-        Path <code>@stream.Name</code> on server <strong>@stream.Server!.Name</strong>
-        @if (stream.Owner is not null)
-        {
-            <span> · owner @stream.Owner.Email</span>
-        }
-        @if (!string.IsNullOrEmpty(stream.Description))
-        {
-            <br />@stream.Description
-        }
-    </p>
 
     @if (Created)
     {
-        <div class="alert alert-success">
-            <strong>Stream created.</strong> Below are the credentials and all the ways to connect.
-            Keep the passwords safe; you can always find them here later or regenerate them.
+        <div class="alert alert-success d-flex gap-2">
+            <i class="bi bi-check-circle"></i>
+            <div>
+                <strong>@L["Stream created."]</strong> @L["Below are the credentials and all the ways to connect."]
+                @L["Keep the passwords safe; you can always find them here later or regenerate them."]
+            </div>
         </div>
     }
     else if (Saved)
     {
-        <div class="alert alert-success">Changes saved.</div>
+        <div class="alert alert-success d-flex align-items-center gap-2"><i class="bi bi-check-circle"></i> @L["Changes saved."]</div>
     }
     @if (!string.IsNullOrEmpty(Warning))
     {
-        <div class="alert alert-warning">@Warning</div>
+        <div class="alert alert-warning d-flex align-items-center gap-2"><i class="bi bi-exclamation-triangle"></i> @Warning</div>
     }
     @if (message is not null)
     {
-        <div class="alert alert-@(messageIsError ? "danger" : "info") alert-dismissible">
-            @message
-            <button type="button" class="btn-close" @onclick="() => message = null"></button>
+        <div class="alert alert-@(messageIsError ? "danger" : "success") alert-dismissible d-flex align-items-center gap-2">
+            <i class="bi @(messageIsError ? "bi-exclamation-octagon" : "bi-check-circle")"></i> @message
+            <button type="button" class="btn-close" aria-label="@L["Close"]" @onclick="() => message = null"></button>
         </div>
     }
 
-    <div class="d-flex flex-wrap gap-2 mb-4">
-        <a class="btn btn-outline-primary btn-sm" href="streams/@stream.Id/edit">Edit</a>
-        <a class="btn btn-outline-secondary btn-sm" href="portal/streams/@stream.Id">Preview and paywall</a>
-        <a class="btn btn-outline-secondary btn-sm" href="watch/@stream.WatchSlug" target="_blank" rel="noopener">Watch page</a>
-        <button class="btn btn-outline-secondary btn-sm" @onclick="ToggleEnabled">@(stream.Enabled ? "Disable" : "Enable")</button>
-        @if (!confirmDelete)
-        {
-            <button class="btn btn-outline-danger btn-sm" @onclick="() => confirmDelete = true">Delete</button>
-        }
-        else
-        {
-            <span class="align-self-center small">Are you sure?</span>
-            <button class="btn btn-danger btn-sm" @onclick="Delete">Yes, delete</button>
-            <button class="btn btn-outline-secondary btn-sm" @onclick="() => confirmDelete = false">No</button>
-        }
-    </div>
+    <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item">
+            <button type="button" class="nav-link @(tab == Tab.Connect ? "active" : "")" @onclick="() => tab = Tab.Connect">
+                <i class="bi bi-key me-1"></i>@L["Credentials & OBS"]
+            </button>
+        </li>
+        <li class="nav-item">
+            <button type="button" class="nav-link @(tab == Tab.Endpoints ? "active" : "")" @onclick="() => tab = Tab.Endpoints">
+                <i class="bi bi-link-45deg me-1"></i>@L["Endpoints"]
+            </button>
+        </li>
+        <li class="nav-item">
+            <button type="button" class="nav-link @(tab == Tab.Live ? "active" : "")" @onclick="() => tab = Tab.Live">
+                <i class="bi bi-activity me-1"></i>@L["Live status"]
+                @if (live is { IsLive: true })
+                {
+                    <span class="badge bg-success-subtle text-success-emphasis ms-1">@live.Readers.Count</span>
+                }
+            </button>
+        </li>
+        <li class="nav-item">
+            <button type="button" class="nav-link @(tab == Tab.Manage ? "active" : "")" @onclick="() => tab = Tab.Manage">
+                <i class="bi bi-gear me-1"></i>@L["Manage"]
+            </button>
+        </li>
+    </ul>
 
-    <div class="row g-4">
-        @if (stream.SourceType == StreamSourceType.Publisher)
-        {
-            <div class="col-lg-6">
-                <div class="card h-100">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <strong>Publish (send)</strong>
-                        <button class="btn btn-link btn-sm p-0" @onclick="() => Regenerate(CredentialKind.Publish)">New credentials</button>
+    @switch (tab)
+    {
+        case Tab.Connect:
+            <div class="row g-4">
+                @if (stream.SourceType == StreamSourceType.Publisher)
+                {
+                    <div class="col-lg-6">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-camera-reels"></i> @L["OBS Studio"]</span>
+                            </div>
+                            <div class="card-body">
+                                <p class="small text-secondary mb-3">
+                                    @L["In OBS open Settings → Stream, choose Service: Custom… and paste these two values."]
+                                </p>
+                                <CopyField Label="@L["Server"]" Value="@obs!.Server" />
+                                <CopyField Label="@L["Stream key"]" Value="@obs.StreamKey" Secret="true" />
+                                <p class="small text-secondary mb-0 mt-3"><i class="bi bi-info-circle me-1"></i>@L["Other encoders: see the Endpoints tab for RTSP, SRT and WebRTC addresses."]</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <CopyField Label="Username" Value="@stream.PublishUser" />
-                        <CopyField Label="Password" Value="@stream.PublishPassword" Secret="true" />
-                        <hr />
-                        <h6>OBS Studio</h6>
-                        <p class="small text-secondary mb-2">Settings → Stream → Service: <em>Custom…</em></p>
-                        <CopyField Label="Server" Value="@obs!.Server" />
-                        <CopyField Label="Stream key" Value="@obs.StreamKey" Secret="true" />
+                    <div class="col-lg-6">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-upload"></i> @L["Publish (send)"]</span>
+                                <button class="btn btn-sm btn-outline-secondary" @onclick="() => Regenerate(CredentialKind.Publish)" title="@L["Create a new username and password for publishing"]">
+                                    <i class="bi bi-arrow-repeat"></i> @L["Regenerate"]
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <p class="small text-secondary mb-3">@L["The encoder uses these credentials to send the stream to the server."]</p>
+                                <CopyField Label="@L["Username"]" Value="@stream.PublishUser" />
+                                <CopyField Label="@L["Password"]" Value="@stream.PublishPassword" Secret="true" />
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-lg-6">
+                        <div class="card h-100">
+                            <div class="card-header"><i class="bi bi-download"></i> @L["Source"]</div>
+                            <div class="card-body">
+                                <p class="small text-secondary mb-3">
+                                    @(stream.SourceOnDemand
+                                        ? L["The server pulls this stream as soon as there is a viewer from:"]
+                                        : L["The server pulls this stream continuously from:"])
+                                </p>
+                                <CopyField Value="@(stream.SourceUrl ?? "")" Secret="true" />
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-eye"></i> @L["Watch (receive)"]</span>
+                            @if (!stream.PublicRead)
+                            {
+                                <button class="btn btn-sm btn-outline-secondary" @onclick="() => Regenerate(CredentialKind.Read)" title="@L["Create a new username and password for viewers"]">
+                                    <i class="bi bi-arrow-repeat"></i> @L["Regenerate"]
+                                </button>
+                            }
+                        </div>
+                        <div class="card-body">
+                            @if (stream.PublicRead)
+                            {
+                                <p class="mb-0"><i class="bi bi-globe text-info me-1"></i>@L["This stream is public: viewers don't need credentials."]</p>
+                            }
+                            else
+                            {
+                                <p class="small text-secondary mb-3">@L["Players and viewers use these credentials to watch."]</p>
+                                <CopyField Label="@L["Username"]" Value="@stream.ReadUser" />
+                                <CopyField Label="@L["Password"]" Value="@stream.ReadPassword" Secret="true" />
+                                @if (stream.SourceType == StreamSourceType.Publisher)
+                                {
+                                    <p class="small text-secondary mb-0">@L["The publish credentials also work for watching."]</p>
+                                }
+                            }
+                        </div>
                     </div>
                 </div>
             </div>
-        }
-        else
-        {
-            <div class="col-lg-6">
-                <div class="card h-100">
-                    <div class="card-header"><strong>Source</strong></div>
-                    <div class="card-body">
-                        <p class="mb-2">The server pulls this stream @(stream.SourceOnDemand ? "as soon as there is a viewer" : "continuously") from:</p>
-                        <CopyField Value="@(stream.SourceUrl ?? "")" Secret="true" />
-                    </div>
-                </div>
-            </div>
-        }
+            break;
 
-        <div class="col-lg-6">
-            <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <strong>Watch (receive)</strong>
-                    @if (!stream.PublicRead)
-                    {
-                        <button class="btn btn-link btn-sm p-0" @onclick="() => Regenerate(CredentialKind.Read)">New credentials</button>
-                    }
+        case Tab.Endpoints:
+            @if (publish.Count > 0)
+            {
+                <div class="card mb-4">
+                    <div class="card-header"><i class="bi bi-upload"></i> @L["Publish endpoints"]</div>
+                    <div class="card-body pb-0">
+                        <p class="small text-secondary">@L["Addresses an encoder can send the stream to. The publish credentials are already included where the protocol allows it."]</p>
+                    </div>
+                    <EndpointTable Items="publish" />
                 </div>
+            }
+
+            <div class="card mb-4">
+                <div class="card-header"><i class="bi bi-eye"></i> @L["Watch endpoints"]</div>
+                <div class="card-body pb-0">
+                    <p class="small text-secondary">@L["Addresses players and browsers can watch the stream on."]</p>
+                </div>
+                <EndpointTable Items="read" />
+            </div>
+
+            <div class="card">
+                <div class="card-header"><i class="bi bi-terminal"></i> @L["Examples"]</div>
                 <div class="card-body">
-                    @if (stream.PublicRead)
+                    <div class="row g-3">
+                        @if (stream.SourceType == StreamSourceType.Publisher)
+                        {
+                            <div class="col-lg-6">
+                                <label class="form-label small text-secondary">@L["Publish a file with ffmpeg"]</label>
+                                <pre class="cmd mb-0">@Endpoints.FfmpegPublishExample(stream)</pre>
+                            </div>
+                        }
+                        <div class="col-lg-6">
+                            <label class="form-label small text-secondary">@L["Watch with ffplay"]</label>
+                            <pre class="cmd mb-0">@Endpoints.FfplayExample(stream)</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            break;
+
+        case Tab.Live:
+            @if (liveError is not null)
+            {
+                <div class="alert alert-warning d-flex align-items-center gap-2"><i class="bi bi-exclamation-triangle"></i> @L["Server {0} is unreachable: {1}", stream.Server!.Name, liveError]</div>
+            }
+            else if (live is null)
+            {
+                <div class="empty-state">
+                    <i class="bi @(stream.Enabled ? "bi-broadcast" : "bi-pause-circle")"></i>
+                    @(stream.Enabled ? L["No source is connected yet."] : L["The stream is disabled."])
+                </div>
+            }
+            else
+            {
+                <div class="row g-3 mb-4">
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="card stat-card h-100"><div class="card-body">
+                            <div class="stat-icon @(live.IsLive ? "success" : "warning")"><i class="bi @(live.IsLive ? "bi-broadcast" : "bi-hourglass-split")"></i></div>
+                            <div><div class="label">@L["Status"]</div><div class="value">@(live.IsLive ? L["Live"] : L["Waiting"])</div></div>
+                        </div></div>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="card stat-card h-100"><div class="card-body">
+                            <div class="stat-icon info"><i class="bi bi-people"></i></div>
+                            <div><div class="label">@L["Viewers"]</div><div class="value">@live.Readers.Count</div></div>
+                        </div></div>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="card stat-card h-100"><div class="card-body">
+                            <div class="stat-icon"><i class="bi bi-arrow-down-circle"></i></div>
+                            <div><div class="label">@L["Received"]</div><div class="value">@Format.Bytes(live.Received)</div></div>
+                        </div></div>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="card stat-card h-100"><div class="card-body">
+                            <div class="stat-icon"><i class="bi bi-arrow-up-circle"></i></div>
+                            <div><div class="label">@L["Sent"]</div><div class="value">@Format.Bytes(live.Sent)</div></div>
+                        </div></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <span><i class="bi bi-plug"></i> @L["Connections"]</span>
+                        <span class="small fw-normal text-secondary">
+                            @L["Codecs"]: @(live.Codecs.Any() ? string.Join(", ", live.Codecs) : "–")
+                            @if ((live.OnlineTime ?? live.ReadyTime) is { } since)
+                            {
+                                <span class="ms-3">@L["Live since"]: @since.ToLocalTime().ToString("g")</span>
+                            }
+                        </span>
+                    </div>
+                    @if (live.Source is not null || live.Readers.Count > 0)
                     {
-                        <p class="mb-0">This stream is public: viewers don't need credentials.</p>
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead><tr><th>@L["Role"]</th><th>@L["Type"]</th><th>@L["ID"]</th><th></th></tr></thead>
+                                <tbody>
+                                    @if (live.Source is not null)
+                                    {
+                                        <tr>
+                                            <td><span class="badge bg-primary-subtle text-primary-emphasis"><i class="bi bi-upload me-1"></i>@L["Source"]</span></td>
+                                            <td>@live.Source.Type</td>
+                                            <td class="font-monospace small">@live.Source.Id</td>
+                                            <td class="text-end">
+                                                @if (MediaMtxClient.CanKick(live.Source.Type))
+                                                {
+                                                    <button class="btn btn-outline-danger btn-sm" @onclick="() => Kick(live.Source)" title="@L["Drop this connection; the encoder may reconnect"]"><i class="bi bi-x-circle"></i> @L["Disconnect"]</button>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                    @foreach (var r in live.Readers)
+                                    {
+                                        <tr>
+                                            <td><span class="badge text-bg-light border"><i class="bi bi-eye me-1"></i>@L["Viewer"]</span></td>
+                                            <td>@r.Type</td>
+                                            <td class="font-monospace small">@r.Id</td>
+                                            <td class="text-end">
+                                                @if (MediaMtxClient.CanKick(r.Type))
+                                                {
+                                                    <button class="btn btn-outline-danger btn-sm" @onclick="() => Kick(r)" title="@L["Drop this viewer's connection"]"><i class="bi bi-x-circle"></i> @L["Disconnect"]</button>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
                     }
                     else
                     {
-                        <CopyField Label="Username" Value="@stream.ReadUser" />
-                        <CopyField Label="Password" Value="@stream.ReadPassword" Secret="true" />
-                        @if (stream.SourceType == StreamSourceType.Publisher)
-                        {
-                            <p class="small text-secondary mb-0">The publish credentials also work for watching.</p>
-                        }
+                        <div class="card-body text-secondary">@L["Nobody is connected right now."]</div>
                     }
                 </div>
-            </div>
-        </div>
-    </div>
-
-    @if (publish.Count > 0)
-    {
-        <h2 class="h4 mt-4">Publish endpoints</h2>
-        <EndpointTable Items="publish" />
-    }
-
-    <h2 class="h4 mt-4">Watch endpoints</h2>
-    <EndpointTable Items="read" />
-
-    <h2 class="h4 mt-4">Examples</h2>
-    <div class="row g-3">
-        @if (stream.SourceType == StreamSourceType.Publisher)
-        {
-            <div class="col-lg-6">
-                <label class="form-label small text-secondary">Publish a file with ffmpeg</label>
-                <pre class="cmd">@Endpoints.FfmpegPublishExample(stream)</pre>
-            </div>
-        }
-        <div class="col-lg-6">
-            <label class="form-label small text-secondary">Watch with ffplay</label>
-            <pre class="cmd">@Endpoints.FfplayExample(stream)</pre>
-        </div>
-    </div>
-
-    <h2 class="h4 mt-4">Live status</h2>
-    @if (liveError is not null)
-    {
-        <div class="alert alert-warning">Server @stream.Server!.Name is unreachable: @liveError</div>
-    }
-    else if (live is null)
-    {
-        <p class="text-secondary">@(stream.Enabled ? "No source is connected yet." : "The stream is disabled.")</p>
-    }
-    else
-    {
-        <div class="row g-3 mb-3">
-            <div class="col-sm-6 col-lg-3"><div class="card stat-card"><div class="card-body"><div class="text-secondary small">Status</div><div class="value">@(live.IsLive ? "Live" : "Waiting")</div></div></div></div>
-            <div class="col-sm-6 col-lg-3"><div class="card stat-card"><div class="card-body"><div class="text-secondary small">Viewers</div><div class="value">@live.Readers.Count</div></div></div></div>
-            <div class="col-sm-6 col-lg-3"><div class="card stat-card"><div class="card-body"><div class="text-secondary small">Received</div><div class="value">@Format.Bytes(live.Received)</div></div></div></div>
-            <div class="col-sm-6 col-lg-3"><div class="card stat-card"><div class="card-body"><div class="text-secondary small">Sent</div><div class="value">@Format.Bytes(live.Sent)</div></div></div></div>
-        </div>
-        <p>
-            <strong>Codecs:</strong> @(live.Codecs.Any() ? string.Join(", ", live.Codecs) : "–")
-            @if ((live.OnlineTime ?? live.ReadyTime) is { } since)
-            {
-                <span class="ms-3"><strong>Live since:</strong> @since.ToLocalTime().ToString("g")</span>
             }
-        </p>
-        @if (live.Source is not null || live.Readers.Count > 0)
-        {
-        <table class="table table-sm align-middle">
-            <thead><tr><th>Role</th><th>Type</th><th>ID</th><th></th></tr></thead>
-            <tbody>
-                @if (live.Source is not null)
-                {
-                    <tr>
-                        <td>Source</td><td>@live.Source.Type</td><td class="font-monospace small">@live.Source.Id</td>
-                        <td class="text-end">
-                            @if (MediaMtxClient.CanKick(live.Source.Type))
+            break;
+
+        case Tab.Manage:
+            <div class="row g-3">
+                <div class="col-md-6 col-xl-4">
+                    <div class="action-card">
+                        <div class="action-icon @(stream.Enabled ? "warning" : "success")"><i class="bi @(stream.Enabled ? "bi-pause-circle" : "bi-play-circle")"></i></div>
+                        <h3>@(stream.Enabled ? L["Disable stream"] : L["Enable stream"])</h3>
+                        <p>@(stream.Enabled
+                            ? L["Switch the stream off: active connections are dropped and nobody can publish or watch until you enable it again."]
+                            : L["Switch the stream on again so the encoder can publish and viewers can watch."])</p>
+                        <div class="action-footer">
+                            <button class="btn btn-sm @(stream.Enabled ? "btn-outline-warning" : "btn-outline-success")" @onclick="ToggleEnabled">
+                                <i class="bi @(stream.Enabled ? "bi-pause-circle" : "bi-play-circle")"></i> @(stream.Enabled ? L["Disable"] : L["Enable"])
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-4">
+                    <div class="action-card">
+                        <div class="action-icon info"><i class="bi bi-arrow-repeat"></i></div>
+                        <h3>@L["Regenerate credentials"]</h3>
+                        <p>@L["Create new usernames and passwords, for example when they have leaked. The old ones stop working; connections stay active until they reconnect."]</p>
+                        <div class="action-footer">
+                            @if (stream.SourceType == StreamSourceType.Publisher)
                             {
-                                <button class="btn btn-outline-danger btn-sm" @onclick="() => Kick(live.Source)">Disconnect</button>
+                                <button class="btn btn-sm btn-outline-primary" @onclick="() => Regenerate(CredentialKind.Publish)"><i class="bi bi-upload"></i> @L["New publish credentials"]</button>
                             }
-                        </td>
-                    </tr>
-                }
-                @foreach (var r in live.Readers)
-                {
-                    <tr>
-                        <td>Viewer</td><td>@r.Type</td><td class="font-monospace small">@r.Id</td>
-                        <td class="text-end">
-                            @if (MediaMtxClient.CanKick(r.Type))
+                            @if (!stream.PublicRead)
                             {
-                                <button class="btn btn-outline-danger btn-sm" @onclick="() => Kick(r)">Disconnect</button>
+                                <button class="btn btn-sm btn-outline-primary" @onclick="() => Regenerate(CredentialKind.Read)"><i class="bi bi-eye"></i> @L["New viewer credentials"]</button>
                             }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-        }
+                            @if (stream.SourceType != StreamSourceType.Publisher && stream.PublicRead)
+                            {
+                                <span class="small text-secondary">@L["This stream has no credentials to regenerate."]</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-4">
+                    <div class="action-card">
+                        <div class="action-icon danger"><i class="bi bi-trash"></i></div>
+                        <h3>@L["Delete stream"]</h3>
+                        <p>@L["Removes the stream from the panel and from the MediaMTX server. This cannot be undone."]</p>
+                        <div class="action-footer">
+                            @if (!confirmDelete)
+                            {
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => confirmDelete = true"><i class="bi bi-trash"></i> @L["Delete"]</button>
+                            }
+                            else
+                            {
+                                <span class="small fw-semibold">@L["Are you sure?"]</span>
+                                <button class="btn btn-sm btn-danger" @onclick="Delete"><i class="bi bi-trash"></i> @L["Yes, delete"]</button>
+                                <button class="btn btn-sm btn-outline-secondary" @onclick="() => confirmDelete = false">@L["No"]</button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            break;
     }
 }
 
@@ -236,6 +408,9 @@ else
     [SupplyParameterFromQuery] public string? Warning { get; set; }
     [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
 
+    private enum Tab { Connect, Endpoints, Live, Manage }
+
+    private Tab tab = Tab.Connect;
     private StreamDefinition? stream;
     private List<StreamEndpoint> publish = [];
     private List<StreamEndpoint> read = [];
@@ -313,7 +488,7 @@ else
         if (s is null) { notFound = true; return; }
         await LoadAsync();
         await RefreshLiveAsync();
-        Show(warning ?? (s.Enabled ? "Stream enabled." : "Stream disabled; active connections have been dropped."), warning is not null);
+        Show(warning ?? (s.Enabled ? L["Stream enabled."] : L["Stream disabled; active connections have been dropped."]), warning is not null);
     }
 
     private async Task Regenerate(CredentialKind kind)
@@ -321,8 +496,8 @@ else
         await Streams.RegenerateAsync((await AuthState).User, Id, kind);
         await LoadAsync();
         Show(kind == CredentialKind.Publish
-            ? "New publish credentials created. Existing connections stay active until they reconnect."
-            : "New viewer credentials created.", false);
+            ? L["New publish credentials created. Existing connections stay active until they reconnect."]
+            : L["New viewer credentials created."], false);
     }
 
     private async Task Delete()
@@ -331,7 +506,7 @@ else
         if (deleted && warning is null)
             Nav.NavigateTo("streams");
         else
-            Show(warning ?? "Delete failed.", true);
+            Show(warning ?? L["Delete failed."], true);
     }
 
     private async Task Kick(MtxConnRef conn)
@@ -339,7 +514,7 @@ else
         try
         {
             await Mtx.KickAsync(conn.Type, conn.Id);
-            Show("Connection dropped.", false);
+            Show(L["Connection dropped."], false);
         }
         catch (Exception ex) when (ex is HttpRequestException or MediaMtxException or NotSupportedException)
         {
