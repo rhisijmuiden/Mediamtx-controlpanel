@@ -1,4 +1,4 @@
-﻿@page "/Account/Manage/EnableAuthenticator"
+@page "/Account/Manage/EnableAuthenticator"
 
 @using System.ComponentModel.DataAnnotations
 @using System.Globalization
@@ -12,57 +12,61 @@
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<EnableAuthenticator> Logger
 
-<PageTitle>Configure authenticator app</PageTitle>
+<AppPageTitle Text="@L["Configure authenticator app"]" />
 
+<a class="back-link" href="Account/Manage/TwoFactorAuthentication"><i class="bi bi-arrow-left"></i> @L["Two-factor authentication"]</a>
 @if (recoveryCodes is not null)
 {
     <ShowRecoveryCodes RecoveryCodes="recoveryCodes.ToArray()" StatusMessage="@message" />
 }
 else
 {
+    <h2 class="h4 d-flex align-items-center gap-2 mb-1"><i class="bi bi-phone text-primary"></i> @L["Configure authenticator app"]</h2>
+    <p class="text-secondary mb-4">@L["To use an authenticator app go through the following steps:"]</p>
     <StatusMessage Message="@message" />
-    <h3>Configure authenticator app</h3>
-    <div>
-        <p>To use an authenticator app go through the following steps:</p>
-        <ol class="list">
-            <li>
-                <p>
-                    Download a two-factor authenticator app like Microsoft Authenticator for
-                    <a href="https://go.microsoft.com/fwlink/?Linkid=825072">Android</a> and
-                    <a href="https://go.microsoft.com/fwlink/?Linkid=825073">iOS</a> or
-                    Google Authenticator for
-                    <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&amp;hl=en">Android</a> and
-                    <a href="https://itunes.apple.com/us/app/google-authenticator/id388497605?mt=8">iOS</a>.
+    <ol class="list-unstyled d-grid gap-3 mb-0">
+        <li class="d-flex gap-3">
+            <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis align-self-start">1</span>
+            <div>
+                <div class="fw-semibold mb-1">@L["Install an authenticator app"]</div>
+                <p class="text-secondary mb-0">
+                    @L["For example Microsoft Authenticator or Google Authenticator:"]
+                    Microsoft Authenticator (<a href="https://go.microsoft.com/fwlink/?Linkid=825072">Android</a>, <a href="https://go.microsoft.com/fwlink/?Linkid=825073">iOS</a>),
+                    Google Authenticator (<a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&amp;hl=en">Android</a>, <a href="https://itunes.apple.com/us/app/google-authenticator/id388497605?mt=8">iOS</a>).
                 </p>
-            </li>
-            <li>
-                <p>Scan the QR Code or enter this key <kbd>@sharedKey</kbd> into your two factor authenticator app. Spaces and casing do not matter.</p>
-                <div class="alert alert-info">Learn how to <a href="https://go.microsoft.com/fwlink/?Linkid=852423">enable QR code generation</a>.</div>
-                <div></div>
+            </div>
+        </li>
+        <li class="d-flex gap-3">
+            <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis align-self-start">2</span>
+            <div class="flex-grow-1" style="min-width:0">
+                <div class="fw-semibold mb-1">@L["Add this account to the app"]</div>
+                <p class="text-secondary mb-2">@L["Enter this key into your two factor authenticator app. Spaces and casing do not matter."]</p>
+                <pre class="cmd mb-0"><code>@sharedKey</code></pre>
                 <div data-url="@authenticatorUri"></div>
-            </li>
-            <li>
-                <p>
-                    Once you have scanned the QR code or input the key above, your two factor authentication app will provide you
-                    with a unique code. Enter the code in the confirmation box below.
-                </p>
+            </div>
+        </li>
+        <li class="d-flex gap-3">
+            <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis align-self-start">3</span>
+            <div class="flex-grow-1">
+                <div class="fw-semibold mb-1">@L["Enter the code from the app"]</div>
+                <p class="text-secondary mb-2">@L["Once you have input the key above, your two factor authentication app will provide you with a unique code. Enter the code in the confirmation box below."]</p>
                 <div class="row">
-                    <div class="col-xl-6">
+                    <div class="col-xl-8">
                         <EditForm Model="Input" FormName="send-code" OnValidSubmit="OnValidSubmitAsync" method="post">
                             <DataAnnotationsValidator />
                             <div class="form-floating mb-3">
-                                <InputText @bind-Value="Input.Code" id="Input.Code" class="form-control" autocomplete="off" placeholder="Enter the code" />
-                                <label for="Input.Code" class="control-label form-label">Verification Code</label>
+                                <InputText @bind-Value="Input.Code" id="Input.Code" class="form-control" autocomplete="one-time-code" inputmode="numeric" placeholder="@L["Enter the code"]" />
+                                <label for="Input.Code" class="control-label form-label">@L["Verification code"]</label>
                                 <ValidationMessage For="() => Input.Code" class="text-danger" />
                             </div>
-                            <button type="submit" class="w-100 btn btn-lg btn-primary">Verify</button>
-                            <ValidationSummary class="text-danger" role="alert" />
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> @L["Verify"]</button>
+                            <ValidationSummary class="text-danger mt-2" role="alert" />
                         </EditForm>
                     </div>
                 </div>
-            </li>
-        </ol>
-    </div>
+            </div>
+        </li>
+    </ol>
 }
 
 @code {
@@ -110,7 +114,7 @@ else
 
         if (!is2faTokenValid)
         {
-            message = "Error: Verification code is invalid.";
+            message = "Error: " + L["Verification code is invalid."];
             return;
         }
 
@@ -118,7 +122,7 @@ else
         var userId = await UserManager.GetUserIdAsync(user);
         Logger.LogInformation("User with ID '{UserId}' has enabled 2FA with an authenticator app.", userId);
 
-        message = "Your authenticator app has been verified.";
+        message = L["Your authenticator app has been verified."];
 
         if (await UserManager.CountRecoveryCodesAsync(user) == 0)
         {

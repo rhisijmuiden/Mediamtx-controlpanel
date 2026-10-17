@@ -5,8 +5,13 @@
             <NotAuthorized>
                 @if (context.User.Identity?.IsAuthenticated == true)
                 {
-                    <h1>Access denied</h1>
-                    <p>This page is not available for your account. <a href="portal">Go to my portal</a></p>
+                    <AppPageTitle Text="@L["Access denied"]" />
+                    <div class="empty-state my-4">
+                        <i class="bi bi-shield-lock"></i>
+                        <h1 class="h4 text-body">@L["Access denied"]</h1>
+                        <p class="mb-3">@L["This page is not available for your account."]</p>
+                        <a class="btn btn-primary" href="portal"><i class="bi bi-house"></i> @L["Go to my portal"]</a>
+                    </div>
                 }
                 else
                 {

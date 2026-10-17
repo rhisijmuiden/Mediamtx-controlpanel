@@ -1,0 +1,1212 @@
+{
+  "2fa has been disabled. You can reenable 2fa when you setup an authenticator app": {
+    "nl": "Tweestapsverificatie is uitgeschakeld. Je kunt het weer inschakelen wanneer je een authenticator-app instelt.",
+    "de": "Die Zwei-Faktor-Authentifizierung wurde deaktiviert. Du kannst sie wieder aktivieren, wenn du eine Authenticator-App einrichtest.",
+    "fr": "L'authentification à deux facteurs a été désactivée. Vous pouvez la réactiver en configurant une application d'authentification."
+  },
+  "A passkey lets you log in with your fingerprint, face, device PIN or a security key instead of typing a password.": {
+    "nl": "Met een passkey log je in met je vingerafdruk, gezicht, apparaatpincode of een beveiligingssleutel in plaats van een wachtwoord te typen.",
+    "de": "Mit einem Passkey meldest du dich per Fingerabdruck, Gesichtserkennung, Geräte-PIN oder Sicherheitsschlüssel an, statt ein Passwort einzugeben.",
+    "fr": "Une clé d'accès vous permet de vous connecter avec votre empreinte digitale, votre visage, le code PIN de l'appareil ou une clé de sécurité au lieu de saisir un mot de passe."
+  },
+  "Access denied": {
+    "nl": "Toegang geweigerd",
+    "de": "Zugriff verweigert",
+    "fr": "Accès refusé"
+  },
+  "Accounts are created by an administrator. Please contact the administrator of this panel.": {
+    "nl": "Accounts worden aangemaakt door een beheerder. Neem contact op met de beheerder van dit paneel.",
+    "de": "Konten werden von einem Administrator angelegt. Bitte wende dich an den Administrator dieses Panels.",
+    "fr": "Les comptes sont créés par un administrateur. Veuillez contacter l'administrateur de ce panneau."
+  },
+  "Add a new passkey": {
+    "nl": "Nieuwe passkey toevoegen",
+    "de": "Neuen Passkey hinzufügen",
+    "fr": "Ajouter une clé d'accès"
+  },
+  "Add another service to log in.": {
+    "nl": "Voeg nog een dienst toe om mee in te loggen.",
+    "de": "Weiteren Dienst zum Anmelden hinzufügen.",
+    "fr": "Ajoutez un autre service pour vous connecter."
+  },
+  "Add authenticator app": {
+    "nl": "Authenticator-app toevoegen",
+    "de": "Authenticator-App hinzufügen",
+    "fr": "Ajouter une application d'authentification"
+  },
+  "Add this account to the app": {
+    "nl": "Voeg dit account toe aan de app",
+    "de": "Dieses Konto zur App hinzufügen",
+    "fr": "Ajoutez ce compte à l'application"
+  },
+  "After this you log in with only your password (or a passkey).": {
+    "nl": "Daarna log je alleen nog in met je wachtwoord (of een passkey).",
+    "de": "Danach meldest du dich nur noch mit deinem Passwort (oder einem Passkey) an.",
+    "fr": "Ensuite, vous vous connectez uniquement avec votre mot de passe (ou une clé d'accès)."
+  },
+  "An app such as Microsoft Authenticator or Google Authenticator generates a new 6-digit code every 30 seconds. You enter that code when you log in.": {
+    "nl": "Een app zoals Microsoft Authenticator of Google Authenticator maakt elke 30 seconden een nieuwe code van 6 cijfers. Die code vul je in wanneer je inlogt.",
+    "de": "Eine App wie Microsoft Authenticator oder Google Authenticator erzeugt alle 30 Sekunden einen neuen 6-stelligen Code. Diesen Code gibst du bei der Anmeldung ein.",
+    "fr": "Une application comme Microsoft Authenticator ou Google Authenticator génère un nouveau code à 6 chiffres toutes les 30 secondes. Vous saisissez ce code lors de la connexion."
+  },
+  "An error occurred while processing your request.": {
+    "nl": "Er is een fout opgetreden bij het verwerken van je verzoek.",
+    "de": "Bei der Verarbeitung deiner Anfrage ist ein Fehler aufgetreten.",
+    "fr": "Une erreur s'est produite lors du traitement de votre demande."
+  },
+  "Associate your {0} account.": {
+    "nl": "Koppel je {0}-account.",
+    "de": "Verknüpfe dein {0}-Konto.",
+    "fr": "Associez votre compte {0}."
+  },
+  "Authenticator app": {
+    "nl": "Authenticator-app",
+    "de": "Authenticator-App",
+    "fr": "Application d'authentification"
+  },
+  "Authenticator code": {
+    "nl": "Authenticatorcode",
+    "de": "Authenticator-Code",
+    "fr": "Code d'authentification"
+  },
+  "Back to log in": {
+    "nl": "Terug naar inloggen",
+    "de": "Zurück zur Anmeldung",
+    "fr": "Retour à la connexion"
+  },
+  "Back to my account": {
+    "nl": "Terug naar mijn account",
+    "de": "Zurück zu meinem Konto",
+    "fr": "Retour à mon compte"
+  },
+  "Back to the start page": {
+    "nl": "Terug naar de startpagina",
+    "de": "Zurück zur Startseite",
+    "fr": "Retour à la page d'accueil"
+  },
+  "Cancel": {
+    "nl": "Annuleren",
+    "de": "Abbrechen",
+    "fr": "Annuler"
+  },
+  "Change email": {
+    "nl": "E-mailadres wijzigen",
+    "de": "E-Mail-Adresse ändern",
+    "fr": "Modifier l'adresse e-mail"
+  },
+  "Change password": {
+    "nl": "Wachtwoord wijzigen",
+    "de": "Passwort ändern",
+    "fr": "Modifier le mot de passe"
+  },
+  "Change your account settings: email address, password, two-factor authentication and passkeys.": {
+    "nl": "Wijzig je accountinstellingen: e-mailadres, wachtwoord, tweestapsverificatie en passkeys.",
+    "de": "Ändere deine Kontoeinstellungen: E-Mail-Adresse, Passwort, Zwei-Faktor-Authentifizierung und Passkeys.",
+    "fr": "Modifiez les paramètres de votre compte : adresse e-mail, mot de passe, authentification à deux facteurs et clés d'accès."
+  },
+  "Check your email": {
+    "nl": "Controleer je e-mail",
+    "de": "Prüfe deine E-Mails",
+    "fr": "Consultez votre messagerie"
+  },
+  "Choose a new password for your account.": {
+    "nl": "Kies een nieuw wachtwoord voor je account.",
+    "de": "Wähle ein neues Passwort für dein Konto.",
+    "fr": "Choisissez un nouveau mot de passe pour votre compte."
+  },
+  "Close your account and remove the data stored about you.": {
+    "nl": "Sluit je account en verwijder de gegevens die over jou zijn opgeslagen.",
+    "de": "Schließe dein Konto und entferne die über dich gespeicherten Daten.",
+    "fr": "Fermez votre compte et supprimez les données enregistrées à votre sujet."
+  },
+  "Configure authenticator app": {
+    "nl": "Authenticator-app instellen",
+    "de": "Authenticator-App einrichten",
+    "fr": "Configurer l'application d'authentification"
+  },
+  "Confirm email": {
+    "nl": "E-mailadres bevestigen",
+    "de": "E-Mail-Adresse bestätigen",
+    "fr": "Confirmer l'adresse e-mail"
+  },
+  "Confirm email change": {
+    "nl": "Wijziging e-mailadres bevestigen",
+    "de": "Änderung der E-Mail-Adresse bestätigen",
+    "fr": "Confirmer le changement d'adresse e-mail"
+  },
+  "Confirm new password": {
+    "nl": "Bevestig nieuw wachtwoord",
+    "de": "Neues Passwort bestätigen",
+    "fr": "Confirmer le nouveau mot de passe"
+  },
+  "Confirm password": {
+    "nl": "Bevestig wachtwoord",
+    "de": "Passwort bestätigen",
+    "fr": "Confirmer le mot de passe"
+  },
+  "Confirmation link to change email sent. Please check your email.": {
+    "nl": "Bevestigingslink om je e-mailadres te wijzigen is verstuurd. Controleer je e-mail.",
+    "de": "Bestätigungslink zur Änderung der E-Mail-Adresse wurde gesendet. Bitte prüfe deine E-Mails.",
+    "fr": "Lien de confirmation pour modifier l'adresse e-mail envoyé. Veuillez consulter votre messagerie."
+  },
+  "Confirmed": {
+    "nl": "Bevestigd",
+    "de": "Bestätigt",
+    "fr": "Confirmée"
+  },
+  "Could not add the passkey: {0}": {
+    "nl": "Kan de passkey niet toevoegen: {0}",
+    "de": "Der Passkey konnte nicht hinzugefügt werden: {0}",
+    "fr": "Impossible d'ajouter la clé d'accès : {0}"
+  },
+  "Could not load external login info.": {
+    "nl": "Kan de gegevens van de externe login niet laden.",
+    "de": "Die Informationen zur externen Anmeldung konnten nicht geladen werden.",
+    "fr": "Impossible de charger les informations de connexion externe."
+  },
+  "Create a new set of 10 recovery codes. Your old codes stop working immediately.": {
+    "nl": "Maak een nieuwe set van 10 herstelcodes. Je oude codes werken direct niet meer.",
+    "de": "Erstelle einen neuen Satz von 10 Wiederherstellungscodes. Deine alten Codes funktionieren sofort nicht mehr.",
+    "fr": "Créez un nouveau jeu de 10 codes de récupération. Vos anciens codes cessent immédiatement de fonctionner."
+  },
+  "Current email": {
+    "nl": "Huidig e-mailadres",
+    "de": "Aktuelle E-Mail-Adresse",
+    "fr": "Adresse e-mail actuelle"
+  },
+  "Current password": {
+    "nl": "Huidig wachtwoord",
+    "de": "Aktuelles Passwort",
+    "fr": "Mot de passe actuel"
+  },
+  "Delete": {
+    "nl": "Verwijderen",
+    "de": "Löschen",
+    "fr": "Supprimer"
+  },
+  "Delete data and close my account": {
+    "nl": "Gegevens verwijderen en mijn account sluiten",
+    "de": "Daten löschen und mein Konto schließen",
+    "fr": "Supprimer les données et fermer mon compte"
+  },
+  "Delete personal data": {
+    "nl": "Persoonsgegevens verwijderen",
+    "de": "Personenbezogene Daten löschen",
+    "fr": "Supprimer les données personnelles"
+  },
+  "Delete your account": {
+    "nl": "Je account verwijderen",
+    "de": "Dein Konto löschen",
+    "fr": "Supprimer votre compte"
+  },
+  "Deleting this data will permanently remove your account, and this cannot be recovered.": {
+    "nl": "Als je deze gegevens verwijdert, wordt je account definitief verwijderd. Dit kan niet ongedaan worden gemaakt.",
+    "de": "Das Löschen dieser Daten entfernt dein Konto dauerhaft; dies kann nicht rückgängig gemacht werden.",
+    "fr": "La suppression de ces données supprimera définitivement votre compte, sans possibilité de récupération."
+  },
+  "Development mode": {
+    "nl": "Ontwikkelmodus",
+    "de": "Entwicklungsmodus",
+    "fr": "Mode développement"
+  },
+  "Disable 2FA": {
+    "nl": "Tweestapsverificatie uitschakelen",
+    "de": "2FA deaktivieren",
+    "fr": "Désactiver la 2FA"
+  },
+  "Disable two-factor authentication (2FA)": {
+    "nl": "Tweestapsverificatie (2FA) uitschakelen",
+    "de": "Zwei-Faktor-Authentifizierung (2FA) deaktivieren",
+    "fr": "Désactiver l'authentification à deux facteurs (2FA)"
+  },
+  "Disabled": {
+    "nl": "Uitgeschakeld",
+    "de": "Deaktiviert",
+    "fr": "Désactivée"
+  },
+  "Disabling 2FA does not change the keys used in authenticator apps. If you wish to change the key used in an authenticator app you should reset your authenticator keys.": {
+    "nl": "Het uitschakelen van tweestapsverificatie verandert de sleutels in authenticator-apps niet. Wil je de sleutel in een authenticator-app wijzigen, reset dan je authenticatorsleutel.",
+    "de": "Das Deaktivieren der 2FA ändert die in Authenticator-Apps verwendeten Schlüssel nicht. Wenn du den Schlüssel einer Authenticator-App ändern möchtest, setze deinen Authenticator-Schlüssel zurück.",
+    "fr": "La désactivation de la 2FA ne modifie pas les clés utilisées dans les applications d'authentification. Pour changer la clé utilisée dans une application d'authentification, réinitialisez votre clé d'authentification."
+  },
+  "Don't have access to your authenticator device?": {
+    "nl": "Geen toegang tot je authenticator-apparaat?",
+    "de": "Kein Zugriff auf dein Authenticator-Gerät?",
+    "fr": "Vous n'avez pas accès à votre appareil d'authentification ?"
+  },
+  "Download": {
+    "nl": "Downloaden",
+    "de": "Herunterladen",
+    "fr": "Télécharger"
+  },
+  "Download your data": {
+    "nl": "Je gegevens downloaden",
+    "de": "Deine Daten herunterladen",
+    "fr": "Télécharger vos données"
+  },
+  "Each code can be used once to log in when you don't have your authenticator app at hand.": {
+    "nl": "Elke code kun je één keer gebruiken om in te loggen wanneer je je authenticator-app niet bij de hand hebt.",
+    "de": "Jeder Code kann einmal zur Anmeldung verwendet werden, wenn du deine Authenticator-App nicht zur Hand hast.",
+    "fr": "Chaque code peut être utilisé une fois pour vous connecter lorsque vous n'avez pas votre application d'authentification sous la main."
+  },
+  "Email": {
+    "nl": "E-mail",
+    "de": "E-Mail",
+    "fr": "E-mail"
+  },
+  "Email address": {
+    "nl": "E-mailadres",
+    "de": "E-Mail-Adresse",
+    "fr": "Adresse e-mail"
+  },
+  "Enabled": {
+    "nl": "Ingeschakeld",
+    "de": "Aktiviert",
+    "fr": "Activée"
+  },
+  "Enter a name for your passkey": {
+    "nl": "Geef je passkey een naam",
+    "de": "Gib deinem Passkey einen Namen",
+    "fr": "Donnez un nom à votre clé d'accès"
+  },
+  "Enter a new email": {
+    "nl": "Voer een nieuw e-mailadres in",
+    "de": "Neue E-Mail-Adresse eingeben",
+    "fr": "Saisissez une nouvelle adresse e-mail"
+  },
+  "Enter a new name for your “{0}” passkey": {
+    "nl": "Geef je passkey “{0}” een nieuwe naam",
+    "de": "Gib deinem Passkey „{0}“ einen neuen Namen",
+    "fr": "Donnez un nouveau nom à votre clé d'accès « {0} »"
+  },
+  "Enter the code": {
+    "nl": "Voer de code in",
+    "de": "Code eingeben",
+    "fr": "Saisissez le code"
+  },
+  "Enter the code from the app": {
+    "nl": "Voer de code uit de app in",
+    "de": "Code aus der App eingeben",
+    "fr": "Saisissez le code de l'application"
+  },
+  "Enter the new password": {
+    "nl": "Voer het nieuwe wachtwoord in",
+    "de": "Neues Passwort eingeben",
+    "fr": "Saisissez le nouveau mot de passe"
+  },
+  "Enter the old password": {
+    "nl": "Voer het oude wachtwoord in",
+    "de": "Altes Passwort eingeben",
+    "fr": "Saisissez l'ancien mot de passe"
+  },
+  "Enter this key into your two factor authenticator app. Spaces and casing do not matter.": {
+    "nl": "Voer deze sleutel in je authenticator-app in. Spaties en hoofdletters maken niet uit.",
+    "de": "Gib diesen Schlüssel in deine Authenticator-App ein. Leerzeichen sowie Groß- und Kleinschreibung spielen keine Rolle.",
+    "fr": "Saisissez cette clé dans votre application d'authentification. Les espaces et la casse n'ont pas d'importance."
+  },
+  "Enter your current password, then choose a new one of at least 6 characters.": {
+    "nl": "Voer je huidige wachtwoord in en kies daarna een nieuw wachtwoord van minstens 6 tekens.",
+    "de": "Gib dein aktuelles Passwort ein und wähle dann ein neues mit mindestens 6 Zeichen.",
+    "fr": "Saisissez votre mot de passe actuel, puis choisissez-en un nouveau d'au moins 6 caractères."
+  },
+  "Enter your email address and we will send you a link to reset your password.": {
+    "nl": "Voer je e-mailadres in, dan sturen we je een link om je wachtwoord opnieuw in te stellen.",
+    "de": "Gib deine E-Mail-Adresse ein und wir senden dir einen Link zum Zurücksetzen deines Passworts.",
+    "fr": "Saisissez votre adresse e-mail et nous vous enverrons un lien pour réinitialiser votre mot de passe."
+  },
+  "Enter your email address and we will send you a new confirmation link.": {
+    "nl": "Voer je e-mailadres in, dan sturen we je een nieuwe bevestigingslink.",
+    "de": "Gib deine E-Mail-Adresse ein und wir senden dir einen neuen Bestätigungslink.",
+    "fr": "Saisissez votre adresse e-mail et nous vous enverrons un nouveau lien de confirmation."
+  },
+  "Enter your phone number": {
+    "nl": "Voer je telefoonnummer in",
+    "de": "Telefonnummer eingeben",
+    "fr": "Saisissez votre numéro de téléphone"
+  },
+  "Error": {
+    "nl": "Fout",
+    "de": "Fehler",
+    "fr": "Erreur"
+  },
+  "Error changing email.": {
+    "nl": "Fout bij het wijzigen van het e-mailadres.",
+    "de": "Fehler beim Ändern der E-Mail-Adresse.",
+    "fr": "Erreur lors de la modification de l'adresse e-mail."
+  },
+  "Error changing user name.": {
+    "nl": "Fout bij het wijzigen van de gebruikersnaam.",
+    "de": "Fehler beim Ändern des Benutzernamens.",
+    "fr": "Erreur lors de la modification du nom d'utilisateur."
+  },
+  "Error confirming your email.": {
+    "nl": "Fout bij het bevestigen van je e-mailadres.",
+    "de": "Fehler beim Bestätigen deiner E-Mail-Adresse.",
+    "fr": "Erreur lors de la confirmation de votre adresse e-mail."
+  },
+  "Error from external provider: {0}": {
+    "nl": "Fout van externe provider: {0}",
+    "de": "Fehler vom externen Anbieter: {0}",
+    "fr": "Erreur du fournisseur externe : {0}"
+  },
+  "Error loading external login information during confirmation.": {
+    "nl": "Fout bij het laden van de externe logingegevens tijdens de bevestiging.",
+    "de": "Fehler beim Laden der externen Anmeldeinformationen während der Bestätigung.",
+    "fr": "Erreur lors du chargement des informations de connexion externe pendant la confirmation."
+  },
+  "Error loading external login information.": {
+    "nl": "Fout bij het laden van de externe logingegevens.",
+    "de": "Fehler beim Laden der externen Anmeldeinformationen.",
+    "fr": "Erreur lors du chargement des informations de connexion externe."
+  },
+  "Error loading user with ID {0}": {
+    "nl": "Fout bij het laden van gebruiker met ID {0}",
+    "de": "Fehler beim Laden des Benutzers mit der ID {0}",
+    "fr": "Erreur lors du chargement de l'utilisateur avec l'ID {0}"
+  },
+  "External logins": {
+    "nl": "Externe logins",
+    "de": "Externe Anmeldungen",
+    "fr": "Connexions externes"
+  },
+  "Failed to rejoin.": {
+    "nl": "Opnieuw verbinden is mislukt.",
+    "de": "Erneutes Verbinden fehlgeschlagen.",
+    "fr": "Échec de la reconnexion."
+  },
+  "Failed to resume the session.": {
+    "nl": "De sessie kon niet worden hervat.",
+    "de": "Die Sitzung konnte nicht fortgesetzt werden.",
+    "fr": "Impossible de reprendre la session."
+  },
+  "Failed to set phone number.": {
+    "nl": "Telefoonnummer instellen is mislukt.",
+    "de": "Telefonnummer konnte nicht gespeichert werden.",
+    "fr": "Impossible d'enregistrer le numéro de téléphone."
+  },
+  "Faster and safer": {
+    "nl": "Sneller en veiliger",
+    "de": "Schneller und sicherer",
+    "fr": "Plus rapide et plus sûr"
+  },
+  "For example Microsoft Authenticator or Google Authenticator:": {
+    "nl": "Bijvoorbeeld Microsoft Authenticator of Google Authenticator:",
+    "de": "Zum Beispiel Microsoft Authenticator oder Google Authenticator:",
+    "fr": "Par exemple Microsoft Authenticator ou Google Authenticator :"
+  },
+  "For local debugging, set this environment variable and restart the app:": {
+    "nl": "Stel voor lokaal debuggen deze omgevingsvariabele in en herstart de app:",
+    "de": "Setze zum lokalen Debuggen diese Umgebungsvariable und starte die App neu:",
+    "fr": "Pour le débogage local, définissez cette variable d'environnement et redémarrez l'application :"
+  },
+  "Forget this browser": {
+    "nl": "Deze browser vergeten",
+    "de": "Diesen Browser vergessen",
+    "fr": "Oublier ce navigateur"
+  },
+  "Forgot password confirmation": {
+    "nl": "Bevestiging wachtwoord vergeten",
+    "de": "Bestätigung: Passwort vergessen",
+    "fr": "Confirmation de mot de passe oublié"
+  },
+  "Forgot your password?": {
+    "nl": "Wachtwoord vergeten?",
+    "de": "Passwort vergessen?",
+    "fr": "Mot de passe oublié ?"
+  },
+  "Generate a new key, for example when you switch to a new phone or think your key has been exposed.": {
+    "nl": "Maak een nieuwe sleutel aan, bijvoorbeeld als je een nieuwe telefoon hebt of denkt dat je sleutel is uitgelekt.",
+    "de": "Erzeuge einen neuen Schlüssel, zum Beispiel wenn du ein neues Telefon hast oder glaubst, dass dein Schlüssel offengelegt wurde.",
+    "fr": "Générez une nouvelle clé, par exemple lorsque vous changez de téléphone ou pensez que votre clé a été exposée."
+  },
+  "Generate recovery codes": {
+    "nl": "Herstelcodes genereren",
+    "de": "Wiederherstellungscodes erzeugen",
+    "fr": "Générer des codes de récupération"
+  },
+  "Generate two-factor authentication (2FA) recovery codes": {
+    "nl": "Herstelcodes voor tweestapsverificatie (2FA) genereren",
+    "de": "Wiederherstellungscodes für die Zwei-Faktor-Authentifizierung (2FA) erzeugen",
+    "fr": "Générer des codes de récupération pour l'authentification à deux facteurs (2FA)"
+  },
+  "Generating new recovery codes does not change the keys used in authenticator apps. If you wish to change the key used in an authenticator app you should reset your authenticator keys.": {
+    "nl": "Nieuwe herstelcodes genereren verandert de sleutels in authenticator-apps niet. Wil je de sleutel in een authenticator-app wijzigen, reset dan je authenticatorsleutel.",
+    "de": "Das Erzeugen neuer Wiederherstellungscodes ändert die in Authenticator-Apps verwendeten Schlüssel nicht. Wenn du den Schlüssel einer Authenticator-App ändern möchtest, setze deinen Authenticator-Schlüssel zurück.",
+    "fr": "La génération de nouveaux codes de récupération ne modifie pas les clés utilisées dans les applications d'authentification. Pour changer la clé utilisée dans une application d'authentification, réinitialisez votre clé d'authentification."
+  },
+  "Get a JSON file with the personal data stored for your account, such as your email address and phone number.": {
+    "nl": "Download een JSON-bestand met de persoonsgegevens die voor je account zijn opgeslagen, zoals je e-mailadres en telefoonnummer.",
+    "de": "Lade eine JSON-Datei mit den für dein Konto gespeicherten personenbezogenen Daten herunter, etwa deine E-Mail-Adresse und Telefonnummer.",
+    "fr": "Obtenez un fichier JSON contenant les données personnelles enregistrées pour votre compte, comme votre adresse e-mail et votre numéro de téléphone."
+  },
+  "Go to log in": {
+    "nl": "Naar inloggen",
+    "de": "Zur Anmeldung",
+    "fr": "Aller à la connexion"
+  },
+  "Go to my portal": {
+    "nl": "Naar mijn portaal",
+    "de": "Zu meinem Portal",
+    "fr": "Aller à mon portail"
+  },
+  "How to use it": {
+    "nl": "Zo gebruik je het",
+    "de": "So verwendest du ihn",
+    "fr": "Comment l'utiliser"
+  },
+  "If you lose your device and don't have the recovery codes you will lose access to your account.": {
+    "nl": "Als je je apparaat kwijtraakt en de herstelcodes niet hebt, verlies je de toegang tot je account.",
+    "de": "Wenn du dein Gerät verlierst und die Wiederherstellungscodes nicht hast, verlierst du den Zugriff auf dein Konto.",
+    "fr": "Si vous perdez votre appareil et n'avez pas les codes de récupération, vous perdrez l'accès à votre compte."
+  },
+  "If you reset your authenticator key your authenticator app will not work until you reconfigure it.": {
+    "nl": "Als je je authenticatorsleutel reset, werkt je authenticator-app pas weer nadat je die opnieuw hebt ingesteld.",
+    "de": "Wenn du deinen Authenticator-Schlüssel zurücksetzt, funktioniert deine Authenticator-App erst wieder, nachdem du sie neu eingerichtet hast.",
+    "fr": "Si vous réinitialisez votre clé d'authentification, votre application d'authentification ne fonctionnera plus tant que vous ne l'aurez pas reconfigurée."
+  },
+  "Incorrect password.": {
+    "nl": "Onjuist wachtwoord.",
+    "de": "Falsches Passwort.",
+    "fr": "Mot de passe incorrect."
+  },
+  "Install an authenticator app": {
+    "nl": "Installeer een authenticator-app",
+    "de": "Installiere eine Authenticator-App",
+    "fr": "Installez une application d'authentification"
+  },
+  "Invalid authenticator code.": {
+    "nl": "Ongeldige authenticatorcode.",
+    "de": "Ungültiger Authenticator-Code.",
+    "fr": "Code d'authentification invalide."
+  },
+  "Invalid email address or password.": {
+    "nl": "Ongeldig e-mailadres of wachtwoord.",
+    "de": "Ungültige E-Mail-Adresse oder ungültiges Passwort.",
+    "fr": "Adresse e-mail ou mot de passe invalide."
+  },
+  "Invalid email change confirmation link.": {
+    "nl": "Ongeldige bevestigingslink voor het wijzigen van je e-mailadres.",
+    "de": "Ungültiger Bestätigungslink für die Änderung der E-Mail-Adresse.",
+    "fr": "Lien de confirmation de changement d'adresse e-mail invalide."
+  },
+  "Invalid password reset": {
+    "nl": "Ongeldige wachtwoordreset",
+    "de": "Ungültige Passwortzurücksetzung",
+    "fr": "Réinitialisation du mot de passe invalide"
+  },
+  "Invalid recovery code entered.": {
+    "nl": "Ongeldige herstelcode ingevoerd.",
+    "de": "Ungültiger Wiederherstellungscode eingegeben.",
+    "fr": "Code de récupération saisi invalide."
+  },
+  "Invalid user": {
+    "nl": "Ongeldige gebruiker",
+    "de": "Ungültiger Benutzer",
+    "fr": "Utilisateur invalide"
+  },
+  "It can result in displaying sensitive information from exceptions to end users.": {
+    "nl": "Daardoor kan gevoelige informatie uit foutmeldingen aan eindgebruikers worden getoond.",
+    "de": "Dadurch können vertrauliche Informationen aus Ausnahmen für Endbenutzer sichtbar werden.",
+    "fr": "Cela peut entraîner l'affichage d'informations sensibles issues des exceptions aux utilisateurs finaux."
+  },
+  "Locked out": {
+    "nl": "Geblokkeerd",
+    "de": "Gesperrt",
+    "fr": "Compte verrouillé"
+  },
+  "Log in": {
+    "nl": "Inloggen",
+    "de": "Anmelden",
+    "fr": "Se connecter"
+  },
+  "Log in to manage your streams.": {
+    "nl": "Log in om je streams te beheren.",
+    "de": "Melde dich an, um deine Streams zu verwalten.",
+    "fr": "Connectez-vous pour gérer vos flux."
+  },
+  "Log in using your {0} account": {
+    "nl": "Inloggen met je {0}-account",
+    "de": "Mit deinem {0}-Konto anmelden",
+    "fr": "Se connecter avec votre compte {0}"
+  },
+  "Log in with a passkey": {
+    "nl": "Inloggen met een passkey",
+    "de": "Mit einem Passkey anmelden",
+    "fr": "Se connecter avec une clé d'accès"
+  },
+  "Log in with a recovery code": {
+    "nl": "Inloggen met een herstelcode",
+    "de": "Mit einem Wiederherstellungscode anmelden",
+    "fr": "Se connecter avec un code de récupération"
+  },
+  "Log in with only your password again. Your authenticator key stays the same, so you can turn 2FA back on later.": {
+    "nl": "Log weer in met alleen je wachtwoord. Je authenticatorsleutel blijft hetzelfde, dus je kunt tweestapsverificatie later weer inschakelen.",
+    "de": "Melde dich wieder nur mit deinem Passwort an. Dein Authenticator-Schlüssel bleibt gleich, sodass du 2FA später wieder einschalten kannst.",
+    "fr": "Connectez-vous à nouveau avec votre seul mot de passe. Votre clé d'authentification reste la même, vous pourrez donc réactiver la 2FA plus tard."
+  },
+  "Manage email": {
+    "nl": "E-mailadres beheren",
+    "de": "E-Mail-Adresse verwalten",
+    "fr": "Gérer l'adresse e-mail"
+  },
+  "Manage your account": {
+    "nl": "Je account beheren",
+    "de": "Dein Konto verwalten",
+    "fr": "Gérer votre compte"
+  },
+  "Manage your external logins": {
+    "nl": "Je externe logins beheren",
+    "de": "Deine externen Anmeldungen verwalten",
+    "fr": "Gérer vos connexions externes"
+  },
+  "Manage your passkeys": {
+    "nl": "Je passkeys beheren",
+    "de": "Deine Passkeys verwalten",
+    "fr": "Gérer vos clés d'accès"
+  },
+  "Mention this ID when you report the problem to an administrator.": {
+    "nl": "Vermeld deze ID wanneer je het probleem aan een beheerder meldt.",
+    "de": "Gib diese ID an, wenn du das Problem einem Administrator meldest.",
+    "fr": "Mentionnez cet identifiant lorsque vous signalez le problème à un administrateur."
+  },
+  "My passkey": {
+    "nl": "Mijn passkey",
+    "de": "Mein Passkey",
+    "fr": "Ma clé d'accès"
+  },
+  "New email": {
+    "nl": "Nieuw e-mailadres",
+    "de": "Neue E-Mail-Adresse",
+    "fr": "Nouvelle adresse e-mail"
+  },
+  "New password": {
+    "nl": "Nieuw wachtwoord",
+    "de": "Neues Passwort",
+    "fr": "Nouveau mot de passe"
+  },
+  "No account yet? Ask an administrator to create one for you.": {
+    "nl": "Nog geen account? Vraag een beheerder om er een voor je aan te maken.",
+    "de": "Noch kein Konto? Bitte einen Administrator, eines für dich anzulegen.",
+    "fr": "Pas encore de compte ? Demandez à un administrateur de vous en créer un."
+  },
+  "No passkeys are registered.": {
+    "nl": "Er zijn geen passkeys geregistreerd.",
+    "de": "Es sind keine Passkeys registriert.",
+    "fr": "Aucune clé d'accès n'est enregistrée."
+  },
+  "Not confirmed": {
+    "nl": "Niet bevestigd",
+    "de": "Nicht bestätigt",
+    "fr": "Non confirmée"
+  },
+  "Not found": {
+    "nl": "Niet gevonden",
+    "de": "Nicht gefunden",
+    "fr": "Introuvable"
+  },
+  "On the log in page, choose “Log in with a passkey” and confirm on your device. Your password keeps working as well.": {
+    "nl": "Kies op de inlogpagina “Inloggen met een passkey” en bevestig op je apparaat. Je wachtwoord blijft ook gewoon werken.",
+    "de": "Wähle auf der Anmeldeseite „Mit einem Passkey anmelden“ und bestätige auf deinem Gerät. Dein Passwort funktioniert weiterhin.",
+    "fr": "Sur la page de connexion, choisissez « Se connecter avec une clé d'accès » et confirmez sur votre appareil. Votre mot de passe continue également de fonctionner."
+  },
+  "Once you have input the key above, your two factor authentication app will provide you with a unique code. Enter the code in the confirmation box below.": {
+    "nl": "Zodra je de sleutel hierboven hebt ingevoerd, geeft je authenticator-app je een unieke code. Vul die code hieronder in.",
+    "de": "Sobald du den Schlüssel oben eingegeben hast, zeigt dir deine Authenticator-App einen eindeutigen Code an. Gib diesen Code unten ein.",
+    "fr": "Une fois la clé ci-dessus saisie, votre application d'authentification vous fournira un code unique. Saisissez ce code ci-dessous."
+  },
+  "One-time codes to log in when you lose your phone. Generating new codes makes the old ones invalid.": {
+    "nl": "Eenmalige codes om in te loggen als je je telefoon kwijt bent. Nieuwe codes maken de oude ongeldig.",
+    "de": "Einmalcodes zur Anmeldung, falls du dein Telefon verlierst. Neue Codes machen die alten ungültig.",
+    "fr": "Codes à usage unique pour vous connecter si vous perdez votre téléphone. Générer de nouveaux codes invalide les anciens."
+  },
+  "or": {
+    "nl": "of",
+    "de": "oder",
+    "fr": "ou"
+  },
+  "Passkey deleted successfully.": {
+    "nl": "Passkey verwijderd.",
+    "de": "Passkey wurde gelöscht.",
+    "fr": "Clé d'accès supprimée."
+  },
+  "Passkey name": {
+    "nl": "Naam van de passkey",
+    "de": "Name des Passkeys",
+    "fr": "Nom de la clé d'accès"
+  },
+  "Passkey updated successfully.": {
+    "nl": "Passkey bijgewerkt.",
+    "de": "Passkey wurde aktualisiert.",
+    "fr": "Clé d'accès mise à jour."
+  },
+  "Passkeys": {
+    "nl": "Passkeys",
+    "de": "Passkeys",
+    "fr": "Clés d'accès"
+  },
+  "Passkeys cannot be guessed or phished. Your device keeps the secret part; the panel only stores a public key.": {
+    "nl": "Passkeys kunnen niet worden geraden of gephisht. Je apparaat bewaart het geheime deel; het paneel slaat alleen een openbare sleutel op.",
+    "de": "Passkeys können weder erraten noch per Phishing abgegriffen werden. Dein Gerät behält den geheimen Teil; das Panel speichert nur einen öffentlichen Schlüssel.",
+    "fr": "Les clés d'accès ne peuvent être ni devinées ni hameçonnées. Votre appareil conserve la partie secrète ; le panneau ne stocke qu'une clé publique."
+  },
+  "Password": {
+    "nl": "Wachtwoord",
+    "de": "Passwort",
+    "fr": "Mot de passe"
+  },
+  "Password reset": {
+    "nl": "Wachtwoord opnieuw ingesteld",
+    "de": "Passwort zurückgesetzt",
+    "fr": "Mot de passe réinitialisé"
+  },
+  "Personal data": {
+    "nl": "Persoonsgegevens",
+    "de": "Personenbezogene Daten",
+    "fr": "Données personnelles"
+  },
+  "Phone number": {
+    "nl": "Telefoonnummer",
+    "de": "Telefonnummer",
+    "fr": "Numéro de téléphone"
+  },
+  "Pick a name that tells you which device or password manager holds this passkey, such as “Work laptop”.": {
+    "nl": "Kies een naam waaraan je herkent op welk apparaat of in welke wachtwoordmanager deze passkey staat, zoals “Werklaptop”.",
+    "de": "Wähle einen Namen, an dem du erkennst, auf welchem Gerät oder in welchem Passwortmanager dieser Passkey liegt, z. B. „Arbeitslaptop“.",
+    "fr": "Choisissez un nom qui indique quel appareil ou gestionnaire de mots de passe contient cette clé d'accès, par exemple « Ordinateur du travail »."
+  },
+  "Please check your email to reset your password.": {
+    "nl": "Controleer je e-mail om je wachtwoord opnieuw in te stellen.",
+    "de": "Bitte prüfe deine E-Mails, um dein Passwort zurückzusetzen.",
+    "fr": "Veuillez consulter votre messagerie pour réinitialiser votre mot de passe."
+  },
+  "Please confirm your password.": {
+    "nl": "Bevestig je wachtwoord.",
+    "de": "Bitte bestätige dein Passwort.",
+    "fr": "Veuillez confirmer votre mot de passe."
+  },
+  "Please enter your email.": {
+    "nl": "Voer je e-mailadres in.",
+    "de": "Bitte gib deine E-Mail-Adresse ein.",
+    "fr": "Veuillez saisir votre adresse e-mail."
+  },
+  "Please enter your password.": {
+    "nl": "Voer je wachtwoord in.",
+    "de": "Bitte gib dein Passwort ein.",
+    "fr": "Veuillez saisir votre mot de passe."
+  },
+  "Please retry or reload the page.": {
+    "nl": "Probeer het opnieuw of herlaad de pagina.",
+    "de": "Bitte versuche es erneut oder lade die Seite neu.",
+    "fr": "Veuillez réessayer ou recharger la page."
+  },
+  "Privacy and cookie policy have not been accepted.": {
+    "nl": "Het privacy- en cookiebeleid is niet geaccepteerd.",
+    "de": "Die Datenschutz- und Cookie-Richtlinie wurde nicht akzeptiert.",
+    "fr": "La politique de confidentialité et de cookies n'a pas été acceptée."
+  },
+  "Profile": {
+    "nl": "Profiel",
+    "de": "Profil",
+    "fr": "Profil"
+  },
+  "Protect your account with a second step: after your password, you also enter a code from an app on your phone.": {
+    "nl": "Beveilig je account met een tweede stap: na je wachtwoord voer je ook een code in uit een app op je telefoon.",
+    "de": "Schütze dein Konto mit einem zweiten Schritt: Nach deinem Passwort gibst du zusätzlich einen Code aus einer App auf deinem Telefon ein.",
+    "fr": "Protégez votre compte par une seconde étape : après votre mot de passe, vous saisissez aussi un code provenant d'une application sur votre téléphone."
+  },
+  "Put these codes in a safe place.": {
+    "nl": "Bewaar deze codes op een veilige plek.",
+    "de": "Bewahre diese Codes an einem sicheren Ort auf.",
+    "fr": "Conservez ces codes en lieu sûr."
+  },
+  "Recovery code": {
+    "nl": "Herstelcode",
+    "de": "Wiederherstellungscode",
+    "fr": "Code de récupération"
+  },
+  "Recovery code verification": {
+    "nl": "Herstelcode controleren",
+    "de": "Überprüfung des Wiederherstellungscodes",
+    "fr": "Vérification du code de récupération"
+  },
+  "Recovery codes": {
+    "nl": "Herstelcodes",
+    "de": "Wiederherstellungscodes",
+    "fr": "Codes de récupération"
+  },
+  "Register": {
+    "nl": "Registreren",
+    "de": "Registrieren",
+    "fr": "S'inscrire"
+  },
+  "Registered logins": {
+    "nl": "Geregistreerde logins",
+    "de": "Registrierte Anmeldungen",
+    "fr": "Connexions enregistrées"
+  },
+  "Registration is disabled": {
+    "nl": "Registreren is uitgeschakeld",
+    "de": "Die Registrierung ist deaktiviert",
+    "fr": "L'inscription est désactivée"
+  },
+  "Rejoin failed... trying again in": {
+    "nl": "Opnieuw verbinden mislukt... nieuwe poging over",
+    "de": "Erneutes Verbinden fehlgeschlagen... neuer Versuch in",
+    "fr": "Échec de la reconnexion... nouvel essai dans"
+  },
+  "Rejoining the server...": {
+    "nl": "Opnieuw verbinden met de server...",
+    "de": "Verbindung zum Server wird wiederhergestellt...",
+    "fr": "Reconnexion au serveur..."
+  },
+  "Remember this machine": {
+    "nl": "Deze computer onthouden",
+    "de": "Dieses Gerät merken",
+    "fr": "Se souvenir de cet appareil"
+  },
+  "Remove": {
+    "nl": "Verwijderen",
+    "de": "Entfernen",
+    "fr": "Retirer"
+  },
+  "Remove this passkey from your account": {
+    "nl": "Deze passkey uit je account verwijderen",
+    "de": "Diesen Passkey aus deinem Konto entfernen",
+    "fr": "Retirer cette clé d'accès de votre compte"
+  },
+  "Remove this {0} login from your account": {
+    "nl": "Deze {0}-login uit je account verwijderen",
+    "de": "Diese {0}-Anmeldung aus deinem Konto entfernen",
+    "fr": "Retirer cette connexion {0} de votre compte"
+  },
+  "Rename": {
+    "nl": "Hernoemen",
+    "de": "Umbenennen",
+    "fr": "Renommer"
+  },
+  "Rename passkey": {
+    "nl": "Passkey hernoemen",
+    "de": "Passkey umbenennen",
+    "fr": "Renommer la clé d'accès"
+  },
+  "Rename this passkey": {
+    "nl": "Deze passkey hernoemen",
+    "de": "Diesen Passkey umbenennen",
+    "fr": "Renommer cette clé d'accès"
+  },
+  "Request ID:": {
+    "nl": "Verzoek-ID:",
+    "de": "Anfrage-ID:",
+    "fr": "ID de la requête :"
+  },
+  "Resend": {
+    "nl": "Opnieuw versturen",
+    "de": "Erneut senden",
+    "fr": "Renvoyer"
+  },
+  "Resend email confirmation": {
+    "nl": "Bevestigingsmail opnieuw versturen",
+    "de": "Bestätigungs-E-Mail erneut senden",
+    "fr": "Renvoyer l'e-mail de confirmation"
+  },
+  "Reset authenticator app": {
+    "nl": "Authenticator-app resetten",
+    "de": "Authenticator-App zurücksetzen",
+    "fr": "Réinitialiser l'application d'authentification"
+  },
+  "Reset authenticator key": {
+    "nl": "Authenticatorsleutel resetten",
+    "de": "Authenticator-Schlüssel zurücksetzen",
+    "fr": "Réinitialiser la clé d'authentification"
+  },
+  "Reset password": {
+    "nl": "Wachtwoord opnieuw instellen",
+    "de": "Passwort zurücksetzen",
+    "fr": "Réinitialiser le mot de passe"
+  },
+  "Reset password confirmation": {
+    "nl": "Bevestiging wachtwoordreset",
+    "de": "Bestätigung der Passwortzurücksetzung",
+    "fr": "Confirmation de réinitialisation du mot de passe"
+  },
+  "Reset recovery codes": {
+    "nl": "Herstelcodes resetten",
+    "de": "Wiederherstellungscodes zurücksetzen",
+    "fr": "Réinitialiser les codes de récupération"
+  },
+  "Resume": {
+    "nl": "Hervatten",
+    "de": "Fortsetzen",
+    "fr": "Reprendre"
+  },
+  "Retry": {
+    "nl": "Opnieuw proberen",
+    "de": "Erneut versuchen",
+    "fr": "Réessayer"
+  },
+  "Save": {
+    "nl": "Opslaan",
+    "de": "Speichern",
+    "fr": "Enregistrer"
+  },
+  "seconds.": {
+    "nl": "seconden.",
+    "de": "Sekunden.",
+    "fr": "secondes."
+  },
+  "Send verification email": {
+    "nl": "Verificatiemail versturen",
+    "de": "Bestätigungs-E-Mail senden",
+    "fr": "Envoyer l'e-mail de vérification"
+  },
+  "Services you can use to log in to this panel instead of your password.": {
+    "nl": "Diensten waarmee je in plaats van je wachtwoord kunt inloggen op dit paneel.",
+    "de": "Dienste, mit denen du dich statt mit deinem Passwort bei diesem Panel anmelden kannst.",
+    "fr": "Services que vous pouvez utiliser pour vous connecter à ce panneau au lieu de votre mot de passe."
+  },
+  "Set password": {
+    "nl": "Wachtwoord instellen",
+    "de": "Passwort festlegen",
+    "fr": "Définir le mot de passe"
+  },
+  "Set up authenticator app": {
+    "nl": "Authenticator-app instellen",
+    "de": "Authenticator-App einrichten",
+    "fr": "Configurer l'application d'authentification"
+  },
+  "Set your password": {
+    "nl": "Stel je wachtwoord in",
+    "de": "Lege dein Passwort fest",
+    "fr": "Définissez votre mot de passe"
+  },
+  "Something went wrong": {
+    "nl": "Er ging iets mis",
+    "de": "Etwas ist schiefgelaufen",
+    "fr": "Une erreur s'est produite"
+  },
+  "Sorry, the content you are looking for does not exist.": {
+    "nl": "Sorry, de inhoud die je zoekt bestaat niet.",
+    "de": "Leider existiert der gesuchte Inhalt nicht.",
+    "fr": "Désolé, le contenu que vous recherchez n'existe pas."
+  },
+  "Stay logged in": {
+    "nl": "Ingelogd blijven",
+    "de": "Angemeldet bleiben",
+    "fr": "Rester connecté"
+  },
+  "Swapping to the Development environment will display more detailed information about the error that occurred.": {
+    "nl": "In de Development-omgeving wordt meer gedetailleerde informatie over de opgetreden fout getoond.",
+    "de": "In der Development-Umgebung werden ausführlichere Informationen zum aufgetretenen Fehler angezeigt.",
+    "fr": "L'environnement Development affiche des informations plus détaillées sur l'erreur survenue."
+  },
+  "Thank you for confirming your email change.": {
+    "nl": "Bedankt voor het bevestigen van je nieuwe e-mailadres.",
+    "de": "Danke für die Bestätigung deiner neuen E-Mail-Adresse.",
+    "fr": "Merci d'avoir confirmé le changement de votre adresse e-mail."
+  },
+  "Thank you for confirming your email.": {
+    "nl": "Bedankt voor het bevestigen van je e-mailadres.",
+    "de": "Danke für die Bestätigung deiner E-Mail-Adresse.",
+    "fr": "Merci d'avoir confirmé votre adresse e-mail."
+  },
+  "The browser did not provide a passkey.": {
+    "nl": "De browser heeft geen passkey aangeleverd.",
+    "de": "Der Browser hat keinen Passkey geliefert.",
+    "fr": "Le navigateur n'a fourni aucune clé d'accès."
+  },
+  "The current browser has been forgotten. When you login again from this browser you will be prompted for your 2fa code.": {
+    "nl": "Deze browser is vergeten. Wanneer je opnieuw inlogt vanuit deze browser, wordt om je verificatiecode gevraagd.",
+    "de": "Dieser Browser wurde vergessen. Wenn du dich erneut über diesen Browser anmeldest, wirst du nach deinem 2FA-Code gefragt.",
+    "fr": "Ce navigateur a été oublié. Lorsque vous vous reconnecterez depuis ce navigateur, votre code 2FA vous sera demandé."
+  },
+  "The Development environment shouldn't be enabled for deployed applications.": {
+    "nl": "De Development-omgeving mag niet worden ingeschakeld voor apps in productie.",
+    "de": "Die Development-Umgebung sollte für produktive Anwendungen nicht aktiviert werden.",
+    "fr": "L'environnement Development ne doit pas être activé pour les applications déployées."
+  },
+  "The email address you log in with. A change only takes effect after you confirm it through the link we send to the new address.": {
+    "nl": "Het e-mailadres waarmee je inlogt. Een wijziging gaat pas in nadat je die bevestigt via de link die we naar het nieuwe adres sturen.",
+    "de": "Die E-Mail-Adresse, mit der du dich anmeldest. Eine Änderung wird erst wirksam, wenn du sie über den Link bestätigst, den wir an die neue Adresse senden.",
+    "fr": "L'adresse e-mail avec laquelle vous vous connectez. Une modification ne prend effet qu'après confirmation via le lien envoyé à la nouvelle adresse."
+  },
+  "The external login was added.": {
+    "nl": "De externe login is toegevoegd.",
+    "de": "Die externe Anmeldung wurde hinzugefügt.",
+    "fr": "La connexion externe a été ajoutée."
+  },
+  "The external login was not added. External logins can only be associated with one account.": {
+    "nl": "De externe login is niet toegevoegd. Een externe login kan maar aan één account gekoppeld zijn.",
+    "de": "Die externe Anmeldung wurde nicht hinzugefügt. Externe Anmeldungen können nur mit einem Konto verknüpft sein.",
+    "fr": "La connexion externe n'a pas été ajoutée. Une connexion externe ne peut être associée qu'à un seul compte."
+  },
+  "The external login was not removed.": {
+    "nl": "De externe login is niet verwijderd.",
+    "de": "Die externe Anmeldung wurde nicht entfernt.",
+    "fr": "La connexion externe n'a pas été retirée."
+  },
+  "The external login was removed.": {
+    "nl": "De externe login is verwijderd.",
+    "de": "Die externe Anmeldung wurde entfernt.",
+    "fr": "La connexion externe a été retirée."
+  },
+  "The passkey could not be added to your account.": {
+    "nl": "De passkey kon niet aan je account worden toegevoegd.",
+    "de": "Der Passkey konnte deinem Konto nicht hinzugefügt werden.",
+    "fr": "La clé d'accès n'a pas pu être ajoutée à votre compte."
+  },
+  "The passkey could not be deleted.": {
+    "nl": "De passkey kon niet worden verwijderd.",
+    "de": "Der Passkey konnte nicht gelöscht werden.",
+    "fr": "La clé d'accès n'a pas pu être supprimée."
+  },
+  "The passkey could not be updated.": {
+    "nl": "De passkey kon niet worden bijgewerkt.",
+    "de": "Der Passkey konnte nicht aktualisiert werden.",
+    "fr": "La clé d'accès n'a pas pu être mise à jour."
+  },
+  "The password reset link is invalid.": {
+    "nl": "De link om je wachtwoord opnieuw in te stellen is ongeldig.",
+    "de": "Der Link zum Zurücksetzen des Passworts ist ungültig.",
+    "fr": "Le lien de réinitialisation du mot de passe est invalide."
+  },
+  "The session has been paused by the server.": {
+    "nl": "De sessie is door de server gepauzeerd.",
+    "de": "Die Sitzung wurde vom Server angehalten.",
+    "fr": "La session a été mise en pause par le serveur."
+  },
+  "The specified passkey could not be found.": {
+    "nl": "De opgegeven passkey is niet gevonden.",
+    "de": "Der angegebene Passkey wurde nicht gefunden.",
+    "fr": "La clé d'accès indiquée est introuvable."
+  },
+  "The specified passkey ID had an invalid format.": {
+    "nl": "De opgegeven passkey-ID heeft een ongeldig formaat.",
+    "de": "Die angegebene Passkey-ID hat ein ungültiges Format.",
+    "fr": "L'identifiant de clé d'accès indiqué a un format invalide."
+  },
+  "There are no external authentication services configured.": {
+    "nl": "Er zijn geen externe inlogdiensten ingesteld.",
+    "de": "Es sind keine externen Anmeldedienste eingerichtet.",
+    "fr": "Aucun service d'authentification externe n'est configuré."
+  },
+  "This account has been locked out, please try again later.": {
+    "nl": "Dit account is tijdelijk geblokkeerd. Probeer het later opnieuw.",
+    "de": "Dieses Konto wurde gesperrt. Bitte versuche es später erneut.",
+    "fr": "Ce compte a été verrouillé, veuillez réessayer plus tard."
+  },
+  "This action only disables 2FA.": {
+    "nl": "Deze actie schakelt alleen tweestapsverificatie uit.",
+    "de": "Diese Aktion deaktiviert nur die 2FA.",
+    "fr": "Cette action désactive uniquement la 2FA."
+  },
+  "This browser is remembered": {
+    "nl": "Deze browser wordt onthouden",
+    "de": "Dieser Browser wird gemerkt",
+    "fr": "Ce navigateur est mémorisé"
+  },
+  "This page is not available for your account.": {
+    "nl": "Deze pagina is niet beschikbaar voor jouw account.",
+    "de": "Diese Seite ist für dein Konto nicht verfügbar.",
+    "fr": "Cette page n'est pas disponible pour votre compte."
+  },
+  "This process disables 2FA until you verify your authenticator app. If you do not complete your authenticator app configuration you may lose access to your account.": {
+    "nl": "Hiermee wordt tweestapsverificatie uitgeschakeld totdat je je authenticator-app opnieuw hebt bevestigd. Als je het instellen van je authenticator-app niet afrondt, kun je de toegang tot je account verliezen.",
+    "de": "Dadurch wird die 2FA deaktiviert, bis du deine Authenticator-App bestätigt hast. Wenn du die Einrichtung deiner Authenticator-App nicht abschließt, kannst du den Zugriff auf dein Konto verlieren.",
+    "fr": "Cette opération désactive la 2FA jusqu'à ce que vous vérifiiez votre application d'authentification. Si vous ne terminez pas sa configuration, vous risquez de perdre l'accès à votre compte."
+  },
+  "To use an authenticator app go through the following steps:": {
+    "nl": "Doorloop deze stappen om een authenticator-app te gebruiken:",
+    "de": "Führe diese Schritte aus, um eine Authenticator-App zu verwenden:",
+    "fr": "Pour utiliser une application d'authentification, suivez ces étapes :"
+  },
+  "Two-factor authentication": {
+    "nl": "Tweestapsverificatie",
+    "de": "Zwei-Faktor-Authentifizierung",
+    "fr": "Authentification à deux facteurs"
+  },
+  "Two-factor authentication (2FA)": {
+    "nl": "Tweestapsverificatie (2FA)",
+    "de": "Zwei-Faktor-Authentifizierung (2FA)",
+    "fr": "Authentification à deux facteurs (2FA)"
+  },
+  "Unable to find user with ID '{0}'.": {
+    "nl": "Kan gebruiker met ID '{0}' niet vinden.",
+    "de": "Benutzer mit der ID '{0}' wurde nicht gefunden.",
+    "fr": "Impossible de trouver l'utilisateur avec l'ID '{0}'."
+  },
+  "Unknown action '{0}'.": {
+    "nl": "Onbekende actie '{0}'.",
+    "de": "Unbekannte Aktion '{0}'.",
+    "fr": "Action inconnue '{0}'."
+  },
+  "Unnamed passkey": {
+    "nl": "Naamloze passkey",
+    "de": "Unbenannter Passkey",
+    "fr": "Clé d'accès sans nom"
+  },
+  "Update password": {
+    "nl": "Wachtwoord bijwerken",
+    "de": "Passwort aktualisieren",
+    "fr": "Mettre à jour le mot de passe"
+  },
+  "Username": {
+    "nl": "Gebruikersnaam",
+    "de": "Benutzername",
+    "fr": "Nom d'utilisateur"
+  },
+  "Verification code": {
+    "nl": "Verificatiecode",
+    "de": "Bestätigungscode",
+    "fr": "Code de vérification"
+  },
+  "Verification code is invalid.": {
+    "nl": "De verificatiecode is ongeldig.",
+    "de": "Der Bestätigungscode ist ungültig.",
+    "fr": "Le code de vérification est invalide."
+  },
+  "Verification email sent. Please check your email.": {
+    "nl": "Verificatiemail verstuurd. Controleer je e-mail.",
+    "de": "Bestätigungs-E-Mail gesendet. Bitte prüfe deine E-Mails.",
+    "fr": "E-mail de vérification envoyé. Veuillez consulter votre messagerie."
+  },
+  "Verify": {
+    "nl": "Controleren",
+    "de": "Bestätigen",
+    "fr": "Vérifier"
+  },
+  "You are logged in with a one-time password. Choose your own password to continue.": {
+    "nl": "Je bent ingelogd met een eenmalig wachtwoord. Kies je eigen wachtwoord om verder te gaan.",
+    "de": "Du bist mit einem Einmalpasswort angemeldet. Wähle ein eigenes Passwort, um fortzufahren.",
+    "fr": "Vous êtes connecté avec un mot de passe à usage unique. Choisissez votre propre mot de passe pour continuer."
+  },
+  "You are not asked for a code on this browser. Forget it to be asked for a code again the next time you log in here.": {
+    "nl": "In deze browser wordt niet om een code gevraagd. Laat de browser vergeten om de volgende keer dat je hier inlogt weer een code te moeten invoeren.",
+    "de": "In diesem Browser wirst du nicht nach einem Code gefragt. Lass ihn vergessen, damit du bei der nächsten Anmeldung hier wieder nach einem Code gefragt wirst.",
+    "fr": "Aucun code ne vous est demandé sur ce navigateur. Oubliez-le pour qu'un code vous soit de nouveau demandé lors de votre prochaine connexion ici."
+  },
+  "You can generate a new set of recovery codes.": {
+    "nl": "Je kunt een nieuwe set herstelcodes genereren.",
+    "de": "Du kannst einen neuen Satz Wiederherstellungscodes erzeugen.",
+    "fr": "Vous pouvez générer un nouveau jeu de codes de récupération."
+  },
+  "You do not have a local username/password for this site. Add a local account so you can log in without an external login.": {
+    "nl": "Je hebt geen lokale gebruikersnaam en wachtwoord voor deze site. Stel een wachtwoord in zodat je ook zonder externe login kunt inloggen.",
+    "de": "Du hast keinen lokalen Benutzernamen und kein Passwort für diese Seite. Lege ein Passwort fest, damit du dich auch ohne externe Anmeldung anmelden kannst.",
+    "fr": "Vous n'avez pas de nom d'utilisateur ni de mot de passe locaux pour ce site. Définissez un mot de passe pour pouvoir vous connecter sans connexion externe."
+  },
+  "You do not have access to this resource.": {
+    "nl": "Je hebt geen toegang tot deze pagina.",
+    "de": "Du hast keinen Zugriff auf diese Ressource.",
+    "fr": "Vous n'avez pas accès à cette ressource."
+  },
+  "You have 1 recovery code left.": {
+    "nl": "Je hebt nog 1 herstelcode over.",
+    "de": "Du hast noch 1 Wiederherstellungscode.",
+    "fr": "Il vous reste 1 code de récupération."
+  },
+  "You have generated new recovery codes.": {
+    "nl": "Je hebt nieuwe herstelcodes gegenereerd.",
+    "de": "Du hast neue Wiederherstellungscodes erzeugt.",
+    "fr": "Vous avez généré de nouveaux codes de récupération."
+  },
+  "You have no recovery codes left.": {
+    "nl": "Je hebt geen herstelcodes meer over.",
+    "de": "Du hast keine Wiederherstellungscodes mehr.",
+    "fr": "Il ne vous reste aucun code de récupération."
+  },
+  "You have reached the maximum number of allowed passkeys.": {
+    "nl": "Je hebt het maximale aantal passkeys bereikt.",
+    "de": "Du hast die maximale Anzahl an Passkeys erreicht.",
+    "fr": "Vous avez atteint le nombre maximal de clés d'accès autorisées."
+  },
+  "You have reached the maximum number of allowed passkeys. Please delete one before adding a new one.": {
+    "nl": "Je hebt het maximale aantal passkeys bereikt. Verwijder er eerst een voordat je een nieuwe toevoegt.",
+    "de": "Du hast die maximale Anzahl an Passkeys erreicht. Lösche zuerst einen, bevor du einen neuen hinzufügst.",
+    "fr": "Vous avez atteint le nombre maximal de clés d'accès autorisées. Supprimez-en une avant d'en ajouter une nouvelle."
+  },
+  "You have requested to log in with a recovery code. This login will not be remembered until you provide an authenticator app code at log in or disable 2FA and log in again.": {
+    "nl": "Je logt in met een herstelcode. Deze login wordt pas onthouden als je bij het inloggen een code uit je authenticator-app invoert, of tweestapsverificatie uitschakelt en opnieuw inlogt.",
+    "de": "Du meldest dich mit einem Wiederherstellungscode an. Diese Anmeldung wird erst gespeichert, wenn du bei der Anmeldung einen Code aus deiner Authenticator-App eingibst oder die 2FA deaktivierst und dich erneut anmeldest.",
+    "fr": "Vous avez demandé à vous connecter avec un code de récupération. Cette connexion ne sera pas mémorisée tant que vous n'aurez pas saisi un code de votre application d'authentification ou désactivé la 2FA puis vous être reconnecté."
+  },
+  "You have {0} recovery codes left.": {
+    "nl": "Je hebt nog {0} herstelcodes over.",
+    "de": "Du hast noch {0} Wiederherstellungscodes.",
+    "fr": "Il vous reste {0} codes de récupération."
+  },
+  "You must accept the policy before you can enable two factor authentication.": {
+    "nl": "Je moet het beleid accepteren voordat je tweestapsverificatie kunt inschakelen.",
+    "de": "Du musst die Richtlinie akzeptieren, bevor du die Zwei-Faktor-Authentifizierung aktivieren kannst.",
+    "fr": "Vous devez accepter la politique avant de pouvoir activer l'authentification à deux facteurs."
+  },
+  "You must generate a new set of recovery codes before you can log in with a recovery code.": {
+    "nl": "Je moet een nieuwe set herstelcodes genereren voordat je met een herstelcode kunt inloggen.",
+    "de": "Du musst einen neuen Satz Wiederherstellungscodes erzeugen, bevor du dich mit einem Wiederherstellungscode anmelden kannst.",
+    "fr": "Vous devez générer un nouveau jeu de codes de récupération avant de pouvoir vous connecter avec un code de récupération."
+  },
+  "You should generate a new set of recovery codes.": {
+    "nl": "Het is verstandig een nieuwe set herstelcodes te genereren.",
+    "de": "Du solltest einen neuen Satz Wiederherstellungscodes erzeugen.",
+    "fr": "Vous devriez générer un nouveau jeu de codes de récupération."
+  },
+  "You've successfully authenticated with {0}. Please enter an email address for this site below and click the Register button to finish logging in.": {
+    "nl": "Je bent aangemeld via {0}. Voer hieronder een e-mailadres voor deze site in en klik op Registreren om het inloggen af te ronden.",
+    "de": "Du hast dich erfolgreich über {0} authentifiziert. Gib unten eine E-Mail-Adresse für diese Seite ein und klicke auf Registrieren, um die Anmeldung abzuschließen.",
+    "fr": "Vous vous êtes authentifié avec {0}. Saisissez ci-dessous une adresse e-mail pour ce site et cliquez sur S'inscrire pour terminer la connexion."
+  },
+  "Your account contains personal data that you have given us. This page allows you to download or delete that data.": {
+    "nl": "Je account bevat persoonsgegevens die je ons hebt gegeven. Op deze pagina kun je die gegevens downloaden of verwijderen.",
+    "de": "Dein Konto enthält personenbezogene Daten, die du uns gegeben hast. Auf dieser Seite kannst du diese Daten herunterladen oder löschen.",
+    "fr": "Votre compte contient des données personnelles que vous nous avez fournies. Cette page vous permet de les télécharger ou de les supprimer."
+  },
+  "Your authenticator app has been verified.": {
+    "nl": "Je authenticator-app is bevestigd.",
+    "de": "Deine Authenticator-App wurde bestätigt.",
+    "fr": "Votre application d'authentification a été vérifiée."
+  },
+  "Your authenticator app key has been reset, you will need to configure your authenticator app using the new key.": {
+    "nl": "Je authenticatorsleutel is gereset. Stel je authenticator-app opnieuw in met de nieuwe sleutel.",
+    "de": "Dein Authenticator-Schlüssel wurde zurückgesetzt. Richte deine Authenticator-App mit dem neuen Schlüssel neu ein.",
+    "fr": "Votre clé d'authentification a été réinitialisée ; vous devez reconfigurer votre application d'authentification avec la nouvelle clé."
+  },
+  "Your basic account details. Your username is your email address; change it on the Email page.": {
+    "nl": "Je basisgegevens. Je gebruikersnaam is je e-mailadres; dat wijzig je op de pagina E-mail.",
+    "de": "Deine grundlegenden Kontodaten. Dein Benutzername ist deine E-Mail-Adresse; ändere sie auf der Seite E-Mail.",
+    "fr": "Les informations de base de votre compte. Votre nom d'utilisateur est votre adresse e-mail ; modifiez-la sur la page E-mail."
+  },
+  "Your email is unchanged.": {
+    "nl": "Je e-mailadres is niet gewijzigd.",
+    "de": "Deine E-Mail-Adresse ist unverändert.",
+    "fr": "Votre adresse e-mail n'a pas changé."
+  },
+  "Your login is protected with an authenticator app. Enter your authenticator code below.": {
+    "nl": "Je login is beveiligd met een authenticator-app. Voer hieronder de code uit je app in.",
+    "de": "Deine Anmeldung ist mit einer Authenticator-App geschützt. Gib unten deinen Authenticator-Code ein.",
+    "fr": "Votre connexion est protégée par une application d'authentification. Saisissez votre code ci-dessous."
+  },
+  "Your password has been changed": {
+    "nl": "Je wachtwoord is gewijzigd",
+    "de": "Dein Passwort wurde geändert",
+    "fr": "Votre mot de passe a été modifié"
+  },
+  "Your password has been reset. You can now log in with your new password.": {
+    "nl": "Je wachtwoord is opnieuw ingesteld. Je kunt nu inloggen met je nieuwe wachtwoord.",
+    "de": "Dein Passwort wurde zurückgesetzt. Du kannst dich jetzt mit deinem neuen Passwort anmelden.",
+    "fr": "Votre mot de passe a été réinitialisé. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe."
+  },
+  "Your password has been set.": {
+    "nl": "Je wachtwoord is ingesteld.",
+    "de": "Dein Passwort wurde festgelegt.",
+    "fr": "Votre mot de passe a été défini."
+  },
+  "Your profile has been updated": {
+    "nl": "Je profiel is bijgewerkt",
+    "de": "Dein Profil wurde aktualisiert",
+    "fr": "Votre profil a été mis à jour"
+  },
+  "{0} left": {
+    "nl": "nog {0}",
+    "de": "noch {0}",
+    "fr": "{0} restants"
+  }
+}
