@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Installs or updates the MediaMTX Panel inside an LXC container (or machine) running
 # Debian 13 (Debian 12 works too).
-# Normally started by create-lxc.sh, which copies the sources to /tmp/mediamtx-panel-install/source.tar.gz.
+# Normally started by create-lxc.sh (Proxmox) or deploy/debian/install.sh (standalone), which put the
+# sources at /tmp/mediamtx-panel-install/source.tar.gz.
 #
 # MODE=install  first installation: packages, users, configuration, services
 # MODE=update   rebuild and restart the panel, keep configuration and database
@@ -15,6 +16,8 @@ ADMIN_EMAIL="${ADMIN_EMAIL:-admin@localhost}"
 ADMIN_PASSWORD="${ADMIN_PASSWORD:-}"
 PANEL_HOST="${PANEL_HOST:-$(hostname -I | awk '{print $1}')}"
 PUBLIC_HOST="${PUBLIC_HOST:-$PANEL_HOST}"
+SET_LOCALE="${SET_LOCALE:-yes}"                # make en_US.UTF-8 the system language (no = leave it alone)
+LOG_TAG="${LOG_TAG:-lxc}"
 
 WORK=/tmp/mediamtx-panel-install
 SOURCE_TARBALL="${SOURCE_TARBALL:-$WORK/source.tar.gz}"
@@ -25,7 +28,7 @@ MTX_DIR=/opt/mediamtx
 MTX_CONF_DIR=/etc/mediamtx
 MTX_REC_DIR=/var/lib/mediamtx/recordings
 
-log() { echo -e "\e[1;34m[lxc]\e[0m $*"; }
+log() { echo -e "\e[1;34m[${LOG_TAG}]\e[0m $*"; }
 # '|| true': head closing the pipe makes tr exit with SIGPIPE, which pipefail would turn into a failure.
 random_secret() { LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom 2>/dev/null | head -c "${1:-24}" || true; }
 
@@ -44,11 +47,11 @@ install_packages() {
   apt-get update -qq
   apt-get install -y -qq curl ca-certificates tar sqlite3 iproute2 locales >/dev/null
   # English (en_US.UTF-8) as the container's default language, so logins from a host shell with that LANG work.
-  if ! locale -a 2>/dev/null | grep -qi '^en_US\.utf-\?8$'; then
+  if [[ "$SET_LOCALE" == "yes" ]] && ! locale -a 2>/dev/null | grep -qi '^en_US\.utf-\?8$'; then
     sed -i 's/^# *\(en_US.UTF-8 UTF-8\)/\1/' /etc/locale.gen
     locale-gen >/dev/null
   fi
-  update-locale LANG=en_US.UTF-8
+  [[ "$SET_LOCALE" == "yes" ]] && update-locale LANG=en_US.UTF-8
   if [[ "$ID" != "debian" ]]; then
     echo "Unsupported OS '$ID': this installer is made for Debian 13." >&2
     exit 1
@@ -192,7 +195,20 @@ wait_for_panel() {
   exit 1
 }
 
+# The SDK is only needed to build; keep the machine small. 'update' installs it again.
+# A SDK that was already installed before this script ran (e.g. for other work) is left alone.
+remove_sdk() {
+  [[ "$SDK_PREINSTALLED" == "yes" ]] && return 0
+  apt-get purge -y -qq dotnet-sdk-10.0 >/dev/null || true
+  apt-get autoremove -y -qq >/dev/null || true
+}
+
 # ---------------------------------------------------------------- main
+SDK_PREINSTALLED=no
+if dpkg-query -W -f='${Status}' dotnet-sdk-10.0 2>/dev/null | grep -q 'install ok installed'; then
+  [[ -f "$CONF_DIR/panel.env" ]] || SDK_PREINSTALLED=yes
+fi
+
 case "$MODE" in
   install)
     [[ -n "$ADMIN_PASSWORD" ]] || ADMIN_PASSWORD="$(random_secret 16)Aa1"
@@ -209,17 +225,14 @@ case "$MODE" in
     if [[ "$INSTALL_MEDIAMTX" == "yes" ]]; then
       systemctl enable --now mediamtx >/dev/null
     fi
-    # The SDK is only needed to build; keep the container small. 'update' installs it again.
-    apt-get purge -y -qq dotnet-sdk-10.0 >/dev/null || true
-    apt-get autoremove -y -qq >/dev/null || true
+    remove_sdk
     ;;
   update)
     install_packages
     build_panel
     systemctl restart mediamtx-panel
     wait_for_panel
-    apt-get purge -y -qq dotnet-sdk-10.0 >/dev/null || true
-    apt-get autoremove -y -qq >/dev/null || true
+    remove_sdk
     ;;
   *)
     echo "Unknown MODE '$MODE' (use install or update)." >&2
