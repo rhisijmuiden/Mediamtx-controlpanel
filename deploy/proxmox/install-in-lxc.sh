@@ -71,7 +71,9 @@ build_panel() {
   mkdir -p "$WORK/src"
   tar -xzf "$SOURCE_TARBALL" -C "$WORK/src"
   export DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1
-  dotnet publish "$WORK/src/src/MediaMtxPanel/MediaMtxPanel.csproj" -c Release -o "$WORK/publish" -v quiet -nologo
+  local revision=()
+  [[ -n "${SOURCE_COMMIT:-}" ]] && revision=("-p:SourceRevisionId=${SOURCE_COMMIT}")
+  dotnet publish "$WORK/src/src/MediaMtxPanel/MediaMtxPanel.csproj" -c Release -o "$WORK/publish" -v quiet -nologo "${revision[@]}"
   mkdir -p "$APP_DIR"
   # Replace the application files but keep nothing else in APP_DIR.
   find "$APP_DIR" -mindepth 1 -delete

@@ -1,6 +1,10 @@
 services:
   panel:
-    build: .
+    build:
+      context: .
+      args:
+        # Optional: GIT_COMMIT=$(git rev-parse HEAD) docker compose up -d --build, so Info shows the exact build.
+        GIT_COMMIT: ${GIT_COMMIT:-}
     restart: unless-stopped
     ports:
       - "8080:8080"
