@@ -1,0 +1,302 @@
+{
+  "Tell the panel how to reach the server's control API and how broadcasters and viewers reach it. The panel can set up MediaMTX on the server over SSH, or you follow the steps on the right.": {
+    "nl": "Geef aan hoe het paneel de beheer-API van de server bereikt en hoe zenders en kijkers de server bereiken. Het paneel kan MediaMTX via SSH op de server instellen, of je volgt de stappen rechts.",
+    "de": "Geben Sie an, wie das Panel die Steuerungs-API des Servers erreicht und wie Sender und Zuschauer den Server erreichen. Das Panel kann MediaMTX per SSH auf dem Server einrichten, oder Sie folgen den Schritten rechts.",
+    "fr": "Indiquez comment le panneau atteint l'API de contrôle du serveur et comment les diffuseurs et les spectateurs atteignent le serveur. Le panneau peut configurer MediaMTX sur le serveur via SSH, ou vous suivez les étapes à droite."
+  },
+  "Connection, public address and statistics of this server. Configure MediaMTX over SSH or by hand on the right.": {
+    "nl": "Verbinding, publiek adres en statistieken van deze server. Stel MediaMTX rechts in via SSH of met de hand.",
+    "de": "Verbindung, öffentliche Adresse und Statistiken dieses Servers. Richten Sie MediaMTX rechts per SSH oder von Hand ein.",
+    "fr": "Connexion, adresse publique et statistiques de ce serveur. Configurez MediaMTX à droite via SSH ou à la main."
+  },
+  "MediaMTX on this server was configured over SSH and the panel is connected.": {
+    "nl": "MediaMTX op deze server is via SSH ingesteld en het paneel is verbonden.",
+    "de": "MediaMTX auf diesem Server wurde per SSH eingerichtet und das Panel ist verbunden.",
+    "fr": "MediaMTX sur ce serveur a été configuré via SSH et le panneau est connecté."
+  },
+  "MediaMTX on this server was configured over SSH, but the panel cannot reach its control API yet. Check that port {0} on the server is open to the panel and that the API URL is correct, then click Test connection.": {
+    "nl": "MediaMTX op deze server is via SSH ingesteld, maar het paneel bereikt de beheer-API nog niet. Controleer of poort {0} op de server openstaat voor het paneel en of de API-URL klopt, en klik daarna op Verbinding testen.",
+    "de": "MediaMTX auf diesem Server wurde per SSH eingerichtet, aber das Panel erreicht die Steuerungs-API noch nicht. Prüfen Sie, ob Port {0} auf dem Server für das Panel offen ist und die API-URL stimmt, und klicken Sie dann auf Verbindung testen.",
+    "fr": "MediaMTX sur ce serveur a été configuré via SSH, mais le panneau n'atteint pas encore son API de contrôle. Vérifiez que le port {0} du serveur est ouvert au panneau et que l'URL de l'API est correcte, puis cliquez sur Tester la connexion."
+  },
+  "Set up MediaMTX on the server as described on the right, or configure it over SSH, and then click Test connection.": {
+    "nl": "Stel MediaMTX op de server in zoals rechts beschreven, of via SSH, en klik daarna op Verbinding testen.",
+    "de": "Richten Sie MediaMTX auf dem Server wie rechts beschrieben oder per SSH ein und klicken Sie dann auf Verbindung testen.",
+    "fr": "Configurez MediaMTX sur le serveur comme décrit à droite, ou via SSH, puis cliquez sur Tester la connexion."
+  },
+  "Setup over SSH": {
+    "nl": "Instellen via SSH",
+    "de": "Einrichtung per SSH",
+    "fr": "Configuration via SSH"
+  },
+  "The panel logs in to the server, sets up MediaMTX for the panel (and installs it if needed), restarts it and adds the server once the connection works. Without SSH, follow the steps on the right.": {
+    "nl": "Het paneel logt in op de server, stelt MediaMTX in voor het paneel (en installeert het zo nodig), herstart het en voegt de server toe zodra de verbinding werkt. Zonder SSH volg je de stappen rechts.",
+    "de": "Das Panel meldet sich am Server an, richtet MediaMTX für das Panel ein (und installiert es bei Bedarf), startet es neu und fügt den Server hinzu, sobald die Verbindung funktioniert. Ohne SSH folgen Sie den Schritten rechts.",
+    "fr": "Le panneau se connecte au serveur, configure MediaMTX pour le panneau (et l'installe si nécessaire), le redémarre et ajoute le serveur dès que la connexion fonctionne. Sans SSH, suivez les étapes à droite."
+  },
+  "Configure MediaMTX on the server over SSH": {
+    "nl": "MediaMTX op de server instellen via SSH",
+    "de": "MediaMTX auf dem Server per SSH einrichten",
+    "fr": "Configurer MediaMTX sur le serveur via SSH"
+  },
+  "Setting up…": {
+    "nl": "Bezig met instellen…",
+    "de": "Wird eingerichtet…",
+    "fr": "Configuration…"
+  },
+  "Set up and add server": {
+    "nl": "Instellen en server toevoegen",
+    "de": "Einrichten und Server hinzufügen",
+    "fr": "Configurer et ajouter le serveur"
+  },
+  "Setup log": {
+    "nl": "Logboek van de installatie",
+    "de": "Einrichtungsprotokoll",
+    "fr": "Journal de configuration"
+  },
+  "Configure over SSH": {
+    "nl": "Instellen via SSH",
+    "de": "Per SSH einrichten",
+    "fr": "Configurer via SSH"
+  },
+  "Let the panel log in to this server and set up MediaMTX for it, for example after creating a new secret or changing the API URL.": {
+    "nl": "Laat het paneel inloggen op deze server en MediaMTX ervoor instellen, bijvoorbeeld na een nieuw geheim of een gewijzigde API-URL.",
+    "de": "Lassen Sie das Panel sich an diesem Server anmelden und MediaMTX dafür einrichten, zum Beispiel nach einem neuen Geheimnis oder einer geänderten API-URL.",
+    "fr": "Laissez le panneau se connecter à ce serveur et y configurer MediaMTX, par exemple après un nouveau secret ou une URL d'API modifiée."
+  },
+  "Configure MediaMTX": {
+    "nl": "MediaMTX instellen",
+    "de": "MediaMTX einrichten",
+    "fr": "Configurer MediaMTX"
+  },
+  "Manual setup": {
+    "nl": "Handmatig instellen",
+    "de": "Manuelle Einrichtung",
+    "fr": "Configuration manuelle"
+  },
+  "To set up MediaMTX on the server yourself so that the panel can manage it:": {
+    "nl": "Zo stel je MediaMTX zelf op de server in, zodat het paneel het kan beheren:",
+    "de": "So richten Sie MediaMTX selbst auf dem Server ein, damit das Panel es verwalten kann:",
+    "fr": "Pour configurer vous-même MediaMTX sur le serveur afin que le panneau puisse le gérer :"
+  },
+  "Fill in this form and click Add server, then Test connection.": {
+    "nl": "Vul dit formulier in en klik op Server toevoegen, daarna op Verbinding testen.",
+    "de": "Füllen Sie dieses Formular aus und klicken Sie auf Server hinzufügen, dann auf Verbindung testen.",
+    "fr": "Remplissez ce formulaire et cliquez sur Ajouter le serveur, puis sur Tester la connexion."
+  },
+  "Click Test connection.": {
+    "nl": "Klik op Verbinding testen.",
+    "de": "Klicken Sie auf Verbindung testen.",
+    "fr": "Cliquez sur Tester la connexion."
+  },
+  "The server was not added.": {
+    "nl": "De server is niet toegevoegd.",
+    "de": "Der Server wurde nicht hinzugefügt.",
+    "fr": "Le serveur n'a pas été ajouté."
+  },
+  "Install MediaMTX v1.16 or newer on the server, for example as a systemd service:": {
+    "nl": "Installeer MediaMTX v1.16 of nieuwer op de server, bijvoorbeeld als systemd-service:",
+    "de": "Installieren Sie MediaMTX v1.16 oder neuer auf dem Server, zum Beispiel als systemd-Dienst:",
+    "fr": "Installez MediaMTX v1.16 ou plus récent sur le serveur, par exemple comme service systemd :"
+  },
+  "Put these settings in the server's mediamtx.yml, replacing the existing lines with the same names (often {0} or {1}):": {
+    "nl": "Zet deze instellingen in de mediamtx.yml van de server en vervang de bestaande regels met dezelfde namen (vaak {0} of {1}):",
+    "de": "Tragen Sie diese Einstellungen in die mediamtx.yml des Servers ein und ersetzen Sie die vorhandenen Zeilen mit denselben Namen (oft {0} oder {1}):",
+    "fr": "Placez ces paramètres dans le fichier mediamtx.yml du serveur en remplaçant les lignes existantes de même nom (souvent {0} ou {1}) :"
+  },
+  "Copied ✓": {
+    "nl": "Gekopieerd ✓",
+    "de": "Kopiert ✓",
+    "fr": "Copié ✓"
+  },
+  "authHTTPExclude: [] matters: otherwise MediaMTX lets API requests through without asking the panel.": {
+    "nl": "authHTTPExclude: [] is belangrijk: anders laat MediaMTX API-verzoeken door zonder het paneel te vragen.",
+    "de": "authHTTPExclude: [] ist wichtig: sonst lässt MediaMTX API-Anfragen durch, ohne das Panel zu fragen.",
+    "fr": "authHTTPExclude: [] est important : sinon MediaMTX laisse passer les requêtes API sans interroger le panneau."
+  },
+  "In Docker, mount this mediamtx.yml into the container. When the file already has these settings, this environment variable alone is enough:": {
+    "nl": "Koppel deze mediamtx.yml in Docker aan de container. Staan deze instellingen al in het bestand, dan is alleen deze omgevingsvariabele genoeg:",
+    "de": "Binden Sie diese mediamtx.yml in Docker in den Container ein. Enthält die Datei diese Einstellungen bereits, genügt diese Umgebungsvariable:",
+    "fr": "Dans Docker, montez ce mediamtx.yml dans le conteneur. Si le fichier contient déjà ces paramètres, cette variable d'environnement suffit :"
+  },
+  "Check the network in both directions: the server must reach the panel at {0}, and the panel must reach port {1} on the server. Open that port to the panel only, for example:": {
+    "nl": "Controleer het netwerk in beide richtingen: de server moet het paneel bereiken op {0}, en het paneel moet poort {1} op de server bereiken. Zet die poort alleen open voor het paneel, bijvoorbeeld:",
+    "de": "Prüfen Sie das Netzwerk in beide Richtungen: Der Server muss das Panel unter {0} erreichen, und das Panel muss Port {1} auf dem Server erreichen. Öffnen Sie diesen Port nur für das Panel, zum Beispiel:",
+    "fr": "Vérifiez le réseau dans les deux sens : le serveur doit atteindre le panneau à {0}, et le panneau doit atteindre le port {1} du serveur. N'ouvrez ce port qu'au panneau, par exemple :"
+  },
+  "Restart MediaMTX:": {
+    "nl": "Herstart MediaMTX:",
+    "de": "Starten Sie MediaMTX neu:",
+    "fr": "Redémarrez MediaMTX :"
+  },
+  "SSH host": {
+    "nl": "SSH-host",
+    "de": "SSH-Host",
+    "fr": "Hôte SSH"
+  },
+  "Used to log in and, for a user other than root, for sudo. The panel does not store it.": {
+    "nl": "Wordt gebruikt om in te loggen en, voor een andere gebruiker dan root, voor sudo. Het paneel slaat het niet op.",
+    "de": "Wird zur Anmeldung und, bei einem anderen Benutzer als root, für sudo verwendet. Das Panel speichert es nicht.",
+    "fr": "Utilisé pour se connecter et, pour un utilisateur autre que root, pour sudo. Le panneau ne l'enregistre pas."
+  },
+  "Log in with a private key instead": {
+    "nl": "In plaats daarvan inloggen met een private key",
+    "de": "Stattdessen mit einem privaten Schlüssel anmelden",
+    "fr": "Se connecter plutôt avec une clé privée"
+  },
+  "Private key": {
+    "nl": "Private key",
+    "de": "Privater Schlüssel",
+    "fr": "Clé privée"
+  },
+  "Key passphrase (if any)": {
+    "nl": "Wachtwoordzin van de key (indien van toepassing)",
+    "de": "Passphrase des Schlüssels (falls vorhanden)",
+    "fr": "Phrase secrète de la clé (le cas échéant)"
+  },
+  "Panel address, as the server reaches it": {
+    "nl": "Adres van het paneel, zoals de server het bereikt",
+    "de": "Adresse des Panels, wie der Server es erreicht",
+    "fr": "Adresse du panneau, telle que le serveur l'atteint"
+  },
+  "MediaMTX asks the panel at this address whether a broadcaster or viewer may connect.": {
+    "nl": "MediaMTX vraagt het paneel op dit adres of een zender of kijker verbinding mag maken.",
+    "de": "MediaMTX fragt das Panel unter dieser Adresse, ob ein Sender oder Zuschauer sich verbinden darf.",
+    "fr": "MediaMTX demande au panneau à cette adresse si un diffuseur ou un spectateur peut se connecter."
+  },
+  "Install MediaMTX v{0} when it is missing": {
+    "nl": "MediaMTX v{0} installeren als het ontbreekt",
+    "de": "MediaMTX v{0} installieren, wenn es fehlt",
+    "fr": "Installer MediaMTX v{0} s'il est absent"
+  },
+  "Advanced": {
+    "nl": "Geavanceerd",
+    "de": "Erweitert",
+    "fr": "Avancé"
+  },
+  "Path of mediamtx.yml (optional)": {
+    "nl": "Pad van mediamtx.yml (optioneel)",
+    "de": "Pfad der mediamtx.yml (optional)",
+    "fr": "Chemin de mediamtx.yml (facultatif)"
+  },
+  "found automatically": {
+    "nl": "wordt automatisch gevonden",
+    "de": "wird automatisch gefunden",
+    "fr": "trouvé automatiquement"
+  },
+  "But the panel cannot use the control API yet: {0} Check that port {1} on the server is reachable from the panel (firewall, NAT) and that the API URL is correct.": {
+    "nl": "Maar het paneel kan de beheer-API nog niet gebruiken: {0} Controleer of poort {1} op de server bereikbaar is vanaf het paneel (firewall, NAT) en of de API-URL klopt.",
+    "de": "Aber das Panel kann die Steuerungs-API noch nicht nutzen: {0} Prüfen Sie, ob Port {1} auf dem Server vom Panel aus erreichbar ist (Firewall, NAT) und die API-URL stimmt.",
+    "fr": "Mais le panneau ne peut pas encore utiliser l'API de contrôle : {0} Vérifiez que le port {1} du serveur est accessible depuis le panneau (pare-feu, NAT) et que l'URL de l'API est correcte."
+  },
+  "The SSH server refused the login for '{0}'. Check the user, password or key.": {
+    "nl": "De SSH-server weigert de login voor '{0}'. Controleer de gebruiker, het wachtwoord of de key.",
+    "de": "Der SSH-Server lehnt die Anmeldung für '{0}' ab. Prüfen Sie Benutzer, Passwort oder Schlüssel.",
+    "fr": "Le serveur SSH refuse la connexion pour « {0} ». Vérifiez l'utilisateur, le mot de passe ou la clé."
+  },
+  "The SSH connection to {0} failed: {1}": {
+    "nl": "De SSH-verbinding met {0} is mislukt: {1}",
+    "de": "Die SSH-Verbindung zu {0} ist fehlgeschlagen: {1}",
+    "fr": "La connexion SSH à {0} a échoué : {1}"
+  },
+  "Cannot reach {0} over SSH: {1}": {
+    "nl": "{0} is niet bereikbaar via SSH: {1}",
+    "de": "{0} ist per SSH nicht erreichbar: {1}",
+    "fr": "Impossible d'atteindre {0} via SSH : {1}"
+  },
+  "The private key cannot be read: {0}": {
+    "nl": "De private key kan niet worden gelezen: {0}",
+    "de": "Der private Schlüssel kann nicht gelesen werden: {0}",
+    "fr": "La clé privée ne peut pas être lue : {0}"
+  },
+  "SSH setup failed: {0}": {
+    "nl": "Instellen via SSH is mislukt: {0}",
+    "de": "Die Einrichtung per SSH ist fehlgeschlagen: {0}",
+    "fr": "La configuration via SSH a échoué : {0}"
+  },
+  "'{0}' is not root and cannot use sudo. Log in as root, or as a user with sudo rights (and fill in the password).": {
+    "nl": "'{0}' is geen root en kan sudo niet gebruiken. Log in als root, of als gebruiker met sudo-rechten (en vul het wachtwoord in).",
+    "de": "'{0}' ist nicht root und kann sudo nicht verwenden. Melden Sie sich als root an oder als Benutzer mit sudo-Rechten (und geben Sie das Passwort ein).",
+    "fr": "« {0} » n'est pas root et ne peut pas utiliser sudo. Connectez-vous en root, ou avec un utilisateur ayant les droits sudo (et saisissez le mot de passe)."
+  },
+  "MediaMTX was not found on the server. Turn on the option to install it, or install it yourself.": {
+    "nl": "MediaMTX is niet gevonden op de server. Zet de optie aan om het te installeren, of installeer het zelf.",
+    "de": "MediaMTX wurde auf dem Server nicht gefunden. Aktivieren Sie die Option zur Installation oder installieren Sie es selbst.",
+    "fr": "MediaMTX est introuvable sur le serveur. Activez l'option pour l'installer, ou installez-le vous-même."
+  },
+  "Installing MediaMTX failed: {0}": {
+    "nl": "Installeren van MediaMTX is mislukt: {0}",
+    "de": "Die Installation von MediaMTX ist fehlgeschlagen: {0}",
+    "fr": "L'installation de MediaMTX a échoué : {0}"
+  },
+  "MediaMTX runs in Docker container '{0}', but its mediamtx.yml is not mounted from the host, so the panel cannot change it. Mount a mediamtx.yml into the container as described under manual setup.": {
+    "nl": "MediaMTX draait in Docker-container '{0}', maar de mediamtx.yml is niet vanaf de host gekoppeld, dus het paneel kan hem niet aanpassen. Koppel een mediamtx.yml aan de container zoals beschreven bij handmatig instellen.",
+    "de": "MediaMTX läuft im Docker-Container '{0}', aber seine mediamtx.yml ist nicht vom Host eingebunden, daher kann das Panel sie nicht ändern. Binden Sie eine mediamtx.yml wie unter manueller Einrichtung beschrieben in den Container ein.",
+    "fr": "MediaMTX tourne dans le conteneur Docker « {0} », mais son mediamtx.yml n'est pas monté depuis l'hôte, le panneau ne peut donc pas le modifier. Montez un mediamtx.yml dans le conteneur comme décrit dans la configuration manuelle."
+  },
+  "MediaMTX was found, but not its mediamtx.yml. Enter the path of the configuration file under Advanced and try again.": {
+    "nl": "MediaMTX is gevonden, maar de mediamtx.yml niet. Vul het pad van het configuratiebestand in onder Geavanceerd en probeer het opnieuw.",
+    "de": "MediaMTX wurde gefunden, aber nicht seine mediamtx.yml. Geben Sie den Pfad der Konfigurationsdatei unter Erweitert ein und versuchen Sie es erneut.",
+    "fr": "MediaMTX a été trouvé, mais pas son mediamtx.yml. Saisissez le chemin du fichier de configuration sous Avancé et réessayez."
+  },
+  "MediaMTX {0} is too old: the panel needs v1.16 or newer. Update MediaMTX first.": {
+    "nl": "MediaMTX {0} is te oud: het paneel heeft v1.16 of nieuwer nodig. Werk MediaMTX eerst bij.",
+    "de": "MediaMTX {0} ist zu alt: Das Panel benötigt v1.16 oder neuer. Aktualisieren Sie zuerst MediaMTX.",
+    "fr": "MediaMTX {0} est trop ancien : le panneau nécessite la v1.16 ou plus récente. Mettez d'abord MediaMTX à jour."
+  },
+  "The server cannot reach the panel at {0}. Fix the panel address (it must be reachable from this server), or open the panel's port in the firewall, and try again. Nothing was changed on the server.": {
+    "nl": "De server kan het paneel niet bereiken op {0}. Pas het adres van het paneel aan (het moet bereikbaar zijn vanaf deze server), of zet de poort van het paneel open in de firewall, en probeer het opnieuw. Er is niets veranderd op de server.",
+    "de": "Der Server erreicht das Panel unter {0} nicht. Korrigieren Sie die Adresse des Panels (sie muss von diesem Server erreichbar sein) oder öffnen Sie den Port des Panels in der Firewall und versuchen Sie es erneut. Auf dem Server wurde nichts geändert.",
+    "fr": "Le serveur ne peut pas atteindre le panneau à {0}. Corrigez l'adresse du panneau (elle doit être accessible depuis ce serveur), ou ouvrez le port du panneau dans le pare-feu, puis réessayez. Rien n'a été modifié sur le serveur."
+  },
+  "The panel did not recognise this server's secret. Reload the page and try again.": {
+    "nl": "Het paneel herkende het geheim van deze server niet. Laad de pagina opnieuw en probeer het nog eens.",
+    "de": "Das Panel hat das Geheimnis dieses Servers nicht erkannt. Laden Sie die Seite neu und versuchen Sie es erneut.",
+    "fr": "Le panneau n'a pas reconnu le secret de ce serveur. Rechargez la page et réessayez."
+  },
+  "MediaMTX was already configured for the panel.": {
+    "nl": "MediaMTX was al ingesteld voor het paneel.",
+    "de": "MediaMTX war bereits für das Panel eingerichtet.",
+    "fr": "MediaMTX était déjà configuré pour le panneau."
+  },
+  "MediaMTX did not start with the new configuration, so the previous configuration was restored. See the setup log for details.": {
+    "nl": "MediaMTX startte niet met de nieuwe configuratie, dus de vorige configuratie is teruggezet. Zie het logboek voor details.",
+    "de": "MediaMTX ist mit der neuen Konfiguration nicht gestartet, daher wurde die vorherige Konfiguration wiederhergestellt. Details im Einrichtungsprotokoll.",
+    "fr": "MediaMTX n'a pas démarré avec la nouvelle configuration, la configuration précédente a donc été restaurée. Voir le journal de configuration."
+  },
+  "Writing the configuration failed: {0}": {
+    "nl": "Het schrijven van de configuratie is mislukt: {0}",
+    "de": "Das Schreiben der Konfiguration ist fehlgeschlagen: {0}",
+    "fr": "L'écriture de la configuration a échoué : {0}"
+  },
+  "MediaMTX is configured for the panel.": {
+    "nl": "MediaMTX is ingesteld voor het paneel.",
+    "de": "MediaMTX ist für das Panel eingerichtet.",
+    "fr": "MediaMTX est configuré pour le panneau."
+  },
+  "Enter the SSH password or a private key.": {
+    "nl": "Vul het SSH-wachtwoord of een private key in.",
+    "de": "Geben Sie das SSH-Passwort oder einen privaten Schlüssel ein.",
+    "fr": "Saisissez le mot de passe SSH ou une clé privée."
+  },
+  "Enter the SSH host.": {
+    "nl": "Vul de SSH-host in.",
+    "de": "Geben Sie den SSH-Host ein.",
+    "fr": "Saisissez l'hôte SSH."
+  },
+  "Enter the SSH user.": {
+    "nl": "Vul de SSH-gebruiker in.",
+    "de": "Geben Sie den SSH-Benutzer ein.",
+    "fr": "Saisissez l'utilisateur SSH."
+  },
+  "Enter the panel address.": {
+    "nl": "Vul het adres van het paneel in.",
+    "de": "Geben Sie die Adresse des Panels ein.",
+    "fr": "Saisissez l'adresse du panneau."
+  },
+  "Use an address such as http://10.0.0.10:8080.": {
+    "nl": "Gebruik een adres zoals http://10.0.0.10:8080.",
+    "de": "Verwenden Sie eine Adresse wie http://10.0.0.10:8080.",
+    "fr": "Utilisez une adresse comme http://10.0.0.10:8080."
+  }
+}
