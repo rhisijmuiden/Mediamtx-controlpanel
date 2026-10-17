@@ -12,7 +12,7 @@
 
 <a class="back-link" href="Account/Manage/Passkeys"><i class="bi bi-arrow-left"></i> @L["Passkeys"]</a>
 <EditForm Model="Input" OnValidSubmit="Rename" FormName="rename-passkey" method="post">
-    <DataAnnotationsValidator />
+    <LocalizedValidator />
     <h2 class="h4 d-flex align-items-center gap-2 mb-1">
         <i class="bi bi-fingerprint text-primary"></i>
         @if (passkey?.Name is { } name)

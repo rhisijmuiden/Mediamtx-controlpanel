@@ -1,0 +1,12 @@
+{
+  "name": "mediamtx-panel-screenshots",
+  "private": true,
+  "description": "Takes the README screenshots of a running demo panel (see start-demo.sh).",
+  "type": "module",
+  "scripts": {
+    "screenshots": "node take-screenshots.mjs"
+  },
+  "dependencies": {
+    "playwright": "1.56.1"
+  }
+}

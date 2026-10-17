@@ -53,7 +53,7 @@ else
                 <div class="row">
                     <div class="col-xl-8">
                         <EditForm Model="Input" FormName="send-code" OnValidSubmit="OnValidSubmitAsync" method="post">
-                            <DataAnnotationsValidator />
+                            <LocalizedValidator />
                             <div class="form-floating mb-3">
                                 <InputText @bind-Value="Input.Code" id="Input.Code" class="form-control" autocomplete="one-time-code" inputmode="numeric" placeholder="@L["Enter the code"]" />
                                 <label for="Input.Code" class="control-label form-label">@L["Verification code"]</label>

@@ -7,7 +7,9 @@
 
     <main class="app-main">
         <header class="topbar">
-            <MediaMtxStatusBadge />
+            <AuthorizeView Roles="@Roles.Staff">
+                <MediaMtxStatusBadge />
+            </AuthorizeView>
         </header>
 
         <article class="content">

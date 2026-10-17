@@ -73,7 +73,7 @@ else
     <div class="row g-4">
         <div class="@(IsNew ? "col-12" : "col-xxl-7")">
             <EditForm Model="input" OnValidSubmit="Save" FormName="server">
-                <DataAnnotationsValidator />
+                <LocalizedValidator />
                 <div class="card">
                     <div class="card-body">
                         <ValidationSummary class="text-danger small mb-3" />

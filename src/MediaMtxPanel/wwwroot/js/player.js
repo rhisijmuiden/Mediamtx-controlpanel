@@ -19,7 +19,18 @@
         return scripts[src];
     }
 
+    // Status texts arrive translated in data-texts on the <video> (see StreamPlayer.razor); English is the fallback.
+    function tr(video, text) {
+        try {
+            const texts = JSON.parse(video.dataset.texts || "{}");
+            return texts[text] ?? text;
+        } catch {
+            return text;
+        }
+    }
+
     function setStatus(video, text, kind) {
+        text = tr(video, text);
         const el = video.closest("[data-player-root]")?.querySelector("[data-player-status]");
         if (el) {
             el.textContent = text;
@@ -49,12 +60,12 @@
                 if (String(err).includes("codecs not supported")) {
                     // This browser cannot decode the stream's codecs over WebRTC; HLS usually can.
                     stop(video);
-                    startHls(video, o).catch((e) => setStatus(video, "Player could not start: " + e.message, "error"));
+                    startHls(video, o).catch((e) => setStatus(video, tr(video, "Player could not start:") + " " + e.message, "error"));
                     return;
                 }
                 setStatus(video, String(err).includes("not found")
                     ? "No picture yet: the stream is not live yet"
-                    : "No picture yet: " + err, "error");
+                    : tr(video, "No picture yet:") + " " + err, "error");
             },
             onTrack: (evt) => {
                 if (video.srcObject !== evt.streams[0]) {
@@ -85,7 +96,7 @@
             hls.on(window.Hls.Events.MANIFEST_PARSED, () => setStatus(video, "Live (HLS)", "live"));
             hls.on(window.Hls.Events.ERROR, (_, data) => {
                 if (data.fatal) {
-                    setStatus(video, "No picture yet (HLS): " + (data.response?.code || data.details), "error");
+                    setStatus(video, tr(video, "No picture yet (HLS):") + " " + (data.response?.code || data.details), "error");
                     setTimeout(() => { if (players.get(video) === hls) { hls.loadSource(o.hlsUrl); } }, 4000);
                 }
             });
@@ -108,7 +119,7 @@
                 await startWebRtc(video, options);
             }
         } catch (e) {
-            setStatus(video, "Player could not start: " + e.message, "error");
+            setStatus(video, tr(video, "Player could not start:") + " " + e.message, "error");
         }
     }
 

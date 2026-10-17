@@ -11,6 +11,7 @@
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 @inject PanelSettingsStore Settings
+@inject MailService Mail
 
 <AppPageTitle Text="@L["Log in"]" />
 
@@ -22,7 +23,7 @@
             <p class="text-secondary mb-4">@L["Log in to manage your streams."]</p>
             <StatusMessage Message="@errorMessage" />
             <EditForm EditContext="editContext" method="post" OnSubmit="LoginUser" FormName="login">
-                <DataAnnotationsValidator />
+                <LocalizedValidator />
                 <ValidationSummary class="text-danger" role="alert" />
                 <div class="form-floating mb-3">
                     <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" autocomplete="username webauthn" aria-required="true" placeholder="name@example.com" />
@@ -38,6 +39,11 @@
                     <InputCheckbox @bind-Value="Input.RememberMe" id="Input.RememberMe" class="darker-border-checkbox form-check-input" />
                     <label class="form-check-label" for="Input.RememberMe">@L["Stay logged in"]</label>
                 </div>
+                @if (Mail.IsConfigured)
+                {
+                    @* Only offered once outgoing mail is set up under Settings → Mail. *@
+                    <div class="text-end mb-3 small"><a href="Account/ForgotPassword">@L["Forgot your password?"]</a></div>
+                }
                 <button type="submit" class="w-100 btn btn-lg btn-primary"><i class="bi bi-box-arrow-in-right"></i> @L["Log in"]</button>
                 <div class="d-flex align-items-center gap-2 my-3 text-secondary small">
                     <hr class="flex-grow-1 m-0" /> @L["or"] <hr class="flex-grow-1 m-0" />

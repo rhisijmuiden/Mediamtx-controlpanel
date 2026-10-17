@@ -229,7 +229,7 @@ else
                         else
                         {
                             <EditForm Model="offerInput" OnValidSubmit="SaveOffer" FormName="offer" class="offer-card mb-2">
-                                <DataAnnotationsValidator />
+                                <LocalizedValidator />
                                 <div class="mb-2">
                                     <label class="form-label small" for="offer-name">@L["Name"]</label>
                                     <InputText id="offer-name" class="form-control form-control-sm" @bind-Value="offerInput.Name" placeholder="@L["Day ticket, HD version, season pass…"]" />

@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
 using MediaMtxPanel.Data;
+using MediaMtxPanel.Services.Localization;
 using Microsoft.EntityFrameworkCore;
 
 namespace MediaMtxPanel.Services;
@@ -81,6 +82,7 @@ public enum CredentialKind { Publish, Read }
 public class StreamService(
     IDbContextFactory<ApplicationDbContext> dbFactory,
     MediaMtxClientFactory clients,
+    TextLocalizer l,
     ILogger<StreamService> logger)
 {
     public static bool IsAdmin(ClaimsPrincipal user) => user.IsInRole(Roles.Admin);
@@ -256,8 +258,7 @@ public class StreamService(
         catch (Exception ex) when (ex is HttpRequestException or MediaMtxException or TaskCanceledException)
         {
             logger.LogWarning(ex, "Could not apply stream {Name} to {Server}", stream.Name, server.Name);
-            return $"Saved, but server {server.Name} could not be updated: {ex.Message}. " +
-                   "The panel will retry automatically.";
+            return l["Saved, but server {0} could not be updated: {1}. The panel will retry automatically.", server.Name, ex.Message];
         }
     }
     public static MtxPathConfig ToConfig(StreamDefinition s) => new()

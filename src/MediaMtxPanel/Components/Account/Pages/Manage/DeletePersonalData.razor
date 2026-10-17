@@ -24,7 +24,7 @@
 
 <div class="col-xl-8">
     <EditForm Model="Input" FormName="delete-user" OnValidSubmit="OnValidSubmitAsync" method="post">
-        <DataAnnotationsValidator />
+        <LocalizedValidator />
         <ValidationSummary class="text-danger" role="alert" />
         @if (requirePassword)
         {

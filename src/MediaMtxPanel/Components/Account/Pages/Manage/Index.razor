@@ -17,7 +17,7 @@
 <div class="row">
     <div class="col-xl-8">
         <EditForm Model="Input" FormName="profile" OnValidSubmit="OnValidSubmitAsync" method="post">
-            <DataAnnotationsValidator />
+            <LocalizedValidator />
             <ValidationSummary class="text-danger" role="alert" />
             <div class="form-floating mb-3">
                 <input type="text" value="@username" id="username" class="form-control" placeholder="@L["Username"]" disabled />
