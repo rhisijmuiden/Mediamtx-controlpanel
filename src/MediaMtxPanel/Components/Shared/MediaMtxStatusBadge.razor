@@ -6,13 +6,13 @@
 }
 @if (states.Count == 0)
 {
-    <span class="badge text-bg-secondary">MediaMTX: checking connection…</span>
+    <span class="badge text-bg-light border badge-dot">@L["MediaMTX: checking connection…"]</span>
 }
 else if (up == states.Count)
 {
-    <span class="badge text-bg-success">@(states.Count == 1 ? "MediaMTX server connected" : $"All {states.Count} MediaMTX servers connected")</span>
+    <span class="badge bg-success-subtle text-success-emphasis badge-dot">@(states.Count == 1 ? L["MediaMTX server connected"] : L["All {0} MediaMTX servers connected", states.Count])</span>
 }
 else
 {
-    <a href="servers" class="badge text-bg-danger text-decoration-none">@(states.Count - up) of @states.Count MediaMTX server(s) unreachable</a>
+    <a href="servers" class="badge bg-danger-subtle text-danger-emphasis badge-dot">@L["{0} of {1} MediaMTX server(s) unreachable", states.Count - up, states.Count]</a>
 }

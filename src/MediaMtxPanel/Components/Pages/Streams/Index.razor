@@ -5,89 +5,126 @@
 @inject StreamService Streams
 @inject LiveStatusReader LiveReader
 
-<PageTitle>Streams</PageTitle>
+<AppPageTitle Text="@L["Streams"]" />
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="mb-0">Streams</h1>
-    <a class="btn btn-primary" href="streams/new">+ New stream</a>
+<div class="page-header">
+    <div>
+        <h1><i class="bi bi-camera-video text-primary"></i> @L["Streams"]</h1>
+        <p class="page-subtitle">@L["Every stream is a path on a MediaMTX server with its own credentials. Open one to see its connection details and live status."]</p>
+    </div>
+    <div class="page-actions">
+        <a class="btn btn-primary" href="streams/new"><i class="bi bi-plus-lg"></i> @L["New stream"]</a>
+    </div>
 </div>
 
 @foreach (var (serverId, err) in live.Errors)
 {
-    <div class="alert alert-warning py-2">Server @ServerName(serverId) is unreachable: @err</div>
+    <div class="alert alert-warning d-flex align-items-center gap-2 py-2"><i class="bi bi-exclamation-triangle"></i> @L["Server {0} is unreachable: {1}", ServerName(serverId), err]</div>
 }
 @if (message is not null)
 {
-    <div class="alert alert-warning py-2">@message</div>
+    <div class="alert alert-warning d-flex align-items-center gap-2 py-2"><i class="bi bi-exclamation-triangle"></i> @message</div>
 }
 
 @if (streams is null)
 {
-    <p>Loading…</p>
+    <p class="text-secondary"><span class="spinner-border spinner-border-sm me-2"></span>@L["Loading…"]</p>
 }
 else if (streams.Count == 0)
 {
-    <div class="text-center text-secondary py-5">
-        <p>There are no streams yet.</p>
-        <a class="btn btn-primary" href="streams/new">Create your first stream</a>
+    <div class="empty-state">
+        <i class="bi bi-camera-video-off"></i>
+        <p class="mb-3">@L["There are no streams yet."]</p>
+        <a class="btn btn-primary" href="streams/new"><i class="bi bi-plus-lg"></i> @L["Create your first stream"]</a>
     </div>
 }
 else
 {
-    <div class="d-flex gap-2 mb-3">
-        <input class="form-control" placeholder="Search…" @bind="filter" @bind:event="oninput" />
+    <div class="d-flex flex-wrap gap-2 mb-3">
+        <div class="input-group" style="max-width: 22rem">
+            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+            <input class="form-control" placeholder="@L["Search by name or path"]" @bind="filter" @bind:event="oninput" />
+        </div>
         @if (serverNames.Count > 1)
         {
-            <select class="form-select w-auto" @bind="serverFilter">
-                <option value="0">All servers</option>
+            <select class="form-select w-auto" @bind="serverFilter" aria-label="@L["Server"]">
+                <option value="0">@L["All servers"]</option>
                 @foreach (var (id, name) in serverNames)
                 {
                     <option value="@id">@name</option>
                 }
             </select>
         }
+        <span class="ms-auto align-self-center small text-secondary">@L["{0} of {1} stream(s)", Filtered.Count(), streams.Count]</span>
     </div>
-    <div class="table-responsive">
-        <table class="table table-hover align-middle">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Path</th>
-                    <th>Server</th>
-                    <th>Source</th>
-                    <th>Status</th>
-                    <th class="text-end">Viewers</th>
-                    @if (isAdmin)
-                    {
-                        <th>Owner</th>
-                    }
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var s in Filtered)
-                {
-                    var p = live.Find(s);
-                    <tr>
-                        <td><a href="streams/@s.Id">@s.DisplayName</a></td>
-                        <td><code>@s.Name</code></td>
-                        <td>@s.Server!.Name</td>
-                        <td>@(s.SourceType == StreamSourceType.Publisher ? "Publisher" : "Pull")</td>
-                        <td><StreamStateBadge Stream="s" Live="p" /></td>
-                        <td class="text-end">@(p?.Readers.Count ?? 0)</td>
-                        @if (isAdmin)
+
+    @if (!Filtered.Any())
+    {
+        <div class="empty-state">
+            <i class="bi bi-search"></i>
+            @L["No streams match this filter."]
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>@L["Name"]</th>
+                            <th>@L["Server"]</th>
+                            <th>@L["Source"]</th>
+                            <th>@L["Status"]</th>
+                            <th class="text-end">@L["Viewers"]</th>
+                            @if (isAdmin)
+                            {
+                                <th>@L["Owner"]</th>
+                            }
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var s in Filtered)
                         {
-                            <td class="small">@(s.Owner?.Email ?? "–")</td>
+                            var p = live.Find(s);
+                            <tr>
+                                <td>
+                                    <a class="fw-semibold" href="streams/@s.Id">@s.DisplayName</a>
+                                    <div><code class="small">@s.Name</code></div>
+                                </td>
+                                <td>@s.Server!.Name</td>
+                                <td>
+                                    @if (s.SourceType == StreamSourceType.Publisher)
+                                    {
+                                        <span class="badge text-bg-light border"><i class="bi bi-upload me-1"></i>@L["Publisher"]</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge text-bg-light border"><i class="bi bi-download me-1"></i>@L["Pull"]</span>
+                                    }
+                                </td>
+                                <td><StreamStateBadge Stream="s" Live="p" /></td>
+                                <td class="text-end"><i class="bi bi-eye text-secondary me-1"></i>@(p?.Readers.Count ?? 0)</td>
+                                @if (isAdmin)
+                                {
+                                    <td class="small">@(s.Owner?.Email ?? "–")</td>
+                                }
+                                <td class="text-end text-nowrap">
+                                    <a class="btn btn-sm btn-outline-primary" href="streams/@s.Id"><i class="bi bi-box-arrow-in-right"></i> @L["Details"]</a>
+                                    <a class="btn btn-sm btn-outline-secondary btn-icon" href="streams/@s.Id/edit" title="@L["Edit"]"><i class="bi bi-pencil"></i></a>
+                                    <button class="btn btn-sm btn-outline-secondary btn-icon" @onclick="() => Toggle(s)"
+                                            title="@(s.Enabled ? L["Disable"] : L["Enable"])">
+                                        <i class="bi @(s.Enabled ? "bi-pause-circle" : "bi-play-circle")"></i>
+                                    </button>
+                                </td>
+                            </tr>
                         }
-                        <td class="text-end text-nowrap">
-                            <a class="btn btn-sm btn-outline-primary" href="streams/@s.Id">Details</a>
-                            <button class="btn btn-sm btn-outline-secondary" @onclick="() => Toggle(s)">@(s.Enabled ? "Disable" : "Enable")</button>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
 }
 
 @code {

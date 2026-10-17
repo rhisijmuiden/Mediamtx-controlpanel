@@ -1,14 +1,21 @@
+@* Connection URLs per protocol, each with a copy button and a short hint on when to use it. *@
 <div class="table-responsive">
-    <table class="table table-sm endpoint-table">
+    <table class="table endpoint-table align-middle">
         <thead>
-            <tr><th style="width: 12rem">Protocol</th><th>URL</th></tr>
+            <tr><th style="width: 15rem">@L["Protocol"]</th><th>@L["URL"]</th></tr>
         </thead>
         <tbody>
             @foreach (var e in Items)
             {
                 <tr>
-                    <td><strong>@e.Protocol</strong></td>
-                    <td><CopyField Value="@e.Url" Note="@e.Note" /></td>
+                    <td>
+                        <div class="fw-semibold">@e.Protocol</div>
+                        @if (Hint(e.Protocol) is { } hint)
+                        {
+                            <div class="small text-secondary">@L[hint]</div>
+                        }
+                    </td>
+                    <td><CopyField Value="@e.Url" Note="@(e.Note is null ? null : L[e.Note])" /></td>
                 </tr>
             }
         </tbody>
@@ -17,4 +24,18 @@
 
 @code {
     [Parameter, EditorRequired] public List<StreamEndpoint> Items { get; set; } = [];
+
+    // English texts; translated through L[...] when shown.
+    private static string? Hint(string protocol) => protocol switch
+    {
+        "RTSP" => "Low latency; VLC, ffmpeg, IP cameras",
+        "RTMP" => "OBS and most encoders",
+        "SRT" => "Reliable over unstable networks",
+        "WebRTC (WHIP)" => "Sub-second latency from OBS or apps",
+        "WebRTC (WHEP)" => "Sub-second latency in players",
+        "WebRTC (browser)" => "Open the link in a browser",
+        "HLS" => "Widest device support, a few seconds delay",
+        "HLS (browser)" => "Open the link in a browser",
+        _ => null,
+    };
 }

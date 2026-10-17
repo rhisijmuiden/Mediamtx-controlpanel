@@ -1,0 +1,917 @@
+{
+  "Version and updates": {
+    "nl": "Versie en updates",
+    "de": "Version und Updates",
+    "fr": "Version et mises à jour"
+  },
+  "Info": {
+    "nl": "Info",
+    "de": "Info",
+    "fr": "Infos"
+  },
+  "Update available": {
+    "nl": "Update beschikbaar",
+    "de": "Update verfügbar",
+    "fr": "Mise à jour disponible"
+  },
+  "Control panel for MediaMTX": {
+    "nl": "Beheerpaneel voor MediaMTX",
+    "de": "Verwaltungsoberfläche für MediaMTX",
+    "fr": "Panneau de contrôle pour MediaMTX"
+  },
+  "Close": {
+    "nl": "Sluiten",
+    "de": "Schließen",
+    "fr": "Fermer"
+  },
+  "Version": {
+    "nl": "Versie",
+    "de": "Version",
+    "fr": "Version"
+  },
+  "Build": {
+    "nl": "Build",
+    "de": "Build",
+    "fr": "Build"
+  },
+  "unknown": {
+    "nl": "onbekend",
+    "de": "unbekannt",
+    "fr": "inconnu"
+  },
+  "Built on": {
+    "nl": "Gebouwd op",
+    "de": "Erstellt am",
+    "fr": "Compilé le"
+  },
+  "Updates": {
+    "nl": "Updates",
+    "de": "Updates",
+    "fr": "Mises à jour"
+  },
+  "Checking for updates…": {
+    "nl": "Zoeken naar updates…",
+    "de": "Suche nach Updates…",
+    "fr": "Recherche de mises à jour…"
+  },
+  "Not checked yet.": {
+    "nl": "Nog niet gecontroleerd.",
+    "de": "Noch nicht geprüft.",
+    "fr": "Pas encore vérifié."
+  },
+  "Could not reach GitHub: {0}": {
+    "nl": "GitHub is niet bereikbaar: {0}",
+    "de": "GitHub ist nicht erreichbar: {0}",
+    "fr": "Impossible de joindre GitHub : {0}"
+  },
+  "A new version is available": {
+    "nl": "Er is een nieuwe versie beschikbaar",
+    "de": "Eine neue Version ist verfügbar",
+    "fr": "Une nouvelle version est disponible"
+  },
+  "{0} new change(s) on GitHub since this build.": {
+    "nl": "{0} nieuwe wijziging(en) op GitHub sinds deze build.",
+    "de": "{0} neue Änderung(en) auf GitHub seit diesem Build.",
+    "fr": "{0} nouvelle(s) modification(s) sur GitHub depuis ce build."
+  },
+  "Latest version: {0}": {
+    "nl": "Nieuwste versie: {0}",
+    "de": "Neueste Version: {0}",
+    "fr": "Dernière version : {0}"
+  },
+  "What's new": {
+    "nl": "Wat is er nieuw",
+    "de": "Was ist neu",
+    "fr": "Nouveautés"
+  },
+  "Proxmox: run the installer with update and the container ID on the Proxmox host. Docker: pull the new code and run docker compose up -d --build.": {
+    "nl": "Proxmox: voer het installatiescript uit met update en het container-ID op de Proxmox-host. Docker: haal de nieuwe code op en voer docker compose up -d --build uit.",
+    "de": "Proxmox: Führen Sie das Installationsskript mit update und der Container-ID auf dem Proxmox-Host aus. Docker: Holen Sie den neuen Code und führen Sie docker compose up -d --build aus.",
+    "fr": "Proxmox : lancez le script d'installation avec update et l'ID du conteneur sur l'hôte Proxmox. Docker : récupérez le nouveau code et lancez docker compose up -d --build."
+  },
+  "You are running the latest version.": {
+    "nl": "Je gebruikt de nieuwste versie.",
+    "de": "Sie verwenden die neueste Version.",
+    "fr": "Vous utilisez la dernière version."
+  },
+  "Last checked: {0}": {
+    "nl": "Laatst gecontroleerd: {0}",
+    "de": "Zuletzt geprüft: {0}",
+    "fr": "Dernière vérification : {0}"
+  },
+  "The panel checks automatically every 24 hours.": {
+    "nl": "Het paneel controleert automatisch elke 24 uur.",
+    "de": "Das Panel prüft automatisch alle 24 Stunden.",
+    "fr": "Le panneau vérifie automatiquement toutes les 24 heures."
+  },
+  "The automatic check is turned off under Settings.": {
+    "nl": "De automatische controle staat uit bij Instellingen.",
+    "de": "Die automatische Prüfung ist unter Einstellungen ausgeschaltet.",
+    "fr": "La vérification automatique est désactivée dans Paramètres."
+  },
+  "Check for updates": {
+    "nl": "Controleren op updates",
+    "de": "Nach Updates suchen",
+    "fr": "Rechercher des mises à jour"
+  },
+  "An unexpected error has occurred.": {
+    "nl": "Er is een onverwachte fout opgetreden.",
+    "de": "Ein unerwarteter Fehler ist aufgetreten.",
+    "fr": "Une erreur inattendue s'est produite."
+  },
+  "Reload": {
+    "nl": "Opnieuw laden",
+    "de": "Neu laden",
+    "fr": "Recharger"
+  },
+  "Menu": {
+    "nl": "Menu",
+    "de": "Menü",
+    "fr": "Menu"
+  },
+  "Overview": {
+    "nl": "Overzicht",
+    "de": "Übersicht",
+    "fr": "Vue d'ensemble"
+  },
+  "Dashboard": {
+    "nl": "Dashboard",
+    "de": "Dashboard",
+    "fr": "Tableau de bord"
+  },
+  "Streams": {
+    "nl": "Streams",
+    "de": "Streams",
+    "fr": "Flux"
+  },
+  "All streams": {
+    "nl": "Alle streams",
+    "de": "Alle Streams",
+    "fr": "Tous les flux"
+  },
+  "New stream": {
+    "nl": "Nieuwe stream",
+    "de": "Neuer Stream",
+    "fr": "Nouveau flux"
+  },
+  "Customer portal": {
+    "nl": "Klantportaal",
+    "de": "Kundenportal",
+    "fr": "Portail client"
+  },
+  "My streams": {
+    "nl": "Mijn streams",
+    "de": "Meine Streams",
+    "fr": "Mes flux"
+  },
+  "Payment settings": {
+    "nl": "Betaalinstellingen",
+    "de": "Zahlungseinstellungen",
+    "fr": "Paramètres de paiement"
+  },
+  "Administration": {
+    "nl": "Beheer",
+    "de": "Administration",
+    "fr": "Administration"
+  },
+  "Management": {
+    "nl": "Beheren",
+    "de": "Verwaltung",
+    "fr": "Gestion"
+  },
+  "Servers": {
+    "nl": "Servers",
+    "de": "Server",
+    "fr": "Serveurs"
+  },
+  "Users": {
+    "nl": "Gebruikers",
+    "de": "Benutzer",
+    "fr": "Utilisateurs"
+  },
+  "Settings": {
+    "nl": "Instellingen",
+    "de": "Einstellungen",
+    "fr": "Paramètres"
+  },
+  "General": {
+    "nl": "Algemeen",
+    "de": "Allgemein",
+    "fr": "Général"
+  },
+  "Web server": {
+    "nl": "Webserver",
+    "de": "Webserver",
+    "fr": "Serveur web"
+  },
+  "Account": {
+    "nl": "Account",
+    "de": "Konto",
+    "fr": "Compte"
+  },
+  "My account": {
+    "nl": "Mijn account",
+    "de": "Mein Konto",
+    "fr": "Mon compte"
+  },
+  "Profile": {
+    "nl": "Profiel",
+    "de": "Profil",
+    "fr": "Profil"
+  },
+  "Password": {
+    "nl": "Wachtwoord",
+    "de": "Passwort",
+    "fr": "Mot de passe"
+  },
+  "Two-factor authentication": {
+    "nl": "Tweestapsverificatie",
+    "de": "Zwei-Faktor-Authentifizierung",
+    "fr": "Authentification à deux facteurs"
+  },
+  "Passkeys": {
+    "nl": "Passkeys",
+    "de": "Passkeys",
+    "fr": "Clés d'accès"
+  },
+  "Log in": {
+    "nl": "Inloggen",
+    "de": "Anmelden",
+    "fr": "Se connecter"
+  },
+  "Log out": {
+    "nl": "Uitloggen",
+    "de": "Abmelden",
+    "fr": "Se déconnecter"
+  },
+  "General settings": {
+    "nl": "Algemene instellingen",
+    "de": "Allgemeine Einstellungen",
+    "fr": "Paramètres généraux"
+  },
+  "The name of the panel, the default language and automatic update checks. These settings apply to everyone.": {
+    "nl": "De naam van het paneel, de standaardtaal en automatische updatecontroles. Deze instellingen gelden voor iedereen.",
+    "de": "Der Name des Panels, die Standardsprache und automatische Update-Prüfungen. Diese Einstellungen gelten für alle.",
+    "fr": "Le nom du panneau, la langue par défaut et la vérification automatique des mises à jour. Ces paramètres s'appliquent à tous."
+  },
+  "Settings saved.": {
+    "nl": "Instellingen opgeslagen.",
+    "de": "Einstellungen gespeichert.",
+    "fr": "Paramètres enregistrés."
+  },
+  "Application name": {
+    "nl": "Naam van de applicatie",
+    "de": "Name der Anwendung",
+    "fr": "Nom de l'application"
+  },
+  "Shown at the top of the menu, in the browser tab and on the login page. Use your own brand, for example \"Acme Streaming\".": {
+    "nl": "Zichtbaar bovenaan het menu, in het browsertabblad en op de inlogpagina. Gebruik je eigen merk, bijvoorbeeld \"Acme Streaming\".",
+    "de": "Wird oben im Menü, im Browser-Tab und auf der Anmeldeseite angezeigt. Verwenden Sie Ihre eigene Marke, zum Beispiel „Acme Streaming“.",
+    "fr": "Affiché en haut du menu, dans l'onglet du navigateur et sur la page de connexion. Utilisez votre propre marque, par exemple « Acme Streaming »."
+  },
+  "Name": {
+    "nl": "Naam",
+    "de": "Name",
+    "fr": "Nom"
+  },
+  "Leave empty to use \"{0}\".": {
+    "nl": "Laat leeg om \"{0}\" te gebruiken.",
+    "de": "Leer lassen, um „{0}“ zu verwenden.",
+    "fr": "Laissez vide pour utiliser « {0} »."
+  },
+  "Default language": {
+    "nl": "Standaardtaal",
+    "de": "Standardsprache",
+    "fr": "Langue par défaut"
+  },
+  "The language for everyone who has not picked one. Each person can choose their own language at the bottom of the menu.": {
+    "nl": "De taal voor iedereen die zelf nog geen taal heeft gekozen. Iedereen kan onderaan het menu een eigen taal kiezen.",
+    "de": "Die Sprache für alle, die noch keine gewählt haben. Jede Person kann unten im Menü ihre eigene Sprache wählen.",
+    "fr": "La langue pour tous ceux qui n'en ont pas choisi. Chacun peut choisir sa propre langue en bas du menu."
+  },
+  "The panel can check GitHub for a newer version. Nothing is installed automatically; you see a notice under Info at the bottom of the menu.": {
+    "nl": "Het paneel kan op GitHub controleren of er een nieuwere versie is. Er wordt niets automatisch geïnstalleerd; je ziet een melding onder Info onderaan het menu.",
+    "de": "Das Panel kann auf GitHub nach einer neueren Version suchen. Es wird nichts automatisch installiert; Sie sehen einen Hinweis unter Info unten im Menü.",
+    "fr": "Le panneau peut vérifier sur GitHub si une version plus récente existe. Rien n'est installé automatiquement ; un avis apparaît sous Infos en bas du menu."
+  },
+  "Check for updates every 24 hours": {
+    "nl": "Elke 24 uur controleren op updates",
+    "de": "Alle 24 Stunden nach Updates suchen",
+    "fr": "Rechercher des mises à jour toutes les 24 heures"
+  },
+  "You can always check by hand under Info.": {
+    "nl": "Je kunt altijd handmatig controleren onder Info.",
+    "de": "Sie können jederzeit manuell unter Info prüfen.",
+    "fr": "Vous pouvez toujours vérifier manuellement sous Infos."
+  },
+  "Save settings": {
+    "nl": "Instellingen opslaan",
+    "de": "Einstellungen speichern",
+    "fr": "Enregistrer les paramètres"
+  },
+  "Web server settings": {
+    "nl": "Webserverinstellingen",
+    "de": "Webserver-Einstellungen",
+    "fr": "Paramètres du serveur web"
+  },
+  "The port on which the panel's web interface can be reached.": {
+    "nl": "De poort waarop de webinterface van het paneel bereikbaar is.",
+    "de": "Der Port, unter dem die Weboberfläche des Panels erreichbar ist.",
+    "fr": "Le port sur lequel l'interface web du panneau est accessible."
+  },
+  "Port {0} could not be used at startup ({1}), so the panel runs on port {2}.": {
+    "nl": "Poort {0} kon bij het opstarten niet worden gebruikt ({1}), daarom draait het paneel op poort {2}.",
+    "de": "Port {0} konnte beim Start nicht verwendet werden ({1}), daher läuft das Panel auf Port {2}.",
+    "fr": "Le port {0} n'a pas pu être utilisé au démarrage ({1}), le panneau fonctionne donc sur le port {2}."
+  },
+  "Current port": {
+    "nl": "Huidige poort",
+    "de": "Aktueller Port",
+    "fr": "Port actuel"
+  },
+  "Port from the installation": {
+    "nl": "Poort uit de installatie",
+    "de": "Port aus der Installation",
+    "fr": "Port de l'installation"
+  },
+  "Listening on": {
+    "nl": "Luistert op",
+    "de": "Lauscht auf",
+    "fr": "À l'écoute sur"
+  },
+  "The panel runs in a Docker container": {
+    "nl": "Het paneel draait in een Docker-container",
+    "de": "Das Panel läuft in einem Docker-Container",
+    "fr": "Le panneau fonctionne dans un conteneur Docker"
+  },
+  "Docker decides on which port the panel can be reached. Change the port mapping in docker-compose.yml and run docker compose up -d again:": {
+    "nl": "Docker bepaalt op welke poort het paneel bereikbaar is. Pas de poorttoewijzing in docker-compose.yml aan en voer docker compose up -d opnieuw uit:",
+    "de": "Docker legt fest, unter welchem Port das Panel erreichbar ist. Ändern Sie die Portzuordnung in docker-compose.yml und führen Sie docker compose up -d erneut aus:",
+    "fr": "C'est Docker qui détermine le port du panneau. Modifiez le mappage de ports dans docker-compose.yml puis relancez docker compose up -d :"
+  },
+  "outside port : port inside the container": {
+    "nl": "poort buiten : poort in de container",
+    "de": "Port außen : Port im Container",
+    "fr": "port externe : port dans le conteneur"
+  },
+  "The panel is restarting on port {0}…": {
+    "nl": "Het paneel herstart op poort {0}…",
+    "de": "Das Panel startet auf Port {0} neu…",
+    "fr": "Le panneau redémarre sur le port {0}…"
+  },
+  "You will be taken to {0} as soon as it is back. If nothing happens, open that address yourself.": {
+    "nl": "Je wordt doorgestuurd naar {0} zodra het weer bereikbaar is. Gebeurt er niets, open dat adres dan zelf.",
+    "de": "Sie werden zu {0} weitergeleitet, sobald es wieder erreichbar ist. Falls nichts passiert, öffnen Sie die Adresse selbst.",
+    "fr": "Vous serez redirigé vers {0} dès qu'il sera de nouveau disponible. Si rien ne se passe, ouvrez cette adresse vous-même."
+  },
+  "Port number": {
+    "nl": "Poortnummer",
+    "de": "Portnummer",
+    "fr": "Numéro de port"
+  },
+  "Saving restarts the panel. Everyone has to open the panel at the new address afterwards.": {
+    "nl": "Bij opslaan herstart het paneel. Daarna moet iedereen het paneel op het nieuwe adres openen.",
+    "de": "Beim Speichern startet das Panel neu. Danach muss jeder das Panel unter der neuen Adresse öffnen.",
+    "fr": "L'enregistrement redémarre le panneau. Ensuite, chacun doit ouvrir le panneau à la nouvelle adresse."
+  },
+  "Port": {
+    "nl": "Poort",
+    "de": "Port",
+    "fr": "Port"
+  },
+  "Between 1024 and 65535. Common choices are 8080, 8443 or 9000.": {
+    "nl": "Tussen 1024 en 65535. Veelgebruikt zijn 8080, 8443 of 9000.",
+    "de": "Zwischen 1024 und 65535. Üblich sind 8080, 8443 oder 9000.",
+    "fr": "Entre 1024 et 65535. Les choix courants sont 8080, 8443 ou 9000."
+  },
+  "Before you change it": {
+    "nl": "Voordat je hem wijzigt",
+    "de": "Bevor Sie ihn ändern",
+    "fr": "Avant de le modifier"
+  },
+  "Check these points, otherwise viewers or servers may lose the connection.": {
+    "nl": "Controleer deze punten, anders kunnen kijkers of servers de verbinding verliezen.",
+    "de": "Prüfen Sie diese Punkte, sonst können Zuschauer oder Server die Verbindung verlieren.",
+    "fr": "Vérifiez ces points, sinon des spectateurs ou des serveurs risquent de perdre la connexion."
+  },
+  "Firewall and port forwarding: allow the new port.": {
+    "nl": "Firewall en port forwarding: sta de nieuwe poort toe.",
+    "de": "Firewall und Portweiterleitung: Geben Sie den neuen Port frei.",
+    "fr": "Pare-feu et redirection de port : autorisez le nouveau port."
+  },
+  "Reverse proxy (Caddy, nginx, Traefik): point it to the new port.": {
+    "nl": "Reverse proxy (Caddy, nginx, Traefik): laat deze naar de nieuwe poort wijzen.",
+    "de": "Reverse Proxy (Caddy, nginx, Traefik): Richten Sie ihn auf den neuen Port.",
+    "fr": "Proxy inverse (Caddy, nginx, Traefik) : faites-le pointer vers le nouveau port."
+  },
+  "A MediaMTX on the same machine keeps working: the old port stays available on 127.0.0.1 for the authentication hook.": {
+    "nl": "Een MediaMTX op dezelfde machine blijft werken: de oude poort blijft beschikbaar op 127.0.0.1 voor de authenticatie-hook.",
+    "de": "Ein MediaMTX auf demselben Rechner funktioniert weiter: Der alte Port bleibt auf 127.0.0.1 für den Authentifizierungs-Hook erreichbar.",
+    "fr": "Un MediaMTX sur la même machine continue de fonctionner : l'ancien port reste disponible sur 127.0.0.1 pour le hook d'authentification."
+  },
+  "Other MediaMTX servers: update authHTTPAddress in their mediamtx.yml (shown per server under Servers).": {
+    "nl": "Andere MediaMTX-servers: pas authHTTPAddress aan in hun mediamtx.yml (per server te zien onder Servers).",
+    "de": "Andere MediaMTX-Server: Passen Sie authHTTPAddress in deren mediamtx.yml an (pro Server unter Server angezeigt).",
+    "fr": "Autres serveurs MediaMTX : mettez à jour authHTTPAddress dans leur mediamtx.yml (affiché par serveur sous Serveurs)."
+  },
+  "The panel has to run as a service that restarts automatically, as the Proxmox installation does. Otherwise start it again yourself.": {
+    "nl": "Het paneel moet draaien als service die automatisch herstart, zoals bij de Proxmox-installatie. Start het anders zelf opnieuw.",
+    "de": "Das Panel muss als Dienst laufen, der automatisch neu startet, wie bei der Proxmox-Installation. Andernfalls starten Sie es selbst neu.",
+    "fr": "Le panneau doit fonctionner comme un service qui redémarre automatiquement, comme avec l'installation Proxmox. Sinon, relancez-le vous-même."
+  },
+  "Save and restart": {
+    "nl": "Opslaan en herstarten",
+    "de": "Speichern und neu starten",
+    "fr": "Enregistrer et redémarrer"
+  },
+  "Back to port {0}": {
+    "nl": "Terug naar poort {0}",
+    "de": "Zurück zu Port {0}",
+    "fr": "Revenir au port {0}"
+  },
+  "Enter a port between 1 and 65535.": {
+    "nl": "Vul een poort in tussen 1 en 65535.",
+    "de": "Geben Sie einen Port zwischen 1 und 65535 ein.",
+    "fr": "Saisissez un port entre 1 et 65535."
+  },
+  "Port {0} cannot be used: {1}": {
+    "nl": "Poort {0} kan niet worden gebruikt: {1}",
+    "de": "Port {0} kann nicht verwendet werden: {1}",
+    "fr": "Le port {0} ne peut pas être utilisé : {1}"
+  },
+  "Access denied: ports below 1024 need extra privileges.": {
+    "nl": "Toegang geweigerd: poorten onder 1024 vereisen extra rechten.",
+    "de": "Zugriff verweigert: Ports unter 1024 erfordern zusätzliche Rechte.",
+    "fr": "Accès refusé : les ports inférieurs à 1024 nécessitent des privilèges supplémentaires."
+  },
+  "The port is already in use.": {
+    "nl": "De poort is al in gebruik.",
+    "de": "Der Port wird bereits verwendet.",
+    "fr": "Le port est déjà utilisé."
+  },
+  "New user": {
+    "nl": "Nieuwe gebruiker",
+    "de": "Neuer Benutzer",
+    "fr": "Nouvel utilisateur"
+  },
+  "The person logs in with this email address and password. Pass the password on yourself; the panel does not send email.": {
+    "nl": "De persoon logt in met dit e-mailadres en wachtwoord. Geef het wachtwoord zelf door; het paneel verstuurt geen e-mail.",
+    "de": "Die Person meldet sich mit dieser E-Mail-Adresse und diesem Passwort an. Geben Sie das Passwort selbst weiter; das Panel versendet keine E-Mails.",
+    "fr": "La personne se connecte avec cette adresse e-mail et ce mot de passe. Transmettez vous-même le mot de passe ; le panneau n'envoie pas d'e-mail."
+  },
+  "Role": {
+    "nl": "Rol",
+    "de": "Rolle",
+    "fr": "Rôle"
+  },
+  "Decides what this person can see and do. You can change it later.": {
+    "nl": "Bepaalt wat deze persoon kan zien en doen. Je kunt dit later wijzigen.",
+    "de": "Legt fest, was diese Person sehen und tun kann. Sie können es später ändern.",
+    "fr": "Détermine ce que cette personne peut voir et faire. Vous pourrez le modifier plus tard."
+  },
+  "The email address is the login name.": {
+    "nl": "Het e-mailadres is de inlognaam.",
+    "de": "Die E-Mail-Adresse ist der Anmeldename.",
+    "fr": "L'adresse e-mail sert d'identifiant."
+  },
+  "Email address (login)": {
+    "nl": "E-mailadres (inlognaam)",
+    "de": "E-Mail-Adresse (Anmeldung)",
+    "fr": "Adresse e-mail (identifiant)"
+  },
+  "optional": {
+    "nl": "optioneel",
+    "de": "optional",
+    "fr": "facultatif"
+  },
+  "At least 8 characters, with an uppercase letter, a lowercase letter and a digit.": {
+    "nl": "Minstens 8 tekens, met een hoofdletter, een kleine letter en een cijfer.",
+    "de": "Mindestens 8 Zeichen, mit einem Groß-, einem Kleinbuchstaben und einer Ziffer.",
+    "fr": "Au moins 8 caractères, avec une majuscule, une minuscule et un chiffre."
+  },
+  "Generate": {
+    "nl": "Genereren",
+    "de": "Erzeugen",
+    "fr": "Générer"
+  },
+  "Create user": {
+    "nl": "Gebruiker aanmaken",
+    "de": "Benutzer anlegen",
+    "fr": "Créer l'utilisateur"
+  },
+  "Cancel": {
+    "nl": "Annuleren",
+    "de": "Abbrechen",
+    "fr": "Annuler"
+  },
+  "Edit user": {
+    "nl": "Gebruiker bewerken",
+    "de": "Benutzer bearbeiten",
+    "fr": "Modifier l'utilisateur"
+  },
+  "User not found": {
+    "nl": "Gebruiker niet gevonden",
+    "de": "Benutzer nicht gefunden",
+    "fr": "Utilisateur introuvable"
+  },
+  "Back": {
+    "nl": "Terug",
+    "de": "Zurück",
+    "fr": "Retour"
+  },
+  "Loading…": {
+    "nl": "Laden…",
+    "de": "Wird geladen…",
+    "fr": "Chargement…"
+  },
+  "Blocked": {
+    "nl": "Geblokkeerd",
+    "de": "Gesperrt",
+    "fr": "Bloqué"
+  },
+  "Active": {
+    "nl": "Actief",
+    "de": "Aktiv",
+    "fr": "Actif"
+  },
+  "Profile and role": {
+    "nl": "Profiel en rol",
+    "de": "Profil und Rolle",
+    "fr": "Profil et rôle"
+  },
+  "User": {
+    "nl": "Gebruiker",
+    "de": "Benutzer",
+    "fr": "Utilisateur"
+  },
+  "Customer": {
+    "nl": "Klant",
+    "de": "Kunde",
+    "fr": "Client"
+  },
+  "Administrator": {
+    "nl": "Beheerder",
+    "de": "Administrator",
+    "fr": "Administrateur"
+  },
+  "Manages their own streams.": {
+    "nl": "Beheert de eigen streams.",
+    "de": "Verwaltet die eigenen Streams.",
+    "fr": "Gère ses propres flux."
+  },
+  "Sees only the customer portal with their own streams, preview and paywall.": {
+    "nl": "Ziet alleen het klantportaal met de eigen streams, preview en betaalmuur.",
+    "de": "Sieht nur das Kundenportal mit den eigenen Streams, Vorschau und Paywall.",
+    "fr": "Ne voit que le portail client avec ses propres flux, l'aperçu et le paywall."
+  },
+  "Manages all streams, servers, users and settings.": {
+    "nl": "Beheert alle streams, servers, gebruikers en instellingen.",
+    "de": "Verwaltet alle Streams, Server, Benutzer und Einstellungen.",
+    "fr": "Gère tous les flux, serveurs, utilisateurs et paramètres."
+  },
+  "You cannot change your own role.": {
+    "nl": "Je kunt je eigen rol niet wijzigen.",
+    "de": "Sie können Ihre eigene Rolle nicht ändern.",
+    "fr": "Vous ne pouvez pas modifier votre propre rôle."
+  },
+  "Save": {
+    "nl": "Opslaan",
+    "de": "Speichern",
+    "fr": "Enregistrer"
+  },
+  "Reset password": {
+    "nl": "Wachtwoord resetten",
+    "de": "Passwort zurücksetzen",
+    "fr": "Réinitialiser le mot de passe"
+  },
+  "Sets a new password right away. Pass it on to the user; they can change it themselves under My account.": {
+    "nl": "Stelt direct een nieuw wachtwoord in. Geef het door aan de gebruiker; die kan het zelf wijzigen onder Mijn account.",
+    "de": "Setzt sofort ein neues Passwort. Geben Sie es an den Benutzer weiter; er kann es selbst unter Mein Konto ändern.",
+    "fr": "Définit immédiatement un nouveau mot de passe. Transmettez-le à l'utilisateur ; il pourra le changer lui-même sous Mon compte."
+  },
+  "New password": {
+    "nl": "Nieuw wachtwoord",
+    "de": "Neues Passwort",
+    "fr": "Nouveau mot de passe"
+  },
+  "Set password": {
+    "nl": "Wachtwoord instellen",
+    "de": "Passwort setzen",
+    "fr": "Définir le mot de passe"
+  },
+  "Unblock account": {
+    "nl": "Account deblokkeren",
+    "de": "Konto entsperren",
+    "fr": "Débloquer le compte"
+  },
+  "Block account": {
+    "nl": "Account blokkeren",
+    "de": "Konto sperren",
+    "fr": "Bloquer le compte"
+  },
+  "The user can log in again with their existing password.": {
+    "nl": "De gebruiker kan weer inloggen met het bestaande wachtwoord.",
+    "de": "Der Benutzer kann sich wieder mit seinem bisherigen Passwort anmelden.",
+    "fr": "L'utilisateur peut de nouveau se connecter avec son mot de passe actuel."
+  },
+  "Signs the user out everywhere and stops them from logging in. Their streams keep working.": {
+    "nl": "Logt de gebruiker overal uit en voorkomt dat die inlogt. De streams blijven werken.",
+    "de": "Meldet den Benutzer überall ab und verhindert die Anmeldung. Seine Streams laufen weiter.",
+    "fr": "Déconnecte l'utilisateur partout et l'empêche de se connecter. Ses flux continuent de fonctionner."
+  },
+  "Unblock": {
+    "nl": "Deblokkeren",
+    "de": "Entsperren",
+    "fr": "Débloquer"
+  },
+  "Block": {
+    "nl": "Blokkeren",
+    "de": "Sperren",
+    "fr": "Bloquer"
+  },
+  "Delete account": {
+    "nl": "Account verwijderen",
+    "de": "Konto löschen",
+    "fr": "Supprimer le compte"
+  },
+  "Removes the account permanently. Streams of this user remain, without an owner.": {
+    "nl": "Verwijdert het account definitief. Streams van deze gebruiker blijven bestaan, zonder eigenaar.",
+    "de": "Löscht das Konto dauerhaft. Streams dieses Benutzers bleiben ohne Besitzer erhalten.",
+    "fr": "Supprime définitivement le compte. Les flux de cet utilisateur restent, sans propriétaire."
+  },
+  "Confirm delete": {
+    "nl": "Verwijderen bevestigen",
+    "de": "Löschen bestätigen",
+    "fr": "Confirmer la suppression"
+  },
+  "Delete": {
+    "nl": "Verwijderen",
+    "de": "Löschen",
+    "fr": "Supprimer"
+  },
+  "Saved.": {
+    "nl": "Opgeslagen.",
+    "de": "Gespeichert.",
+    "fr": "Enregistré."
+  },
+  "Password has been set. Pass the new password on to the user.": {
+    "nl": "Het wachtwoord is ingesteld. Geef het nieuwe wachtwoord door aan de gebruiker.",
+    "de": "Das Passwort wurde gesetzt. Geben Sie das neue Passwort an den Benutzer weiter.",
+    "fr": "Le mot de passe a été défini. Transmettez le nouveau mot de passe à l'utilisateur."
+  },
+  "{0} has been unblocked.": {
+    "nl": "{0} is gedeblokkeerd.",
+    "de": "{0} wurde entsperrt.",
+    "fr": "{0} a été débloqué."
+  },
+  "{0} has been blocked and signed out.": {
+    "nl": "{0} is geblokkeerd en uitgelogd.",
+    "de": "{0} wurde gesperrt und abgemeldet.",
+    "fr": "{0} a été bloqué et déconnecté."
+  },
+  "Create accounts and decide what each person can do. There is no open registration: only administrators add people.": {
+    "nl": "Maak accounts aan en bepaal wat iedereen kan doen. Er is geen open registratie: alleen beheerders voegen mensen toe.",
+    "de": "Legen Sie Konten an und bestimmen Sie, was jede Person tun kann. Es gibt keine offene Registrierung: Nur Administratoren fügen Personen hinzu.",
+    "fr": "Créez des comptes et décidez de ce que chacun peut faire. Il n'y a pas d'inscription libre : seuls les administrateurs ajoutent des personnes."
+  },
+  "{0} account(s)": {
+    "nl": "{0} account(s)",
+    "de": "{0} Konto/Konten",
+    "fr": "{0} compte(s)"
+  },
+  "Show": {
+    "nl": "Tonen",
+    "de": "Anzeigen",
+    "fr": "Afficher"
+  },
+  "All accounts": {
+    "nl": "Alle accounts",
+    "de": "Alle Konten",
+    "fr": "Tous les comptes"
+  },
+  "All": {
+    "nl": "Alle",
+    "de": "Alle",
+    "fr": "Tous"
+  },
+  "Search by name or email": {
+    "nl": "Zoek op naam of e-mail",
+    "de": "Nach Name oder E-Mail suchen",
+    "fr": "Rechercher par nom ou e-mail"
+  },
+  "No accounts match this filter.": {
+    "nl": "Geen accounts gevonden met dit filter.",
+    "de": "Keine Konten entsprechen diesem Filter.",
+    "fr": "Aucun compte ne correspond à ce filtre."
+  },
+  "you": {
+    "nl": "jij",
+    "de": "Sie",
+    "fr": "vous"
+  },
+  "{0} stream(s)": {
+    "nl": "{0} stream(s)",
+    "de": "{0} Stream(s)",
+    "fr": "{0} flux"
+  },
+  "Edit": {
+    "nl": "Bewerken",
+    "de": "Bearbeiten",
+    "fr": "Modifier"
+  },
+  "Allow this account to log in again": {
+    "nl": "Dit account weer laten inloggen",
+    "de": "Diesem Konto die Anmeldung wieder erlauben",
+    "fr": "Autoriser de nouveau ce compte à se connecter"
+  },
+  "Sign this account out and stop it from logging in": {
+    "nl": "Dit account uitloggen en inloggen blokkeren",
+    "de": "Dieses Konto abmelden und die Anmeldung sperren",
+    "fr": "Déconnecter ce compte et l'empêcher de se connecter"
+  },
+  "{0} has been deleted. Any streams of this user remain, without an owner.": {
+    "nl": "{0} is verwijderd. Eventuele streams van deze gebruiker blijven bestaan, zonder eigenaar.",
+    "de": "{0} wurde gelöscht. Streams dieses Benutzers bleiben ohne Besitzer erhalten.",
+    "fr": "{0} a été supprimé. Les flux éventuels de cet utilisateur restent, sans propriétaire."
+  },
+  "MediaMTX: checking connection…": {
+    "nl": "MediaMTX: verbinding controleren…",
+    "de": "MediaMTX: Verbindung wird geprüft…",
+    "fr": "MediaMTX : vérification de la connexion…"
+  },
+  "MediaMTX server connected": {
+    "nl": "MediaMTX-server verbonden",
+    "de": "MediaMTX-Server verbunden",
+    "fr": "Serveur MediaMTX connecté"
+  },
+  "All {0} MediaMTX servers connected": {
+    "nl": "Alle {0} MediaMTX-servers verbonden",
+    "de": "Alle {0} MediaMTX-Server verbunden",
+    "fr": "Les {0} serveurs MediaMTX sont connectés"
+  },
+  "{0} of {1} MediaMTX server(s) unreachable": {
+    "nl": "{0} van {1} MediaMTX-server(s) onbereikbaar",
+    "de": "{0} von {1} MediaMTX-Server(n) nicht erreichbar",
+    "fr": "{0} sur {1} serveur(s) MediaMTX injoignable(s)"
+  },
+  "Full control over the panel.": {
+    "nl": "Volledige controle over het paneel.",
+    "de": "Volle Kontrolle über das Panel.",
+    "fr": "Contrôle total du panneau."
+  },
+  "Manage all streams of everyone": {
+    "nl": "Alle streams van iedereen beheren",
+    "de": "Alle Streams aller Benutzer verwalten",
+    "fr": "Gérer tous les flux de tout le monde"
+  },
+  "Add and configure MediaMTX servers": {
+    "nl": "MediaMTX-servers toevoegen en instellen",
+    "de": "MediaMTX-Server hinzufügen und einrichten",
+    "fr": "Ajouter et configurer des serveurs MediaMTX"
+  },
+  "Create, block and delete accounts": {
+    "nl": "Accounts aanmaken, blokkeren en verwijderen",
+    "de": "Konten anlegen, sperren und löschen",
+    "fr": "Créer, bloquer et supprimer des comptes"
+  },
+  "Change the panel's settings": {
+    "nl": "De instellingen van het paneel wijzigen",
+    "de": "Die Einstellungen des Panels ändern",
+    "fr": "Modifier les paramètres du panneau"
+  },
+  "Add administrator": {
+    "nl": "Beheerder toevoegen",
+    "de": "Administrator hinzufügen",
+    "fr": "Ajouter un administrateur"
+  },
+  "Operators who run their own streams.": {
+    "nl": "Operators die hun eigen streams verzorgen.",
+    "de": "Operatoren, die ihre eigenen Streams betreiben.",
+    "fr": "Opérateurs qui gèrent leurs propres flux."
+  },
+  "Create and edit their own streams": {
+    "nl": "Eigen streams aanmaken en bewerken",
+    "de": "Eigene Streams anlegen und bearbeiten",
+    "fr": "Créer et modifier leurs propres flux"
+  },
+  "See live status and viewers": {
+    "nl": "Live-status en kijkers zien",
+    "de": "Live-Status und Zuschauer sehen",
+    "fr": "Voir l'état en direct et les spectateurs"
+  },
+  "Copy publish and view addresses for OBS, ffmpeg and players": {
+    "nl": "Zend- en kijkadressen kopiëren voor OBS, ffmpeg en spelers",
+    "de": "Sende- und Abspieladressen für OBS, ffmpeg und Player kopieren",
+    "fr": "Copier les adresses de diffusion et de lecture pour OBS, ffmpeg et les lecteurs"
+  },
+  "Add user": {
+    "nl": "Gebruiker toevoegen",
+    "de": "Benutzer hinzufügen",
+    "fr": "Ajouter un utilisateur"
+  },
+  "Clients who broadcast on streams you assign to them.": {
+    "nl": "Klanten die uitzenden op streams die jij aan ze toewijst.",
+    "de": "Kunden, die auf Streams senden, die Sie ihnen zuweisen.",
+    "fr": "Clients qui diffusent sur les flux que vous leur attribuez."
+  },
+  "Only see the customer portal": {
+    "nl": "Zien alleen het klantportaal",
+    "de": "Sehen nur das Kundenportal",
+    "fr": "Ne voient que le portail client"
+  },
+  "Watch a live preview and statistics": {
+    "nl": "Live-preview en statistieken bekijken",
+    "de": "Live-Vorschau und Statistiken ansehen",
+    "fr": "Regarder un aperçu en direct et des statistiques"
+  },
+  "Sell tickets behind a paywall (iDEAL, PayPal)": {
+    "nl": "Tickets verkopen achter een betaalmuur (iDEAL, PayPal)",
+    "de": "Tickets hinter einer Paywall verkaufen (iDEAL, PayPal)",
+    "fr": "Vendre des billets derrière un paywall (iDEAL, PayPal)"
+  },
+  "Add customer": {
+    "nl": "Klant toevoegen",
+    "de": "Kunden hinzufügen",
+    "fr": "Ajouter un client"
+  },
+  "User not found.": {
+    "nl": "Gebruiker niet gevonden.",
+    "de": "Benutzer nicht gefunden.",
+    "fr": "Utilisateur introuvable."
+  },
+  "You cannot revoke your own administrator role.": {
+    "nl": "Je kunt je eigen beheerdersrol niet intrekken.",
+    "de": "Sie können Ihre eigene Administratorrolle nicht entziehen.",
+    "fr": "Vous ne pouvez pas retirer votre propre rôle d'administrateur."
+  },
+  "You cannot block yourself.": {
+    "nl": "Je kunt jezelf niet blokkeren.",
+    "de": "Sie können sich nicht selbst sperren.",
+    "fr": "Vous ne pouvez pas vous bloquer vous-même."
+  },
+  "You cannot delete yourself.": {
+    "nl": "Je kunt jezelf niet verwijderen.",
+    "de": "Sie können sich nicht selbst löschen.",
+    "fr": "Vous ne pouvez pas vous supprimer vous-même."
+  },
+  "An unknown failure has occurred.": {
+    "nl": "Er is een onbekende fout opgetreden.",
+    "de": "Ein unbekannter Fehler ist aufgetreten.",
+    "fr": "Une erreur inconnue s'est produite."
+  },
+  "Incorrect password.": {
+    "nl": "Onjuist wachtwoord.",
+    "de": "Falsches Passwort.",
+    "fr": "Mot de passe incorrect."
+  },
+  "Invalid token.": {
+    "nl": "Ongeldige token.",
+    "de": "Ungültiges Token.",
+    "fr": "Jeton non valide."
+  },
+  "Email '{0}' is invalid.": {
+    "nl": "E-mailadres '{0}' is ongeldig.",
+    "de": "Die E-Mail-Adresse '{0}' ist ungültig.",
+    "fr": "L'adresse e-mail « {0} » n'est pas valide."
+  },
+  "Username '{0}' is invalid.": {
+    "nl": "Gebruikersnaam '{0}' is ongeldig.",
+    "de": "Der Benutzername '{0}' ist ungültig.",
+    "fr": "Le nom d'utilisateur « {0} » n'est pas valide."
+  },
+  "Email '{0}' is already taken.": {
+    "nl": "E-mailadres '{0}' is al in gebruik.",
+    "de": "Die E-Mail-Adresse '{0}' ist bereits vergeben.",
+    "fr": "L'adresse e-mail « {0} » est déjà utilisée."
+  },
+  "Username '{0}' is already taken.": {
+    "nl": "Gebruikersnaam '{0}' is al in gebruik.",
+    "de": "Der Benutzername '{0}' ist bereits vergeben.",
+    "fr": "Le nom d'utilisateur « {0} » est déjà utilisé."
+  },
+  "Passwords must be at least {0} characters.": {
+    "nl": "Wachtwoorden moeten minstens {0} tekens lang zijn.",
+    "de": "Passwörter müssen mindestens {0} Zeichen lang sein.",
+    "fr": "Les mots de passe doivent contenir au moins {0} caractères."
+  },
+  "Passwords must have at least one non alphanumeric character.": {
+    "nl": "Wachtwoorden moeten minstens één leesteken of symbool bevatten.",
+    "de": "Passwörter müssen mindestens ein Sonderzeichen enthalten.",
+    "fr": "Les mots de passe doivent contenir au moins un caractère spécial."
+  },
+  "Passwords must have at least one digit ('0'-'9').": {
+    "nl": "Wachtwoorden moeten minstens één cijfer ('0'-'9') bevatten.",
+    "de": "Passwörter müssen mindestens eine Ziffer ('0'-'9') enthalten.",
+    "fr": "Les mots de passe doivent contenir au moins un chiffre ('0'-'9')."
+  },
+  "Passwords must have at least one lowercase ('a'-'z').": {
+    "nl": "Wachtwoorden moeten minstens één kleine letter ('a'-'z') bevatten.",
+    "de": "Passwörter müssen mindestens einen Kleinbuchstaben ('a'-'z') enthalten.",
+    "fr": "Les mots de passe doivent contenir au moins une minuscule ('a'-'z')."
+  },
+  "Passwords must have at least one uppercase ('A'-'Z').": {
+    "nl": "Wachtwoorden moeten minstens één hoofdletter ('A'-'Z') bevatten.",
+    "de": "Passwörter müssen mindestens einen Großbuchstaben ('A'-'Z') enthalten.",
+    "fr": "Les mots de passe doivent contenir au moins une majuscule ('A'-'Z')."
+  }
+}

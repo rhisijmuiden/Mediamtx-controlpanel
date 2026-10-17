@@ -1,0 +1,133 @@
+@* Info button at the bottom of the menu: current build and the update check. *@
+@implements IDisposable
+@inject UpdateChecker Updates
+@inject PanelSettingsStore Settings
+
+<button type="button" class="btn btn-sidebar" @onclick="() => open = true" title="@L["Version and updates"]">
+    <i class="bi bi-info-circle"></i> @L["Info"]
+    @if (Updates.Status.UpdateAvailable)
+    {
+        <span class="update-dot" title="@L["Update available"]"></span>
+    }
+</button>
+
+@if (open)
+{
+    <div class="app-modal-backdrop" @onclick="() => open = false">
+        <div class="app-modal" role="dialog" aria-modal="true" aria-labelledby="info-title" @onclick:stopPropagation="true">
+            <header>
+                <span class="brand-logo"><i class="bi bi-broadcast"></i></span>
+                <div class="flex-grow-1">
+                    <h2 id="info-title">@Settings.Current.AppName</h2>
+                    <div class="small text-secondary">@L["Control panel for MediaMTX"]</div>
+                </div>
+                <button type="button" class="btn-close" @onclick="() => open = false" aria-label="@L["Close"]"></button>
+            </header>
+            <div class="body">
+                <dl class="info-list mb-4">
+                    <dt>@L["Version"]</dt>
+                    <dd><strong>@BuildInfo.Version</strong></dd>
+                    <dt>@L["Build"]</dt>
+                    <dd>
+                        @if (BuildInfo.Commit is { } commit)
+                        {
+                            <a href="https://github.com/@Updates.Repository/commit/@commit" target="_blank" rel="noopener"><code>@BuildInfo.ShortCommit</code></a>
+                        }
+                        else
+                        {
+                            <span class="text-secondary">@L["unknown"]</span>
+                        }
+                    </dd>
+                    <dt>@L["Built on"]</dt>
+                    <dd>@(BuildInfo.BuildDate?.ToLocalTime().ToString("g") ?? "–")</dd>
+                    <dt>.NET</dt>
+                    <dd>@Environment.Version</dd>
+                </dl>
+
+                <h3 class="h6 mb-2">@L["Updates"]</h3>
+                @{ var s = Updates.Status; }
+                @if (Updates.Checking)
+                {
+                    <div class="alert alert-light d-flex align-items-center gap-2 mb-2">
+                        <span class="spinner-border spinner-border-sm text-primary"></span> @L["Checking for updates…"]
+                    </div>
+                }
+                else if (s.CheckedAt is null)
+                {
+                    <div class="alert alert-light mb-2"><i class="bi bi-clock-history me-1"></i> @L["Not checked yet."]</div>
+                }
+                else if (s.Error is not null && s.Latest is null)
+                {
+                    <div class="alert alert-warning mb-2">
+                        <i class="bi bi-exclamation-triangle me-1"></i> @L["Could not reach GitHub: {0}", s.Error]
+                    </div>
+                }
+                else if (s.UpdateAvailable)
+                {
+                    <div class="alert alert-warning mb-2">
+                        <div class="fw-semibold"><i class="bi bi-arrow-up-circle me-1"></i> @L["A new version is available"]</div>
+                        <div class="small">
+                            @if (s.CommitsBehind is > 0)
+                            {
+                                @L["{0} new change(s) on GitHub since this build.", s.CommitsBehind]
+                            }
+                            else
+                            {
+                                @L["Latest version: {0}", s.Latest ?? ""]
+                            }
+                            @if (s.Url is not null)
+                            {
+                                <a class="ms-1" href="@s.Url" target="_blank" rel="noopener">@L["What's new"] <i class="bi bi-box-arrow-up-right"></i></a>
+                            }
+                        </div>
+                    </div>
+                    <AuthorizeView Roles="@Roles.Admin">
+                        <div class="small text-secondary mb-2">
+                            @L["Proxmox: run the installer with update and the container ID on the Proxmox host. Docker: pull the new code and run docker compose up -d --build."]
+                        </div>
+                        <pre class="cmd small mb-2">bash -c "$(curl -fsSL https://raw.githubusercontent.com/@Updates.Repository/@Updates.Branch/deploy/proxmox/create-lxc.sh)" _ update &lt;CTID&gt;</pre>
+                    </AuthorizeView>
+                }
+                else
+                {
+                    <div class="alert alert-success mb-2"><i class="bi bi-check-circle me-1"></i> @L["You are running the latest version."]</div>
+                }
+                <div class="small text-secondary">
+                    @if (s.CheckedAt is { } at)
+                    {
+                        <div>@L["Last checked: {0}", at.ToLocalTime().ToString("g")]</div>
+                    }
+                    @if (Settings.Current.AutoUpdateCheck)
+                    {
+                        <div>@L["The panel checks automatically every 24 hours."]</div>
+                    }
+                    else
+                    {
+                        <div>@L["The automatic check is turned off under Settings."]</div>
+                    }
+                </div>
+            </div>
+            <footer>
+                <a class="btn btn-outline-secondary btn-sm me-auto" href="https://github.com/@Updates.Repository" target="_blank" rel="noopener"><i class="bi bi-github"></i> GitHub</a>
+                <AuthorizeView Roles="@Roles.Admin">
+                    <button type="button" class="btn btn-primary btn-sm" @onclick="CheckNow" disabled="@Updates.Checking">
+                        <i class="bi bi-arrow-repeat"></i> @L["Check for updates"]
+                    </button>
+                </AuthorizeView>
+                <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="() => open = false">@L["Close"]</button>
+            </footer>
+        </div>
+    </div>
+}
+
+@code {
+    private bool open;
+
+    protected override void OnInitialized() => Updates.Changed += OnChanged;
+
+    private async Task CheckNow() => await Updates.CheckAsync();
+
+    private void OnChanged() => _ = InvokeAsync(StateHasChanged);
+
+    public void Dispose() => Updates.Changed -= OnChanged;
+}

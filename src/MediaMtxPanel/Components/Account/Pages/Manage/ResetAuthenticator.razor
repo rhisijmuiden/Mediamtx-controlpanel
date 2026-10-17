@@ -1,4 +1,4 @@
-﻿@page "/Account/Manage/ResetAuthenticator"
+@page "/Account/Manage/ResetAuthenticator"
 
 @using Microsoft.AspNetCore.Identity
 @using MediaMtxPanel.Data
@@ -8,26 +8,26 @@
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<ResetAuthenticator> Logger
 
-<PageTitle>Reset authenticator key</PageTitle>
+<AppPageTitle Text="@L["Reset authenticator key"]" />
 
+<a class="back-link" href="Account/Manage/TwoFactorAuthentication"><i class="bi bi-arrow-left"></i> @L["Two-factor authentication"]</a>
+<h2 class="h4 d-flex align-items-center gap-2 mb-1"><i class="bi bi-arrow-repeat text-primary"></i> @L["Reset authenticator key"]</h2>
+<p class="text-secondary mb-4">@L["Generate a new key, for example when you switch to a new phone or think your key has been exposed."]</p>
 <StatusMessage />
-<h3>Reset authenticator key</h3>
-<div class="alert alert-warning" role="alert">
-    <p>
-        <span class="glyphicon glyphicon-warning-sign"></span>
-        <strong>If you reset your authenticator key your authenticator app will not work until you reconfigure it.</strong>
-    </p>
-    <p>
-        This process disables 2FA until you verify your authenticator app.
-        If you do not complete your authenticator app configuration you may lose access to your account.
-    </p>
+<div class="alert alert-warning d-flex align-items-start gap-2" role="alert">
+    <i class="bi bi-exclamation-triangle mt-1"></i>
+    <div>
+        <strong>@L["If you reset your authenticator key your authenticator app will not work until you reconfigure it."]</strong><br />
+        @L["This process disables 2FA until you verify your authenticator app. If you do not complete your authenticator app configuration you may lose access to your account."]
+    </div>
 </div>
-<div>
-    <form @formname="reset-authenticator" @onsubmit="OnSubmitAsync" method="post">
-        <AntiforgeryToken />
-        <button class="btn btn-danger" type="submit">Reset authenticator key</button>
-    </form>
-</div>
+<form @formname="reset-authenticator" @onsubmit="OnSubmitAsync" method="post">
+    <AntiforgeryToken />
+    <div class="d-flex flex-wrap gap-2">
+        <button class="btn btn-danger" type="submit"><i class="bi bi-arrow-repeat"></i> @L["Reset authenticator key"]</button>
+        <a class="btn btn-outline-secondary" href="Account/Manage/TwoFactorAuthentication"><i class="bi bi-arrow-left"></i> @L["Cancel"]</a>
+    </div>
+</form>
 
 @code {
     [CascadingParameter]
@@ -51,7 +51,7 @@
 
         RedirectManager.RedirectToWithStatus(
             "Account/Manage/EnableAuthenticator",
-            "Your authenticator app key has been reset, you will need to configure your authenticator app using the new key.",
+            L["Your authenticator app key has been reset, you will need to configure your authenticator app using the new key."],
             HttpContext);
     }
 }

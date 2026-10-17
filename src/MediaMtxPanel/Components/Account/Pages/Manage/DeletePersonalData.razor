@@ -1,4 +1,4 @@
-﻿@page "/Account/Manage/DeletePersonalData"
+@page "/Account/Manage/DeletePersonalData"
 
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Identity
@@ -9,31 +9,32 @@
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<DeletePersonalData> Logger
 
-<PageTitle>Delete Personal Data</PageTitle>
+<AppPageTitle Text="@L["Delete personal data"]" />
+
+<a class="back-link" href="Account/Manage/PersonalData"><i class="bi bi-arrow-left"></i> @L["Personal data"]</a>
+<h2 class="h4 d-flex align-items-center gap-2 mb-1"><i class="bi bi-person-x text-primary"></i> @L["Delete personal data"]</h2>
+<p class="text-secondary mb-4">@L["Close your account and remove the data stored about you."]</p>
 
 <StatusMessage Message="@message" />
 
-<h3>Delete Personal Data</h3>
-
-<div class="alert alert-warning" role="alert">
-    <p>
-        <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
-    </p>
+<div class="alert alert-danger d-flex align-items-start gap-2" role="alert">
+    <i class="bi bi-exclamation-octagon mt-1"></i>
+    <strong>@L["Deleting this data will permanently remove your account, and this cannot be recovered."]</strong>
 </div>
 
-<div>
+<div class="col-xl-8">
     <EditForm Model="Input" FormName="delete-user" OnValidSubmit="OnValidSubmitAsync" method="post">
-        <DataAnnotationsValidator />
+        <LocalizedValidator />
         <ValidationSummary class="text-danger" role="alert" />
         @if (requirePassword)
         {
             <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Please enter your password." />
-                <label for="Input.Password" class="form-label">Password</label>
+                <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="@L["Please enter your password."]" />
+                <label for="Input.Password" class="form-label">@L["Password"]</label>
                 <ValidationMessage For="() => Input.Password" class="text-danger" />
             </div>
         }
-        <button class="w-100 btn btn-lg btn-danger" type="submit">Delete data and close my account</button>
+        <button class="btn btn-danger" type="submit"><i class="bi bi-trash"></i> @L["Delete data and close my account"]</button>
     </EditForm>
 </div>
 
@@ -71,7 +72,7 @@
 
         if (requirePassword && !await UserManager.CheckPasswordAsync(user, Input.Password))
         {
-            message = "Error: Incorrect password.";
+            message = "Error: " + L["Incorrect password."];
             return;
         }
 

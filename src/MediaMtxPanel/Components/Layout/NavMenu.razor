@@ -1,92 +1,154 @@
 @implements IDisposable
 
 @inject NavigationManager NavigationManager
+@inject PanelSettingsStore Settings
 
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">MediaMTX Panel</a>
-    </div>
-</div>
+<a class="sidebar-brand" href="">
+    <span class="brand-logo"><i class="bi bi-broadcast"></i></span>
+    <span class="brand-name">@Settings.Current.AppName</span>
+    <label for="sidebar-toggle" class="sidebar-toggle" title="@L["Menu"]" onclick="event.stopPropagation()"><i class="bi bi-list"></i></label>
+</a>
+<input type="checkbox" id="sidebar-toggle" class="d-none" />
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
+<div class="sidebar-collapsible">
+    <nav class="sidebar-nav">
         <AuthorizeView>
             <Authorized>
                 <AuthorizeView Roles="@Roles.Staff" Context="staffContext">
-                    <div class="nav-item px-3">
-                        <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                            <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Dashboard
-                        </NavLink>
-                    </div>
-                    <div class="nav-item px-3">
-                        <NavLink class="nav-link" href="streams">
-                            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Streams
-                        </NavLink>
-                    </div>
-                    <div class="nav-item px-3">
-                        <NavLink class="nav-link" href="streams/new">
-                            <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> New stream
-                        </NavLink>
-                    </div>
+                    <div class="nav-section">@L["Overview"]</div>
+                    <NavLink class="side-link" href="" Match="NavLinkMatch.All">
+                        <i class="bi bi-grid-1x2"></i> @L["Dashboard"]
+                    </NavLink>
+
+                    <details class="nav-group @Active("streams")" open="@IsIn("streams")">
+                        <summary><i class="bi bi-camera-video"></i> @L["Streams"] <i class="bi bi-chevron-right chevron"></i></summary>
+                        <div class="nav-sub">
+                            <NavLink class="side-link" href="streams" Match="NavLinkMatch.All"><i class="bi bi-collection-play"></i> @L["All streams"]</NavLink>
+                            <NavLink class="side-link" href="streams/new"><i class="bi bi-plus-circle"></i> @L["New stream"]</NavLink>
+                        </div>
+                    </details>
                 </AuthorizeView>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="portal">
-                        <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> My portal
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="portal/payments">
-                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Payment settings
-                    </NavLink>
-                </div>
-                <AuthorizeView Roles="Admin" Context="adminContext">
-                    <div class="nav-item px-3">
-                        <NavLink class="nav-link" href="servers">
-                            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Servers
-                        </NavLink>
-                    </div>
-                    <div class="nav-item px-3">
-                        <NavLink class="nav-link" href="users">
-                            <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Users
-                        </NavLink>
-                    </div>
+
+                <AuthorizeView Roles="@Roles.Customer" Context="customerContext">
+                    <div class="nav-section">@L["Overview"]</div>
                 </AuthorizeView>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Manage">
-                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3">
-                    <form action="Account/Logout" method="post">
-                        <AntiforgeryToken />
-                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                        <button type="submit" class="nav-link">
-                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Log out
-                        </button>
-                    </form>
-                </div>
+                <details class="nav-group @Active("portal")" open="@(IsIn("portal") || !IsStaff(context))">
+                    <summary><i class="bi bi-person-video3"></i> @L["Customer portal"] <i class="bi bi-chevron-right chevron"></i></summary>
+                    <div class="nav-sub">
+                        <NavLink class="side-link" href="portal" Match="NavLinkMatch.All"><i class="bi bi-tv"></i> @L["My streams"]</NavLink>
+                        <NavLink class="side-link" href="portal/payments"><i class="bi bi-credit-card"></i> @L["Payment settings"]</NavLink>
+                    </div>
+                </details>
+
+                <AuthorizeView Roles="@Roles.Admin" Context="adminContext">
+                    <div class="nav-section">@L["Administration"]</div>
+                    <details class="nav-group @Active("servers", "users")" open="@IsIn("servers", "users")">
+                        <summary><i class="bi bi-diagram-3"></i> @L["Management"] <i class="bi bi-chevron-right chevron"></i></summary>
+                        <div class="nav-sub">
+                            <NavLink class="side-link" href="servers"><i class="bi bi-hdd-network"></i> @L["Servers"]</NavLink>
+                            <NavLink class="side-link" href="users"><i class="bi bi-people"></i> @L["Users"]</NavLink>
+                        </div>
+                    </details>
+                    <details class="nav-group @Active("settings")" open="@IsIn("settings")">
+                        <summary><i class="bi bi-gear"></i> @L["Settings"] <i class="bi bi-chevron-right chevron"></i></summary>
+                        <div class="nav-sub">
+                            <NavLink class="side-link" href="settings" Match="NavLinkMatch.All"><i class="bi bi-sliders"></i> @L["General"]</NavLink>
+                            <NavLink class="side-link" href="settings/web"><i class="bi bi-ethernet"></i> @L["Web server"]</NavLink>
+                            <NavLink class="side-link" href="settings/mail"><i class="bi bi-envelope"></i> @L["Mail"]</NavLink>
+                        </div>
+                    </details>
+                </AuthorizeView>
+
+                <div class="nav-section">@L["Account"]</div>
+                <details class="nav-group @Active("Account/Manage")" open="@IsIn("Account/Manage")">
+                    <summary><i class="bi bi-person-circle"></i> @L["My account"] <i class="bi bi-chevron-right chevron"></i></summary>
+                    <div class="nav-sub">
+                        <NavLink class="side-link" href="Account/Manage" Match="NavLinkMatch.All"><i class="bi bi-person-vcard"></i> @L["Profile"]</NavLink>
+                        <NavLink class="side-link" href="Account/Manage/ChangePassword"><i class="bi bi-key"></i> @L["Password"]</NavLink>
+                        <NavLink class="side-link" href="Account/Manage/TwoFactorAuthentication"><i class="bi bi-shield-lock"></i> @L["Two-factor authentication"]</NavLink>
+                        <NavLink class="side-link" href="Account/Manage/Passkeys"><i class="bi bi-fingerprint"></i> @L["Passkeys"]</NavLink>
+                    </div>
+                </details>
             </Authorized>
             <NotAuthorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Login">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Log in
-                    </NavLink>
-                </div>
+                <NavLink class="side-link" href="Account/Login">
+                    <i class="bi bi-box-arrow-in-right"></i> @L["Log in"]
+                </NavLink>
             </NotAuthorized>
         </AuthorizeView>
     </nav>
+
+    <div class="sidebar-footer">
+        <AuthorizeView>
+            <Authorized>
+                <div class="user-chip">
+                    <span class="avatar avatar-sm role-@RoleOf(context)">@Initial(context.User.Identity?.Name)</span>
+                    <div class="who">
+                        <a href="Account/Manage" title="@context.User.Identity?.Name">@context.User.Identity?.Name</a>
+                        <small>@L[Roles.Label(RoleOf(context))]</small>
+                    </div>
+                    <form action="Account/Logout" method="post" class="m-0">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                        <button type="submit" class="btn btn-sidebar btn-icon btn-sm" title="@L["Log out"]"><i class="bi bi-box-arrow-right"></i></button>
+                    </form>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+        <div class="footer-row">
+            <details class="lang-menu">
+                <summary class="btn btn-sidebar w-100 justify-content-start">
+                    <i class="bi bi-translate"></i> @CurrentLanguage.Name
+                </summary>
+                <div class="menu">
+                    @foreach (var lang in TextLocalizer.Languages)
+                    {
+                        @* A full page load, so that interactive pages switch language too. *@
+                        <a href="@($"api/language?code={lang.Code}&returnUrl={Uri.EscapeDataString(currentUrl ?? "")}")" data-enhance-nav="false"
+                           class="@(lang.Code == CurrentLanguage.Code ? "active" : null)">
+                            <span>@lang.Flag</span> @lang.Name
+                            @if (lang.Code == CurrentLanguage.Code)
+                            {
+                                <i class="bi bi-check2 ms-auto"></i>
+                            }
+                        </a>
+                    }
+                </div>
+            </details>
+            <AuthorizeView>
+                <InfoPanel @rendermode="InteractiveServer" />
+            </AuthorizeView>
+        </div>
+    </div>
 </div>
 
 @code {
     private string? currentUrl;
+
+    private static PanelLanguage CurrentLanguage =>
+        TextLocalizer.Languages.First(l => l.Code == TextLocalizer.Current);
 
     protected override void OnInitialized()
     {
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
         NavigationManager.LocationChanged += OnLocationChanged;
     }
+
+    private bool IsIn(params string[] prefixes)
+    {
+        var path = (currentUrl ?? "").Split('?', '#')[0];
+        return prefixes.Any(p => path.Equals(p, StringComparison.OrdinalIgnoreCase)
+                                 || path.StartsWith(p + "/", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private string? Active(params string[] prefixes) => IsIn(prefixes) ? "has-active" : null;
+
+    private static bool IsStaff(AuthenticationState state) => Roles.Staff.Split(',').Any(state.User.IsInRole);
+
+    private static string RoleOf(AuthenticationState state) =>
+        state.User.IsInRole(Roles.Admin) ? Roles.Admin : state.User.IsInRole(Roles.Customer) ? Roles.Customer : Roles.User;
+
+    private static string Initial(string? name) => string.IsNullOrEmpty(name) ? "?" : name[..1].ToUpperInvariant();
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {

@@ -1,4 +1,4 @@
-﻿@page "/Account/Manage/PersonalData"
+@page "/Account/Manage/PersonalData"
 
 @using Microsoft.AspNetCore.Identity
 @using MediaMtxPanel.Data
@@ -6,24 +6,35 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject IdentityRedirectManager RedirectManager
 
-<PageTitle>Personal Data</PageTitle>
+<AppPageTitle Text="@L["Personal data"]" />
 
+<h2 class="h4 d-flex align-items-center gap-2 mb-1"><i class="bi bi-file-earmark-person text-primary"></i> @L["Personal data"]</h2>
+<p class="text-secondary mb-4">@L["Your account contains personal data that you have given us. This page allows you to download or delete that data."]</p>
 <StatusMessage />
-<h3>Personal Data</h3>
 
-<div class="row">
+<div class="row g-3">
     <div class="col-md-6">
-        <p>Your account contains personal data that you have given us. This page allows you to download or delete that data.</p>
-        <p>
-            <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
-        </p>
-        <form action="Account/Manage/DownloadPersonalData" method="post">
-            <AntiforgeryToken />
-            <button class="btn btn-primary" type="submit">Download</button>
-        </form>
-        <p>
-            <a href="Account/Manage/DeletePersonalData" class="btn btn-danger">Delete</a>
-        </p>
+        <div class="action-card">
+            <div class="action-icon info"><i class="bi bi-download"></i></div>
+            <h3>@L["Download your data"]</h3>
+            <p>@L["Get a JSON file with the personal data stored for your account, such as your email address and phone number."]</p>
+            <div class="action-footer">
+                <form action="Account/Manage/DownloadPersonalData" method="post">
+                    <AntiforgeryToken />
+                    <button class="btn btn-sm btn-outline-primary" type="submit"><i class="bi bi-download"></i> @L["Download"]</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="action-card">
+            <div class="action-icon danger"><i class="bi bi-person-x"></i></div>
+            <h3>@L["Delete your account"]</h3>
+            <p>@L["Deleting this data will permanently remove your account, and this cannot be recovered."]</p>
+            <div class="action-footer">
+                <a href="Account/Manage/DeletePersonalData" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> @L["Delete"]</a>
+            </div>
+        </div>
     </div>
 </div>
 

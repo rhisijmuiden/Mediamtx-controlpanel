@@ -1,8 +1,39 @@
 @inherits LayoutComponentBase
+@inject PanelSettingsStore Settings
+@inject NavigationManager Nav
 
 @* Layout for the public watch pages: no sidebar, no panel links. *@
-<div class="watch-page">
-    <main class="container py-4">
+<div class="watch-page d-flex flex-column">
+    <header class="bg-white border-bottom">
+        <div class="container d-flex align-items-center gap-2 py-2">
+            <span class="brand-logo"><i class="bi bi-broadcast"></i></span>
+            <strong class="text-truncate">@Settings.Current.AppName</strong>
+            <details class="lang-menu ms-auto" style="flex: 0 0 auto">
+                <summary class="btn btn-sm btn-outline-secondary" title="@L["Language"]">
+                    <i class="bi bi-translate"></i> <span class="d-none d-sm-inline">@CurrentLanguage.Name</span>
+                </summary>
+                <div class="menu" style="top: calc(100% + .4rem); bottom: auto; left: auto; right: 0">
+                    @foreach (var lang in TextLocalizer.Languages)
+                    {
+                        <a href="@($"api/language?code={lang.Code}&returnUrl={Uri.EscapeDataString(Nav.ToBaseRelativePath(Nav.Uri))}")" data-enhance-nav="false"
+                           class="@(lang.Code == CurrentLanguage.Code ? "active" : null)">
+                            <span>@lang.Flag</span> @lang.Name
+                            @if (lang.Code == CurrentLanguage.Code)
+                            {
+                                <i class="bi bi-check2 ms-auto"></i>
+                            }
+                        </a>
+                    }
+                </div>
+            </details>
+        </div>
+    </header>
+    <main class="container py-4 flex-grow-1">
         @Body
     </main>
 </div>
+
+@code {
+    private static PanelLanguage CurrentLanguage =>
+        TextLocalizer.Languages.First(l => l.Code == TextLocalizer.Current);
+}

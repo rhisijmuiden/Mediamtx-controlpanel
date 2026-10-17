@@ -4,15 +4,15 @@
 
 <div data-player-root>
     <div class="player">
-        <video @ref="video" autoplay muted playsinline controls></video>
-        <span class="player-status" data-player-status>Loading player…</span>
+        <video @ref="video" autoplay muted playsinline controls data-texts="@Texts"></video>
+        <span class="player-status" data-player-status>@L["Loading player…"]</span>
     </div>
-    <div class="d-flex justify-content-between align-items-center mt-2">
-        <div class="btn-group btn-group-sm" role="group">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-2">
+        <div class="btn-group btn-group-sm" role="group" aria-label="@L["Playback technology"]">
             <button type="button" class="btn btn-outline-secondary @(mode == "webrtc" ? "active" : "")" @onclick='() => SwitchAsync("webrtc")'>WebRTC</button>
             <button type="button" class="btn btn-outline-secondary @(mode == "hls" ? "active" : "")" @onclick='() => SwitchAsync("hls")'>HLS</button>
         </div>
-        <button type="button" class="btn btn-sm btn-link" @onclick="() => SwitchAsync(mode)">Reconnect</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => SwitchAsync(mode)" title="@L["Restart the player"]"><i class="bi bi-arrow-clockwise"></i> @L["Reconnect"]</button>
     </div>
 </div>
 
@@ -53,4 +53,18 @@
         }
         catch (JSDisconnectedException) { }
     }
+
+    // Texts the JavaScript player shows, in the visitor's language.
+    private string Texts => System.Text.Json.JsonSerializer.Serialize(new Dictionary<string, string>
+    {
+        ["Connecting via WebRTC…"] = L["Connecting via WebRTC…"],
+        ["Player could not start:"] = L["Player could not start:"],
+        ["No picture yet: the stream is not live yet"] = L["No picture yet: the stream is not live yet"],
+        ["No picture yet:"] = L["No picture yet:"],
+        ["Live (WebRTC)"] = L["Live (WebRTC)"],
+        ["Connecting via HLS…"] = L["Connecting via HLS…"],
+        ["This browser does not support HLS."] = L["This browser does not support HLS."],
+        ["Live (HLS)"] = L["Live (HLS)"],
+        ["No picture yet (HLS):"] = L["No picture yet (HLS):"],
+    });
 }

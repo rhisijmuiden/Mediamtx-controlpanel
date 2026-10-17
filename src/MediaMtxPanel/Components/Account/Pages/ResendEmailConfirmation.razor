@@ -1,4 +1,4 @@
-﻿@page "/Account/ResendEmailConfirmation"
+@page "/Account/ResendEmailConfirmation"
 
 @using System.ComponentModel.DataAnnotations
 @using System.Text
@@ -12,24 +12,27 @@
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 
-<PageTitle>Resend email confirmation</PageTitle>
+<AppPageTitle Text="@L["Resend email confirmation"]" />
 
-<h1>Resend email confirmation</h1>
-<h2>Enter your email.</h2>
-<hr />
-<StatusMessage Message="@message" />
-<div class="row">
-    <div class="col-md-4">
-        <EditForm Model="Input" FormName="resend-email-confirmation" OnValidSubmit="OnValidSubmitAsync" method="post">
-            <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert" />
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" aria-required="true" placeholder="name@example.com" />
-                <label for="Input.Email" class="form-label">Email</label>
-                <ValidationMessage For="() => Input.Email" class="text-danger" />
-            </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Resend</button>
-        </EditForm>
+<div class="auth-page">
+    <div class="card auth-card">
+        <div class="card-body p-4 p-sm-5">
+            <span class="brand-logo"><i class="bi bi-broadcast"></i></span>
+            <h1 class="h3 mb-1">@L["Resend email confirmation"]</h1>
+            <p class="text-secondary mb-4">@L["Enter your email address and we will send you a new confirmation link."]</p>
+            <StatusMessage Message="@message" />
+            <EditForm Model="Input" FormName="resend-email-confirmation" OnValidSubmit="OnValidSubmitAsync" method="post">
+                <LocalizedValidator />
+                <ValidationSummary class="text-danger" role="alert" />
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" aria-required="true" placeholder="name@example.com" />
+                    <label for="Input.Email" class="form-label">@L["Email address"]</label>
+                    <ValidationMessage For="() => Input.Email" class="text-danger" />
+                </div>
+                <button type="submit" class="w-100 btn btn-lg btn-primary"><i class="bi bi-send"></i> @L["Resend"]</button>
+            </EditForm>
+            <a class="back-link mt-3 mb-0" href="Account/Login"><i class="bi bi-arrow-left"></i> @L["Back to log in"]</a>
+        </div>
     </div>
 </div>
 
@@ -49,7 +52,7 @@
         var user = await UserManager.FindByEmailAsync(Input.Email!);
         if (user is null)
         {
-            message = "Verification email sent. Please check your email.";
+            message = L["Verification email sent. Please check your email."];
             return;
         }
 
@@ -61,7 +64,7 @@
             new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code });
         await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
 
-        message = "Verification email sent. Please check your email.";
+        message = L["Verification email sent. Please check your email."];
     }
 
     private sealed class InputModel

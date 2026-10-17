@@ -6,109 +6,123 @@
 @inject StreamEndpointBuilder Endpoints
 @inject MediaMtxClientFactory Clients
 
-<PageTitle>@(stream?.DisplayName ?? "Stream")</PageTitle>
+<AppPageTitle Text="@(stream?.DisplayName ?? L["Stream"])" />
 
 @if (stream is null || !stream.Enabled)
 {
-    <div class="text-center py-5">
-        <h1 class="h3">Stream not found</h1>
-        <p class="text-secondary">This link doesn't work (anymore). Check the address or ask the organizer for a new link.</p>
+    <div class="empty-state my-5 mx-auto" style="max-width: 32rem">
+        <i class="bi bi-camera-video-off"></i>
+        <h1 class="h4 text-body">@L["Stream not found"]</h1>
+        <p class="mb-0">@L["This link doesn't work (anymore). Check the address or ask the organizer for a new link."]</p>
     </div>
 }
 else
 {
-    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-        <h1 class="mb-0 me-2">@stream.DisplayName</h1>
-        @if (isLive)
+    <div class="mb-4">
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+            <h1 class="mb-0 me-2">@stream.DisplayName</h1>
+            @if (isLive)
+            {
+                <span class="badge text-bg-danger badge-dot">@L["Live"]</span>
+            }
+            else
+            {
+                <span class="badge bg-secondary-subtle text-secondary-emphasis"><i class="bi bi-hourglass-split me-1"></i>@L["Not live yet"]</span>
+            }
+        </div>
+        @if (!string.IsNullOrEmpty(stream.Description))
         {
-            <span class="badge text-bg-danger">● Live</span>
-        }
-        else
-        {
-            <span class="badge text-bg-secondary">Not live yet</span>
+            <p class="text-secondary mb-0 fs-5">@stream.Description</p>
         }
     </div>
-    @if (!string.IsNullOrEmpty(stream.Description))
-    {
-        <p class="text-secondary">@stream.Description</p>
-    }
 
     @if (!string.IsNullOrEmpty(Error))
     {
-        <div class="alert alert-danger">@Error</div>
+        <div class="alert alert-danger d-flex align-items-center gap-2"><i class="bi bi-exclamation-octagon"></i> <span>@Error</span></div>
     }
 
     @if (player is not null)
     {
-        <div class="row g-4 mt-1">
-            <div class="col-lg-8">
+        <div class="row g-4">
+            <div class="@(ticket is null ? "col-12" : "col-lg-8")">
                 <div data-player-root>
-                    <div class="player">
+                    <div class="player shadow-sm">
                         <video data-player="@JsonSerializer.Serialize(player, JsonOptions)" autoplay muted playsinline controls></video>
-                        <span class="player-status" data-player-status>Loading player…</span>
+                        <span class="player-status" data-player-status>@L["Loading player…"]</span>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center mt-2">
-                        <div class="btn-group btn-group-sm" role="group">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-2">
+                        <div class="btn-group btn-group-sm" role="group" aria-label="@L["Playback technology"]">
                             <button type="button" class="btn btn-outline-secondary active" data-player-mode="webrtc">WebRTC</button>
                             <button type="button" class="btn btn-outline-secondary" data-player-mode="hls">HLS</button>
                         </div>
-                        <span class="small text-secondary">Sound is muted until you click the player.</span>
+                        <span class="small text-secondary"><i class="bi bi-volume-mute me-1"></i>@L["Sound is muted until you click the player."]</span>
                     </div>
                 </div>
                 @if (!isLive)
                 {
-                    <p class="mt-2 text-secondary small">The broadcast hasn't started yet. The player starts automatically once there is video.</p>
-                }
-            </div>
-            <div class="col-lg-4">
-                @if (ticket is not null)
-                {
-                    <div class="card">
-                        <div class="card-header"><strong>Your ticket</strong></div>
-                        <div class="card-body small">
-                            <p class="mb-2">
-                                @ticket.OfferName, valid until <strong>@ticket.AccessExpiresAt!.Value.ToLocalTime().ToString("dddd, MMMM d, h:mm tt", English)</strong>.
-                            </p>
-                            <p class="text-secondary">Bookmark this page; you can also use the link to watch on another device.</p>
-                            <h6>Watch in VLC or on TV</h6>
-                            @foreach (var e in ticketUrls)
-                            {
-                                <CopyField Label="@e.Protocol" Value="@e.Url" Secret="true" />
-                            }
-                        </div>
+                    <div class="alert alert-light border d-flex gap-2 small mt-3 mb-0">
+                        <i class="bi bi-hourglass-split"></i>
+                        <span>@L["The broadcast hasn't started yet. The player starts automatically once there is video."]</span>
                     </div>
                 }
             </div>
+            @if (ticket is not null)
+            {
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header"><i class="bi bi-ticket-perforated"></i> @L["Your ticket"]</div>
+                        <div class="card-body small">
+                            <p class="mb-2">
+                                <strong>@ticket.OfferName</strong><br />
+                                @L["Valid until {0}.", ticket.AccessExpiresAt!.Value.ToLocalTime().ToString("f")]
+                            </p>
+                            <p class="text-secondary"><i class="bi bi-bookmark me-1"></i>@L["Bookmark this page; you can also use the link to watch on another device."]</p>
+                            <h6 class="mt-3"><i class="bi bi-tv me-1 text-primary"></i> @L["Watch in VLC or on TV"]</h6>
+                            @foreach (var e in ticketUrls)
+                            {
+                                <CopyField Label="@L[e.Protocol]" Value="@e.Url" Secret="true" />
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
     }
     else if (stream.PaywallEnabled)
     {
         @if (ticketExpired)
         {
-            <div class="alert alert-warning" data-ticket-invalid>Your ticket has expired or is invalid. Buy a new ticket to keep watching.</div>
+            <div class="alert alert-warning d-flex align-items-center gap-2" data-ticket-invalid>
+                <i class="bi bi-exclamation-triangle"></i> <span>@L["Your ticket has expired or is invalid. Buy a new ticket to keep watching."]</span>
+            </div>
         }
-        <div class="row g-3 mt-1">
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <i class="bi bi-ticket-perforated text-primary fs-4"></i>
+            <h2 class="h5 mb-0">@L["Choose a ticket"]</h2>
+        </div>
+        <div class="row g-3">
             @foreach (var o in offers)
             {
                 <div class="col-md-6 col-lg-4">
-                    <div class="card h-100">
-                        <div class="card-body d-flex flex-column">
-                            <h2 class="h5">@o.Name</h2>
-                            <div class="fs-3 fw-semibold">@Format.Money(o.PriceCents, o.Currency)</div>
-                            <div class="text-secondary small mb-2">Access @Format.Hours(o.AccessHours)</div>
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body d-flex flex-column p-4">
+                            <h3 class="h5 mb-1">@o.Name</h3>
+                            <div class="text-secondary small mb-3"><i class="bi bi-clock me-1"></i>@L["Access {0}", Hours(o.AccessHours)]</div>
+                            <div class="display-6 fw-bold mb-3">@Format.Money(o.PriceCents, o.Currency)</div>
                             @if (!string.IsNullOrEmpty(o.Description))
                             {
-                                <p class="small">@o.Description</p>
+                                <p class="small text-secondary">@o.Description</p>
                             }
                             <form method="post" action="watch/@stream.WatchSlug/buy" class="mt-auto" data-enhance="false">
                                 <AntiforgeryToken />
                                 <input type="hidden" name="offerId" value="@o.Id" />
-                                <input type="email" name="email" class="form-control form-control-sm mb-2" placeholder="Email (optional, for your receipt)" />
+                                <label class="form-label small visually-hidden" for="email-@o.Id">@L["Email"]</label>
+                                <input type="email" id="email-@o.Id" name="email" class="form-control mb-2" placeholder="@L["Email (optional, for your receipt)"]" />
                                 <div class="d-grid gap-2">
                                     @foreach (var p in providers)
                                     {
                                         <button type="submit" name="provider" value="@p" class="btn @(p == PaymentProvider.Test ? "btn-outline-secondary" : "btn-primary")">
-                                            @ProviderLabel(p)
+                                            <i class="bi @ProviderIcon(p)"></i> @ProviderLabel(p)
                                         </button>
                                     }
                                 </div>
@@ -120,15 +134,22 @@ else
         </div>
         @if (offers.Count == 0 || providers.Count == 0)
         {
-            <p class="text-secondary">No tickets are on sale right now.</p>
+            <div class="empty-state">
+                <i class="bi bi-ticket-perforated"></i>
+                @L["No tickets are on sale right now."]
+            </div>
         }
-        <p class="small text-secondary mt-3">
-            Already bought a ticket? Open the link you received after payment, or use the same browser you paid with.
+        <p class="small text-secondary mt-4 d-flex gap-2">
+            <i class="bi bi-info-circle"></i>
+            <span>@L["Already bought a ticket? Open the link you received after payment, or use the same browser you paid with."]</span>
         </p>
     }
     else
     {
-        <div class="alert alert-secondary mt-3">This stream is private. You need credentials from the organizer to watch.</div>
+        <div class="empty-state">
+            <i class="bi bi-lock"></i>
+            @L["This stream is private. You need credentials from the organizer to watch."]
+        </div>
     }
 
     <script>
@@ -155,7 +176,6 @@ else
 
 @code {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
-    private static readonly System.Globalization.CultureInfo English = System.Globalization.CultureInfo.GetCultureInfo("en-US");
 
     [Parameter] public string Slug { get; set; } = "";
     [SupplyParameterFromQuery(Name = "t")] public string? Token { get; set; }
@@ -203,10 +223,22 @@ else
         }
     }
 
-    private static string ProviderLabel(PaymentProvider p) => p switch
+    private string ProviderLabel(PaymentProvider p) => p switch
     {
-        PaymentProvider.Mollie => "Pay with iDEAL",
-        PaymentProvider.PayPal => "Pay with PayPal",
-        _ => "Test payment (no real money)",
+        PaymentProvider.Mollie => L["Pay with iDEAL"],
+        PaymentProvider.PayPal => L["Pay with PayPal"],
+        _ => L["Test payment (no real money)"],
     };
+
+    private static string ProviderIcon(PaymentProvider p) => p switch
+    {
+        PaymentProvider.Mollie => "bi-bank",
+        PaymentProvider.PayPal => "bi-paypal",
+        _ => "bi-cone-striped",
+    };
+
+    private string Hours(int hours) =>
+        hours % 24 == 0
+            ? (hours == 24 ? L["1 day"] : L["{0} days", hours / 24])
+            : (hours == 1 ? L["1 hour"] : L["{0} hours", hours]);
 }

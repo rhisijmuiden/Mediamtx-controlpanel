@@ -1,3 +1,5 @@
+@* A read-only value with a copy button (and a show/hide toggle for secrets).
+   Label and Note are shown as given: callers pass already translated text. *@
 @inject IJSRuntime JS
 
 <div class="mb-2">
@@ -6,12 +8,24 @@
         <label class="form-label small text-secondary mb-1">@Label</label>
     }
     <div class="input-group input-group-sm">
-        <input class="form-control font-monospace" type="@(Secret && !revealed ? "password" : "text")" value="@Value" readonly />
+        <input class="form-control font-monospace" type="@(Secret && !revealed ? "password" : "text")" value="@Value" readonly aria-label="@Label" />
         @if (Secret)
         {
-            <button type="button" class="btn btn-outline-secondary" @onclick="() => revealed = !revealed">@(revealed ? "Hide" : "Show")</button>
+            <button type="button" class="btn btn-outline-secondary" @onclick="() => revealed = !revealed"
+                    title="@(revealed ? L["Hide"] : L["Show"])" aria-label="@(revealed ? L["Hide"] : L["Show"])">
+                <i class="bi @(revealed ? "bi-eye-slash" : "bi-eye")"></i>
+            </button>
         }
-        <button type="button" class="btn btn-outline-primary" @onclick="Copy">@(copied ? "Copied ✓" : "Copy")</button>
+        <button type="button" class="btn @(copied ? "btn-success" : "btn-outline-primary")" @onclick="Copy" title="@L["Copy to clipboard"]">
+            @if (copied)
+            {
+                <i class="bi bi-check-lg"></i><span class="d-none d-sm-inline ms-1">@L["Copied"]</span>
+            }
+            else
+            {
+                <i class="bi bi-clipboard"></i><span class="d-none d-sm-inline ms-1">@L["Copy"]</span>
+            }
+        </button>
     </div>
     @if (!string.IsNullOrEmpty(Note))
     {

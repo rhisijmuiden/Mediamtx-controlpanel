@@ -3,19 +3,19 @@
 
 @if (!Stream.Enabled)
 {
-    <span class="badge text-bg-secondary">Disabled</span>
+    <span class="badge bg-secondary-subtle text-secondary-emphasis" title="@L["The stream is switched off: nobody can publish or watch."]"><i class="bi bi-pause-circle me-1"></i>@L["Disabled"]</span>
 }
 else if (Live is { IsLive: true })
 {
-    <span class="badge text-bg-success">● Live</span>
+    <span class="badge bg-success-subtle text-success-emphasis badge-dot" title="@L["A source is connected and sending."]">@L["Live"]</span>
 }
 else if (Live is not null)
 {
-    <span class="badge text-bg-warning">Waiting for source</span>
+    <span class="badge bg-warning-subtle text-warning-emphasis badge-dot" title="@L["The path is ready, but no source is sending yet."]">@L["Waiting for source"]</span>
 }
 else
 {
-    <span class="badge text-bg-light border">Offline</span>
+    <span class="badge text-bg-light border" title="@L["No source is connected."]"><i class="bi bi-circle me-1"></i>@L["Offline"]</span>
 }
 
 @code {

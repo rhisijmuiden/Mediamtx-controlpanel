@@ -1,4 +1,4 @@
-﻿@page "/Account/Manage/Passkeys"
+@page "/Account/Manage/Passkeys"
 
 @using MediaMtxPanel.Data
 @using Microsoft.AspNetCore.Identity
@@ -9,55 +9,79 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject IdentityRedirectManager RedirectManager
 
-<PageTitle>Manage your passkeys</PageTitle>
+<AppPageTitle Text="@L["Manage your passkeys"]" />
 
-<h3>Manage your passkeys</h3>
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+        <h2 class="h4 d-flex align-items-center gap-2 mb-1"><i class="bi bi-fingerprint text-primary"></i> @L["Manage your passkeys"]</h2>
+        <p class="text-secondary mb-0">@L["A passkey lets you log in with your fingerprint, face, device PIN or a security key instead of typing a password."]</p>
+    </div>
+    <form @formname="add-passkey" @onsubmit="AddPasskey" method="post">
+        <AntiforgeryToken />
+        @if (currentPasskeys is not { Count: >= MaxPasskeyCount })
+        {
+            <PasskeySubmit Operation="PasskeyOperation.Create" Name="Input" class="btn btn-primary"><i class="bi bi-plus-lg"></i> @L["Add a new passkey"]</PasskeySubmit>
+        }
+    </form>
+</div>
 
 <StatusMessage />
 
+@if (currentPasskeys is { Count: >= MaxPasskeyCount })
+{
+    <div class="alert alert-warning d-flex align-items-start gap-2">
+        <i class="bi bi-exclamation-triangle mt-1"></i>
+        <div>@L["You have reached the maximum number of allowed passkeys. Please delete one before adding a new one."]</div>
+    </div>
+}
+
 @if (currentPasskeys is { Count: > 0 })
 {
-    <table class="table">
-        <tbody>
-            @foreach (var passkey in currentPasskeys)
-            {
-                <tr>
-                    <td>@(passkey.Name ?? "Unnamed passkey")</td>
-                    <td>
-                        @{
-                            var credentialId = Base64Url.EncodeToString(passkey.CredentialId);
-                        }
-                        <form @formname="@($"update-passkey-{credentialId}")" @onsubmit="UpdatePasskey" method="post">
-                            <AntiforgeryToken />
-                            <div>
-                                <input type="hidden" name="CredentialId" value="@credentialId" />
-                                <button type="submit" name="Action" value="rename" class="btn btn-primary" title="Rename this passkey">Rename</button>
-                                <button type="submit" name="Action" value="delete" class="btn btn-danger" title="Remove this passkey from your account">Delete</button>
-                            </div>
-                        </form>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <ul class="list-group mb-4">
+        @foreach (var passkey in currentPasskeys)
+        {
+            var credentialId = Base64Url.EncodeToString(passkey.CredentialId);
+            <li class="list-group-item d-flex flex-wrap align-items-center justify-content-between gap-2 py-3">
+                <span class="d-flex align-items-center gap-2 fw-semibold" style="min-width:0">
+                    <i class="bi bi-key text-primary"></i>
+                    <span class="text-truncate">@(passkey.Name ?? L["Unnamed passkey"])</span>
+                </span>
+                <form @formname="@($"update-passkey-{credentialId}")" @onsubmit="UpdatePasskey" method="post">
+                    <AntiforgeryToken />
+                    <input type="hidden" name="CredentialId" value="@credentialId" />
+                    <div class="d-flex gap-2">
+                        <button type="submit" name="Action" value="rename" class="btn btn-sm btn-outline-primary" title="@L["Rename this passkey"]"><i class="bi bi-pencil"></i> @L["Rename"]</button>
+                        <button type="submit" name="Action" value="delete" class="btn btn-sm btn-outline-danger btn-icon" title="@L["Remove this passkey from your account"]"><i class="bi bi-trash"></i></button>
+                    </div>
+                </form>
+            </li>
+        }
+    </ul>
 }
 else
 {
-    <p>No passkeys are registered.</p>
+    <div class="empty-state mb-4">
+        <i class="bi bi-fingerprint"></i>
+        @L["No passkeys are registered."]
+    </div>
 }
 
-<form @formname="add-passkey" @onsubmit="AddPasskey" method="post">
-    <AntiforgeryToken />
-    @if (currentPasskeys is { Count: >= MaxPasskeyCount })
-    {
-        <p class="text-danger">You have reached the maximum number of allowed passkeys. Please delete one before adding a new one.</p>
-    }
-    else
-    {
-        <PasskeySubmit Operation="PasskeyOperation.Create" Name="Input" class="btn btn-primary">Add a new passkey</PasskeySubmit>
-    }
-
-</form>
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="action-card">
+            <div class="action-icon success"><i class="bi bi-lightning-charge"></i></div>
+            <h3>@L["Faster and safer"]</h3>
+            <p>@L["Passkeys cannot be guessed or phished. Your device keeps the secret part; the panel only stores a public key."]</p>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="action-card">
+            <div class="action-icon info"><i class="bi bi-box-arrow-in-right"></i></div>
+            <h3>@L["How to use it"]</h3>
+            <p>@L["On the log in page, choose “Log in with a passkey” and confirm on your device. Your password keeps working as well."]</p>
+        </div>
+    </div>
+</div>
 
 @code {
     private const int MaxPasskeyCount = 100;
@@ -106,27 +130,27 @@ else
 
         if (string.IsNullOrEmpty(Input.CredentialJson))
         {
-            RedirectManager.RedirectToCurrentPageWithStatus("Error: The browser did not provide a passkey.", HttpContext);
+            RedirectManager.RedirectToCurrentPageWithStatus("Error: " + L["The browser did not provide a passkey."], HttpContext);
             return;
         }
 
         if (currentPasskeys!.Count >= MaxPasskeyCount)
         {
-            RedirectManager.RedirectToCurrentPageWithStatus($"Error: You have reached the maximum number of allowed passkeys.", HttpContext);
+            RedirectManager.RedirectToCurrentPageWithStatus("Error: " + L["You have reached the maximum number of allowed passkeys."], HttpContext);
             return;
         }
 
         var attestationResult = await SignInManager.PerformPasskeyAttestationAsync(Input.CredentialJson);
         if (!attestationResult.Succeeded)
         {
-            RedirectManager.RedirectToCurrentPageWithStatus($"Error: Could not add the passkey: {attestationResult.Failure.Message}", HttpContext);
+            RedirectManager.RedirectToCurrentPageWithStatus("Error: " + L["Could not add the passkey: {0}", attestationResult.Failure.Message], HttpContext);
             return;
         }
 
         var addPasskeyResult = await UserManager.AddOrUpdatePasskeyAsync(user, attestationResult.Passkey);
         if (!addPasskeyResult.Succeeded)
         {
-            RedirectManager.RedirectToCurrentPageWithStatus("Error: The passkey could not be added to your account.", HttpContext);
+            RedirectManager.RedirectToCurrentPageWithStatus("Error: " + L["The passkey could not be added to your account."], HttpContext);
             return;
         }
 
@@ -146,7 +170,7 @@ else
                 await DeletePasskey();
                 break;
             default:
-                RedirectManager.RedirectToCurrentPageWithStatus($"Error: Unknown action '{Action}'.", HttpContext);
+                RedirectManager.RedirectToCurrentPageWithStatus("Error: " + L["Unknown action '{0}'.", Action], HttpContext);
                 break;
         }
     }
@@ -166,17 +190,17 @@ else
         }
         catch (FormatException)
         {
-            RedirectManager.RedirectToCurrentPageWithStatus("Error: The specified passkey ID had an invalid format.", HttpContext);
+            RedirectManager.RedirectToCurrentPageWithStatus("Error: " + L["The specified passkey ID had an invalid format."], HttpContext);
             return;
         }
 
         var result = await UserManager.RemovePasskeyAsync(user, credentialId);
         if (!result.Succeeded)
         {
-            RedirectManager.RedirectToCurrentPageWithStatus("Error: The passkey could not be deleted.", HttpContext);
+            RedirectManager.RedirectToCurrentPageWithStatus("Error: " + L["The passkey could not be deleted."], HttpContext);
             return;
         }
 
-        RedirectManager.RedirectToCurrentPageWithStatus("Passkey deleted successfully.", HttpContext);
+        RedirectManager.RedirectToCurrentPageWithStatus(L["Passkey deleted successfully."], HttpContext);
     }
 }

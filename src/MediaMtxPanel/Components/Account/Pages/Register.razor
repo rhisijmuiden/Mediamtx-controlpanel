@@ -1,8 +1,15 @@
 @page "/Account/Register"
 @page "/Account/RegisterConfirmation"
 
-<PageTitle>Register</PageTitle>
+<AppPageTitle Text="@L["Register"]" />
 
-<h1>Registration is disabled</h1>
-<p>Accounts are created by an administrator. Please contact the administrator of this panel.</p>
-<a class="btn btn-primary" href="Account/Login">Go to log in</a>
+<div class="auth-page">
+    <div class="card auth-card">
+        <div class="card-body p-4 p-sm-5">
+            <span class="brand-logo"><i class="bi bi-broadcast"></i></span>
+            <h1 class="h3 mb-1 d-flex align-items-center gap-2"><i class="bi bi-person-lock text-secondary"></i> @L["Registration is disabled"]</h1>
+            <p class="text-secondary mb-4">@L["Accounts are created by an administrator. Please contact the administrator of this panel."]</p>
+            <a class="btn btn-primary" href="Account/Login"><i class="bi bi-box-arrow-in-right"></i> @L["Go to log in"]</a>
+        </div>
+    </div>
+</div>
