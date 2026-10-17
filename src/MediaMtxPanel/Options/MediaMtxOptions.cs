@@ -59,4 +59,31 @@ public class PanelOptions
 
     /// <summary>Branch that is compared when the repository has no releases (the Proxmox installer builds from it).</summary>
     public string UpdateBranch { get; set; } = "main";
+
+    // --- Station contract (see "Running as part of Build My TV Station" in the README); all off when empty ---
+
+    /// <summary>
+    /// Serve the panel under this path, e.g. /channel1, behind a reverse proxy that forwards the full path.
+    /// Empty or "/" serves it at the root.
+    /// </summary>
+    public string? PathBase { get; set; }
+
+    /// <summary>
+    /// Token that gives administrator access to /api/v1 with "Authorization: Bearer &lt;token&gt;".
+    /// At least 32 characters; empty turns the token (and the /api/v1 access it gives) off.
+    /// </summary>
+    public string? ServiceToken { get; set; }
+
+    /// <summary>
+    /// Comma-separated IPs or CIDRs of the reverse proxies whose X-Forwarded-* headers are believed.
+    /// Empty keeps the default: forwarded headers are accepted from any address.
+    /// </summary>
+    public string? TrustedProxies { get; set; }
+
+    /// <summary><see cref="PathBase"/> as "/channel1", or an empty string for the root.</summary>
+    public static string NormalizePathBase(string? pathBase)
+    {
+        var trimmed = (pathBase ?? "").Trim().Trim('/');
+        return trimmed.Length == 0 ? "" : "/" + trimmed;
+    }
 }

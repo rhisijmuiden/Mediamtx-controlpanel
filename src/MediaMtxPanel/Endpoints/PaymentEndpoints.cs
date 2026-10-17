@@ -28,7 +28,7 @@ public static class PaymentEndpoints
             }
             catch (PaymentException ex)
             {
-                return Results.Redirect($"/watch/{Uri.EscapeDataString(slug)}?error={Uri.EscapeDataString(ex.Message)}");
+                return Results.Redirect($"{http.Request.PathBase}/watch/{Uri.EscapeDataString(slug)}?error={Uri.EscapeDataString(ex.Message)}");
             }
         }).AllowAnonymous();
 
@@ -45,10 +45,10 @@ public static class PaymentEndpoints
             return Results.Ok();
         }).AllowAnonymous().DisableAntiforgery();
 
-        app.MapPost("/watch/{slug}/order/{id:guid}/simulate", async (string slug, Guid id, PaywallService paywall, CancellationToken ct) =>
+        app.MapPost("/watch/{slug}/order/{id:guid}/simulate", async (string slug, Guid id, HttpContext http, PaywallService paywall, CancellationToken ct) =>
         {
             var order = await paywall.CompleteTestPaymentAsync(id, ct);
-            return order is null ? Results.NotFound() : Results.Redirect($"/watch/{Uri.EscapeDataString(slug)}/order/{id}");
+            return order is null ? Results.NotFound() : Results.Redirect($"{http.Request.PathBase}/watch/{Uri.EscapeDataString(slug)}/order/{id}");
         }).AllowAnonymous();
 
         return app;

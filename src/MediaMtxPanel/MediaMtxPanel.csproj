@@ -7,7 +7,7 @@
     <UserSecretsId>aspnet-MediaMtxPanel-3c598a6e-92ad-4a30-9abf-425b21f6f4d2</UserSecretsId>
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
     <!-- Shown under Info in the panel. Bump when publishing a GitHub release (tag v<Version>). -->
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -37,6 +37,11 @@
       <SourceRevisionId>$(_GitCommit.Trim())</SourceRevisionId>
     </PropertyGroup>
   </Target>
+
+  <ItemGroup>
+    <!-- WebApplicationFactory<Program> in tests/MediaMtxPanel.Tests. -->
+    <InternalsVisibleTo Include="MediaMtxPanel.Tests" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Update="Data\app.db" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
