@@ -84,6 +84,11 @@ build_panel() {
   chown -R root:root "$APP_DIR"
 }
 
+# The station command of the Build My TV Station contract; does nothing until someone runs it.
+install_station_command() {
+  install -m 0755 "$WORK/src/deploy/mediamtx-panel-station.sh" /usr/local/bin/mediamtx-panel-station
+}
+
 # ---------------------------------------------------------------- MediaMTX
 install_mediamtx() {
   local arch
@@ -188,7 +193,7 @@ UNIT
 
 wait_for_panel() {
   for _ in $(seq 1 60); do
-    curl -fs -o /dev/null "http://127.0.0.1:${PANEL_PORT}/Account/Login" && return 0
+    curl -fs -o /dev/null "http://127.0.0.1:${PANEL_PORT}/healthz" && return 0
     sleep 2
   done
   echo "The panel did not start; see: journalctl -u mediamtx-panel" >&2
@@ -215,6 +220,7 @@ case "$MODE" in
     HOOK_SECRET="$(random_secret 32)"
     install_packages
     build_panel
+    install_station_command
     configure_panel
     [[ "$INSTALL_MEDIAMTX" == "yes" ]] && install_mediamtx
     systemctl daemon-reload
@@ -230,6 +236,7 @@ case "$MODE" in
   update)
     install_packages
     build_panel
+    install_station_command
     systemctl restart mediamtx-panel
     wait_for_panel
     remove_sdk

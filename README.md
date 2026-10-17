@@ -327,6 +327,17 @@ userdel mediamtx-panel; userdel mediamtx
 
 This deletes the database and recordings too.
 
+## Running as part of Build My TV Station
+
+[Build My TV Station](https://github.com/rhisijmuiden/BulldMyTVStation) can deploy the panel as one part of a station. For that the panel implements the [station contract (version 1)](https://github.com/rhisijmuiden/BulldMyTVStation/blob/main/docs/station-contract.md). Everything in it is off until it is set, so a standalone install behaves exactly as before.
+
+- `GET /healthz` answers without a login: `{"status": "ok", "app": "mediamtx-panel", "version": "…", "contract": 1}`, at the root and under the base path.
+- `Panel__ServiceToken` (at least 32 characters) turns on `Authorization: Bearer <token>` for `/api/v1/` only, with administrator rights: `GET`/`POST /api/v1/streams` (`{"name": "channel1", "publicRead": true}`) and `GET`/`DELETE /api/v1/streams/{id}`, on the first media server. Each stream comes with its publish and play URLs. Without a token `/api/v1/` answers 401 to everyone.
+- `Panel__PathBase` (e.g. `/channel1`) serves the panel under that path; the reverse proxy forwards the full path unchanged. `/healthz` and the MediaMTX authentication hook keep working at the root.
+- `Panel__TrustedProxies` (comma-separated IPs or CIDRs) makes the panel believe `X-Forwarded-For`, `-Proto` and `-Host` only from those addresses.
+
+The installers add the command `mediamtx-panel-station [--reset-admin]`, which the station runs as root. It writes `STATION_SERVICE_TOKEN`, `STATION_BASE_PATH`, `STATION_PUBLIC_URL` (→ `Panel__PublicUrl`) and `STATION_TRUSTED_PROXIES` into `/etc/mediamtx-panel/panel.env` (a variable that is not set is left alone, an empty one is removed), with `--reset-admin` gives the administrator a new one-time password, restarts the panel when something changed, waits for `/healthz` and writes `/var/lib/mediamtx-panel/station.json`. It prints the same JSON on stdout (with `initialPassword` after `--reset-admin`); progress goes to stderr.
+
 ## Customer portal and paywall
 
 ![Customer portal](docs/screenshots/customer-stream.png)
@@ -373,6 +384,8 @@ Requires: .NET 10 SDK and a MediaMTX binary.
    dotnet run --no-launch-profile
    ```
 
+Run the tests with `dotnet test MediaMtxPanel.slnx`.
+
 ## Configuration
 
 All settings live in `appsettings.json` and can be overridden with environment variables (`Section__Key`). Servers themselves are managed in the panel; the `MediaMtx__…` settings only serve to create a server automatically on first start.
@@ -396,6 +409,9 @@ All settings live in `appsettings.json` and can be overridden with environment v
 | `Panel__SettingsPath` | next to the database | Where the settings from the Settings page are stored (`panel-settings.json`) |
 | `Panel__UpdateRepository` | `rhisijmuiden/Mediamtx-controlpanel` | GitHub repository for the update check (empty = no check) |
 | `Panel__UpdateBranch` | `main` | Branch compared when the repository has no releases |
+| `Panel__PathBase` | empty | Serve the panel under this path, e.g. `/channel1` (see [Build My TV Station](#running-as-part-of-build-my-tv-station)) |
+| `Panel__ServiceToken` | empty | Bearer token with administrator rights on `/api/v1/` (at least 32 characters) |
+| `Panel__TrustedProxies` | empty | IPs or CIDRs whose `X-Forwarded-*` headers are believed (empty = any address, as before) |
 
 The application name, default language, web port and mail server are set in the panel under **Settings**, not here. A port chosen there overrides the port in `ASPNETCORE_URLS`.
 
@@ -442,15 +458,18 @@ src/MediaMtxPanel/
                            Portal (customer portal, payment settings), Watch (public watch and payment page)
   Components/Shared/       Form, copy fields, endpoint table, status badges, player, statistics bar
   Data/                    EF Core context, entities, migrations, seeding of roles/administrator
-  Endpoints/               Authentication hook for MediaMTX, payment endpoints (purchase, Mollie webhook)
+  Endpoints/               Authentication hook for MediaMTX, payment endpoints (purchase, Mollie webhook),
+                           station contract (/healthz, /api/v1/streams)
   Services/                MediaMTX API client, stream and server management, synchronization, live status, URL builder, user management,
                            server statistics, Payments/ (Mollie, PayPal, paywall and tickets), settings, mail, update check,
                            Localization/ (translations)
   Localization/            Translations (JSON) for Dutch, German and French
   wwwroot/app.css          Design system on top of Bootstrap 5.3 and Bootstrap Icons
 deploy/mediamtx.yml        MediaMTX configuration for use with the panel
+deploy/mediamtx-panel-station.sh  Station command for Build My TV Station (installed as mediamtx-panel-station)
 deploy/proxmox/            create-lxc.sh (on the Proxmox host) and install-in-lxc.sh (in the container)
 deploy/debian/install.sh   Standalone installer for Debian 13 (bare metal or VM); uses install-in-lxc.sh
+tests/MediaMtxPanel.Tests/ Integration tests (xUnit, WebApplicationFactory)
 tools/                     Translation check, screenshot scripts
 .github/workflows/         Build, translation check and README screenshots
 ```
