@@ -9,7 +9,13 @@ A control panel for [MediaMTX](https://github.com/bluenviron/mediamtx), written 
 - **Multiple MediaMTX servers**: administrators add as many MediaMTX instances as needed under *Servers*. Each stream is assigned to a server; its URLs use that server's public address and ports. The dashboard shows whether each server is online.
 - **Customer portal**: customers log in and see their own streams with a live preview, a tab with exactly what they need to broadcast, and a bar with CPU, RAM, load, network, bitrate and viewers (see [Customer portal and paywall](#customer-portal-and-paywall)).
 - **Paywall**: customers sell tickets for their stream (e.g. a day ticket or a week pass) and let viewers pay with iDEAL (Mollie) or PayPal.
-- **Proxmox**: create an LXC container with the panel and MediaMTX using a single script (see [Proxmox LXC](#proxmox-lxc)).
+- **Proxmox**: create an LXC container with the panel and MediaMTX using a single command in the Proxmox shell (see [Proxmox LXC](#proxmox-lxc)).
+
+**Install on Proxmox VE** by pasting this into the Proxmox host shell (details in [Proxmox LXC](#proxmox-lxc)):
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/proxmox/create-lxc.sh)"
+```
 
 ## How it works
 
@@ -39,28 +45,85 @@ In production, put the panel behind a reverse proxy with HTTPS (Caddy, nginx, Tr
 
 ## Proxmox LXC
 
-The script `deploy/proxmox/create-lxc.sh` creates a Debian 13 container on a Proxmox VE host and installs the panel in it as a systemd service, plus (by default) MediaMTX as the first server.
+The script `deploy/proxmox/create-lxc.sh` creates a Debian 13 container on a Proxmox VE host. It installs the panel as a systemd service and, by default, MediaMTX as the first server in the same container.
 
-Paste this into the shell of the Proxmox host (as root, e.g. via *Datacenter → node → Shell*):
+### Requirements
+
+- Proxmox VE 8.4 or newer, because the Debian 13 template needs it. Both amd64 and arm64 hosts work.
+- Root access to the Proxmox host shell.
+- Internet access from the host and from the container. The container downloads .NET 10 from Microsoft's package feed (`packages.microsoft.com`) and MediaMTX from GitHub.
+- At least 1536 MB of memory for the container, because the panel is built inside it. The default is 2048 MB.
+
+### Install
+
+1. In the Proxmox web UI, open **Datacenter → *your node* → Shell**, or log in to the host over SSH as root.
+2. Paste this command:
+
+   ```bash
+   bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/proxmox/create-lxc.sh)"
+   ```
+
+3. Choose how the container should be created. As with the [community-scripts.org](https://community-scripts.org) scripts, there are two options:
+   - **Default**: 2 cores, 2048 MB memory, 8 GB disk, DHCP on `vmbr0`.
+   - **Advanced**: you choose the container ID, hostname, cores, memory, swap, disk size, storage (picked from the storage on your host), network bridge, static IP or DHCP, gateway, VLAN, DNS, root password, SSH key, whether MediaMTX is installed in the container too, the panel port, the administrator's email address and the public address for the streams.
+4. Check the summary and confirm. The script then downloads the Debian 13 template, creates and starts the container, and builds and installs the panel. This takes a few minutes.
+5. At the end the script prints the details you need:
+
+   ```
+   [✓] MediaMTX Panel is installed in container 125 (Debian 13)
+
+     ┌──────────────────────────────────────────────────────────────
+     │  Address:      http://192.168.1.50:8080
+     │  Login:        admin@localhost
+     │  Password:     <one-time password>
+     │
+     │  This is a one-time password: after your first login
+     │  the panel immediately asks you to choose your own password.
+     └──────────────────────────────────────────────────────────────
+
+     Root password of the container: <random password>
+   ```
+
+   These passwords are not stored anywhere and are not shown again, so copy them now.
+
+6. Open the address in your browser and log in. The panel immediately asks you to choose a new password.
+
+### After installing
+
+- **Public address**: stream URLs use the container's IP by default. If viewers or encoders connect through a domain name or a NAT address, change it under **Servers** in the panel, or install with `PUBLIC_HOST=…`.
+- **Firewall and port forwarding**: open the MediaMTX ports you use: 8554 (RTSP), 1935 (RTMP), 8890/udp (SRT), 8888 (HLS), 8889 and 8189/udp (WebRTC), plus the panel port (8080).
+- **HTTPS**: for use on the internet, put the panel behind a reverse proxy with HTTPS (Caddy, nginx, Traefik). Forwarded headers are supported.
+- **Root password**: if you shared the container's root password anywhere, change it with `pct exec <CTID> -- passwd`.
+- **More servers**: other containers or VMs that run only MediaMTX can be added under **Servers** in the panel.
+
+Inside the container:
+
+| | Panel | MediaMTX |
+|---|---|---|
+| Program | `/opt/mediamtx-panel` | `/opt/mediamtx` |
+| Configuration | `/etc/mediamtx-panel/panel.env` | `/etc/mediamtx/mediamtx.yml` |
+| Data | `/var/lib/mediamtx-panel` | `/var/lib/mediamtx/recordings` |
+| Service | `mediamtx-panel` | `mediamtx` |
+
+Useful commands on the Proxmox host:
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/proxmox/create-lxc.sh)"
+pct exec <CTID> -- journalctl -u mediamtx-panel -f      # panel logs
+pct exec <CTID> -- journalctl -u mediamtx -f            # MediaMTX logs
+pct exec <CTID> -- systemctl restart mediamtx-panel     # restart after editing panel.env
 ```
 
-Like the scripts from [community-scripts.org](https://community-scripts.org), the script first asks how the container should be created:
+### Updating
 
-- **Default**: 2 cores, 2048 MB memory, 8 GB disk, DHCP on `vmbr0`.
-- **Advanced**: you choose the container ID, hostname, cores, memory, swap, disk size, storage (from the list on your Proxmox host), network bridge, static IP or DHCP, gateway, VLAN, DNS, root password, SSH key, whether MediaMTX is installed in the container too, the panel port, the administrator's email address and the public address for the streams.
+Run the same script with `update` and the container ID. The latest code from GitHub is built and installed. The database and settings are kept.
 
-Before anything is created, the script shows a summary to confirm.
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/proxmox/create-lxc.sh)" _ update <CTID>
+```
 
-The script fetches the source code from GitHub itself (`REPO_BRANCH=…` selects another branch). Running `bash deploy/proxmox/create-lxc.sh` from an extracted copy of this repository also works; that code is then used.
+### Unattended install
 
-When it is done, the script shows the address (`http://<container-ip>:8080`), the administrator login and a **one-time password** in the shell. On first login the panel immediately asks for a new password; the one-time password is not stored anywhere in the container.
-
-.NET 10 comes from Microsoft's package feed (`packages.microsoft.com`), because Debian does not ship .NET itself. The Debian 13 template requires Proxmox VE 8.4 or newer.
-
-To run without questions (e.g. for automation), set `INTERACTIVE=no` and pass the settings as environment variables:
+To run without questions, for example from automation, set `INTERACTIVE=no` and pass the settings as environment variables:
 
 ```bash
 INTERACTIVE=no CT_ID=150 CT_IP=192.168.1.50/24 CT_GW=192.168.1.1 CT_STORAGE=local-zfs \
@@ -74,11 +137,11 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-co
 | `TEMPLATE_NAME` | `debian-13-standard` | Specific Debian 13 template |
 | `CT_ID` | next free ID | Container ID |
 | `CT_HOSTNAME` | `mediamtx-panel` | Hostname |
-| `CT_CORES` / `CT_MEMORY` / `CT_DISK` | 2 / 2048 MB / 8 GB | Resources (building needs ~1.5 GB memory) |
+| `CT_CORES` / `CT_MEMORY` / `CT_SWAP` / `CT_DISK` | 2 / 2048 MB / 512 MB / 8 GB | Resources (building needs ~1.5 GB memory) |
 | `CT_STORAGE` / `TEMPLATE_STORAGE` | `local-lvm` / `local` | Storage for the disk and for the template |
 | `CT_BRIDGE` / `CT_VLAN` | `vmbr0` / empty | Network |
 | `CT_IP` / `CT_GW` / `CT_DNS` | `dhcp` / empty / empty | IP settings |
-| `CT_PASSWORD` / `CT_SSH_KEY` | random / empty | Root access to the container |
+| `CT_PASSWORD` / `CT_SSH_KEY` | random / empty | Root access to the container (`CT_SSH_KEY` is a path to a public key file) |
 | `INSTALL_MEDIAMTX` | `yes` | Install MediaMTX in the same container |
 | `MEDIAMTX_VERSION` | `1.21.2` | MediaMTX version (from GitHub releases) |
 | `PANEL_PORT` | `8080` | Panel port |
@@ -86,18 +149,14 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-co
 | `REPO` / `REPO_BRANCH` | `rhisijmuiden/Mediamtx-controlpanel` / `main` | Where the source code comes from |
 | `PUBLIC_HOST` | IP of the container | Address in the stream URLs |
 
-Inside the container:
+The script downloads the source code from GitHub itself. Running `bash deploy/proxmox/create-lxc.sh` from an extracted copy of this repository also works, and then uses that copy.
 
-- panel: `/opt/mediamtx-panel`, configuration `/etc/mediamtx-panel/panel.env`, data `/var/lib/mediamtx-panel`, service `mediamtx-panel`
-- MediaMTX: `/opt/mediamtx`, configuration `/etc/mediamtx/mediamtx.yml`, recordings `/var/lib/mediamtx/recordings`, service `mediamtx`
+### Troubleshooting
 
-Updating to new code (database and settings are kept):
-
-```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/proxmox/create-lxc.sh)" _ update <CTID>
-```
-
-Other Proxmox containers or VMs running only MediaMTX can then be added under **Servers** in the panel.
+- **"Template … not found"**: the host is older than Proxmox VE 8.4, or `pveam update` cannot reach the internet.
+- **"Container … could not start and has been removed again"**: see `journalctl -u pve-container@<CTID>` on the host for the cause.
+- **"Container … has no working network/DNS"**: check the bridge, IP, gateway and DNS settings, or try DHCP.
+- **The panel does not open**: check that the service runs with `pct exec <CTID> -- systemctl status mediamtx-panel`, and read the logs with the command above.
 
 ## Customer portal and paywall
 
