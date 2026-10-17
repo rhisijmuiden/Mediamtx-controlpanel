@@ -4,71 +4,100 @@
 @inject ServerService ServerAdmin
 @inject MediaMtxStatus Status
 
-<PageTitle>Servers</PageTitle>
+<AppPageTitle Text="@L["Servers"]" />
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="mb-0">MediaMTX servers</h1>
-    <a class="btn btn-primary" href="servers/new">+ Add server</a>
+<div class="page-header">
+    <div>
+        <h1><i class="bi bi-hdd-network text-primary"></i> @L["MediaMTX servers"]</h1>
+        <p class="page-subtitle">@L["The MediaMTX machines this panel controls. Streams run on one of these servers; the panel keeps their paths in sync and checks who may broadcast or watch."]</p>
+    </div>
+    <div class="page-actions">
+        <a class="btn btn-primary" href="servers/new"><i class="bi bi-plus-lg"></i> @L["Add server"]</a>
+    </div>
 </div>
 
 @if (message is not null)
 {
-    <div class="alert alert-@(isError ? "danger" : "success")">@message</div>
+    <div class="alert alert-@(isError ? "danger" : "success") d-flex align-items-center gap-2">
+        <i class="bi @(isError ? "bi-exclamation-octagon" : "bi-check-circle")"></i> <span>@message</span>
+    </div>
 }
 
 @if (servers is null)
 {
-    <p>Loading…</p>
+    <p class="text-secondary"><span class="spinner-border spinner-border-sm me-2"></span>@L["Loading…"]</p>
 }
 else if (servers.Count == 0)
 {
-    <div class="text-center text-secondary py-5">
-        <p>No servers have been connected yet.</p>
-        <a class="btn btn-primary" href="servers/new">Add your first MediaMTX server</a>
+    <div class="empty-state">
+        <i class="bi bi-hdd-network"></i>
+        <p class="mb-3">@L["No servers have been connected yet."]</p>
+        <a class="btn btn-primary" href="servers/new"><i class="bi bi-plus-lg"></i> @L["Add your first MediaMTX server"]</a>
     </div>
 }
 else
 {
-    <div class="table-responsive">
-        <table class="table table-hover align-middle">
-            <thead>
-                <tr><th>Name</th><th>API</th><th>Public address</th><th class="text-end">Streams</th><th>Status</th><th></th></tr>
-            </thead>
-            <tbody>
-                @foreach (var s in servers)
-                {
-                    var state = Status.Get(s.Id);
-                    <tr>
-                        <td><a href="servers/@s.Id">@s.Name</a></td>
-                        <td class="small font-monospace">@s.ApiUrl</td>
-                        <td class="small font-monospace">@s.PublicHost</td>
-                        <td class="text-end">@counts.GetValueOrDefault(s.Id)</td>
-                        <td>
+    <div class="row g-3">
+        @foreach (var s in servers)
+        {
+            var state = Status.Get(s.Id);
+            <div class="col-md-6 col-xl-4">
+                <div class="card entity-card h-100">
+                    <div class="card-body">
+                        <div class="entity-head">
+                            <span class="avatar"><i class="bi bi-hdd-rack"></i></span>
+                            <div class="flex-grow-1" style="min-width:0">
+                                <div class="entity-title"><a href="servers/@s.Id" class="text-reset">@s.Name</a></div>
+                                <div class="entity-sub">@(string.IsNullOrEmpty(s.Description) ? s.PublicHost : s.Description)</div>
+                            </div>
+                        </div>
+                        <div class="entity-meta">
                             @if (!s.Enabled)
                             {
-                                <span class="badge text-bg-secondary">Disabled</span>
+                                <span class="badge bg-secondary-subtle text-secondary-emphasis badge-dot">@L["Disabled"]</span>
                             }
                             else if (state is null)
                             {
-                                <span class="badge text-bg-light border">Unknown</span>
+                                <span class="badge text-bg-light border badge-dot">@L["Unknown"]</span>
                             }
                             else if (state.Connected)
                             {
-                                <span class="badge text-bg-success">Online @state.Version</span>
+                                <span class="badge bg-success-subtle text-success-emphasis badge-dot">@L["Online"] @state.Version</span>
                             }
                             else
                             {
-                                <span class="badge text-bg-danger" title="@state.Error">Unreachable</span>
+                                <span class="badge bg-danger-subtle text-danger-emphasis badge-dot" title="@state.Error">@L["Unreachable"]</span>
                             }
-                        </td>
-                        <td class="text-end text-nowrap">
-                            <button class="btn btn-sm btn-outline-secondary" @onclick="() => Test(s)" disabled="@(testing == s.Id)">@(testing == s.Id ? "Testing…" : "Test")</button>
-                            <a class="btn btn-sm btn-outline-primary" href="servers/@s.Id">Settings</a>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                            <span class="badge text-bg-light border"><i class="bi bi-camera-video me-1"></i>@L["{0} stream(s)", counts.GetValueOrDefault(s.Id)]</span>
+                        </div>
+                        <dl class="info-list small mb-0">
+                            <dt>@L["API"]</dt>
+                            <dd class="font-monospace text-break">@s.ApiUrl</dd>
+                            <dt>@L["Public address"]</dt>
+                            <dd class="font-monospace text-break">@s.PublicHost</dd>
+                        </dl>
+                        @if (s.Enabled && state is { Connected: false, Error: not null })
+                        {
+                            <div class="small text-danger-emphasis text-break"><i class="bi bi-exclamation-triangle me-1"></i>@state.Error</div>
+                        }
+                        <div class="entity-actions">
+                            <a class="btn btn-sm btn-outline-primary" href="servers/@s.Id"><i class="bi bi-gear"></i> @L["Settings"]</a>
+                            <button class="btn btn-sm btn-outline-secondary" @onclick="() => Test(s)" disabled="@(testing == s.Id)"
+                                    title="@L["Check the connection and apply all streams to this server"]">
+                                @if (testing == s.Id)
+                                {
+                                    <span class="spinner-border spinner-border-sm"></span> @L["Testing…"]
+                                }
+                                else
+                                {
+                                    <i class="bi bi-plug"></i> @L["Test"]
+                                }
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
 }
 

@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using MediaMtxPanel.Data;
+using MediaMtxPanel.Services.Localization;
 using Microsoft.EntityFrameworkCore;
 
 namespace MediaMtxPanel.Services;
@@ -85,7 +86,8 @@ public class ServerService(
     IDbContextFactory<ApplicationDbContext> dbFactory,
     MediaMtxClientFactory clients,
     MediaMtxSyncService sync,
-    MediaMtxStatus status)
+    MediaMtxStatus status,
+    TextLocalizer L)
 {
     public async Task<List<MediaServer>> ListAsync(bool enabledOnly = false, CancellationToken ct = default)
     {
@@ -152,9 +154,9 @@ public class ServerService(
         await using var db = await dbFactory.CreateDbContextAsync(ct);
         var server = await db.Servers.Include(s => s.Streams).FirstOrDefaultAsync(s => s.Id == id, ct);
         if (server is null)
-            return "Server not found.";
+            return L["Server not found."];
         if (server.Streams.Count > 0)
-            return $"This server still has {server.Streams.Count} stream(s). Move or delete them first.";
+            return L["This server still has {0} stream(s). Move or delete them first.", server.Streams.Count];
         db.Servers.Remove(server);
         await db.SaveChangesAsync(ct);
         status.Forget(id);
@@ -171,25 +173,24 @@ public class ServerService(
         await using var db = await dbFactory.CreateDbContextAsync(ct);
         var server = await db.Servers.AsNoTracking().Include(s => s.Streams).FirstOrDefaultAsync(s => s.Id == id, ct);
         if (server is null)
-            return new(false, "Server not found.");
+            return new(false, L["Server not found."]);
 
         var mtx = clients.Create(server);
         try
         {
             var info = await mtx.GetInfoAsync(ct);
             await sync.SyncServerAsync(mtx, server, ct);
-            return new(true, $"Connected to MediaMTX {info?.Version}. {server.Streams.Count} stream(s) synchronized.");
+            return new(true, L["Connected to MediaMTX {0}. {1} stream(s) synchronized.", info?.Version, server.Streams.Count]);
         }
         catch (MediaMtxException ex) when (ex.Status == System.Net.HttpStatusCode.Unauthorized)
         {
             status.Report(id, false, null, ex.Message);
-            return new(false, "MediaMTX rejects the API credentials. Check that authHTTPAddress on this server points to the panel " +
-                              "with the correct secret, and that the API user and password are correct.");
+            return new(false, L["MediaMTX rejects the API credentials. Check that authHTTPAddress on this server points to the panel with the correct secret, and that the API user and password are correct."]);
         }
         catch (Exception ex) when (ex is HttpRequestException or MediaMtxException or TaskCanceledException)
         {
             status.Report(id, false, null, ex.Message);
-            return new(false, $"Cannot connect to {server.ApiUrl}: {ex.Message}");
+            return new(false, L["Cannot connect to {0}: {1}", server.ApiUrl, ex.Message]);
         }
     }
 }

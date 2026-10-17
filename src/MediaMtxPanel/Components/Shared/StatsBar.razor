@@ -6,47 +6,47 @@
     @if (host is not null)
     {
         <div class="stat">
-            <div class="label">CPU@(host.CpuCores is { } c ? $" ({c} cores)" : "")</div>
-            <div>@(host.CpuPercent is { } cpu ? $"{cpu:0}%" : "measuring…")</div>
+            <div class="label"><i class="bi bi-cpu me-1"></i>@(host.CpuCores is { } c ? L["CPU ({0} cores)", c] : L["CPU"])</div>
+            <div>@(host.CpuPercent is { } cpu ? $"{cpu:0}%" : L["measuring…"])</div>
             <div class="meter"><div class="@(host.CpuPercent > 85 ? "high" : "")" style="width:@Pct(host.CpuPercent)%"></div></div>
         </div>
         <div class="stat">
-            <div class="label">RAM</div>
+            <div class="label"><i class="bi bi-memory me-1"></i>@L["RAM"]</div>
             <div>@(host.MemUsedBytes is { } used && host.MemTotalBytes is { } total ? $"{Format.Bytes(used)} / {Format.Bytes(total)}" : "–")</div>
             <div class="meter"><div class="@(host.MemPercent > 90 ? "high" : "")" style="width:@Pct(host.MemPercent)%"></div></div>
         </div>
         @if (host.Load1 is { } load)
         {
-            <div class="stat"><div class="label">Load</div><div>@load.ToString("0.00")</div></div>
+            <div class="stat"><div class="label"><i class="bi bi-activity me-1"></i>@L["Load"]</div><div>@load.ToString("0.00")</div></div>
         }
         <div class="stat">
-            <div class="label">Server network</div>
-            <div>↓ @Format.Bitrate(host.NetRxBytesPerSec) · ↑ @Format.Bitrate(host.NetTxBytesPerSec)</div>
+            <div class="label"><i class="bi bi-ethernet me-1"></i>@L["Server network"]</div>
+            <div><i class="bi bi-arrow-down"></i> @Format.Bitrate(host.NetRxBytesPerSec) · <i class="bi bi-arrow-up"></i> @Format.Bitrate(host.NetTxBytesPerSec)</div>
         </div>
     }
     else if (hostUnsupported)
     {
-        <div class="stat text-secondary small align-self-center">Server statistics unavailable (set a node_exporter URL on the server).</div>
+        <div class="stat text-secondary small align-self-center"><i class="bi bi-info-circle me-1"></i>@L["Server statistics unavailable (set a node_exporter URL on the server)."]</div>
     }
     <div class="stat">
-        <div class="label">Stream in</div>
-        <div>@(live?.IsLive == true ? Format.Bitrate(inRate) : "offline")</div>
+        <div class="label"><i class="bi bi-box-arrow-in-down me-1"></i>@L["Stream in"]</div>
+        <div>@(live?.IsLive == true ? Format.Bitrate(inRate) : L["offline"])</div>
     </div>
     <div class="stat">
-        <div class="label">Stream out</div>
+        <div class="label"><i class="bi bi-box-arrow-up me-1"></i>@L["Stream out"]</div>
         <div>@(live?.IsLive == true ? Format.Bitrate(outRate) : "–")</div>
     </div>
     <div class="stat">
-        <div class="label">Viewers</div>
+        <div class="label"><i class="bi bi-eye me-1"></i>@L["Viewers"]</div>
         <div>@(live?.Readers.Count ?? 0)</div>
     </div>
     @if ((live?.OnlineTime ?? live?.ReadyTime) is { } since && live!.IsLive)
     {
-        <div class="stat"><div class="label">Live since</div><div>@Format.Duration(DateTime.UtcNow - since.ToUniversalTime())</div></div>
+        <div class="stat"><div class="label"><i class="bi bi-clock me-1"></i>@L["Live since"]</div><div>@Format.Duration(DateTime.UtcNow - since.ToUniversalTime())</div></div>
     }
     @if (live?.Codecs.Any() == true)
     {
-        <div class="stat"><div class="label">Codecs</div><div>@string.Join(", ", live.Codecs)</div></div>
+        <div class="stat"><div class="label"><i class="bi bi-film me-1"></i>@L["Codecs"]</div><div>@string.Join(", ", live.Codecs)</div></div>
     }
 </div>
 
