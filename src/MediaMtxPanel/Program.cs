@@ -14,6 +14,7 @@ using MediaMtxPanel.Options;
 using MediaMtxPanel.Services;
 using MediaMtxPanel.Services.Localization;
 using MediaMtxPanel.Services.Payments;
+using MediaMtxPanel.Services.Setup;
 
 // "admin-reset" and "station-info" run a command for deploy/mediamtx-panel-station.sh instead of the web server.
 var stationCommand = StationCommands.Parse(args);
@@ -75,6 +76,7 @@ builder.Services.AddHttpClient("mediamtx");
 builder.Services.AddSingleton<MediaMtxClientFactory>();
 builder.Services.AddScoped<StreamService>();
 builder.Services.AddScoped<ServerService>();
+builder.Services.AddSingleton<SshServerSetup>();
 builder.Services.AddSingleton<LiveStatusReader>();
 builder.Services.AddSingleton<ServerMetricsReader>();
 builder.Services.AddHttpClient("metrics");
