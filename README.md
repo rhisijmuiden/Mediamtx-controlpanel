@@ -17,6 +17,12 @@ A control panel for [MediaMTX](https://github.com/bluenviron/mediamtx), written 
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/proxmox/create-lxc.sh)"
 ```
 
+**Install on a Debian 13 machine** (bare metal or a VM) by running this as root (details in [Debian 13 standalone](#debian-13-standalone)):
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/debian/install.sh)"
+```
+
 ## How it works
 
 ```
@@ -158,6 +164,86 @@ The script downloads the source code from GitHub itself. Running `bash deploy/pr
 - **"Container … has no working network/DNS"**: check the bridge, IP, gateway and DNS settings, or try DHCP.
 - **The panel does not open**: check that the service runs with `pct exec <CTID> -- systemctl status mediamtx-panel`, and read the logs with the command above.
 
+## Debian 13 standalone
+
+The script `deploy/debian/install.sh` installs the panel directly on a machine running Debian 13 (trixie), such as a bare-metal server or a VM, without Proxmox. It installs everything it needs itself (.NET 10 from Microsoft's package feed, and curl and whiptail when they are missing) and sets up the same systemd services as the Proxmox container. During the installation you choose whether a local MediaMTX is installed too, or only the control panel.
+
+### Requirements
+
+- Debian 13 with systemd, amd64 or arm64. Other distributions and Debian versions are refused.
+- Root access (`sudo -i` or `su -`).
+- Internet access to `packages.microsoft.com` (.NET 10), `github.com` (sources and MediaMTX) and the Debian mirrors.
+- About 1.5 GB of memory plus swap, because the panel is built on the machine. The script warns when there is less.
+- Free ports: the panel port (8080), and with a local MediaMTX also 8554, 1935, 8890/udp, 8888, 8889, 8189/udp and 9997. The script checks this before it installs anything.
+
+### Install
+
+1. Log in to the machine and become root.
+2. Run:
+
+   ```bash
+   bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/debian/install.sh)"
+   ```
+
+   On a minimal Debian without curl, use wget instead:
+
+   ```bash
+   bash -c "$(wget -qO- https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/debian/install.sh)"
+   ```
+
+3. Choose what to install:
+   - **Panel + MediaMTX**: streams are served from this machine, and this MediaMTX is added to the panel as the first server.
+   - **Panel only**: no local MediaMTX. Afterwards you add MediaMTX servers that run elsewhere under **Servers** in the panel, which shows the `mediamtx.yml` settings each server needs.
+4. Choose **Default** settings, or **Advanced** to set the panel port, the administrator's email address, the address of this machine and (with MediaMTX) the public stream address and MediaMTX version.
+5. Check the summary and confirm. At the end the script prints the panel address, the login and a one-time password, just like the Proxmox script. The panel asks you to choose your own password at the first login.
+
+The program, configuration, data and service locations are the same as in the Proxmox container (see the table under [After installing](#after-installing)). Logs: `journalctl -u mediamtx-panel -f` and `journalctl -u mediamtx -f`.
+
+### Unattended install
+
+Options and environment variables skip the questions:
+
+```bash
+# Only the control panel, no questions
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/debian/install.sh)" _ --panel-only --yes
+
+# Panel + MediaMTX with a public host name
+PUBLIC_HOST=stream.example.com ADMIN_EMAIL=me@example.com \
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/debian/install.sh)" _ --yes
+```
+
+| Option / variable | Default | Meaning |
+|---|---|---|
+| `--panel-only` / `INSTALL_MEDIAMTX=no` | MediaMTX is installed | Install only the control panel |
+| `--yes` / `INTERACTIVE=no` | ask | Ask nothing, use the defaults and variables |
+| `PANEL_PORT` | `8080` | Panel port |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | `admin@localhost` / random | First administrator (the password is one-time) |
+| `PANEL_HOST` | first IP of the machine | Address at which browsers and MediaMTX servers reach the panel |
+| `PUBLIC_HOST` | `PANEL_HOST` | Address in the stream URLs of the local MediaMTX |
+| `MEDIAMTX_VERSION` | `1.21.2` | MediaMTX version (from GitHub releases) |
+| `REPO` / `REPO_BRANCH` | `rhisijmuiden/Mediamtx-controlpanel` / `main` | Where the source code comes from |
+
+Running `bash deploy/debian/install.sh` from a copy of this repository also works, and then uses that copy.
+
+### Updating
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/debian/install.sh)" _ update
+```
+
+The latest code is built and installed; the database and settings are kept. Running the installer again without `update` on a machine that already has the panel is refused, so the existing configuration is never overwritten.
+
+### Removing
+
+```bash
+systemctl disable --now mediamtx-panel mediamtx
+rm -f /etc/systemd/system/mediamtx-panel.service /etc/systemd/system/mediamtx.service && systemctl daemon-reload
+rm -rf /opt/mediamtx-panel /etc/mediamtx-panel /var/lib/mediamtx-panel /opt/mediamtx /etc/mediamtx /var/lib/mediamtx
+userdel mediamtx-panel; userdel mediamtx
+```
+
+This deletes the database and recordings too.
+
 ## Customer portal and paywall
 
 ![Customer portal](docs/customer-portal.png)
@@ -250,6 +336,7 @@ src/MediaMtxPanel/
                            server statistics, Payments/ (Mollie, PayPal, paywall and tickets)
 deploy/mediamtx.yml        MediaMTX configuration for use with the panel
 deploy/proxmox/            create-lxc.sh (on the Proxmox host) and install-in-lxc.sh (in the container)
+deploy/debian/install.sh   Standalone installer for Debian 13 (bare metal or VM); uses install-in-lxc.sh
 ```
 
 Adding a database migration: `dotnet tool restore && cd src/MediaMtxPanel && dotnet ef migrations add <Name> -o Data/Migrations`. Migrations are applied automatically at startup.
