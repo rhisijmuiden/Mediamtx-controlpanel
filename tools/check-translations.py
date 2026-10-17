@@ -19,7 +19,8 @@ used = {}
 for path in sorted(ROOT.rglob("*")):
     if path.suffix not in (".razor", ".cs") or "bin" in path.parts or "obj" in path.parts:
         continue
-    for match in KEY.finditer(path.read_text(encoding="utf-8")):
+    text = re.sub(r"^\s*///.*$", "", path.read_text(encoding="utf-8"), flags=re.M)
+    for match in KEY.finditer(text):
         key = json.loads('"' + match.group(1) + '"')
         used.setdefault(key, path.relative_to(ROOT))
 

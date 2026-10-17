@@ -204,6 +204,6 @@ else
     private void Report(Microsoft.AspNetCore.Identity.IdentityResult r, string ok)
     {
         isError = !r.Succeeded;
-        message = r.Succeeded ? ok : string.Join(" ", r.Errors.Select(e => e.Description));
+        message = r.Succeeded ? ok : string.Join(" ", r.Errors.Select(e => L[e.Description]));
     }
 }

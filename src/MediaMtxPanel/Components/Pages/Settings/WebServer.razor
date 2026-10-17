@@ -1,0 +1,147 @@
+@page "/settings/web"
+@attribute [Authorize(Roles = Roles.Admin)]
+@rendermode InteractiveServer
+@inject PanelSettingsStore Store
+@inject WebPortInfo Port
+@inject IHostApplicationLifetime Lifetime
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<AppPageTitle Text="@L["Web server"]" />
+
+<div class="page-header">
+    <div>
+        <h1><i class="bi bi-ethernet text-primary"></i> @L["Web server"]</h1>
+        <p class="page-subtitle">@L["The port on which the panel's web interface can be reached."]</p>
+    </div>
+</div>
+
+@if (Port.FallbackReason is { } reason)
+{
+    <div class="alert alert-warning d-flex gap-2">
+        <i class="bi bi-exclamation-triangle"></i>
+        <div>@L["Port {0} could not be used at startup ({1}), so the panel runs on port {2}.", Port.ChosenPort ?? 0, L[reason], Port.ActivePort]</div>
+    </div>
+}
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card stat-card h-100"><div class="card-body">
+            <div class="stat-icon"><i class="bi bi-door-open"></i></div>
+            <div><div class="label">@L["Current port"]</div><div class="value">@Port.ActivePort</div></div>
+        </div></div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card h-100"><div class="card-body">
+            <div class="stat-icon info"><i class="bi bi-gear-wide-connected"></i></div>
+            <div><div class="label">@L["Port from the installation"]</div><div class="value">@Port.ConfiguredPort</div></div>
+        </div></div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card h-100"><div class="card-body">
+            <div class="stat-icon success"><i class="bi bi-hdd-network"></i></div>
+            <div style="min-width:0"><div class="label">@L["Listening on"]</div><div class="small font-monospace text-break">@string.Join(", ", Port.Urls)</div></div>
+        </div></div>
+    </div>
+</div>
+
+@if (Port.InContainer)
+{
+    <div class="card">
+        <div class="card-body">
+            <h2 class="h5"><i class="bi bi-box-seam text-primary me-1"></i> @L["The panel runs in a Docker container"]</h2>
+            <p class="text-secondary">@L["Docker decides on which port the panel can be reached. Change the port mapping in docker-compose.yml and run docker compose up -d again:"]</p>
+            <pre class="cmd mb-0">ports:
+  - "<strong>9000</strong>:8080"   # @L["outside port : port inside the container"]</pre>
+        </div>
+    </div>
+}
+else if (restarting)
+{
+    <div class="card">
+        <div class="card-body d-flex align-items-center gap-3">
+            <span class="spinner-border text-primary"></span>
+            <div>
+                <div class="fw-semibold">@L["The panel is restarting on port {0}…", port]</div>
+                <div class="text-secondary small">@L["You will be taken to {0} as soon as it is back. If nothing happens, open that address yourself.", newUrl]</div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="card-body">
+            <section class="form-section">
+                <header>
+                    <h2>@L["Port number"]</h2>
+                    <p>@L["Saving restarts the panel. Everyone has to open the panel at the new address afterwards."]</p>
+                </header>
+                <div>
+                    <label class="form-label" for="port">@L["Port"]</label>
+                    <div class="input-group" style="max-width: 22rem">
+                        <span class="input-group-text">@($"{new Uri(Nav.BaseUri).Scheme}://{new Uri(Nav.BaseUri).Host}:")</span>
+                        <input id="port" type="number" min="1" max="65535" class="form-control" @bind="port" />
+                    </div>
+                    @if (error is not null)
+                    {
+                        <div class="validation-message mt-1">@error</div>
+                    }
+                    <div class="form-text">@L["Between 1024 and 65535. Common choices are 8080, 8443 or 9000."]</div>
+                </div>
+            </section>
+            <section class="form-section">
+                <header>
+                    <h2>@L["Before you change it"]</h2>
+                    <p>@L["Check these points, otherwise viewers or servers may lose the connection."]</p>
+                </header>
+                <ul class="mb-0 small">
+                    <li class="mb-1">@L["Firewall and port forwarding: allow the new port."]</li>
+                    <li class="mb-1">@L["Reverse proxy (Caddy, nginx, Traefik): point it to the new port."]</li>
+                    <li class="mb-1">@L["A MediaMTX on the same machine keeps working: the old port stays available on 127.0.0.1 for the authentication hook."]</li>
+                    <li class="mb-1">@L["Other MediaMTX servers: update authHTTPAddress in their mediamtx.yml (shown per server under Servers)."]</li>
+                    <li>@L["The panel has to run as a service that restarts automatically, as the Proxmox installation does. Otherwise start it again yourself."]</li>
+                </ul>
+            </section>
+        </div>
+        <div class="card-footer bg-transparent d-flex flex-wrap gap-2 py-3">
+            <button class="btn btn-primary" @onclick="SaveAndRestart" disabled="@(port == Port.ActivePort)"><i class="bi bi-arrow-repeat"></i> @L["Save and restart"]</button>
+            @if (Port.ActivePort != Port.ConfiguredPort)
+            {
+                <button class="btn btn-outline-secondary" @onclick="() => { port = Port.ConfiguredPort; }"><i class="bi bi-arrow-counterclockwise"></i> @L["Back to port {0}", Port.ConfiguredPort]</button>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private int port;
+    private string? error;
+    private bool restarting;
+    private string newUrl = "";
+
+    protected override void OnInitialized() => port = Port.ActivePort;
+
+    private async Task SaveAndRestart()
+    {
+        error = null;
+        if (port is < 1 or > 65535)
+        {
+            error = L["Enter a port between 1 and 65535."];
+            return;
+        }
+        if (port != Port.ConfiguredPort && WebPortInfo.CheckPort(port) is { } problem)
+        {
+            error = L["Port {0} cannot be used: {1}", port, L[problem]];
+            return;
+        }
+
+        Store.Save(Store.Current with { WebPort = port == Port.ConfiguredPort ? null : port });
+        newUrl = new UriBuilder(Nav.BaseUri) { Port = port, Path = "settings/web" }.Uri.ToString();
+        restarting = true;
+        StateHasChanged();
+        await JS.InvokeVoidAsync("panel.goWhenUp", newUrl);
+        // Let this response reach the browser, then stop; the service manager starts the panel again.
+        _ = Task.Delay(TimeSpan.FromSeconds(1)).ContinueWith(_ => Lifetime.StopApplication());
+    }
+}

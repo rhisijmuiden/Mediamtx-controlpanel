@@ -1,0 +1,96 @@
+@page "/settings"
+@attribute [Authorize(Roles = Roles.Admin)]
+@rendermode InteractiveServer
+@inject PanelSettingsStore Store
+@inject NavigationManager Nav
+
+<AppPageTitle Text="@L["General settings"]" />
+
+<div class="page-header">
+    <div>
+        <h1><i class="bi bi-sliders text-primary"></i> @L["General settings"]</h1>
+        <p class="page-subtitle">@L["The name of the panel, the default language and automatic update checks. These settings apply to everyone."]</p>
+    </div>
+</div>
+
+@if (saved)
+{
+    <div class="alert alert-success d-flex align-items-center gap-2"><i class="bi bi-check-circle"></i> @L["Settings saved."]</div>
+}
+
+<div class="card">
+    <div class="card-body">
+        <section class="form-section">
+            <header>
+                <h2>@L["Application name"]</h2>
+                <p>@L["Shown at the top of the menu, in the browser tab and on the login page. Use your own brand, for example \"Acme Streaming\"."]</p>
+            </header>
+            <div>
+                <label class="form-label" for="appname">@L["Name"]</label>
+                <input id="appname" class="form-control" maxlength="60" @bind="appName" @bind:event="oninput" placeholder="@PanelSettings.DefaultAppName" />
+                <div class="form-text">@L["Leave empty to use \"{0}\".", PanelSettings.DefaultAppName]</div>
+            </div>
+        </section>
+
+        <section class="form-section">
+            <header>
+                <h2>@L["Default language"]</h2>
+                <p>@L["The language for everyone who has not picked one. Each person can choose their own language at the bottom of the menu."]</p>
+            </header>
+            <div class="row g-2">
+                @foreach (var lang in TextLocalizer.Languages)
+                {
+                    <div class="col-sm-6 col-lg-3">
+                        <label class="action-card p-3 flex-row align-items-center gap-2 @(language == lang.Code ? "border-primary" : null)" style="cursor:pointer">
+                            <input class="form-check-input mt-0" type="radio" name="language" checked="@(language == lang.Code)" @onchange="() => language = lang.Code" />
+                            <span class="fs-5">@lang.Flag</span> <strong>@lang.Name</strong>
+                        </label>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <section class="form-section">
+            <header>
+                <h2>@L["Updates"]</h2>
+                <p>@L["The panel can check GitHub for a newer version. Nothing is installed automatically; you see a notice under Info at the bottom of the menu."]</p>
+            </header>
+            <div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="autoupdate" @bind="autoUpdate" />
+                    <label class="form-check-label" for="autoupdate">@L["Check for updates every 24 hours"]</label>
+                </div>
+                <div class="form-text">@L["You can always check by hand under Info."]</div>
+            </div>
+        </section>
+    </div>
+    <div class="card-footer bg-transparent d-flex gap-2 py-3">
+        <button class="btn btn-primary" @onclick="Save"><i class="bi bi-check-lg"></i> @L["Save settings"]</button>
+        <a class="btn btn-outline-secondary" href="settings/web"><i class="bi bi-ethernet"></i> @L["Web server settings"]</a>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromQuery(Name = "saved")] private bool Saved { get; set; }
+
+    private string appName = "";
+    private string language = TextLocalizer.DefaultLanguage;
+    private bool autoUpdate;
+    private bool saved;
+
+    protected override void OnInitialized()
+    {
+        var s = Store.Current;
+        appName = s.AppName == PanelSettings.DefaultAppName ? "" : s.AppName;
+        language = s.DefaultLanguage;
+        autoUpdate = s.AutoUpdateCheck;
+        saved = Saved;
+    }
+
+    private void Save()
+    {
+        Store.Save(Store.Current with { AppName = appName, DefaultLanguage = language, AutoUpdateCheck = autoUpdate });
+        // Reload the whole page so the menu and the language pick up the change.
+        Nav.NavigateTo("settings?saved=true", forceLoad: true);
+    }
+}

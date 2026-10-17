@@ -54,9 +54,11 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager()
-    .AddDefaultTokenProviders();
+    .AddDefaultTokenProviders()
+    .AddErrorDescriber<LocalizedIdentityErrorDescriber>();
 
-builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+builder.Services.AddSingleton<MailService>();
+builder.Services.AddSingleton<IEmailSender<ApplicationUser>>(sp => sp.GetRequiredService<MailService>());
 
 builder.Services.Configure<MediaMtxOptions>(builder.Configuration.GetSection(MediaMtxOptions.Section));
 builder.Services.Configure<PanelOptions>(builder.Configuration.GetSection(PanelOptions.Section));

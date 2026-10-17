@@ -3,63 +3,131 @@
 @rendermode InteractiveServer
 @using System.ComponentModel.DataAnnotations
 @inject UserAdminService UserAdmin
+@inject NavigationManager Nav
 
-<PageTitle>Edit user</PageTitle>
+<AppPageTitle Text="@L["Edit user"]" />
+
+<a class="back-link" href="users"><i class="bi bi-arrow-left"></i> @L["Users"]</a>
 
 @if (notFound)
 {
-    <h1>User not found</h1>
-    <a href="users">Back</a>
+    <div class="empty-state">
+        <i class="bi bi-person-x"></i>
+        <p>@L["User not found"]</p>
+        <a class="btn btn-outline-secondary" href="users"><i class="bi bi-arrow-left"></i> @L["Back"]</a>
+    </div>
 }
-else if (input is null)
+else if (input is null || user is null)
 {
-    <p>Loading…</p>
+    <p class="text-secondary"><span class="spinner-border spinner-border-sm me-2"></span>@L["Loading…"]</p>
 }
 else
 {
-    <h1>Edit user</h1>
+    <div class="page-header">
+        <div class="d-flex align-items-center gap-3">
+            <span class="avatar role-@user.Role" style="width:3.25rem;height:3.25rem;font-size:1.3rem">@((user.DisplayName ?? user.Email)[..1].ToUpperInvariant())</span>
+            <div>
+                <h1 class="mb-0">@(user.DisplayName ?? user.Email)</h1>
+                <p class="page-subtitle">
+                    @user.Email ·
+                    @L[Roles.Label(user.Role)] ·
+                    @if (user.Locked)
+                    {
+                        <span class="text-danger">@L["Blocked"]</span>
+                    }
+                    else
+                    {
+                        <span class="text-success">@L["Active"]</span>
+                    }
+                </p>
+            </div>
+        </div>
+    </div>
 
     @if (message is not null)
     {
-        <div class="alert alert-@(isError ? "danger" : "success")">@message</div>
+        <div class="alert alert-@(isError ? "danger" : "success") d-flex align-items-center gap-2">
+            <i class="bi @(isError ? "bi-exclamation-octagon" : "bi-check-circle")"></i> @message
+        </div>
     }
 
     <div class="row g-4">
-        <div class="col-lg-6">
-            <EditForm Model="input" OnValidSubmit="Save" FormName="edit-user">
-                <DataAnnotationsValidator />
-                <div class="mb-3">
-                    <label class="form-label" for="email">Email address (login)</label>
-                    <InputText id="email" class="form-control" @bind-Value="input.Email" />
-                    <ValidationMessage For="() => input.Email" />
+        <div class="col-xl-7">
+            <EditForm Model="input" OnValidSubmit="Save" FormName="edit-user" class="card h-100">
+                <div class="card-header"><i class="bi bi-person-vcard"></i> @L["Profile and role"]</div>
+                <div class="card-body">
+                    <DataAnnotationsValidator />
+                    <div class="mb-3">
+                        <label class="form-label" for="email">@L["Email address (login)"]</label>
+                        <InputText id="email" class="form-control" @bind-Value="input.Email" />
+                        <ValidationMessage For="() => input.Email" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="dn">@L["Name"]</label>
+                        <InputText id="dn" class="form-control" @bind-Value="input.DisplayName" />
+                    </div>
+                    <div class="mb-1">
+                        <label class="form-label" for="role">@L["Role"]</label>
+                        <InputSelect id="role" class="form-select" @bind-Value="input.Role" disabled="@(Id == myId)">
+                            <option value="@Roles.User">@L["User"]: @L["Manages their own streams."]</option>
+                            <option value="@Roles.Customer">@L["Customer"]: @L["Sees only the customer portal with their own streams, preview and paywall."]</option>
+                            <option value="@Roles.Admin">@L["Administrator"]: @L["Manages all streams, servers, users and settings."]</option>
+                        </InputSelect>
+                        @if (Id == myId)
+                        {
+                            <div class="form-text">@L["You cannot change your own role."]</div>
+                        }
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" for="dn">Name</label>
-                    <InputText id="dn" class="form-control" @bind-Value="input.DisplayName" />
+                <div class="card-footer bg-transparent d-flex gap-2">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> @L["Save"]</button>
+                    <a class="btn btn-outline-secondary" href="users"><i class="bi bi-arrow-left"></i> @L["Back"]</a>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" for="role">Role</label>
-                    <InputSelect id="role" class="form-select" @bind-Value="input.Role" disabled="@(Id == myId)">
-                        <option value="@Roles.User">User</option>
-                        <option value="@Roles.Customer">Customer</option>
-                        <option value="@Roles.Admin">Administrator</option>
-                    </InputSelect>
-                </div>
-                <button type="submit" class="btn btn-primary">Save</button>
-                <a class="btn btn-outline-secondary" href="users">Back</a>
             </EditForm>
         </div>
-        <div class="col-lg-6">
-            <div class="card">
-                <div class="card-header"><strong>Reset password</strong></div>
-                <div class="card-body">
-                    <div class="input-group mb-2">
-                        <input class="form-control font-monospace" @bind="newPassword" placeholder="New password" />
-                        <button type="button" class="btn btn-outline-secondary" @onclick="GeneratePassword">Generate</button>
-                    </div>
-                    <button class="btn btn-warning" @onclick="ResetPassword" disabled="@string.IsNullOrWhiteSpace(newPassword)">Set password</button>
+
+        <div class="col-xl-5 d-flex flex-column gap-3">
+            <div class="action-card">
+                <div class="action-icon warning"><i class="bi bi-key"></i></div>
+                <h3>@L["Reset password"]</h3>
+                <p>@L["Sets a new password right away. Pass it on to the user; they can change it themselves under My account."]</p>
+                <div class="input-group mb-3">
+                    <input class="form-control font-monospace" @bind="newPassword" @bind:event="oninput" placeholder="@L["New password"]" />
+                    <button type="button" class="btn btn-outline-secondary" @onclick="GeneratePassword"><i class="bi bi-magic"></i> @L["Generate"]</button>
+                </div>
+                <div class="action-footer">
+                    <button class="btn btn-warning" @onclick="ResetPassword" disabled="@string.IsNullOrWhiteSpace(newPassword)"><i class="bi bi-check-lg"></i> @L["Set password"]</button>
                 </div>
             </div>
+
+            @if (Id != myId)
+            {
+                <div class="action-card">
+                    <div class="action-icon @(user.Locked ? "success" : "")"><i class="bi @(user.Locked ? "bi-unlock" : "bi-slash-circle")"></i></div>
+                    <h3>@(user.Locked ? L["Unblock account"] : L["Block account"])</h3>
+                    <p>@(user.Locked ? L["The user can log in again with their existing password."] : L["Signs the user out everywhere and stops them from logging in. Their streams keep working."])</p>
+                    <div class="action-footer">
+                        <button class="btn btn-outline-secondary" @onclick="ToggleLock"><i class="bi @(user.Locked ? "bi-unlock" : "bi-slash-circle")"></i> @(user.Locked ? L["Unblock"] : L["Block"])</button>
+                    </div>
+                </div>
+
+                <div class="action-card">
+                    <div class="action-icon danger"><i class="bi bi-trash"></i></div>
+                    <h3>@L["Delete account"]</h3>
+                    <p>@L["Removes the account permanently. Streams of this user remain, without an owner."]</p>
+                    <div class="action-footer">
+                        @if (confirmDelete)
+                        {
+                            <button class="btn btn-danger" @onclick="Delete"><i class="bi bi-trash"></i> @L["Confirm delete"]</button>
+                            <button class="btn btn-outline-secondary" @onclick="() => confirmDelete = false">@L["Cancel"]</button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-outline-danger" @onclick="() => confirmDelete = true"><i class="bi bi-trash"></i> @L["Delete"]</button>
+                        }
+                    </div>
+                </div>
+            }
         </div>
     </div>
 }
@@ -69,28 +137,31 @@ else
     [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
 
     private EditUserInput? input;
+    private UserSummary? user;
     private string myId = "";
     private string? newPassword;
     private bool notFound;
+    private bool confirmDelete;
     private string? message;
     private bool isError;
 
     protected override async Task OnInitializedAsync()
     {
         myId = StreamService.UserId((await AuthState).User) ?? "";
-        var u = await UserAdmin.GetAsync(Id);
-        if (u is null)
+        user = await UserAdmin.GetAsync(Id);
+        if (user is null)
         {
             notFound = true;
             return;
         }
-        input = new EditUserInput { Email = u.Email, DisplayName = u.DisplayName, Role = u.Role };
+        input = new EditUserInput { Email = user.Email, DisplayName = user.DisplayName, Role = user.Role };
     }
 
     private async Task Save()
     {
         var r = await UserAdmin.UpdateAsync(Id, input!.Email.Trim(), input.DisplayName, input.Role, myId);
-        Report(r, "Saved.");
+        Report(r, L["Saved."]);
+        user = await UserAdmin.GetAsync(Id) ?? user;
     }
 
     private void GeneratePassword() => newPassword = CredentialGenerator.Password(14) + "a1";
@@ -98,13 +169,30 @@ else
     private async Task ResetPassword()
     {
         var r = await UserAdmin.ResetPasswordAsync(Id, newPassword!);
-        Report(r, "Password has been set. Pass the new password on to the user.");
+        Report(r, L["Password has been set. Pass the new password on to the user."]);
+    }
+
+    private async Task ToggleLock()
+    {
+        var locked = user!.Locked;
+        var r = await UserAdmin.SetLockedAsync(Id, !locked, myId);
+        Report(r, locked ? L["{0} has been unblocked.", user.Email] : L["{0} has been blocked and signed out.", user.Email]);
+        user = await UserAdmin.GetAsync(Id) ?? user;
+    }
+
+    private async Task Delete()
+    {
+        var r = await UserAdmin.DeleteAsync(Id, myId);
+        if (r.Succeeded)
+            Nav.NavigateTo("users");
+        else
+            Report(r, "");
     }
 
     private void Report(Microsoft.AspNetCore.Identity.IdentityResult r, string ok)
     {
         isError = !r.Succeeded;
-        message = r.Succeeded ? ok : string.Join(" ", r.Errors.Select(e => e.Description));
+        message = r.Succeeded ? ok : string.Join(" ", r.Errors.Select(e => L[e.Description]));
     }
 
     private class EditUserInput
