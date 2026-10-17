@@ -1,4 +1,4 @@
-﻿@page "/Account/Manage/Email"
+@page "/Account/Manage/Email"
 
 @using System.ComponentModel.DataAnnotations
 @using System.Text
@@ -12,43 +12,41 @@
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 
-<PageTitle>Manage email</PageTitle>
+<AppPageTitle Text="@L["Manage email"]" />
 
-<h3>Manage email</h3>
+<h2 class="h4 d-flex align-items-center gap-2 mb-1"><i class="bi bi-envelope text-primary"></i> @L["Manage email"]</h2>
+<p class="text-secondary mb-4">@L["The email address you log in with. A change only takes effect after you confirm it through the link we send to the new address."]</p>
 
 <StatusMessage Message="@message"/>
 <div class="row">
-    <div class="col-xl-6">
+    <div class="col-xl-8">
         <form @onsubmit="OnSendEmailVerificationAsync" @formname="send-verification" id="send-verification-form" method="post">
             <AntiforgeryToken />
         </form>
         <EditForm Model="Input" FormName="change-email" OnValidSubmit="OnValidSubmitAsync" method="post">
-            <DataAnnotationsValidator />
+            <LocalizedValidator />
             <ValidationSummary class="text-danger" role="alert" />
-            @if (isEmailConfirmed)
-            {
-                <div class="form-floating mb-3 input-group">
-                    <input type="text" value="@email" id="email" class="form-control" placeholder="Enter your email" disabled />
-                    <div class="input-group-append">
-                        <span class="h-100 input-group-text text-success font-weight-bold">✓</span>
-                    </div>
-                    <label for="email" class="form-label">Email</label>
-                </div>
-            }
-            else
-            {
-                <div class="form-floating mb-3">
-                    <input type="text" value="@email" id="email" class="form-control" placeholder="Enter your email" disabled />
-                    <label for="email" class="form-label">Email</label>
-                    <button type="submit" class="btn btn-link" form="send-verification-form">Send verification email</button>
-                </div>
-            }
+            <div class="form-floating mb-2">
+                <input type="text" value="@email" id="email" class="form-control" placeholder="@L["Current email"]" disabled />
+                <label for="email" class="form-label">@L["Current email"]</label>
+            </div>
+            <div class="mb-3 d-flex flex-wrap align-items-center gap-2">
+                @if (isEmailConfirmed)
+                {
+                    <span class="badge bg-success-subtle text-success-emphasis"><i class="bi bi-patch-check me-1"></i>@L["Confirmed"]</span>
+                }
+                else
+                {
+                    <span class="badge bg-warning-subtle text-warning-emphasis"><i class="bi bi-exclamation-circle me-1"></i>@L["Not confirmed"]</span>
+                    <button type="submit" class="btn btn-sm btn-link" form="send-verification-form"><i class="bi bi-send"></i> @L["Send verification email"]</button>
+                }
+            </div>
             <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.NewEmail" id="Input.NewEmail" class="form-control" autocomplete="email" aria-required="true" placeholder="Enter a new email" />
-                <label for="Input.NewEmail" class="form-label">New email</label>
+                <InputText @bind-Value="Input.NewEmail" id="Input.NewEmail" class="form-control" autocomplete="email" aria-required="true" placeholder="@L["Enter a new email"]" />
+                <label for="Input.NewEmail" class="form-label">@L["New email"]</label>
                 <ValidationMessage For="() => Input.NewEmail" class="text-danger" />
             </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Change email</button>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-envelope-arrow-up"></i> @L["Change email"]</button>
         </EditForm>
     </div>
 </div>
@@ -86,7 +84,7 @@
     {
         if (Input.NewEmail is null || Input.NewEmail == email)
         {
-            message = "Your email is unchanged.";
+            message = L["Your email is unchanged."];
             return;
         }
 
@@ -105,7 +103,7 @@
 
         await EmailSender.SendConfirmationLinkAsync(user, Input.NewEmail, HtmlEncoder.Default.Encode(callbackUrl));
 
-        message = "Confirmation link to change email sent. Please check your email.";
+        message = L["Confirmation link to change email sent. Please check your email."];
     }
 
     private async Task OnSendEmailVerificationAsync()
@@ -130,7 +128,7 @@
 
         await EmailSender.SendConfirmationLinkAsync(user, email, HtmlEncoder.Default.Encode(callbackUrl));
 
-        message = "Verification email sent. Please check your email.";
+        message = L["Verification email sent. Please check your email."];
     }
 
     private sealed class InputModel

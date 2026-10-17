@@ -1,5 +1,11 @@
 ﻿@page "/not-found"
 @layout MainLayout
 
-<h3>Not Found</h3>
-<p>Sorry, the content you are looking for does not exist.</p>
+<AppPageTitle Text="@L["Not found"]" />
+
+<div class="empty-state my-4">
+    <i class="bi bi-signpost-split"></i>
+    <h1 class="h4 text-body">@L["Not found"]</h1>
+    <p class="mb-3">@L["Sorry, the content you are looking for does not exist."]</p>
+    <a class="btn btn-primary" href=""><i class="bi bi-house"></i> @L["Back to the start page"]</a>
+</div>

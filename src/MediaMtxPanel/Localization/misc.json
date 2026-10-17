@@ -1,0 +1,247 @@
+{
+  "Forgot your password?": {
+    "nl": "Wachtwoord vergeten?",
+    "de": "Passwort vergessen?",
+    "fr": "Mot de passe oublié ?"
+  },
+  "Saved, but server {0} could not be updated: {1}. The panel will retry automatically.": {
+    "nl": "Opgeslagen, maar server {0} kon niet worden bijgewerkt: {1}. Het paneel probeert het automatisch opnieuw.",
+    "de": "Gespeichert, aber Server {0} konnte nicht aktualisiert werden: {1}. Das Panel versucht es automatisch erneut.",
+    "fr": "Enregistré, mais le serveur {0} n'a pas pu être mis à jour : {1}. Le panneau réessaiera automatiquement."
+  },
+  "At least 8 characters.": {
+    "nl": "Minstens 8 tekens.",
+    "de": "Mindestens 8 Zeichen.",
+    "fr": "Au moins 8 caractères."
+  },
+  "Choose a price between €0.50 and €10,000.": {
+    "nl": "Kies een prijs tussen € 0,50 en € 10.000.",
+    "de": "Wählen Sie einen Preis zwischen 0,50 € und 10.000 €.",
+    "fr": "Choisissez un prix entre 0,50 € et 10 000 €."
+  },
+  "Choose a server.": {
+    "nl": "Kies een server.",
+    "de": "Wählen Sie einen Server.",
+    "fr": "Choisissez un serveur."
+  },
+  "Choose an access period of at least 1 hour.": {
+    "nl": "Kies een toegangsduur van minstens 1 uur.",
+    "de": "Wählen Sie eine Zugangsdauer von mindestens 1 Stunde.",
+    "fr": "Choisissez une durée d'accès d'au moins 1 heure."
+  },
+  "Enter a full URL, for example http://10.0.0.21:9100/metrics.": {
+    "nl": "Vul een volledige URL in, bijvoorbeeld http://10.0.0.21:9100/metrics.",
+    "de": "Geben Sie eine vollständige URL ein, zum Beispiel http://10.0.0.21:9100/metrics.",
+    "fr": "Saisissez une URL complète, par exemple http://10.0.0.21:9100/metrics."
+  },
+  "Enter a password.": {
+    "nl": "Vul een wachtwoord in.",
+    "de": "Geben Sie ein Passwort ein.",
+    "fr": "Saisissez un mot de passe."
+  },
+  "Enter an API password.": {
+    "nl": "Vul een API-wachtwoord in.",
+    "de": "Geben Sie ein API-Passwort ein.",
+    "fr": "Saisissez un mot de passe API."
+  },
+  "Enter an email address.": {
+    "nl": "Vul een e-mailadres in.",
+    "de": "Geben Sie eine E-Mail-Adresse ein.",
+    "fr": "Saisissez une adresse e-mail."
+  },
+  "Enter the API URL.": {
+    "nl": "Vul de API-URL in.",
+    "de": "Geben Sie die API-URL ein.",
+    "fr": "Saisissez l'URL de l'API."
+  },
+  "Enter the public address.": {
+    "nl": "Vul het publieke adres in.",
+    "de": "Geben Sie die öffentliche Adresse ein.",
+    "fr": "Saisissez l'adresse publique."
+  },
+  "Give the offer a name.": {
+    "nl": "Geef het aanbod een naam.",
+    "de": "Geben Sie dem Angebot einen Namen.",
+    "fr": "Donnez un nom à l'offre."
+  },
+  "Give the server a name.": {
+    "nl": "Geef de server een naam.",
+    "de": "Geben Sie dem Server einen Namen.",
+    "fr": "Donnez un nom au serveur."
+  },
+  "Give the stream a path name.": {
+    "nl": "Geef de stream een padnaam.",
+    "de": "Geben Sie dem Stream einen Pfadnamen.",
+    "fr": "Donnez un nom de chemin au flux."
+  },
+  "Invalid email address.": {
+    "nl": "Ongeldig e-mailadres.",
+    "de": "Ungültige E-Mail-Adresse.",
+    "fr": "Adresse e-mail non valide."
+  },
+  "The new password and confirmation password do not match.": {
+    "nl": "Het nieuwe wachtwoord en de bevestiging komen niet overeen.",
+    "de": "Das neue Passwort und die Bestätigung stimmen nicht überein.",
+    "fr": "Le nouveau mot de passe et sa confirmation ne correspondent pas."
+  },
+  "The password and confirmation password do not match.": {
+    "nl": "Het wachtwoord en de bevestiging komen niet overeen.",
+    "de": "Das Passwort und die Bestätigung stimmen nicht überein.",
+    "fr": "Le mot de passe et sa confirmation ne correspondent pas."
+  },
+  "Use a URL such as http://10.0.0.5:9997.": {
+    "nl": "Gebruik een URL zoals http://10.0.0.5:9997.",
+    "de": "Verwenden Sie eine URL wie http://10.0.0.5:9997.",
+    "fr": "Utilisez une URL telle que http://10.0.0.5:9997."
+  },
+  "Use only letters, digits, '-', '_', '.' and '/', and start with a letter or digit.": {
+    "nl": "Gebruik alleen letters, cijfers, '-', '_', '.' en '/', en begin met een letter of cijfer.",
+    "de": "Verwenden Sie nur Buchstaben, Ziffern, '-', '_', '.' und '/', und beginnen Sie mit einem Buchstaben oder einer Ziffer.",
+    "fr": "N'utilisez que des lettres, chiffres, '-', '_', '.' et '/', et commencez par une lettre ou un chiffre."
+  },
+  "Invalid path name.": {
+    "nl": "Ongeldige padnaam.",
+    "de": "Ungültiger Pfadname.",
+    "fr": "Nom de chemin non valide."
+  },
+  "Passkey names must be no longer than 200 characters.": {
+    "nl": "Namen van passkeys mogen niet langer zijn dan 200 tekens.",
+    "de": "Passkey-Namen dürfen höchstens 200 Zeichen lang sein.",
+    "fr": "Les noms des clés d'accès ne doivent pas dépasser 200 caractères."
+  },
+  "The Email field is required.": {
+    "nl": "E-mailadres is verplicht.",
+    "de": "E-Mail ist erforderlich.",
+    "fr": "Le champ « E-mail » est obligatoire."
+  },
+  "The Password field is required.": {
+    "nl": "Wachtwoord is verplicht.",
+    "de": "Passwort ist erforderlich.",
+    "fr": "Le champ « Mot de passe » est obligatoire."
+  },
+  "The Recovery Code field is required.": {
+    "nl": "Herstelcode is verplicht.",
+    "de": "Wiederherstellungscode ist erforderlich.",
+    "fr": "Le champ « Code de récupération » est obligatoire."
+  },
+  "The Code field is required.": {
+    "nl": "Code is verplicht.",
+    "de": "Code ist erforderlich.",
+    "fr": "Le champ « Code » est obligatoire."
+  },
+  "The Authenticator code field is required.": {
+    "nl": "Authenticatorcode is verplicht.",
+    "de": "Authenticator-Code ist erforderlich.",
+    "fr": "Le champ « Code d'authentification » est obligatoire."
+  },
+  "The Verification Code field is required.": {
+    "nl": "Verificatiecode is verplicht.",
+    "de": "Bestätigungscode ist erforderlich.",
+    "fr": "Le champ « Code de vérification » est obligatoire."
+  },
+  "The New email field is required.": {
+    "nl": "Nieuw e-mailadres is verplicht.",
+    "de": "Neue E-Mail ist erforderlich.",
+    "fr": "Le champ « Nouvel e-mail » est obligatoire."
+  },
+  "The Current password field is required.": {
+    "nl": "Huidig wachtwoord is verplicht.",
+    "de": "Aktuelles Passwort ist erforderlich.",
+    "fr": "Le champ « Mot de passe actuel » est obligatoire."
+  },
+  "The New password field is required.": {
+    "nl": "Nieuw wachtwoord is verplicht.",
+    "de": "Neues Passwort ist erforderlich.",
+    "fr": "Le champ « Nouveau mot de passe » est obligatoire."
+  },
+  "The Name field is required.": {
+    "nl": "Naam is verplicht.",
+    "de": "Name ist erforderlich.",
+    "fr": "Le champ « Nom » est obligatoire."
+  },
+  "The Confirm password field is required.": {
+    "nl": "Wachtwoord bevestigen is verplicht.",
+    "de": "Passwort bestätigen ist erforderlich.",
+    "fr": "Le champ « Confirmer le mot de passe » est obligatoire."
+  },
+  "The Confirm new password field is required.": {
+    "nl": "Nieuw wachtwoord bevestigen is verplicht.",
+    "de": "Neues Passwort bestätigen ist erforderlich.",
+    "fr": "Le champ « Confirmer le nouveau mot de passe » est obligatoire."
+  },
+  "The Email field is not a valid e-mail address.": {
+    "nl": "E-mailadres is geen geldig e-mailadres.",
+    "de": "E-Mail ist keine gültige E-Mail-Adresse.",
+    "fr": "Le champ « E-mail » n'est pas une adresse e-mail valide."
+  },
+  "The New email field is not a valid e-mail address.": {
+    "nl": "Nieuw e-mailadres is geen geldig e-mailadres.",
+    "de": "Neue E-Mail ist keine gültige E-Mail-Adresse.",
+    "fr": "Le champ « Nouvel e-mail » n'est pas une adresse e-mail valide."
+  },
+  "The New password must be at least 6 and at max 100 characters long.": {
+    "nl": "Nieuw wachtwoord moet minstens 6 en maximaal 100 tekens lang zijn.",
+    "de": "Neues Passwort muss mindestens 6 und höchstens 100 Zeichen lang sein.",
+    "fr": "Le champ « Nouveau mot de passe » doit contenir entre 6 et 100 caractères."
+  },
+  "The Password must be at least 6 and at max 100 characters long.": {
+    "nl": "Wachtwoord moet minstens 6 en maximaal 100 tekens lang zijn.",
+    "de": "Passwort muss mindestens 6 und höchstens 100 Zeichen lang sein.",
+    "fr": "Le champ « Mot de passe » doit contenir entre 6 et 100 caractères."
+  },
+  "The Authenticator code must be at least 6 and at max 7 characters long.": {
+    "nl": "Authenticatorcode moet minstens 6 en maximaal 7 tekens lang zijn.",
+    "de": "Authenticator-Code muss mindestens 6 und höchstens 7 Zeichen lang sein.",
+    "fr": "Le champ « Code d'authentification » doit contenir entre 6 et 7 caractères."
+  },
+  "The Verification Code must be at least 6 and at max 7 characters long.": {
+    "nl": "Verificatiecode moet minstens 6 en maximaal 7 tekens lang zijn.",
+    "de": "Bestätigungscode muss mindestens 6 und höchstens 7 Zeichen lang sein.",
+    "fr": "Le champ « Code de vérification » doit contenir entre 6 et 7 caractères."
+  },
+  "Connecting via WebRTC…": {
+    "nl": "Verbinden via WebRTC…",
+    "de": "Verbindung über WebRTC…",
+    "fr": "Connexion via WebRTC…"
+  },
+  "Player could not start:": {
+    "nl": "De speler kon niet starten:",
+    "de": "Der Player konnte nicht starten:",
+    "fr": "Le lecteur n'a pas pu démarrer :"
+  },
+  "No picture yet: the stream is not live yet": {
+    "nl": "Nog geen beeld: de stream is nog niet live",
+    "de": "Noch kein Bild: Der Stream ist noch nicht live",
+    "fr": "Pas encore d'image : le flux n'est pas encore en direct"
+  },
+  "No picture yet:": {
+    "nl": "Nog geen beeld:",
+    "de": "Noch kein Bild:",
+    "fr": "Pas encore d'image :"
+  },
+  "Live (WebRTC)": {
+    "nl": "Live (WebRTC)",
+    "de": "Live (WebRTC)",
+    "fr": "En direct (WebRTC)"
+  },
+  "Connecting via HLS…": {
+    "nl": "Verbinden via HLS…",
+    "de": "Verbindung über HLS…",
+    "fr": "Connexion via HLS…"
+  },
+  "This browser does not support HLS.": {
+    "nl": "Deze browser ondersteunt geen HLS.",
+    "de": "Dieser Browser unterstützt kein HLS.",
+    "fr": "Ce navigateur ne prend pas en charge HLS."
+  },
+  "Live (HLS)": {
+    "nl": "Live (HLS)",
+    "de": "Live (HLS)",
+    "fr": "En direct (HLS)"
+  },
+  "No picture yet (HLS):": {
+    "nl": "Nog geen beeld (HLS):",
+    "de": "Noch kein Bild (HLS):",
+    "fr": "Pas encore d'image (HLS) :"
+  }
+}

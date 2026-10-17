@@ -6,38 +6,43 @@
 @inject UserAdminService UserAdmin
 @inject NavigationManager Nav
 
-<PageTitle>New stream</PageTitle>
+<AppPageTitle Text="@L["New stream"]" />
 
-<h1>New stream</h1>
+<a class="back-link" href="streams"><i class="bi bi-arrow-left"></i> @L["Back to streams"]</a>
+<div class="page-header">
+    <div>
+        <h1><i class="bi bi-plus-circle text-primary"></i> @L["New stream"]</h1>
+        <p class="page-subtitle">@L["After creating it you will immediately see the credentials and all connection URLs."]</p>
+    </div>
+</div>
 
 @if (servers is null)
 {
-    <p>Loading…</p>
+    <p class="text-secondary"><span class="spinner-border spinner-border-sm me-2"></span>@L["Loading…"]</p>
 }
 else if (servers.Count == 0)
 {
-    <div class="alert alert-warning">
-        There is no MediaMTX server to set up the stream on yet.
+    <div class="empty-state">
+        <i class="bi bi-hdd-network"></i>
+        <p class="mb-3">@L["There is no MediaMTX server to set up the stream on yet."]</p>
         @if (isAdmin)
         {
-            <a href="servers/new" class="alert-link">Add a server first.</a>
+            <a href="servers/new" class="btn btn-primary"><i class="bi bi-plus-lg"></i> @L["Add a server first"]</a>
         }
         else
         {
-            <span>Ask an administrator to add a server.</span>
+            <span>@L["Ask an administrator to add a server."]</span>
         }
     </div>
 }
 else
 {
-    <p class="text-secondary">After creating it you will immediately see the credentials and all connection URLs.</p>
-
     @if (error is not null)
     {
-        <div class="alert alert-danger">@error</div>
+        <div class="alert alert-danger d-flex align-items-center gap-2"><i class="bi bi-exclamation-octagon"></i> @error</div>
     }
 
-    <StreamForm Model="input" OnValidSubmit="Save" SubmitText="Create stream" Busy="busy" Users="users" Servers="servers" />
+    <StreamForm Model="input" OnValidSubmit="Save" SubmitText="@L["Create stream"]" Busy="busy" Users="users" Servers="servers" />
 }
 
 @code {
@@ -69,7 +74,7 @@ else
         error = null;
         if (await Streams.NameExistsAsync(input.ServerId, input.Name.Trim()))
         {
-            error = $"A stream named '{input.Name}' already exists on this server.";
+            error = L["A stream named '{0}' already exists on this server.", input.Name];
             return;
         }
 

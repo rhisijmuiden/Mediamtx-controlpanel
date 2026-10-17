@@ -1,4 +1,4 @@
-﻿@page "/Account/Manage/TwoFactorAuthentication"
+@page "/Account/Manage/TwoFactorAuthentication"
 
 @using Microsoft.AspNetCore.Http.Features
 @using Microsoft.AspNetCore.Identity
@@ -8,64 +8,134 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject IdentityRedirectManager RedirectManager
 
-<PageTitle>Two-factor authentication (2FA)</PageTitle>
+<AppPageTitle Text="@L["Two-factor authentication (2FA)"]" />
+
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+        <h2 class="h4 d-flex align-items-center gap-2 mb-1"><i class="bi bi-shield-lock text-primary"></i> @L["Two-factor authentication (2FA)"]</h2>
+        <p class="text-secondary mb-0">@L["Protect your account with a second step: after your password, you also enter a code from an app on your phone."]</p>
+    </div>
+    @if (canTrack)
+    {
+        @if (is2faEnabled)
+        {
+            <span class="badge bg-success-subtle text-success-emphasis badge-dot">@L["Enabled"]</span>
+        }
+        else
+        {
+            <span class="badge bg-secondary-subtle text-secondary-emphasis badge-dot">@L["Disabled"]</span>
+        }
+    }
+</div>
 
 <StatusMessage />
-<h3>Two-factor authentication (2FA)</h3>
 @if (canTrack)
 {
     if (is2faEnabled)
     {
         if (recoveryCodesLeft == 0)
         {
-            <div class="alert alert-danger">
-                <strong>You have no recovery codes left.</strong>
-                <p>You must <a href="Account/Manage/GenerateRecoveryCodes">generate a new set of recovery codes</a> before you can log in with a recovery code.</p>
+            <div class="alert alert-danger d-flex align-items-start gap-2">
+                <i class="bi bi-exclamation-octagon mt-1"></i>
+                <div>
+                    <strong>@L["You have no recovery codes left."]</strong><br />
+                    @L["You must generate a new set of recovery codes before you can log in with a recovery code."]
+                </div>
             </div>
         }
         else if (recoveryCodesLeft == 1)
         {
-            <div class="alert alert-danger">
-                <strong>You have 1 recovery code left.</strong>
-                <p>You can <a href="Account/Manage/GenerateRecoveryCodes">generate a new set of recovery codes</a>.</p>
+            <div class="alert alert-danger d-flex align-items-start gap-2">
+                <i class="bi bi-exclamation-octagon mt-1"></i>
+                <div>
+                    <strong>@L["You have 1 recovery code left."]</strong><br />
+                    @L["You can generate a new set of recovery codes."]
+                </div>
             </div>
         }
         else if (recoveryCodesLeft <= 3)
         {
-            <div class="alert alert-warning">
-                <strong>You have @recoveryCodesLeft recovery codes left.</strong>
-                <p>You should <a href="Account/Manage/GenerateRecoveryCodes">generate a new set of recovery codes</a>.</p>
+            <div class="alert alert-warning d-flex align-items-start gap-2">
+                <i class="bi bi-exclamation-triangle mt-1"></i>
+                <div>
+                    <strong>@L["You have {0} recovery codes left.", recoveryCodesLeft]</strong><br />
+                    @L["You should generate a new set of recovery codes."]
+                </div>
             </div>
         }
+    }
 
-        if (isMachineRemembered)
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="action-card">
+                <div class="action-icon"><i class="bi bi-phone"></i></div>
+                <h3>@L["Authenticator app"]</h3>
+                <p>@L["An app such as Microsoft Authenticator or Google Authenticator generates a new 6-digit code every 30 seconds. You enter that code when you log in."]</p>
+                <div class="action-footer">
+                    @if (!hasAuthenticator)
+                    {
+                        <a href="Account/Manage/EnableAuthenticator" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg"></i> @L["Add authenticator app"]</a>
+                    }
+                    else
+                    {
+                        <a href="Account/Manage/EnableAuthenticator" class="btn btn-sm btn-outline-primary"><i class="bi bi-gear"></i> @L["Set up authenticator app"]</a>
+                        <a href="Account/Manage/ResetAuthenticator" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-repeat"></i> @L["Reset authenticator app"]</a>
+                    }
+                </div>
+            </div>
+        </div>
+        @if (is2faEnabled)
         {
-            <form style="display: inline-block" @formname="forget-browser" @onsubmit="OnSubmitForgetBrowserAsync" method="post">
-                <AntiforgeryToken />
-                <button type="submit" class="btn btn-primary">Forget this browser</button>
-            </form>
+            <div class="col-md-6">
+                <div class="action-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="action-icon warning"><i class="bi bi-life-preserver"></i></div>
+                        <span class="badge text-bg-light border">@L["{0} left", recoveryCodesLeft]</span>
+                    </div>
+                    <h3>@L["Recovery codes"]</h3>
+                    <p>@L["One-time codes to log in when you lose your phone. Generating new codes makes the old ones invalid."]</p>
+                    <div class="action-footer">
+                        <a href="Account/Manage/GenerateRecoveryCodes" class="btn btn-sm btn-outline-primary"><i class="bi bi-arrow-repeat"></i> @L["Reset recovery codes"]</a>
+                    </div>
+                </div>
+            </div>
+            @if (isMachineRemembered)
+            {
+                <div class="col-md-6">
+                    <div class="action-card">
+                        <div class="action-icon info"><i class="bi bi-laptop"></i></div>
+                        <h3>@L["This browser is remembered"]</h3>
+                        <p>@L["You are not asked for a code on this browser. Forget it to be asked for a code again the next time you log in here."]</p>
+                        <div class="action-footer">
+                            <form @formname="forget-browser" @onsubmit="OnSubmitForgetBrowserAsync" method="post">
+                                <AntiforgeryToken />
+                                <button type="submit" class="btn btn-sm btn-outline-secondary"><i class="bi bi-eraser"></i> @L["Forget this browser"]</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="col-md-6">
+                <div class="action-card">
+                    <div class="action-icon danger"><i class="bi bi-shield-slash"></i></div>
+                    <h3>@L["Disable 2FA"]</h3>
+                    <p>@L["Log in with only your password again. Your authenticator key stays the same, so you can turn 2FA back on later."]</p>
+                    <div class="action-footer">
+                        <a href="Account/Manage/Disable2fa" class="btn btn-sm btn-outline-danger"><i class="bi bi-shield-slash"></i> @L["Disable 2FA"]</a>
+                    </div>
+                </div>
+            </div>
         }
-
-        <a href="Account/Manage/Disable2fa" class="btn btn-primary">Disable 2FA</a>
-        <a href="Account/Manage/GenerateRecoveryCodes" class="btn btn-primary">Reset recovery codes</a>
-    }
-
-    <h4>Authenticator app</h4>
-    @if (!hasAuthenticator)
-    {
-        <a href="Account/Manage/EnableAuthenticator" class="btn btn-primary">Add authenticator app</a>
-    }
-    else
-    {
-        <a href="Account/Manage/EnableAuthenticator" class="btn btn-primary">Set up authenticator app</a>
-        <a href="Account/Manage/ResetAuthenticator" class="btn btn-primary">Reset authenticator app</a>
-    }
+    </div>
 }
 else
 {
-    <div class="alert alert-danger">
-        <strong>Privacy and cookie policy have not been accepted.</strong>
-        <p>You must accept the policy before you can enable two factor authentication.</p>
+    <div class="alert alert-danger d-flex align-items-start gap-2">
+        <i class="bi bi-exclamation-octagon mt-1"></i>
+        <div>
+            <strong>@L["Privacy and cookie policy have not been accepted."]</strong><br />
+            @L["You must accept the policy before you can enable two factor authentication."]
+        </div>
     </div>
 }
 
@@ -100,7 +170,7 @@ else
         await SignInManager.ForgetTwoFactorClientAsync();
 
         RedirectManager.RedirectToCurrentPageWithStatus(
-            "The current browser has been forgotten. When you login again from this browser you will be prompted for your 2fa code.",
+            L["The current browser has been forgotten. When you login again from this browser you will be prompted for your 2fa code."],
             HttpContext);
     }
 }

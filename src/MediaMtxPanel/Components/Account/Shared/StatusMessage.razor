@@ -1,8 +1,12 @@
-﻿@if (!string.IsNullOrEmpty(DisplayMessage))
+﻿@* Shows a status message. A message starting with "Error" is shown as an error; the "Error: " prefix itself is not shown.
+   The text is passed through L[...] as well, so English messages (e.g. from the status cookie) appear in the user's language. *@
+@if (!string.IsNullOrEmpty(DisplayMessage))
 {
-    var statusMessageClass = DisplayMessage.StartsWith("Error") ? "danger" : "success";
-    <div class="alert alert-@statusMessageClass" role="alert">
-        @DisplayMessage
+    var isError = DisplayMessage.StartsWith("Error");
+    var text = DisplayMessage.StartsWith("Error: ") ? DisplayMessage["Error: ".Length..] : DisplayMessage;
+    <div class="alert alert-@(isError ? "danger" : "success") d-flex align-items-start gap-2" role="alert">
+        <i class="bi @(isError ? "bi-exclamation-octagon" : "bi-check-circle") mt-1"></i>
+        <div>@L[text]</div>
     </div>
 }
 

@@ -113,12 +113,19 @@ install_bootstrap_packages() {
 }
 
 # Downloads the sources from GitHub when there is no checkout next to the script.
+# SOURCE_COMMIT ends up in the panel's Info screen and is used for its update check.
 fetch_sources() {
-  [[ -n "$PROJECT_DIR" && -f "$PROJECT_DIR/src/MediaMtxPanel/MediaMtxPanel.csproj" ]] && return 0
+  if [[ -n "$PROJECT_DIR" && -f "$PROJECT_DIR/src/MediaMtxPanel/MediaMtxPanel.csproj" ]]; then
+    SOURCE_COMMIT="$(git -C "$PROJECT_DIR" rev-parse HEAD 2>/dev/null || true)"
+    return 0
+  fi
   SOURCE_TMP="$(mktemp -d)"
   trap 'rm -rf "$SOURCE_TMP"' EXIT
   info "Downloading the panel from github.com/${REPO} (${REPO_BRANCH})…"
-  curl -fsSL "https://codeload.github.com/${REPO}/tar.gz/refs/heads/${REPO_BRANCH}" | tar -xz -C "$SOURCE_TMP" --strip-components=1 \
+  local ref="refs/heads/${REPO_BRANCH}"
+  SOURCE_COMMIT="$(curl -fsSL -H 'Accept: application/vnd.github.sha' "https://api.github.com/repos/${REPO}/commits/${REPO_BRANCH}" 2>/dev/null || true)"
+  [[ "$SOURCE_COMMIT" =~ ^[0-9a-f]{40}$ ]] && ref="$SOURCE_COMMIT" || SOURCE_COMMIT=""
+  curl -fsSL "https://codeload.github.com/${REPO}/tar.gz/${ref}" | tar -xz -C "$SOURCE_TMP" --strip-components=1 \
     || die "Could not download https://github.com/${REPO} (branch ${REPO_BRANCH})."
   PROJECT_DIR="$SOURCE_TMP"
 }
@@ -134,7 +141,7 @@ run_installer() {
   chmod 0700 "$WORK"
   tar -C "$PROJECT_DIR" --exclude='bin' --exclude='obj' --exclude='*.db' -czf "$WORK/source.tar.gz" src deploy
   # SET_LOCALE=no: unlike in a fresh container, this machine's language is the owner's choice.
-  env "$@" SET_LOCALE=no LOG_TAG=install bash "$installer"
+  env "$@" SET_LOCALE=no LOG_TAG=install SOURCE_COMMIT="${SOURCE_COMMIT:-}" bash "$installer"
 }
 
 machine_ip() { hostname -I 2>/dev/null | awk '{print $1}'; }

@@ -1,109 +1,190 @@
 <EditForm Model="Model" OnValidSubmit="OnValidSubmit" FormName="stream">
-    <DataAnnotationsValidator />
-    <ValidationSummary class="text-danger" />
+    <LocalizedValidator />
+    <ValidationSummary class="alert alert-danger" />
 
-    <div class="row g-3">
-        <div class="col-md-6">
-            <label class="form-label" for="name">Path name</label>
-            <InputText id="name" class="form-control" @bind-Value="Model.Name" placeholder="e.g. studio1 or events/main-hall" />
-            <div class="form-text">Becomes part of all URLs. Letters, digits, -, _, . and /.</div>
-            <ValidationMessage For="() => Model.Name" />
-        </div>
-        <div class="col-md-3">
-            <label class="form-label" for="server">Server</label>
-            <InputSelect id="server" class="form-select" @bind-Value="Model.ServerId">
-                @if (Model.ServerId == 0)
-                {
-                    <option value="0">Choose a server…</option>
-                }
-                @foreach (var srv in Servers)
-                {
-                    <option value="@srv.Id">@srv.Name (@srv.PublicHost)</option>
-                }
-            </InputSelect>
-            <ValidationMessage For="() => Model.ServerId" />
-        </div>
-        <div class="col-md-3">
-            <label class="form-label" for="displayName">Display name</label>
-            <InputText id="displayName" class="form-control" @bind-Value="Model.DisplayName" placeholder="Optional" />
-        </div>
-        <div class="col-12">
-            <label class="form-label" for="description">Description</label>
-            <InputTextArea id="description" class="form-control" rows="2" @bind-Value="Model.Description" />
-        </div>
+    <div class="card mb-4">
+        <div class="card-body p-4">
 
-        <div class="col-md-6">
-            <label class="form-label">Source</label>
-            <InputRadioGroup @bind-Value="Model.SourceType">
-                <div class="form-check">
-                    <InputRadio class="form-check-input" id="src-pub" Value="StreamSourceType.Publisher" />
-                    <label class="form-check-label" for="src-pub">Publisher: an encoder (OBS, ffmpeg, camera, browser) sends the stream to the server</label>
+            @* ------------------------------------------------ basics *@
+            <section class="form-section">
+                <header>
+                    <h2><i class="bi bi-tag text-primary me-1"></i> @L["Basics"]</h2>
+                    <p>@L["Where the stream lives and how it is called. The path name becomes part of every URL, so keep it short."]</p>
+                </header>
+                <div class="row g-3">
+                    <div class="col-md-7">
+                        <label class="form-label" for="name">@L["Path name"]</label>
+                        <InputText id="name" class="form-control font-monospace" @bind-Value="Model.Name" placeholder="@L["e.g. studio1 or events/main-hall"]" />
+                        <div class="form-text">@L["Becomes part of all URLs. Letters, digits, -, _, . and /."]</div>
+                        <ValidationMessage For="() => Model.Name" />
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label" for="server">@L["Server"]</label>
+                        <InputSelect id="server" class="form-select" @bind-Value="Model.ServerId">
+                            @if (Model.ServerId == 0)
+                            {
+                                <option value="0">@L["Choose a server…"]</option>
+                            }
+                            @foreach (var srv in Servers)
+                            {
+                                <option value="@srv.Id">@srv.Name (@srv.PublicHost)</option>
+                            }
+                        </InputSelect>
+                        <div class="form-text">@L["The MediaMTX server that hosts the stream."]</div>
+                        <ValidationMessage For="() => Model.ServerId" />
+                    </div>
+                    <div class="col-md-7">
+                        <label class="form-label" for="displayName">@L["Display name"]</label>
+                        <InputText id="displayName" class="form-control" @bind-Value="Model.DisplayName" placeholder="@L["Optional"]" />
+                        <div class="form-text">@L["A friendly name shown in the panel and on the watch page. Empty = the path name."]</div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label" for="description">@L["Description"]</label>
+                        <InputTextArea id="description" class="form-control" rows="2" @bind-Value="Model.Description" placeholder="@L["Optional"]" />
+                    </div>
                 </div>
-                <div class="form-check">
-                    <InputRadio class="form-check-input" id="src-pull" Value="StreamSourceType.Pull" />
-                    <label class="form-check-label" for="src-pull">Pull: the server pulls the stream from an external URL</label>
-                </div>
-            </InputRadioGroup>
-        </div>
+            </section>
 
-        @if (Model.SourceType == StreamSourceType.Pull)
-        {
-            <div class="col-md-6">
-                <label class="form-label" for="sourceUrl">Source URL</label>
-                <InputText id="sourceUrl" class="form-control font-monospace" @bind-Value="Model.SourceUrl" placeholder="rtsp://user:password@camera:554/stream" />
-                <ValidationMessage For="() => Model.SourceUrl" />
-                <div class="form-check mt-2">
-                    <InputCheckbox class="form-check-input" id="ondemand" @bind-Value="Model.SourceOnDemand" />
-                    <label class="form-check-label" for="ondemand">Only pull when there is a viewer</label>
-                </div>
-            </div>
-        }
+            @* ------------------------------------------------ source *@
+            <section class="form-section">
+                <header>
+                    <h2><i class="bi bi-broadcast text-primary me-1"></i> @L["Source"]</h2>
+                    <p>@L["How the video gets onto the server: an encoder sends it, or the server fetches it from another address."]</p>
+                </header>
+                <div>
+                    <InputRadioGroup @bind-Value="Model.SourceType">
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label class="d-flex gap-2 h-100 p-3 border rounded-3 @(Model.SourceType == StreamSourceType.Publisher ? "border-primary bg-primary-subtle" : "")" for="src-pub" style="cursor:pointer">
+                                    <InputRadio class="form-check-input mt-1 flex-shrink-0" id="src-pub" Value="StreamSourceType.Publisher" />
+                                    <span>
+                                        <span class="fw-semibold d-block"><i class="bi bi-upload me-1"></i>@L["Publisher"]</span>
+                                        <span class="small text-secondary">@L["An encoder (OBS, ffmpeg, camera, browser) sends the stream to the server. You get a username and password to publish with."]</span>
+                                    </span>
+                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="d-flex gap-2 h-100 p-3 border rounded-3 @(Model.SourceType == StreamSourceType.Pull ? "border-primary bg-primary-subtle" : "")" for="src-pull" style="cursor:pointer">
+                                    <InputRadio class="form-check-input mt-1 flex-shrink-0" id="src-pull" Value="StreamSourceType.Pull" />
+                                    <span>
+                                        <span class="fw-semibold d-block"><i class="bi bi-download me-1"></i>@L["Pull"]</span>
+                                        <span class="small text-secondary">@L["The server pulls the stream from an external URL, such as an IP camera or another streaming server."]</span>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                    </InputRadioGroup>
 
-        <div class="col-md-6">
-            <div class="form-check form-switch">
-                <InputCheckbox class="form-check-input" id="enabled" @bind-Value="Model.Enabled" />
-                <label class="form-check-label" for="enabled">Enabled</label>
-            </div>
-            <div class="form-check form-switch">
-                <InputCheckbox class="form-check-input" id="public" @bind-Value="Model.PublicRead" />
-                <label class="form-check-label" for="public">Public viewing (viewers don't need a password)</label>
-            </div>
-            <div class="form-check form-switch">
-                <InputCheckbox class="form-check-input" id="record" @bind-Value="Model.Record" />
-                <label class="form-check-label" for="record">Record on the server</label>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <label class="form-label" for="maxReaders">Maximum viewers</label>
-            <InputNumber id="maxReaders" class="form-control" @bind-Value="Model.MaxReaders" />
-            <div class="form-text">0 = unlimited</div>
-        </div>
-
-        @if (Users is not null)
-        {
-            <div class="col-md-3">
-                <label class="form-label" for="owner">Owner</label>
-                <InputSelect id="owner" class="form-select" @bind-Value="Model.OwnerId">
-                    <option value="">(none)</option>
-                    @foreach (var u in Users)
+                    @if (Model.SourceType == StreamSourceType.Pull)
                     {
-                        <option value="@u.Id">@u.Email (@Roles.Label(u.Role))</option>
+                        <div class="mt-3">
+                            <label class="form-label" for="sourceUrl">@L["Source URL"]</label>
+                            <InputText id="sourceUrl" class="form-control font-monospace" @bind-Value="Model.SourceUrl" placeholder="rtsp://user:password@camera:554/stream" />
+                            <div class="form-text">@L["For example rtsp://, rtmp://, srt://, an HLS address (http(s)://….m3u8), whep:// or udp://. Put credentials in the URL if the source needs them."]</div>
+                            <ValidationMessage For="() => Model.SourceUrl" />
+                            <div class="form-check form-switch mt-2">
+                                <InputCheckbox class="form-check-input" id="ondemand" @bind-Value="Model.SourceOnDemand" />
+                                <label class="form-check-label" for="ondemand">@L["Only pull when there is a viewer"]</label>
+                                <div class="form-text mt-0">@L["Saves bandwidth: the server connects to the source when someone starts watching and disconnects when nobody is left."]</div>
+                            </div>
+                        </div>
                     }
-                </InputSelect>
-            </div>
-        }
+                </div>
+            </section>
+
+            @* ------------------------------------------------ viewing *@
+            <section class="form-section">
+                <header>
+                    <h2><i class="bi bi-eye text-primary me-1"></i> @L["Viewing"]</h2>
+                    <p>@L["Who may watch, and how many people at the same time."]</p>
+                </header>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="form-check form-switch">
+                            <InputCheckbox class="form-check-input" id="public" @bind-Value="Model.PublicRead" />
+                            <label class="form-check-label" for="public">@L["Public viewing (viewers don't need a password)"]</label>
+                            <div class="form-text mt-0">@L["Off: viewers need the viewer username and password (or a ticket). On: anyone with the link can watch."]</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-5">
+                        <label class="form-label" for="maxReaders">@L["Maximum viewers"]</label>
+                        <InputNumber id="maxReaders" class="form-control" @bind-Value="Model.MaxReaders" min="0" />
+                        <div class="form-text">@L["Limit on simultaneous viewers. 0 = unlimited."]</div>
+                        <ValidationMessage For="() => Model.MaxReaders" />
+                    </div>
+                </div>
+            </section>
+
+            @* ------------------------------------------------ options *@
+            <section class="form-section">
+                <header>
+                    <h2><i class="bi bi-sliders text-primary me-1"></i> @L["Options"]</h2>
+                    <p>@L["Switch the stream on or off and choose whether the server keeps a recording."]</p>
+                </header>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="form-check form-switch">
+                            <InputCheckbox class="form-check-input" id="enabled" @bind-Value="Model.Enabled" />
+                            <label class="form-check-label" for="enabled">@L["Enabled"]</label>
+                            <div class="form-text mt-0">@L["When disabled, nobody can publish or watch and active connections are dropped."]</div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check form-switch">
+                            <InputCheckbox class="form-check-input" id="record" @bind-Value="Model.Record" />
+                            <label class="form-check-label" for="record">@L["Record on the server"]</label>
+                            <div class="form-text mt-0">@L["MediaMTX saves everything that is published to disk on the server. Mind the disk space."]</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            @if (Users is not null)
+            {
+                @* ------------------------------------------------ owner (administrators only) *@
+                <section class="form-section">
+                    <header>
+                        <h2><i class="bi bi-person-badge text-primary me-1"></i> @L["Owner"]</h2>
+                        <p>@L["The account that manages this stream. Users and customers only see their own streams."]</p>
+                    </header>
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label" for="owner">@L["Owner"]</label>
+                            <InputSelect id="owner" class="form-select" @bind-Value="Model.OwnerId">
+                                <option value="">@L["(none)"]</option>
+                                @foreach (var u in Users)
+                                {
+                                    <option value="@u.Id">@u.Email (@L[Roles.Label(u.Role)])</option>
+                                }
+                            </InputSelect>
+                        </div>
+                    </div>
+                </section>
+            }
+        </div>
     </div>
 
-    <div class="mt-4 d-flex gap-2">
-        <button type="submit" class="btn btn-primary" disabled="@Busy">@SubmitText</button>
-        <a class="btn btn-outline-secondary" href="@CancelHref">Cancel</a>
+    <div class="d-flex flex-wrap gap-2">
+        <button type="submit" class="btn btn-primary" disabled="@Busy">
+            @if (Busy)
+            {
+                <span class="spinner-border spinner-border-sm me-1"></span>
+            }
+            else
+            {
+                <i class="bi bi-check-lg"></i>
+            }
+            @(SubmitText ?? L["Save"])
+        </button>
+        <a class="btn btn-outline-secondary" href="@CancelHref"><i class="bi bi-arrow-left"></i> @L["Cancel"]</a>
     </div>
 </EditForm>
 
 @code {
     [Parameter, EditorRequired] public StreamInput Model { get; set; } = default!;
     [Parameter, EditorRequired] public EventCallback<EditContext> OnValidSubmit { get; set; }
-    [Parameter] public string SubmitText { get; set; } = "Save";
+    /// <summary>Text on the submit button (already translated); defaults to "Save".</summary>
+    [Parameter] public string? SubmitText { get; set; }
     [Parameter] public string CancelHref { get; set; } = "streams";
     [Parameter] public bool Busy { get; set; }
     [Parameter] public List<UserSummary>? Users { get; set; }

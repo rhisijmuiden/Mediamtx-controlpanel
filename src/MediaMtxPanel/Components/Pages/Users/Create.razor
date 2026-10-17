@@ -5,50 +5,102 @@
 @inject UserAdminService UserAdmin
 @inject NavigationManager Nav
 
-<PageTitle>New user</PageTitle>
+<AppPageTitle Text="@L["New user"]" />
 
-<h1>New user</h1>
+<a class="back-link" href="users"><i class="bi bi-arrow-left"></i> @L["Users"]</a>
+<div class="page-header">
+    <div>
+        <h1><i class="bi bi-person-plus text-primary"></i> @L["New user"]</h1>
+        <p class="page-subtitle">@L["The person logs in with this email address and password. Pass the password on yourself; the panel does not send email."]</p>
+    </div>
+</div>
 
 @if (errors is not null)
 {
-    <div class="alert alert-danger">@errors</div>
+    <div class="alert alert-danger d-flex gap-2"><i class="bi bi-exclamation-octagon"></i> @errors</div>
 }
 
-<EditForm Model="input" OnValidSubmit="Save" FormName="new-user" class="col-lg-6">
-    <DataAnnotationsValidator />
-    <div class="mb-3">
-        <label class="form-label" for="email">Email address (login)</label>
-        <InputText id="email" class="form-control" @bind-Value="input.Email" />
-        <ValidationMessage For="() => input.Email" />
-    </div>
-    <div class="mb-3">
-        <label class="form-label" for="dn">Name</label>
-        <InputText id="dn" class="form-control" @bind-Value="input.DisplayName" />
-    </div>
-    <div class="mb-3">
-        <label class="form-label" for="role">Role</label>
-        <InputSelect id="role" class="form-select" @bind-Value="input.Role">
-            <option value="@Roles.User">User: manages their own streams</option>
-            <option value="@Roles.Customer">Customer: sees only the customer portal with their own streams, preview and paywall</option>
-            <option value="@Roles.Admin">Administrator: manages all streams and users</option>
-        </InputSelect>
-    </div>
-    <div class="mb-3">
-        <label class="form-label" for="pw">Password</label>
-        <div class="input-group">
-            <InputText id="pw" class="form-control font-monospace" @bind-Value="input.Password" />
-            <button type="button" class="btn btn-outline-secondary" @onclick="Generate">Generate</button>
+<EditForm Model="input" OnValidSubmit="Save" FormName="new-user">
+    <LocalizedValidator />
+    <div class="card mb-3">
+        <div class="card-body">
+            <section class="form-section">
+                <header>
+                    <h2>@L["Role"]</h2>
+                    <p>@L["Decides what this person can see and do. You can change it later."]</p>
+                </header>
+                <div class="row g-2">
+                    @foreach (var (role, icon, text) in RoleChoices)
+                    {
+                        <div class="col-md-4">
+                            <label class="action-card p-3 h-100 @(input.Role == role ? "border-primary" : null)" style="cursor:pointer">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <input class="form-check-input mt-0" type="radio" name="role" checked="@(input.Role == role)" @onchange="() => input.Role = role" />
+                                    <i class="bi @icon text-primary"></i>
+                                    <strong>@L[Roles.Label(role)]</strong>
+                                </div>
+                                <small class="text-secondary">@L[text]</small>
+                            </label>
+                        </div>
+                    }
+                </div>
+            </section>
+            <section class="form-section">
+                <header>
+                    <h2>@L["Account"]</h2>
+                    <p>@L["The email address is the login name."]</p>
+                </header>
+                <div>
+                    <div class="mb-3">
+                        <label class="form-label" for="email">@L["Email address (login)"]</label>
+                        <InputText id="email" class="form-control" @bind-Value="input.Email" placeholder="name@example.com" />
+                        <ValidationMessage For="() => input.Email" />
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label" for="dn">@L["Name"] <span class="text-secondary fw-normal">(@L["optional"])</span></label>
+                        <InputText id="dn" class="form-control" @bind-Value="input.DisplayName" />
+                    </div>
+                </div>
+            </section>
+            <section class="form-section">
+                <header>
+                    <h2>@L["Password"]</h2>
+                    <p>@L["At least 8 characters, with an uppercase letter, a lowercase letter and a digit."]</p>
+                </header>
+                <div>
+                    <div class="input-group">
+                        <InputText id="pw" class="form-control font-monospace" @bind-Value="input.Password" />
+                        <button type="button" class="btn btn-outline-secondary" @onclick="Generate"><i class="bi bi-magic"></i> @L["Generate"]</button>
+                    </div>
+                    <ValidationMessage For="() => input.Password" />
+                </div>
+            </section>
         </div>
-        <div class="form-text">At least 8 characters, with an uppercase letter, a lowercase letter and a digit.</div>
-        <ValidationMessage For="() => input.Password" />
     </div>
-    <button type="submit" class="btn btn-primary">Create user</button>
-    <a class="btn btn-outline-secondary" href="users">Cancel</a>
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> @L["Create user"]</button>
+        <a class="btn btn-outline-secondary" href="users"><i class="bi bi-x-lg"></i> @L["Cancel"]</a>
+    </div>
 </EditForm>
 
 @code {
+    [SupplyParameterFromQuery(Name = "role")] private string? RoleFromQuery { get; set; }
+
+    private static readonly (string Role, string Icon, string Text)[] RoleChoices =
+    [
+        (Roles.User, "bi-person-workspace", "Manages their own streams."),
+        (Roles.Customer, "bi-person-video3", "Sees only the customer portal with their own streams, preview and paywall."),
+        (Roles.Admin, "bi-shield-lock", "Manages all streams, servers, users and settings."),
+    ];
+
     private readonly NewUserInput input = new();
     private string? errors;
+
+    protected override void OnInitialized()
+    {
+        if (Roles.All.Contains(RoleFromQuery))
+            input.Role = RoleFromQuery!;
+    }
 
     private void Generate() => input.Password = CredentialGenerator.Password(14) + "a1";
 
@@ -58,7 +110,7 @@
         if (r.Succeeded)
             Nav.NavigateTo("users");
         else
-            errors = string.Join(" ", r.Errors.Select(e => e.Description));
+            errors = string.Join(" ", r.Errors.Select(e => L[e.Description]));
     }
 
     private class NewUserInput

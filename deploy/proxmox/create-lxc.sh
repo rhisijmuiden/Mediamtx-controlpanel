@@ -72,13 +72,20 @@ if [[ -n "${BASH_SOURCE[0]:-}" && -f "${BASH_SOURCE[0]}" ]]; then
 fi
 
 # Downloads the sources from GitHub when there is no checkout next to the script.
+# SOURCE_COMMIT ends up in the panel's Info screen and is used for its update check.
 fetch_sources() {
-  [[ -n "$PROJECT_DIR" && -f "$PROJECT_DIR/src/MediaMtxPanel/MediaMtxPanel.csproj" ]] && return 0
+  if [[ -n "$PROJECT_DIR" && -f "$PROJECT_DIR/src/MediaMtxPanel/MediaMtxPanel.csproj" ]]; then
+    SOURCE_COMMIT="$(git -C "$PROJECT_DIR" rev-parse HEAD 2>/dev/null || true)"
+    return 0
+  fi
   command -v curl >/dev/null || die "curl is needed to download the sources."
   SOURCE_TMP="$(mktemp -d)"
   trap 'rm -rf "$SOURCE_TMP"' EXIT
   info "Downloading the panel from github.com/${REPO} (${REPO_BRANCH})…"
-  curl -fsSL "https://codeload.github.com/${REPO}/tar.gz/refs/heads/${REPO_BRANCH}" | tar -xz -C "$SOURCE_TMP" --strip-components=1 \
+  local ref="refs/heads/${REPO_BRANCH}"
+  SOURCE_COMMIT="$(curl -fsSL -H 'Accept: application/vnd.github.sha' "https://api.github.com/repos/${REPO}/commits/${REPO_BRANCH}" 2>/dev/null || true)"
+  [[ "$SOURCE_COMMIT" =~ ^[0-9a-f]{40}$ ]] && ref="$SOURCE_COMMIT" || SOURCE_COMMIT=""
+  curl -fsSL "https://codeload.github.com/${REPO}/tar.gz/${ref}" | tar -xz -C "$SOURCE_TMP" --strip-components=1 \
     || die "Could not download https://github.com/${REPO} (branch ${REPO_BRANCH})."
   PROJECT_DIR="$SOURCE_TMP"
   SCRIPT_DIR="$SOURCE_TMP/deploy/proxmox"
@@ -108,7 +115,7 @@ push_and_install() {
   # Start from a clean environment: pct exec passes on the host shell's variables, such as a
   # LANG the container has no locale for and an XDG_RUNTIME_DIR (/run/user/0) that does not exist there.
   pct exec "$id" -- env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
-    HOME=/root LANG=C.UTF-8 LC_ALL=C.UTF-8 TERM="${TERM:-xterm}" "$@" bash /tmp/mediamtx-panel-install/install-in-lxc.sh
+    HOME=/root LANG=C.UTF-8 LC_ALL=C.UTF-8 TERM="${TERM:-xterm}" SOURCE_COMMIT="${SOURCE_COMMIT:-}" "$@" bash /tmp/mediamtx-panel-install/install-in-lxc.sh
 }
 
 wait_for_network() {

@@ -1,0 +1,251 @@
+@page "/settings/mail"
+@attribute [Authorize(Roles = Roles.Admin)]
+@rendermode InteractiveServer
+@inject PanelSettingsStore Store
+@inject MailService Mailer
+
+<AppPageTitle Text="@L["Mail"]" />
+
+<div class="page-header">
+    <div>
+        <h1><i class="bi bi-envelope text-primary"></i> @L["Mail"]</h1>
+        <p class="page-subtitle">@L["The mail server the panel uses for outgoing mail, such as password reset links. Any SMTP server works: your provider, Microsoft 365, Gmail or your own relay."]</p>
+    </div>
+    <div class="page-actions">
+        @if (Mailer.IsConfigured)
+        {
+            <span class="badge bg-success-subtle text-success-emphasis badge-dot fs-6">@L["Mail is on"]</span>
+        }
+        else
+        {
+            <span class="badge text-bg-light border badge-dot fs-6">@L["Mail is off"]</span>
+        }
+    </div>
+</div>
+
+@if (message is not null)
+{
+    <div class="alert alert-@(isError ? "danger" : "success") d-flex align-items-center gap-2">
+        <i class="bi @(isError ? "bi-exclamation-octagon" : "bi-check-circle")"></i> <span class="text-break">@message</span>
+    </div>
+}
+
+<div class="card mb-3">
+    <div class="card-body">
+        <section class="form-section">
+            <header>
+                <h2>@L["Outgoing mail"]</h2>
+                <p>@L["When this is off, the panel sends no mail at all."]</p>
+            </header>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="mail-on" @bind="enabled" />
+                <label class="form-check-label" for="mail-on">@L["Send mail through this server"]</label>
+            </div>
+        </section>
+
+        <section class="form-section">
+            <header>
+                <h2>@L["SMTP server"]</h2>
+                <p>@L["Host name and port of the mail server, and how the connection is secured."]</p>
+            </header>
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <label class="form-label" for="host">@L["Server"]</label>
+                    <input id="host" class="form-control" @bind="host" placeholder="smtp.example.com" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="smtp-port">@L["Port"]</label>
+                    <input id="smtp-port" type="number" min="1" max="65535" class="form-control" @bind="port" />
+                </div>
+                <div class="col-12">
+                    <label class="form-label">@L["Encryption"]</label>
+                    <div class="row g-2">
+                        @foreach (var (value, title, text, defaultPort) in SecurityChoices)
+                        {
+                            <div class="col-sm-6 col-xl-3">
+                                <label class="action-card p-3 @(security == value ? "border-primary" : null)" style="cursor:pointer">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <input class="form-check-input mt-0" type="radio" name="security" checked="@(security == value)" @onchange="() => PickSecurity(value, defaultPort)" />
+                                        <strong>@L[title]</strong>
+                                    </div>
+                                    <small class="text-secondary">@L[text]</small>
+                                </label>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="invalid-cert" @bind="allowInvalidCertificate" />
+                        <label class="form-check-label" for="invalid-cert">@L["Accept a self-signed or invalid certificate"]</label>
+                    </div>
+                    <div class="form-text">@L["Only for your own relay on a trusted network."]</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="form-section">
+            <header>
+                <h2>@L["Login"]</h2>
+                <p>@L["Leave the user name empty if the server accepts mail without logging in."]</p>
+            </header>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label" for="smtp-user">@L["User name"]</label>
+                    <input id="smtp-user" class="form-control" @bind="userName" autocomplete="off" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="smtp-pass">@L["Password"]</label>
+                    <input id="smtp-pass" type="password" class="form-control" @bind="password" autocomplete="new-password"
+                           placeholder="@(hasPassword ? L["Unchanged (stored encrypted)"] : "")" />
+                </div>
+            </div>
+        </section>
+
+        <section class="form-section">
+            <header>
+                <h2>@L["Sender"]</h2>
+                <p>@L["The address mails come from. Many servers only accept an address that belongs to the account."]</p>
+            </header>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label" for="from">@L["From address"]</label>
+                    <input id="from" type="email" class="form-control" @bind="fromAddress" placeholder="noreply@example.com" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="from-name">@L["From name"]</label>
+                    <input id="from-name" class="form-control" @bind="fromName" placeholder="@Store.Current.AppName" />
+                </div>
+            </div>
+        </section>
+    </div>
+    <div class="card-footer bg-transparent d-flex gap-2 py-3">
+        <button class="btn btn-primary" @onclick="Save"><i class="bi bi-check-lg"></i> @L["Save settings"]</button>
+    </div>
+</div>
+
+<div class="action-card">
+    <div class="action-icon info"><i class="bi bi-send"></i></div>
+    <h3>@L["Send a test mail"]</h3>
+    <p>@L["Sends a short mail with the settings above (also before saving), so you can see right away whether they work."]</p>
+    <div class="input-group mb-3" style="max-width: 32rem">
+        <input type="email" class="form-control" @bind="testTo" @bind:event="oninput" placeholder="you@example.com" />
+        <button class="btn btn-outline-primary" @onclick="SendTest" disabled="@(sending || string.IsNullOrWhiteSpace(testTo))">
+            @if (sending)
+            {
+                <span class="spinner-border spinner-border-sm"></span>
+            }
+            else
+            {
+                <i class="bi bi-send"></i>
+            }
+            @L["Send test mail"]
+        </button>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
+
+    private static readonly (MailSecurity Value, string Title, string Text, int Port)[] SecurityChoices =
+    [
+        (MailSecurity.Auto, "Automatic", "STARTTLS when the server offers it. Usual for port 587.", 587),
+        (MailSecurity.SslTls, "SSL/TLS", "Encrypted from the start. Usual for port 465.", 465),
+        (MailSecurity.StartTls, "STARTTLS (required)", "Refuse to send when the server cannot encrypt.", 587),
+        (MailSecurity.None, "None", "No encryption, for example a local relay on port 25.", 25),
+    ];
+
+    private bool enabled;
+    private string host = "";
+    private int port = 587;
+    private MailSecurity security;
+    private bool allowInvalidCertificate;
+    private string? userName;
+    private string? password;
+    private bool hasPassword;
+    private string fromAddress = "";
+    private string? fromName;
+    private string? testTo;
+    private bool sending;
+    private string? message;
+    private bool isError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var m = Store.Current.Mail ?? new MailSettings();
+        (enabled, host, port, security, allowInvalidCertificate) = (m.Enabled, m.Host, m.Port, m.Security, m.AllowInvalidCertificate);
+        (userName, fromAddress, fromName) = (m.UserName, m.FromAddress, m.FromName);
+        hasPassword = !string.IsNullOrEmpty(m.PasswordProtected);
+        testTo = (await AuthState).User.Identity?.Name;
+    }
+
+    private void PickSecurity(MailSecurity value, int defaultPort)
+    {
+        // Follow the usual port, unless a non-standard port was typed.
+        if (port is 25 or 465 or 587)
+            port = defaultPort;
+        security = value;
+    }
+
+    private MailSettings Build() => new()
+    {
+        Enabled = enabled,
+        Host = host.Trim(),
+        Port = port,
+        Security = security,
+        AllowInvalidCertificate = allowInvalidCertificate,
+        UserName = string.IsNullOrWhiteSpace(userName) ? null : userName.Trim(),
+        // An empty password field keeps the stored one.
+        PasswordProtected = string.IsNullOrEmpty(password) ? Store.Current.Mail?.PasswordProtected : Mailer.Protect(password),
+        FromAddress = fromAddress.Trim(),
+        FromName = string.IsNullOrWhiteSpace(fromName) ? null : fromName.Trim(),
+    };
+
+    private string? Validate()
+    {
+        if (string.IsNullOrWhiteSpace(host)) return L["Enter the mail server."];
+        if (port is < 1 or > 65535) return L["Enter a port between 1 and 65535."];
+        if (!System.Net.Mail.MailAddress.TryCreate(fromAddress.Trim(), out _)) return L["Enter a valid from address."];
+        return null;
+    }
+
+    private void Save()
+    {
+        if (enabled && Validate() is { } problem)
+        {
+            (message, isError) = (problem, true);
+            return;
+        }
+        var mail = Build();
+        Store.Save(Store.Current with { Mail = mail });
+        hasPassword = !string.IsNullOrEmpty(mail.PasswordProtected);
+        password = null;
+        (message, isError) = (L["Settings saved."], false);
+    }
+
+    private async Task SendTest()
+    {
+        if (Validate() is { } problem)
+        {
+            (message, isError) = (problem, true);
+            return;
+        }
+        sending = true;
+        message = null;
+        try
+        {
+            var app = Store.Current.AppName;
+            await Mailer.SendAsync(testTo!.Trim(), L["Test mail from {0}", app],
+                $"<p>{L["This is a test mail from {0}. Outgoing mail works.", app]}</p>", Build());
+            (message, isError) = (L["Test mail sent to {0}.", testTo!], false);
+        }
+        catch (Exception ex)
+        {
+            (message, isError) = (L["Sending failed: {0}", ex.Message], true);
+        }
+        finally
+        {
+            sending = false;
+        }
+    }
+}

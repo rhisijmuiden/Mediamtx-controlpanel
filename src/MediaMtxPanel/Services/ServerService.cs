@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using MediaMtxPanel.Data;
+using MediaMtxPanel.Services.Localization;
 using MediaMtxPanel.Services.Setup;
 using Microsoft.EntityFrameworkCore;
 
@@ -90,6 +91,7 @@ public class ServerService(
     MediaMtxClientFactory clients,
     MediaMtxSyncService sync,
     MediaMtxStatus status,
+    TextLocalizer L,
     SshServerSetup sshSetup)
 {
     public async Task<List<MediaServer>> ListAsync(bool enabledOnly = false, CancellationToken ct = default)
@@ -157,9 +159,9 @@ public class ServerService(
         await using var db = await dbFactory.CreateDbContextAsync(ct);
         var server = await db.Servers.Include(s => s.Streams).FirstOrDefaultAsync(s => s.Id == id, ct);
         if (server is null)
-            return "Server not found.";
+            return L["Server not found."];
         if (server.Streams.Count > 0)
-            return $"This server still has {server.Streams.Count} stream(s). Move or delete them first.";
+            return L["This server still has {0} stream(s). Move or delete them first.", server.Streams.Count];
         db.Servers.Remove(server);
         await db.SaveChangesAsync(ct);
         status.Forget(id);
@@ -176,25 +178,24 @@ public class ServerService(
         await using var db = await dbFactory.CreateDbContextAsync(ct);
         var server = await db.Servers.AsNoTracking().Include(s => s.Streams).FirstOrDefaultAsync(s => s.Id == id, ct);
         if (server is null)
-            return new(false, "Server not found.");
+            return new(false, L["Server not found."]);
 
         var mtx = clients.Create(server);
         try
         {
             var info = await mtx.GetInfoAsync(ct);
             await sync.SyncServerAsync(mtx, server, ct);
-            return new(true, $"Connected to MediaMTX {info?.Version}. {server.Streams.Count} stream(s) synchronized.");
+            return new(true, L["Connected to MediaMTX {0}. {1} stream(s) synchronized.", info?.Version, server.Streams.Count]);
         }
         catch (MediaMtxException ex) when (ex.Status == System.Net.HttpStatusCode.Unauthorized)
         {
             status.Report(id, false, null, ex.Message);
-            return new(false, "MediaMTX rejects the API credentials. Check that authHTTPAddress on this server points to the panel " +
-                              "with the correct secret, and that the API user and password are correct.");
+            return new(false, L["MediaMTX rejects the API credentials. Check that authHTTPAddress on this server points to the panel with the correct secret, and that the API user and password are correct."]);
         }
         catch (Exception ex) when (ex is HttpRequestException or MediaMtxException or TaskCanceledException)
         {
             status.Report(id, false, null, ex.Message);
-            return new(false, $"Cannot connect to {server.ApiUrl}: {ex.Message}");
+            return new(false, L["Cannot connect to {0}: {1}", server.ApiUrl, ex.Message]);
         }
     }
 
@@ -207,7 +208,7 @@ public class ServerService(
     {
         var server = await GetAsync(id, ct);
         if (server is null)
-            return new(false, false, "Server not found.");
+            return new(false, false, L["Server not found."]);
 
         var setup = await sshSetup.ConfigureAsync(server, login, hookUrl, log, ct);
         if (!setup.Ok)
@@ -223,7 +224,6 @@ public class ServerService(
             if (test.Ok)
                 return new(true, true, $"{setup.Message} {test.Message}");
         }
-        return new(false, true, $"{setup.Message} But the panel cannot use the Control API yet: {test.Message} " +
-                          $"Check that port {new Uri(server.ApiUrl).Port} on the server is reachable from the panel (firewall, NAT) and that the API URL is correct.");
+        return new(false, true, $"{setup.Message} " + L["But the panel cannot use the control API yet: {0} Check that port {1} on the server is reachable from the panel (firewall, NAT) and that the API URL is correct.", test.Message, new Uri(server.ApiUrl).Port]);
     }
 }

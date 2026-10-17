@@ -1,0 +1,217 @@
+{
+  "Mail": {
+    "nl": "Mail",
+    "de": "E-Mail",
+    "fr": "E-mail"
+  },
+  "The mail server the panel uses for outgoing mail, such as password reset links. Any SMTP server works: your provider, Microsoft 365, Gmail or your own relay.": {
+    "nl": "De mailserver die het paneel gebruikt voor uitgaande mail, zoals links om een wachtwoord te resetten. Elke SMTP-server werkt: je provider, Microsoft 365, Gmail of je eigen relay.",
+    "de": "Der Mailserver, den das Panel für ausgehende E-Mails nutzt, etwa Links zum Zurücksetzen des Passworts. Jeder SMTP-Server funktioniert: Ihr Anbieter, Microsoft 365, Gmail oder Ihr eigenes Relay.",
+    "fr": "Le serveur de messagerie utilisé par le panneau pour les e-mails sortants, comme les liens de réinitialisation du mot de passe. Tout serveur SMTP convient : votre fournisseur, Microsoft 365, Gmail ou votre propre relais."
+  },
+  "Mail is on": {
+    "nl": "Mail staat aan",
+    "de": "E-Mail ist aktiv",
+    "fr": "E-mail activé"
+  },
+  "Mail is off": {
+    "nl": "Mail staat uit",
+    "de": "E-Mail ist aus",
+    "fr": "E-mail désactivé"
+  },
+  "Outgoing mail": {
+    "nl": "Uitgaande mail",
+    "de": "Ausgehende E-Mail",
+    "fr": "E-mail sortant"
+  },
+  "When this is off, the panel sends no mail at all.": {
+    "nl": "Als dit uit staat, verstuurt het paneel helemaal geen mail.",
+    "de": "Wenn dies aus ist, versendet das Panel keine E-Mails.",
+    "fr": "Lorsque cette option est désactivée, le panneau n'envoie aucun e-mail."
+  },
+  "Send mail through this server": {
+    "nl": "Mail versturen via deze server",
+    "de": "E-Mails über diesen Server senden",
+    "fr": "Envoyer les e-mails via ce serveur"
+  },
+  "SMTP server": {
+    "nl": "SMTP-server",
+    "de": "SMTP-Server",
+    "fr": "Serveur SMTP"
+  },
+  "Host name and port of the mail server, and how the connection is secured.": {
+    "nl": "Hostnaam en poort van de mailserver, en hoe de verbinding beveiligd wordt.",
+    "de": "Hostname und Port des Mailservers und wie die Verbindung gesichert wird.",
+    "fr": "Nom d'hôte et port du serveur de messagerie, et la façon dont la connexion est sécurisée."
+  },
+  "Server": {
+    "nl": "Server",
+    "de": "Server",
+    "fr": "Serveur"
+  },
+  "Encryption": {
+    "nl": "Versleuteling",
+    "de": "Verschlüsselung",
+    "fr": "Chiffrement"
+  },
+  "Accept a self-signed or invalid certificate": {
+    "nl": "Zelfondertekend of ongeldig certificaat accepteren",
+    "de": "Selbstsigniertes oder ungültiges Zertifikat akzeptieren",
+    "fr": "Accepter un certificat auto-signé ou non valide"
+  },
+  "Only for your own relay on a trusted network.": {
+    "nl": "Alleen voor je eigen relay op een vertrouwd netwerk.",
+    "de": "Nur für Ihr eigenes Relay in einem vertrauenswürdigen Netzwerk.",
+    "fr": "Uniquement pour votre propre relais sur un réseau de confiance."
+  },
+  "Login": {
+    "nl": "Inloggen",
+    "de": "Anmeldung",
+    "fr": "Connexion"
+  },
+  "Leave the user name empty if the server accepts mail without logging in.": {
+    "nl": "Laat de gebruikersnaam leeg als de server mail accepteert zonder in te loggen.",
+    "de": "Lassen Sie den Benutzernamen leer, wenn der Server E-Mails ohne Anmeldung annimmt.",
+    "fr": "Laissez le nom d'utilisateur vide si le serveur accepte les e-mails sans connexion."
+  },
+  "User name": {
+    "nl": "Gebruikersnaam",
+    "de": "Benutzername",
+    "fr": "Nom d'utilisateur"
+  },
+  "Unchanged (stored encrypted)": {
+    "nl": "Ongewijzigd (versleuteld opgeslagen)",
+    "de": "Unverändert (verschlüsselt gespeichert)",
+    "fr": "Inchangé (stocké chiffré)"
+  },
+  "Sender": {
+    "nl": "Afzender",
+    "de": "Absender",
+    "fr": "Expéditeur"
+  },
+  "The address mails come from. Many servers only accept an address that belongs to the account.": {
+    "nl": "Het adres waarvandaan mails komen. Veel servers accepteren alleen een adres dat bij het account hoort.",
+    "de": "Die Adresse, von der E-Mails kommen. Viele Server akzeptieren nur eine Adresse, die zum Konto gehört.",
+    "fr": "L'adresse d'où partent les e-mails. Beaucoup de serveurs n'acceptent qu'une adresse appartenant au compte."
+  },
+  "From address": {
+    "nl": "Afzenderadres",
+    "de": "Absenderadresse",
+    "fr": "Adresse de l'expéditeur"
+  },
+  "From name": {
+    "nl": "Afzendernaam",
+    "de": "Absendername",
+    "fr": "Nom de l'expéditeur"
+  },
+  "Send a test mail": {
+    "nl": "Testmail versturen",
+    "de": "Test-E-Mail senden",
+    "fr": "Envoyer un e-mail de test"
+  },
+  "Sends a short mail with the settings above (also before saving), so you can see right away whether they work.": {
+    "nl": "Verstuurt een korte mail met de instellingen hierboven (ook vóór het opslaan), zodat je meteen ziet of ze werken.",
+    "de": "Sendet eine kurze E-Mail mit den obigen Einstellungen (auch vor dem Speichern), damit Sie sofort sehen, ob sie funktionieren.",
+    "fr": "Envoie un court e-mail avec les paramètres ci-dessus (même avant l'enregistrement), pour vérifier tout de suite qu'ils fonctionnent."
+  },
+  "Send test mail": {
+    "nl": "Testmail versturen",
+    "de": "Test-E-Mail senden",
+    "fr": "Envoyer l'e-mail de test"
+  },
+  "Enter the mail server.": {
+    "nl": "Vul de mailserver in.",
+    "de": "Geben Sie den Mailserver ein.",
+    "fr": "Saisissez le serveur de messagerie."
+  },
+  "Enter a valid from address.": {
+    "nl": "Vul een geldig afzenderadres in.",
+    "de": "Geben Sie eine gültige Absenderadresse ein.",
+    "fr": "Saisissez une adresse d'expéditeur valide."
+  },
+  "Test mail from {0}": {
+    "nl": "Testmail van {0}",
+    "de": "Test-E-Mail von {0}",
+    "fr": "E-mail de test de {0}"
+  },
+  "This is a test mail from {0}. Outgoing mail works.": {
+    "nl": "Dit is een testmail van {0}. Uitgaande mail werkt.",
+    "de": "Dies ist eine Test-E-Mail von {0}. Ausgehende E-Mails funktionieren.",
+    "fr": "Ceci est un e-mail de test de {0}. L'envoi d'e-mails fonctionne."
+  },
+  "Test mail sent to {0}.": {
+    "nl": "Testmail verstuurd naar {0}.",
+    "de": "Test-E-Mail an {0} gesendet.",
+    "fr": "E-mail de test envoyé à {0}."
+  },
+  "Sending failed: {0}": {
+    "nl": "Versturen mislukt: {0}",
+    "de": "Senden fehlgeschlagen: {0}",
+    "fr": "Échec de l'envoi : {0}"
+  },
+  "Automatic": {
+    "nl": "Automatisch",
+    "de": "Automatisch",
+    "fr": "Automatique"
+  },
+  "STARTTLS when the server offers it. Usual for port 587.": {
+    "nl": "STARTTLS als de server het aanbiedt. Gebruikelijk voor poort 587.",
+    "de": "STARTTLS, wenn der Server es anbietet. Üblich für Port 587.",
+    "fr": "STARTTLS si le serveur le propose. Habituel pour le port 587."
+  },
+  "SSL/TLS": {
+    "nl": "SSL/TLS",
+    "de": "SSL/TLS",
+    "fr": "SSL/TLS"
+  },
+  "Encrypted from the start. Usual for port 465.": {
+    "nl": "Vanaf het begin versleuteld. Gebruikelijk voor poort 465.",
+    "de": "Von Anfang an verschlüsselt. Üblich für Port 465.",
+    "fr": "Chiffré dès le début. Habituel pour le port 465."
+  },
+  "STARTTLS (required)": {
+    "nl": "STARTTLS (verplicht)",
+    "de": "STARTTLS (erforderlich)",
+    "fr": "STARTTLS (obligatoire)"
+  },
+  "Refuse to send when the server cannot encrypt.": {
+    "nl": "Niet versturen als de server niet kan versleutelen.",
+    "de": "Nicht senden, wenn der Server nicht verschlüsseln kann.",
+    "fr": "Refuser l'envoi si le serveur ne peut pas chiffrer."
+  },
+  "None": {
+    "nl": "Geen",
+    "de": "Keine",
+    "fr": "Aucun"
+  },
+  "No encryption, for example a local relay on port 25.": {
+    "nl": "Geen versleuteling, bijvoorbeeld een lokale relay op poort 25.",
+    "de": "Keine Verschlüsselung, zum Beispiel ein lokales Relay auf Port 25.",
+    "fr": "Pas de chiffrement, par exemple un relais local sur le port 25."
+  },
+  "Confirm your email": {
+    "nl": "Bevestig je e-mailadres",
+    "de": "Bestätigen Sie Ihre E-Mail-Adresse",
+    "fr": "Confirmez votre adresse e-mail"
+  },
+  "Please confirm your account by <a href='{0}'>clicking here</a>.": {
+    "nl": "Bevestig je account door <a href='{0}'>hier te klikken</a>.",
+    "de": "Bitte bestätigen Sie Ihr Konto, indem Sie <a href='{0}'>hier klicken</a>.",
+    "fr": "Veuillez confirmer votre compte en <a href='{0}'>cliquant ici</a>."
+  },
+  "Reset your password": {
+    "nl": "Je wachtwoord resetten",
+    "de": "Passwort zurücksetzen",
+    "fr": "Réinitialisez votre mot de passe"
+  },
+  "Please reset your password by <a href='{0}'>clicking here</a>.": {
+    "nl": "Reset je wachtwoord door <a href='{0}'>hier te klikken</a>.",
+    "de": "Bitte setzen Sie Ihr Passwort zurück, indem Sie <a href='{0}'>hier klicken</a>.",
+    "fr": "Veuillez réinitialiser votre mot de passe en <a href='{0}'>cliquant ici</a>."
+  },
+  "Please reset your password using the following code: {0}": {
+    "nl": "Reset je wachtwoord met de volgende code: {0}",
+    "de": "Bitte setzen Sie Ihr Passwort mit folgendem Code zurück: {0}",
+    "fr": "Veuillez réinitialiser votre mot de passe avec le code suivant : {0}"
+  }
+}

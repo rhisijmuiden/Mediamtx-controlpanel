@@ -7,197 +7,293 @@
 @inject ServerService ServerAdmin
 @inject NavigationManager Nav
 @inject IOptions<PanelOptions> PanelOptions
+@inject WebPortInfo Port
 
-<PageTitle>@(IsNew ? "Add server" : "Server")</PageTitle>
+<AppPageTitle Text="@(IsNew ? L["Add server"] : server?.Name ?? L["Server"])" />
+
+<a class="back-link" href="servers"><i class="bi bi-arrow-left"></i> @L["MediaMTX servers"]</a>
 
 @if (notFound)
 {
-    <h1>Server not found</h1>
-    <a href="servers">Back</a>
+    <div class="empty-state">
+        <i class="bi bi-hdd-network"></i>
+        <p class="mb-3">@L["Server not found"]</p>
+        <a class="btn btn-outline-secondary" href="servers"><i class="bi bi-arrow-left"></i> @L["Back"]</a>
+    </div>
 }
 else if (input is null)
 {
-    <p>Loading…</p>
+    <p class="text-secondary"><span class="spinner-border spinner-border-sm me-2"></span>@L["Loading…"]</p>
 }
 else
 {
-    <h1>@(IsNew ? "Add MediaMTX server" : server!.Name)</h1>
+    <div class="page-header">
+        <div>
+            <h1><i class="bi @(IsNew ? "bi-plus-circle" : "bi-hdd-rack") text-primary"></i> @(IsNew ? L["Add MediaMTX server"] : server!.Name)</h1>
+            <p class="page-subtitle">
+                @(IsNew
+                    ? L["Tell the panel how to reach the server's control API and how broadcasters and viewers reach it. The panel can set up MediaMTX on the server over SSH, or you follow the steps on the right."]
+                    : L["Connection, public address and statistics of this server. Configure MediaMTX over SSH or by hand on the right."])
+            </p>
+        </div>
+        @if (!IsNew)
+        {
+            <div class="page-actions">
+                <button type="button" class="btn btn-outline-success" @onclick="Test" disabled="@testing">
+                    @if (testing)
+                    {
+                        <span class="spinner-border spinner-border-sm"></span> @L["Testing…"]
+                    }
+                    else
+                    {
+                        <i class="bi bi-plug"></i> @L["Test connection"]
+                    }
+                </button>
+            </div>
+        }
+    </div>
 
     @if (Created && Setup == "ok")
     {
-        <div class="alert alert-success">
-            <strong>Server added.</strong> MediaMTX on this server was configured over SSH and the panel is connected.
+        <div class="alert alert-success d-flex gap-2">
+            <i class="bi bi-check-circle"></i>
+            <div>
+                <strong>@L["Server added."]</strong>
+                @L["MediaMTX on this server was configured over SSH and the panel is connected."]
+            </div>
         </div>
     }
     else if (Created && Setup == "api")
     {
-        <div class="alert alert-warning">
-            <strong>Server added.</strong> MediaMTX on this server was configured over SSH, but the panel cannot reach its Control API yet.
-            Check that port @ApiPort on the server is open to the panel and that the API URL is correct, then click <em>Test connection</em>.
+        <div class="alert alert-warning d-flex gap-2">
+            <i class="bi bi-exclamation-triangle"></i>
+            <div>
+                <strong>@L["Server added."]</strong>
+                @L["MediaMTX on this server was configured over SSH, but the panel cannot reach its control API yet. Check that port {0} on the server is open to the panel and that the API URL is correct, then click Test connection.", ApiPort]
+            </div>
         </div>
     }
     else if (Created)
     {
-        <div class="alert alert-success">
-            <strong>Server added.</strong> Set up MediaMTX on the server as described on the right, or configure it over SSH,
-            and then click <em>Test connection</em>.
+        <div class="alert alert-success d-flex gap-2">
+            <i class="bi bi-check-circle"></i>
+            <div>
+                <strong>@L["Server added."]</strong>
+                @L["Set up MediaMTX on the server as described on the right, or configure it over SSH, and then click Test connection."]
+            </div>
         </div>
     }
     @if (message is not null)
     {
-        <div class="alert alert-@(isError ? "danger" : "success")">@message</div>
+        <div class="alert alert-@(isError ? "danger" : "success") d-flex align-items-center gap-2">
+            <i class="bi @(isError ? "bi-exclamation-octagon" : "bi-check-circle")"></i> <span>@message</span>
+        </div>
     }
 
     <div class="row g-4">
-        <div class="col-xl-6">
+        <div class="col-xxl-7">
             <EditForm Model="input" OnValidSubmit="Save" FormName="server">
-                <DataAnnotationsValidator />
-                <ValidationSummary class="text-danger" />
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label" for="name">Name</label>
-                        <InputText id="name" class="form-control" @bind-Value="input.Name" placeholder="e.g. Amsterdam-1" />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label" for="desc">Description</label>
-                        <InputText id="desc" class="form-control" @bind-Value="input.Description" />
-                    </div>
+                <LocalizedValidator />
+                <div class="card">
+                    <div class="card-body">
+                        <ValidationSummary class="text-danger small mb-3" />
 
-                    <div class="col-12"><h2 class="h6 mb-0 mt-2">Control API (how the panel reaches the server)</h2></div>
-                    <div class="col-12">
-                        <label class="form-label" for="api">API URL</label>
-                        <InputText id="api" class="form-control font-monospace" @bind-Value="input.ApiUrl" placeholder="http://10.0.0.21:9997" />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label" for="apiuser">API user</label>
-                        <InputText id="apiuser" class="form-control font-monospace" @bind-Value="input.ApiUser" />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label" for="apipass">API password</label>
-                        <InputText id="apipass" class="form-control font-monospace" @bind-Value="input.ApiPassword" />
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label" for="metrics">Metrics URL (optional)</label>
-                        <InputText id="metrics" class="form-control font-monospace" @bind-Value="input.MetricsUrl" placeholder="http://10.0.0.21:9100/metrics" />
-                        <div class="form-text">
-                            Prometheus node_exporter on the server (<code>apt install prometheus-node-exporter</code>), for CPU, RAM and network in the customer portal.
-                            You can leave this empty if MediaMTX runs on the same machine as the panel (127.0.0.1).
-                        </div>
-                        <ValidationMessage For="() => input.MetricsUrl" />
-                    </div>
-
-                    <div class="col-12"><h2 class="h6 mb-0 mt-2">Public (how broadcasters and viewers reach the server)</h2></div>
-                    <div class="col-md-6">
-                        <label class="form-label" for="host">Host or IP</label>
-                        <InputText id="host" class="form-control font-monospace" @bind-Value="input.PublicHost" placeholder="stream1.example.com" />
-                    </div>
-                    <div class="col-md-6 d-flex align-items-end">
-                        <div class="form-check form-switch">
-                            <InputCheckbox class="form-check-input" id="https" @bind-Value="input.HttpsUrls" />
-                            <label class="form-check-label" for="https">https:// for HLS and WebRTC</label>
-                        </div>
-                    </div>
-                    <div class="col"><label class="form-label small" for="rtsp">RTSP</label><InputNumber id="rtsp" class="form-control" @bind-Value="input.RtspPort" /></div>
-                    <div class="col"><label class="form-label small" for="rtmp">RTMP</label><InputNumber id="rtmp" class="form-control" @bind-Value="input.RtmpPort" /></div>
-                    <div class="col"><label class="form-label small" for="srt">SRT</label><InputNumber id="srt" class="form-control" @bind-Value="input.SrtPort" /></div>
-                    <div class="col"><label class="form-label small" for="hls">HLS</label><InputNumber id="hls" class="form-control" @bind-Value="input.HlsPort" /></div>
-                    <div class="col"><label class="form-label small" for="webrtc">WebRTC</label><InputNumber id="webrtc" class="form-control" @bind-Value="input.WebRtcPort" /></div>
-
-                    <div class="col-12">
-                        <div class="form-check form-switch">
-                            <InputCheckbox class="form-check-input" id="enabled" @bind-Value="input.Enabled" />
-                            <label class="form-check-label" for="enabled">Enabled (when disabled, the server refuses all connections)</label>
-                        </div>
-                        <div class="form-check form-switch">
-                            <InputCheckbox class="form-check-input" id="unmanaged" @bind-Value="input.RemoveUnmanagedPaths" />
-                            <label class="form-check-label" for="unmanaged">Remove paths that are not in the panel</label>
-                        </div>
-                    </div>
-                    @if (IsNew)
-                    {
-                        <div class="col-12"><h2 class="h6 mb-0 mt-2">Setup</h2></div>
-                        <div class="col-12">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="usessh" @bind="useSsh" disabled="@running" />
-                                <label class="form-check-label" for="usessh">Configure MediaMTX on the server over SSH</label>
+                        <section class="form-section">
+                            <header>
+                                <h2><i class="bi bi-tag me-1 text-primary"></i> @L["General"]</h2>
+                                <p>@L["A name to recognize the server by, for example its location."]</p>
+                            </header>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label" for="name">@L["Name"]</label>
+                                    <InputText id="name" class="form-control" @bind-Value="input.Name" placeholder="@L["e.g. Amsterdam-1"]" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" for="desc">@L["Description"]</label>
+                                    <InputText id="desc" class="form-control" @bind-Value="input.Description" />
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check form-switch">
+                                        <InputCheckbox class="form-check-input" id="enabled" @bind-Value="input.Enabled" />
+                                        <label class="form-check-label" for="enabled">@L["Enabled (when disabled, the server refuses all connections)"]</label>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="form-text">
-                                The panel logs in to the server, sets up MediaMTX for the panel (and installs it if needed), restarts it
-                                and adds the server once the connection works. Without SSH, follow the steps on the right.
+                        </section>
+
+                        <section class="form-section">
+                            <header>
+                                <h2><i class="bi bi-plug me-1 text-primary"></i> @L["Control API"]</h2>
+                                <p>@L["How the panel reaches the server. The API port must be open to the panel."]</p>
+                            </header>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label" for="api">@L["API URL"]</label>
+                                    <InputText id="api" class="form-control font-monospace" @bind-Value="input.ApiUrl" placeholder="http://10.0.0.21:9997" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" for="apiuser">@L["API user"]</label>
+                                    <InputText id="apiuser" class="form-control font-monospace" @bind-Value="input.ApiUser" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" for="apipass">@L["API password"]</label>
+                                    <InputText id="apipass" class="form-control font-monospace" @bind-Value="input.ApiPassword" />
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check form-switch">
+                                        <InputCheckbox class="form-check-input" id="unmanaged" @bind-Value="input.RemoveUnmanagedPaths" />
+                                        <label class="form-check-label" for="unmanaged">@L["Remove paths that are not in the panel"]</label>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        @if (useSsh)
+                        </section>
+
+                        <section class="form-section">
+                            <header>
+                                <h2><i class="bi bi-globe2 me-1 text-primary"></i> @L["Public address and ports"]</h2>
+                                <p>@L["How broadcasters and viewers reach the server. These values are used in the links and settings shown to customers."]</p>
+                            </header>
+                            <div class="row g-3">
+                                <div class="col-md-7">
+                                    <label class="form-label" for="host">@L["Host or IP"]</label>
+                                    <InputText id="host" class="form-control font-monospace" @bind-Value="input.PublicHost" placeholder="stream1.example.com" />
+                                </div>
+                                <div class="col-md-5 d-flex align-items-end">
+                                    <div class="form-check form-switch mb-2">
+                                        <InputCheckbox class="form-check-input" id="https" @bind-Value="input.HttpsUrls" />
+                                        <label class="form-check-label" for="https">@L["https:// for HLS and WebRTC"]</label>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md"><label class="form-label small" for="rtsp">RTSP</label><InputNumber id="rtsp" class="form-control" @bind-Value="input.RtspPort" /></div>
+                                <div class="col-6 col-md"><label class="form-label small" for="rtmp">RTMP</label><InputNumber id="rtmp" class="form-control" @bind-Value="input.RtmpPort" /></div>
+                                <div class="col-6 col-md"><label class="form-label small" for="srt">SRT</label><InputNumber id="srt" class="form-control" @bind-Value="input.SrtPort" /></div>
+                                <div class="col-6 col-md"><label class="form-label small" for="hls">HLS</label><InputNumber id="hls" class="form-control" @bind-Value="input.HlsPort" /></div>
+                                <div class="col-6 col-md"><label class="form-label small" for="webrtc">WebRTC</label><InputNumber id="webrtc" class="form-control" @bind-Value="input.WebRtcPort" /></div>
+                            </div>
+                        </section>
+
+                        <section class="form-section">
+                            <header>
+                                <h2><i class="bi bi-speedometer2 me-1 text-primary"></i> @L["Statistics"]</h2>
+                                <p>@L["CPU, RAM and network of the server in the customer portal."]</p>
+                            </header>
+                            <div>
+                                <label class="form-label" for="metrics">@L["Metrics URL (optional)"]</label>
+                                <InputText id="metrics" class="form-control font-monospace" @bind-Value="input.MetricsUrl" placeholder="http://10.0.0.21:9100/metrics" />
+                                <div class="form-text">
+                                    @L["Prometheus node_exporter on the server:"] <code>apt install prometheus-node-exporter</code>.
+                                    @L["You can leave this empty if MediaMTX runs on the same machine as the panel (127.0.0.1)."]
+                                </div>
+                                <ValidationMessage For="() => input.MetricsUrl" />
+                            </div>
+                        </section>
+
+                        @if (IsNew)
                         {
-                            <div class="col-12">
-                                <SshSetupFields Login="ssh" Disabled="running" HostChanged="FillFromSshHost" />
+                            <section class="form-section">
+                                <header>
+                                    <h2><i class="bi bi-terminal me-1 text-primary"></i> @L["Setup over SSH"]</h2>
+                                    <p>@L["The panel logs in to the server, sets up MediaMTX for the panel (and installs it if needed), restarts it and adds the server once the connection works. Without SSH, follow the steps on the right."]</p>
+                                </header>
+                                <div>
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" id="usessh" @bind="useSsh" disabled="@running" />
+                                        <label class="form-check-label" for="usessh">@L["Configure MediaMTX on the server over SSH"]</label>
+                                    </div>
+                                    @if (useSsh)
+                                    {
+                                        <SshSetupFields Login="ssh" Disabled="running" HostChanged="FillFromSshHost" />
+                                    }
+                                </div>
+                            </section>
+                        }
+                    </div>
+                    <div class="card-footer bg-white d-flex flex-wrap gap-2 py-3">
+                        <button type="submit" class="btn btn-primary" disabled="@running">
+                            @if (running)
+                            {
+                                <span class="spinner-border spinner-border-sm"></span> @L["Setting up…"]
+                            }
+                            else
+                            {
+                                <i class="bi @(IsNew ? "bi-plus-lg" : "bi-check-lg")"></i> @(IsNew ? (useSsh ? L["Set up and add server"] : L["Add server"]) : L["Save"])
+                            }
+                        </button>
+                        <a class="btn btn-outline-secondary" href="servers"><i class="bi bi-arrow-left"></i> @L["Back"]</a>
+                        @if (!IsNew)
+                        {
+                            <div class="ms-auto d-flex flex-wrap gap-2">
+                                @if (!confirmDelete)
+                                {
+                                    <button type="button" class="btn btn-outline-danger" @onclick="() => confirmDelete = true"><i class="bi bi-trash"></i> @L["Delete"]</button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-danger" @onclick="Delete"><i class="bi bi-trash"></i> @L["Yes, delete"]</button>
+                                    <button type="button" class="btn btn-outline-secondary" @onclick="() => confirmDelete = false"><i class="bi bi-x-lg"></i> @L["No"]</button>
+                                }
                             </div>
                         }
-                    }
-                </div>
-                <div class="mt-4 d-flex flex-wrap gap-2">
-                    <button type="submit" class="btn btn-primary" disabled="@running">
-                        @(running ? "Setting up…" : IsNew ? (useSsh ? "Set up and add server" : "Add server") : "Save")
-                    </button>
-                    @if (!IsNew)
-                    {
-                        <button type="button" class="btn btn-outline-success" @onclick="Test" disabled="@testing">@(testing ? "Testing…" : "Test connection")</button>
-                        @if (!confirmDelete)
-                        {
-                            <button type="button" class="btn btn-outline-danger" @onclick="() => confirmDelete = true">Delete</button>
-                        }
-                        else
-                        {
-                            <button type="button" class="btn btn-danger" @onclick="Delete">Yes, delete</button>
-                            <button type="button" class="btn btn-outline-secondary" @onclick="() => confirmDelete = false">No</button>
-                        }
-                    }
-                    <a class="btn btn-outline-secondary" href="servers">Back</a>
+                    </div>
                 </div>
             </EditForm>
 
             @if (setupLog.Count > 0)
             {
-                <h2 class="h6 mt-4">Setup log</h2>
-                <pre class="cmd small">@string.Join("\n", setupLog)</pre>
+                <div class="card mt-4">
+                    <div class="card-header"><i class="bi bi-journal-text"></i> @L["Setup log"]</div>
+                    <div class="card-body"><pre class="cmd small mb-0">@string.Join("\n", setupLog)</pre></div>
+                </div>
             }
         </div>
 
-        <div class="col-xl-6">
+        <div class="col-xxl-5">
             @if (!IsNew)
             {
                 <div class="card mb-4">
-                    <div class="card-header"><strong>Configure over SSH</strong></div>
+                    <div class="card-header"><i class="bi bi-terminal"></i> @L["Configure over SSH"]</div>
                     <div class="card-body">
                         @if (!showSsh)
                         {
-                            <p class="small mb-2">
-                                Let the panel log in to this server and set up MediaMTX for it, for example after creating a new secret
-                                or changing the API URL.
+                            <p class="small text-secondary mb-3">
+                                @L["Let the panel log in to this server and set up MediaMTX for it, for example after creating a new secret or changing the API URL."]
                             </p>
-                            <button type="button" class="btn btn-outline-primary btn-sm" @onclick="() => showSsh = true">Configure over SSH</button>
+                            <button type="button" class="btn btn-outline-primary btn-sm" @onclick="() => showSsh = true">
+                                <i class="bi bi-terminal"></i> @L["Configure over SSH"]
+                            </button>
                         }
                         else
                         {
                             <SshSetupFields Login="ssh" Disabled="running" />
                             <button type="button" class="btn btn-primary mt-3" @onclick="ConfigureExisting" disabled="@running">
-                                @(running ? "Setting up…" : "Configure MediaMTX")
+                                @if (running)
+                                {
+                                    <span class="spinner-border spinner-border-sm"></span> @L["Setting up…"]
+                                }
+                                else
+                                {
+                                    <i class="bi bi-gear"></i> @L["Configure MediaMTX"]
+                                }
                             </button>
                         }
                     </div>
                 </div>
             }
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <strong>Manual setup</strong>
+                <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <span><i class="bi bi-file-earmark-code"></i> @L["Manual setup"]</span>
                     @if (!IsNew)
                     {
-                        <button class="btn btn-link btn-sm p-0" @onclick="RegenerateSecret">New secret</button>
+                        <button class="btn btn-sm btn-outline-secondary" @onclick="RegenerateSecret"
+                                title="@L["Create a new hook secret; the old configuration stops working"]">
+                            <i class="bi bi-arrow-repeat"></i> @L["New secret"]
+                        </button>
                     }
                 </div>
                 <div class="card-body">
-                    <p class="small">To set up MediaMTX on the server yourself so that the panel can manage it:</p>
+                    <p class="small">@L["To set up MediaMTX on the server yourself so that the panel can manage it:"]</p>
                     <ServerSetupGuide HookUrl="@HookUrl" ApiPort="ApiPort" PublicHost="@input.PublicHost"
-                                      LastStep="@(IsNew ? "Fill in this form and click Add server, then Test connection." : "Click Test connection.")" />
+                                      LastStep="@(IsNew ? L["Fill in this form and click Add server, then Test connection."] : L["Click Test connection."])" />
                 </div>
             </div>
         </div>
@@ -230,7 +326,7 @@ else
 
     private string HookBase => (string.IsNullOrWhiteSpace(PanelOptions.Value.HookBaseUrl)
         ? Nav.BaseUri
-        : PanelOptions.Value.HookBaseUrl).TrimEnd('/');
+        : Port.Rewrite(PanelOptions.Value.HookBaseUrl)).TrimEnd('/');
 
     private string HookUrl => ssh.HookUrl(IsNew ? newHookSecret : server!.HookSecret);
 
@@ -261,7 +357,7 @@ else
         message = null;
         if (await ServerAdmin.NameExistsAsync(input!.Name.Trim(), Id))
         {
-            Show("A server with this name already exists.", true);
+            Show(L["A server with this name already exists."], true);
             return;
         }
 
@@ -279,7 +375,7 @@ else
 
         server = await ServerAdmin.UpdateAsync(Id!.Value, input);
         var test = server!.Enabled ? await ServerAdmin.TestAndSyncAsync(server.Id) : null;
-        Show(test is null ? "Saved." : $"Saved. {test.Message}", test is { Ok: false });
+        Show(test is null ? L["Saved."] : $"{L["Saved."]} {test.Message}", test is { Ok: false });
     }
 
     /// <summary>
@@ -288,7 +384,7 @@ else
     /// </summary>
     private async Task AddWithSsh()
     {
-        if (SshSetupFields.Validate(ssh) is { } problem)
+        if (SshSetupFields.Validate(ssh, L) is { } problem)
         {
             Show(problem, true);
             return;
@@ -305,12 +401,12 @@ else
             return;
         }
         await ServerAdmin.DeleteAsync(created.Id);
-        Show($"{result.Message} The server was not added.", true);
+        Show($"{result.Message} {L["The server was not added."]}", true);
     }
 
     private async Task ConfigureExisting()
     {
-        if (SshSetupFields.Validate(ssh) is { } problem)
+        if (SshSetupFields.Validate(ssh, L) is { } problem)
         {
             Show(problem, true);
             return;
@@ -355,7 +451,7 @@ else
     private async Task RegenerateSecret()
     {
         server = await ServerAdmin.RegenerateHookSecretAsync(Id!.Value);
-        Show("New secret created. Update the configuration on the server; until then the panel rejects requests from this server.", false);
+        Show(L["New secret created. Update the configuration on the server; until then the panel rejects requests from this server."], false);
     }
 
     private async Task Delete()

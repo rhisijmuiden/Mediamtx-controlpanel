@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.RegularExpressions;
 using MediaMtxPanel.Data;
+using MediaMtxPanel.Services.Localization;
 using Renci.SshNet;
 using Renci.SshNet.Common;
 using ConnectionInfo = Renci.SshNet.ConnectionInfo;
@@ -57,7 +58,7 @@ public record SshSetupResult(bool Ok, string Message);
 /// Optionally installs MediaMTX as a systemd service first. The previous mediamtx.yml is kept as a backup,
 /// and restored when MediaMTX does not start with the new one.
 /// </summary>
-public class SshServerSetup(ILogger<SshServerSetup> logger)
+public class SshServerSetup(ILogger<SshServerSetup> logger, TextLocalizer L)
 {
     /// <summary>Installed when the server has no MediaMTX yet; same version as the panel's own installer.</summary>
     public const string MediaMtxVersion = "1.21.2";
@@ -77,24 +78,24 @@ public class SshServerSetup(ILogger<SshServerSetup> logger)
         }
         catch (SshAuthenticationException)
         {
-            return new(false, $"The SSH server refused the login for '{login.User}'. Check the user, password or key.");
+            return new(false, L["The SSH server refused the login for '{0}'. Check the user, password or key.", login.User]);
         }
         catch (SshConnectionException ex)
         {
-            return new(false, $"The SSH connection to {login.Host}:{login.Port} failed: {ex.Message}");
+            return new(false, L["The SSH connection to {0} failed: {1}", $"{login.Host}:{login.Port}", ex.Message]);
         }
         catch (Exception ex) when (ex is System.Net.Sockets.SocketException or SshOperationTimeoutException or TimeoutException)
         {
-            return new(false, $"Cannot reach {login.Host}:{login.Port} over SSH: {ex.Message}");
+            return new(false, L["Cannot reach {0} over SSH: {1}", $"{login.Host}:{login.Port}", ex.Message]);
         }
         catch (SshException ex) when (ex.Message.Contains("key", StringComparison.OrdinalIgnoreCase))
         {
-            return new(false, $"The private key cannot be read: {ex.Message}");
+            return new(false, L["The private key cannot be read: {0}", ex.Message]);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
             logger.LogWarning(ex, "SSH setup of {Host} failed", login.Host);
-            return new(false, $"SSH setup failed: {ex.Message}");
+            return new(false, L["SSH setup failed: {0}", ex.Message]);
         }
     }
 
@@ -114,7 +115,7 @@ public class SshServerSetup(ILogger<SshServerSetup> logger)
 
         var remote = DetectElevation(client, login, log);
         if (remote is null)
-            return new(false, $"'{login.User}' is not root and cannot use sudo. Log in as root, or as a user with sudo rights (and fill in the password).");
+            return new(false, L["'{0}' is not root and cannot use sudo. Log in as root, or as a user with sudo rights (and fill in the password).", login.User]);
 
         ct.ThrowIfCancellationRequested();
         log("Looking for MediaMTX…");
@@ -123,12 +124,12 @@ public class SshServerSetup(ILogger<SshServerSetup> logger)
         if (found.Config is null && found.Binary is null && found.Restart == "none")
         {
             if (!login.InstallIfMissing)
-                return new(false, "MediaMTX was not found on the server. Turn on \"Install MediaMTX when it is missing\", or install it yourself.");
+                return new(false, L["MediaMTX was not found on the server. Turn on the option to install it, or install it yourself."]);
             log($"MediaMTX is not installed. Installing MediaMTX v{MediaMtxVersion}…");
             var install = Run(remote, InstallScript, [MediaMtxVersion]);
             LogLines(log, install.Output);
             if (install.Exit != 0)
-                return new(false, $"Installing MediaMTX failed: {FirstLine(install.Error, install.Output)}");
+                return new(false, L["Installing MediaMTX failed: {0}", FirstLine(install.Error, install.Output)]);
             found = Inspect(remote, login.ConfigPath, hookUrl);
         }
 
@@ -138,14 +139,13 @@ public class SshServerSetup(ILogger<SshServerSetup> logger)
         if (found.Config is null)
         {
             if (found.Restart.StartsWith("docker:"))
-                return new(false, $"MediaMTX runs in Docker container '{found.Restart[7..]}', but its mediamtx.yml is not mounted from the host, " +
-                                  "so the panel cannot change it. Mount a mediamtx.yml into the container, or set the environment variables shown under manual setup.");
-            return new(false, "MediaMTX was found, but not its mediamtx.yml. Enter the path of the configuration file and try again.");
+                return new(false, L["MediaMTX runs in Docker container '{0}', but its mediamtx.yml is not mounted from the host, so the panel cannot change it. Mount a mediamtx.yml into the container as described under manual setup.", found.Restart[7..]]);
+            return new(false, L["MediaMTX was found, but not its mediamtx.yml. Enter the path of the configuration file under Advanced and try again."]);
         }
         log($"  config: {found.ConfigPath}");
 
         if (found.Version is { } version && version < new Version(1, 16))
-            return new(false, $"MediaMTX {found.Facts["version"]} is too old: the panel needs v1.16 or newer. Update MediaMTX first.");
+            return new(false, L["MediaMTX {0} is too old: the panel needs v1.16 or newer. Update MediaMTX first.", found.Facts["version"]]);
 
         if (found.Facts.TryGetValue("dockerenv", out var env) && env.Length > 0)
             log($"  Warning: the container sets {env}; these environment variables override mediamtx.yml.");
@@ -157,10 +157,9 @@ public class SshServerSetup(ILogger<SshServerSetup> logger)
                 log("  curl and wget are missing, so the panel address could not be checked from the server.");
                 break;
             case "000" or "fail":
-                return new(false, $"The server cannot reach the panel at {hookUrl}. Fix the panel address (it must be reachable from this server), " +
-                                  "or open the panel's port in the firewall, and try again. Nothing was changed on the server.");
+                return new(false, L["The server cannot reach the panel at {0}. Fix the panel address (it must be reachable from this server), or open the panel's port in the firewall, and try again. Nothing was changed on the server.", hookUrl]);
             case "403":
-                return new(false, "The panel did not recognise this server's secret. Reload the page and try again.");
+                return new(false, L["The panel did not recognise this server's secret. Reload the page and try again."]);
             default:
                 log($"  The server reaches the panel at {hookUrl}.");
                 break;
@@ -170,7 +169,7 @@ public class SshServerSetup(ILogger<SshServerSetup> logger)
         if (updated == found.Config && found.Running)
         {
             log("mediamtx.yml already has the right settings.");
-            return new(true, "MediaMTX was already configured for the panel.");
+            return new(true, L["MediaMTX was already configured for the panel."]);
         }
 
         log("Writing mediamtx.yml (the old file is kept as a backup) and restarting MediaMTX…");
@@ -180,8 +179,8 @@ public class SshServerSetup(ILogger<SshServerSetup> logger)
         {
             LogLines(log, apply.Error);
             return new(false, apply.Exit == 2
-                ? "MediaMTX did not start with the new configuration, so the previous configuration was restored. See the log for details."
-                : $"Writing the configuration failed: {FirstLine(apply.Error, apply.Output)}");
+                ? L["MediaMTX did not start with the new configuration, so the previous configuration was restored. See the setup log for details."]
+                : L["Writing the configuration failed: {0}", FirstLine(apply.Error, apply.Output)]);
         }
         if (found.Restart == "none")
             log(found.Running
@@ -189,7 +188,7 @@ public class SshServerSetup(ILogger<SshServerSetup> logger)
                 : "MediaMTX is not running and has no systemd service or Docker container the panel can start. Start it on the server.");
         if (apply.Output.Contains("ufw=active"))
             log($"  Note: the ufw firewall is active. Port {apiPort} must be open for the panel.");
-        return new(true, "MediaMTX is configured for the panel.");
+        return new(true, L["MediaMTX is configured for the panel."]);
     }
 
     private static ConnectionInfo Connection(SshLoginInput login)

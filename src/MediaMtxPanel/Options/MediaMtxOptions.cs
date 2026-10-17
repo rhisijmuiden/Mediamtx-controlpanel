@@ -53,4 +53,10 @@ public class PanelOptions
 
     /// <summary>Offer a simulated payment method, to try the paywall without a Mollie or PayPal account.</summary>
     public bool EnableTestPayments { get; set; }
+
+    /// <summary>GitHub repository (owner/name) the update check compares against. Empty turns the check off.</summary>
+    public string UpdateRepository { get; set; } = "rhisijmuiden/Mediamtx-controlpanel";
+
+    /// <summary>Branch that is compared when the repository has no releases (the Proxmox installer builds from it).</summary>
+    public string UpdateBranch { get; set; } = "main";
 }

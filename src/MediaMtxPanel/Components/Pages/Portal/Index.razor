@@ -5,22 +5,28 @@
 @inject StreamService Streams
 @inject LiveStatusReader LiveReader
 
-<PageTitle>My streams</PageTitle>
+<AppPageTitle Text="@L["My streams"]" />
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="mb-0">My streams</h1>
-    <a class="btn btn-outline-primary" href="portal/payments">Payment settings</a>
+<div class="page-header">
+    <div>
+        <h1><i class="bi bi-collection-play text-primary"></i> @L["My streams"]</h1>
+        <p class="page-subtitle">@L["Open a stream to see the preview, get the settings for your broadcast software, share the watch page or sell tickets."]</p>
+    </div>
+    <div class="page-actions">
+        <a class="btn btn-outline-primary" href="portal/payments"><i class="bi bi-credit-card"></i> @L["Payment settings"]</a>
+    </div>
 </div>
 
 @if (streams is null)
 {
-    <p>Loading…</p>
+    <p class="text-secondary"><span class="spinner-border spinner-border-sm me-2"></span>@L["Loading…"]</p>
 }
 else if (streams.Count == 0)
 {
-    <div class="text-center text-secondary py-5">
-        <p>No streams are linked to your account yet.</p>
-        <p>Contact your administrator to have a stream created.</p>
+    <div class="empty-state">
+        <i class="bi bi-camera-video-off"></i>
+        <p class="mb-1">@L["No streams are linked to your account yet."]</p>
+        <p class="mb-0 small">@L["Contact your administrator to have a stream created."]</p>
     </div>
 }
 else
@@ -30,25 +36,31 @@ else
         {
             var p = live.Find(s);
             <div class="col-md-6 col-xl-4">
-                <div class="card h-100">
+                <div class="card entity-card h-100 position-relative">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h2 class="h5 mb-0">@s.DisplayName</h2>
-                            <StreamStateBadge Stream="s" Live="p" />
+                        <div class="entity-head">
+                            <span class="avatar"><i class="bi @(p?.IsLive == true ? "bi-broadcast" : "bi-camera-video")"></i></span>
+                            <div class="flex-grow-1" style="min-width:0">
+                                <div class="entity-title">@s.DisplayName</div>
+                                <div class="entity-sub">@s.Server!.PublicHost · <code>@s.Name</code></div>
+                            </div>
                         </div>
-                        <div class="small text-secondary mb-2">@s.Server!.PublicHost · <code>@s.Name</code></div>
-                        <div class="small">
-                            @(p?.Readers.Count ?? 0) viewer(s)
+                        <div class="entity-meta">
+                            <StreamStateBadge Stream="s" Live="p" />
+                            <span class="badge text-bg-light border"><i class="bi bi-eye me-1"></i>@L["{0} viewer(s)", p?.Readers.Count ?? 0]</span>
                             @if (s.PaywallEnabled)
                             {
-                                <span class="badge text-bg-warning ms-2">Paywall on</span>
+                                <span class="badge bg-warning-subtle text-warning-emphasis"><i class="bi bi-ticket-perforated me-1"></i>@L["Paywall on"]</span>
                             }
                             else if (s.PublicRead)
                             {
-                                <span class="badge text-bg-info ms-2">Public</span>
+                                <span class="badge bg-info-subtle text-info-emphasis"><i class="bi bi-globe2 me-1"></i>@L["Public"]</span>
                             }
                         </div>
-                        <a class="stretched-link" href="portal/streams/@s.Id"></a>
+                        <div class="entity-actions">
+                            <span class="btn btn-sm btn-outline-primary"><i class="bi bi-box-arrow-in-right"></i> @L["Open"]</span>
+                        </div>
+                        <a class="stretched-link" href="portal/streams/@s.Id" aria-label="@L["Open"] @s.DisplayName"></a>
                     </div>
                 </div>
             </div>

@@ -4,52 +4,60 @@
 @inject PaywallService Paywall
 @inject NavigationManager Nav
 
-<PageTitle>Payment</PageTitle>
+<AppPageTitle Text="@L["Payment"]" />
 
 @if (order is null || order.Stream?.WatchSlug != Slug)
 {
-    <div class="text-center py-5">
-        <h1 class="h3">Order not found</h1>
-        <a href="watch/@Slug">Back to the stream</a>
+    <div class="empty-state my-5 mx-auto" style="max-width: 32rem">
+        <i class="bi bi-receipt"></i>
+        <h1 class="h4 text-body">@L["Order not found"]</h1>
+        <a class="btn btn-outline-secondary mt-2" href="watch/@Slug"><i class="bi bi-arrow-left"></i> @L["Back to the stream"]</a>
     </div>
 }
 else
 {
-    <div class="card mx-auto" style="max-width: 32rem">
-        <div class="card-body text-center py-4">
+    <div class="card shadow-sm mx-auto my-4" style="max-width: 32rem">
+        <div class="card-body text-center p-4 p-md-5">
+            <div class="text-secondary small text-uppercase fw-semibold mb-1">@L["Payment"]</div>
             <h1 class="h4">@order.Stream.DisplayName</h1>
-            <p class="text-secondary">@order.OfferName · @Format.Money(order.AmountCents, order.Currency)</p>
+            <p class="text-secondary mb-4">
+                <i class="bi bi-ticket-perforated me-1"></i>@order.OfferName · <strong class="text-body">@Format.Money(order.AmountCents, order.Currency)</strong>
+            </p>
 
             @switch (order.Status)
             {
                 case OrderStatus.Open when Canceled:
-                    <p>You canceled the payment.</p>
-                    <a class="btn btn-primary" href="watch/@Slug" data-enhance-nav="false">Try again</a>
+                    <i class="bi bi-x-circle text-secondary d-block mb-2" style="font-size: 2.5rem"></i>
+                    <p>@L["You canceled the payment."]</p>
+                    <a class="btn btn-primary" href="watch/@Slug" data-enhance-nav="false"><i class="bi bi-arrow-repeat"></i> @L["Try again"]</a>
                     break;
                 case OrderStatus.Open:
                     <meta http-equiv="refresh" content="3" />
-                    <div class="spinner-border text-primary mb-3" role="status"></div>
-                    <p>Waiting for your payment to be confirmed. This page refreshes automatically.</p>
+                    <div class="spinner-border text-primary mb-3" role="status"><span class="visually-hidden">@L["Loading…"]</span></div>
+                    <p>@L["Waiting for your payment to be confirmed. This page refreshes automatically."]</p>
                     @if (order.Provider == PaymentProvider.Test)
                     {
-                        <form method="post" action="watch/@Slug/order/@order.Id/simulate" data-enhance="false">
+                        <form method="post" action="watch/@Slug/order/@order.Id/simulate" data-enhance="false" class="mt-4 pt-3 border-top">
                             <AntiforgeryToken />
-                            <p class="small text-secondary">This is a test payment; no money will be charged.</p>
-                            <button type="submit" class="btn btn-success">Simulate payment</button>
+                            <p class="small text-secondary">@L["This is a test payment; no money will be charged."]</p>
+                            <button type="submit" class="btn btn-success"><i class="bi bi-check-lg"></i> @L["Simulate payment"]</button>
                         </form>
                     }
                     break;
                 case OrderStatus.Canceled:
-                    <p>The payment was canceled.</p>
-                    <a class="btn btn-primary" href="watch/@Slug" data-enhance-nav="false">Try again</a>
+                    <i class="bi bi-x-circle text-secondary d-block mb-2" style="font-size: 2.5rem"></i>
+                    <p>@L["The payment was canceled."]</p>
+                    <a class="btn btn-primary" href="watch/@Slug" data-enhance-nav="false"><i class="bi bi-arrow-repeat"></i> @L["Try again"]</a>
                     break;
                 case OrderStatus.Expired:
-                    <p>The payment has expired.</p>
-                    <a class="btn btn-primary" href="watch/@Slug" data-enhance-nav="false">Try again</a>
+                    <i class="bi bi-hourglass-bottom text-warning d-block mb-2" style="font-size: 2.5rem"></i>
+                    <p>@L["The payment has expired."]</p>
+                    <a class="btn btn-primary" href="watch/@Slug" data-enhance-nav="false"><i class="bi bi-arrow-repeat"></i> @L["Try again"]</a>
                     break;
                 default:
-                    <p>The payment failed. Nothing was charged.</p>
-                    <a class="btn btn-primary" href="watch/@Slug" data-enhance-nav="false">Try again</a>
+                    <i class="bi bi-exclamation-octagon text-danger d-block mb-2" style="font-size: 2.5rem"></i>
+                    <p>@L["The payment failed. Nothing was charged."]</p>
+                    <a class="btn btn-primary" href="watch/@Slug" data-enhance-nav="false"><i class="bi bi-arrow-repeat"></i> @L["Try again"]</a>
                     break;
             }
         </div>

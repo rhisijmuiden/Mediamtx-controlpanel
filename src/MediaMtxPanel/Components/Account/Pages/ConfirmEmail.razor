@@ -1,4 +1,4 @@
-﻿@page "/Account/ConfirmEmail"
+@page "/Account/ConfirmEmail"
 
 @using System.Text
 @using Microsoft.AspNetCore.Identity
@@ -8,10 +8,18 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject IdentityRedirectManager RedirectManager
 
-<PageTitle>Confirm email</PageTitle>
+<AppPageTitle Text="@L["Confirm email"]" />
 
-<h1>Confirm email</h1>
-<StatusMessage Message="@statusMessage" />
+<div class="auth-page">
+    <div class="card auth-card">
+        <div class="card-body p-4 p-sm-5">
+            <span class="brand-logo"><i class="bi bi-broadcast"></i></span>
+            <h1 class="h3 mb-3 d-flex align-items-center gap-2"><i class="bi bi-envelope-check text-primary"></i> @L["Confirm email"]</h1>
+            <StatusMessage Message="@statusMessage" />
+            <a class="btn btn-outline-secondary" href=""><i class="bi bi-arrow-left"></i> @L["Back to the start page"]</a>
+        </div>
+    </div>
+</div>
 
 @code {
     private string? statusMessage;
@@ -37,13 +45,13 @@
         if (user is null)
         {
             HttpContext.Response.StatusCode = StatusCodes.Status404NotFound;
-            statusMessage = $"Error loading user with ID {UserId}";
+            statusMessage = "Error: " + L["Error loading user with ID {0}", UserId];
         }
         else
         {
             var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(Code));
             var result = await UserManager.ConfirmEmailAsync(user, code);
-            statusMessage = result.Succeeded ? "Thank you for confirming your email." : "Error confirming your email.";
+            statusMessage = result.Succeeded ? L["Thank you for confirming your email."] : "Error: " + L["Error confirming your email."];
         }
     }
 }

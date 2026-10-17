@@ -6,29 +6,39 @@
 @inject ServerService ServerAdmin
 @inject NavigationManager Nav
 
-<PageTitle>Edit stream</PageTitle>
+<AppPageTitle Text="@L["Edit stream"]" />
 
 @if (notFound)
 {
-    <h1>Stream not found</h1>
-    <a href="streams">Back to streams</a>
+    <div class="empty-state">
+        <i class="bi bi-question-circle"></i>
+        <h1 class="h4">@L["Stream not found"]</h1>
+        <p>@L["It may have been deleted, or you don't have access to it."]</p>
+        <a class="btn btn-outline-secondary" href="streams"><i class="bi bi-arrow-left"></i> @L["Back to streams"]</a>
+    </div>
 }
 else if (input is null)
 {
-    <p>Loading…</p>
+    <p class="text-secondary"><span class="spinner-border spinner-border-sm me-2"></span>@L["Loading…"]</p>
 }
 else
 {
-    <h1>Edit stream</h1>
+    <a class="back-link" href="streams/@Id"><i class="bi bi-arrow-left"></i> @L["Back to the stream"]</a>
+    <div class="page-header">
+        <div>
+            <h1><i class="bi bi-pencil-square text-primary"></i> @L["Edit stream"]</h1>
+            <p class="page-subtitle">@L["Change the settings of {0}. Credentials stay the same; regenerate them on the stream page.", originalName]</p>
+        </div>
+    </div>
     @if (input.Name != originalName || input.ServerId != originalServerId)
     {
-        <div class="alert alert-warning">Note: changing the path name or server changes the URLs and drops active connections.</div>
+        <div class="alert alert-warning d-flex align-items-center gap-2"><i class="bi bi-exclamation-triangle"></i> @L["Note: changing the path name or server changes the URLs and drops active connections."]</div>
     }
     @if (error is not null)
     {
-        <div class="alert alert-danger">@error</div>
+        <div class="alert alert-danger d-flex align-items-center gap-2"><i class="bi bi-exclamation-octagon"></i> @error</div>
     }
-    <StreamForm Model="input" OnValidSubmit="Save" Busy="busy" Users="users" Servers="servers" CancelHref="@($"streams/{Id}")" />
+    <StreamForm Model="input" OnValidSubmit="Save" SubmitText="@L["Save changes"]" Busy="busy" Users="users" Servers="servers" CancelHref="@($"streams/{Id}")" />
 }
 
 @code {
@@ -67,7 +77,7 @@ else
         error = null;
         if (await Streams.NameExistsAsync(input!.ServerId, input.Name.Trim(), Id))
         {
-            error = $"A stream named '{input.Name}' already exists on this server.";
+            error = L["A stream named '{0}' already exists on this server.", input.Name];
             return;
         }
         busy = true;

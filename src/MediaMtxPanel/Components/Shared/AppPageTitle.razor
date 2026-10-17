@@ -1,0 +1,8 @@
+@* Browser tab title: "<page> · <application name from Settings>". *@
+@inject PanelSettingsStore Settings
+
+<PageTitle>@(string.IsNullOrEmpty(Text) ? Settings.Current.AppName : $"{Text} · {Settings.Current.AppName}")</PageTitle>
+
+@code {
+    [Parameter] public string? Text { get; set; }
+}
