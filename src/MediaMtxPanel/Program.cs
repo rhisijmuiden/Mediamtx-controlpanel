@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using MediaMtxPanel.Components;
 using MediaMtxPanel.Components.Account;
@@ -9,9 +10,17 @@ using MediaMtxPanel.Data;
 using MediaMtxPanel.Endpoints;
 using MediaMtxPanel.Options;
 using MediaMtxPanel.Services;
+using MediaMtxPanel.Services.Localization;
 using MediaMtxPanel.Services.Payments;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Settings from the panel's Settings page; the web port has to be known before the server starts.
+var settingsStore = new PanelSettingsStore(PanelSettingsStore.ResolvePath(builder.Configuration, builder.Environment.ContentRootPath));
+builder.Services.AddSingleton(settingsStore);
+builder.Services.AddSingleton(WebPortInfo.Apply(builder, settingsStore.Current));
+builder.Services.AddSingleton<TextLocalizer>();
+builder.Services.AddLocalization();
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -69,6 +78,15 @@ builder.Services.AddSingleton<StreamEndpointBuilder>();
 builder.Services.AddSingleton<MediaMtxStatus>();
 builder.Services.AddSingleton<MediaMtxSyncService>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<MediaMtxSyncService>());
+builder.Services.AddHttpClient("github", c =>
+{
+    c.BaseAddress = new Uri("https://api.github.com/");
+    c.Timeout = TimeSpan.FromSeconds(15);
+    c.DefaultRequestHeaders.UserAgent.ParseAdd($"MediaMtxPanel/{BuildInfo.Version}");
+    c.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
+});
+builder.Services.AddSingleton<UpdateChecker>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<UpdateChecker>());
 
 // Keep the cookie encryption keys next to the database so logins survive container restarts.
 var keysDir = builder.Configuration["Panel:DataProtectionKeysPath"];
@@ -100,6 +118,21 @@ app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages:
 if (app.Configuration.GetValue("Panel:HttpsRedirect", false))
     app.UseHttpsRedirection();
 
+// Language: the visitor's own choice (cookie), otherwise the default language from Settings.
+var supportedCultures = TextLocalizer.Codes;
+app.UseRequestLocalization(o =>
+{
+    o.SetDefaultCulture(TextLocalizer.DefaultLanguage)
+        .AddSupportedCultures(supportedCultures)
+        .AddSupportedUICultures(supportedCultures);
+    o.RequestCultureProviders =
+    [
+        new CookieRequestCultureProvider(),
+        new CustomRequestCultureProvider(_ =>
+            Task.FromResult<ProviderCultureResult?>(new(settingsStore.Current.DefaultLanguage))),
+    ];
+});
+
 app.UseRequiredPasswordChange();
 app.UseAntiforgery();
 
@@ -110,5 +143,6 @@ app.MapRazorComponents<App>()
 app.MapAdditionalIdentityEndpoints();
 app.MapMediaMtxAuth();
 app.MapPaymentEndpoints();
+app.MapLanguageEndpoint();
 
 app.Run();

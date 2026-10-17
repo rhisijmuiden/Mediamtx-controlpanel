@@ -1,23 +1,23 @@
 @inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
+<div class="app-shell">
+    <aside class="sidebar">
         <NavMenu />
-    </div>
+    </aside>
 
-    <main>
-        <div class="top-row px-4">
+    <main class="app-main">
+        <header class="topbar">
             <MediaMtxStatusBadge />
-        </div>
+        </header>
 
-        <article class="content px-4">
+        <article class="content">
             @Body
         </article>
     </main>
 </div>
 
 <div id="blazor-error-ui" data-nosnippet>
-    An unexpected error has occurred.
-    <a href="." class="reload">Reload</a>
+    @L["An unexpected error has occurred."]
+    <a href="." class="reload">@L["Reload"]</a>
     <span class="dismiss">🗙</span>
 </div>

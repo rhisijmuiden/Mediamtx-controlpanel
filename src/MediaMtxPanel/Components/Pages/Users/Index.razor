@@ -3,69 +3,173 @@
 @rendermode InteractiveServer
 @inject UserAdminService UserAdmin
 
-<PageTitle>Users</PageTitle>
+<AppPageTitle Text="@L["Users"]" />
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="mb-0">Users</h1>
-    <a class="btn btn-primary" href="users/new">+ New user</a>
+<div class="page-header">
+    <div>
+        <h1><i class="bi bi-people text-primary"></i> @L["Users"]</h1>
+        <p class="page-subtitle">@L["Create accounts and decide what each person can do. There is no open registration: only administrators add people."]</p>
+    </div>
+    <div class="page-actions">
+        <a class="btn btn-primary" href="users/new"><i class="bi bi-person-plus"></i> @L["New user"]</a>
+    </div>
 </div>
 
 @if (message is not null)
 {
-    <div class="alert alert-@(isError ? "danger" : "info")">@message</div>
+    <div class="alert alert-@(isError ? "danger" : "success") d-flex align-items-center gap-2">
+        <i class="bi @(isError ? "bi-exclamation-octagon" : "bi-check-circle")"></i> @message
+    </div>
 }
+
+<div class="row g-3 mb-4">
+    @foreach (var role in RoleBlocks)
+    {
+        <div class="col-md-4">
+            <div class="action-card">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="action-icon @role.Color"><i class="bi @role.Icon"></i></div>
+                    <span class="badge text-bg-light border">@L["{0} account(s)", users?.Count(u => u.Role == role.Role) ?? 0]</span>
+                </div>
+                <h3>@L[Roles.Label(role.Role)]</h3>
+                <p>@L[role.Description]</p>
+                <ul>
+                    @foreach (var can in role.Can)
+                    {
+                        <li>@L[can]</li>
+                    }
+                </ul>
+                <div class="action-footer">
+                    <a class="btn btn-sm btn-outline-primary" href="users/new?role=@role.Role"><i class="bi bi-plus-lg"></i> @L[role.AddLabel]</a>
+                    <button type="button" class="btn btn-sm btn-link text-decoration-none" @onclick="() => filter = role.Role">@L["Show"]</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+    <h2 class="h5 mb-0">@L["All accounts"]</h2>
+    <div class="d-flex flex-wrap gap-2">
+        <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn @(filter is null ? "btn-primary" : "btn-outline-secondary")" @onclick="() => filter = null">@L["All"]</button>
+            @foreach (var role in RoleBlocks)
+            {
+                <button type="button" class="btn @(filter == role.Role ? "btn-primary" : "btn-outline-secondary")" @onclick="() => filter = role.Role">@L[Roles.Label(role.Role)]</button>
+            }
+        </div>
+        <div class="input-group input-group-sm" style="width: 16rem">
+            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+            <input class="form-control" placeholder="@L["Search by name or email"]" @bind="search" @bind:event="oninput" />
+        </div>
+    </div>
+</div>
 
 @if (users is null)
 {
-    <p>Loading…</p>
+    <p class="text-secondary"><span class="spinner-border spinner-border-sm me-2"></span>@L["Loading…"]</p>
+}
+else if (!Visible.Any())
+{
+    <div class="empty-state">
+        <i class="bi bi-person-x"></i>
+        @L["No accounts match this filter."]
+    </div>
 }
 else
 {
-    <div class="table-responsive">
-        <table class="table table-hover align-middle">
-            <thead>
-                <tr><th>Email address</th><th>Name</th><th>Role</th><th class="text-end">Streams</th><th>Status</th><th>Created</th><th></th></tr>
-            </thead>
-            <tbody>
-                @foreach (var u in users)
-                {
-                    <tr>
-                        <td>@u.Email @if (u.Id == myId) { <span class="badge text-bg-light border">you</span> }</td>
-                        <td>@(u.DisplayName ?? "–")</td>
-                        <td>@Roles.Label(u.Role)</td>
-                        <td class="text-end">@u.StreamCount</td>
-                        <td>@if (u.Locked) { <span class="badge text-bg-danger">Blocked</span> } else { <span class="badge text-bg-success">Active</span> }</td>
-                        <td class="small">@u.CreatedAt.ToLocalTime().ToString("d")</td>
-                        <td class="text-end text-nowrap">
-                            <a class="btn btn-sm btn-outline-primary" href="users/@u.Id">Edit</a>
+    <div class="row g-3">
+        @foreach (var u in Visible)
+        {
+            <div class="col-md-6 col-xl-4">
+                <div class="card entity-card h-100">
+                    <div class="card-body">
+                        <div class="entity-head">
+                            <span class="avatar role-@u.Role">@Initial(u)</span>
+                            <div class="min-w-0 flex-grow-1" style="min-width:0">
+                                <div class="entity-title">
+                                    @(u.DisplayName ?? u.Email)
+                                    @if (u.Id == myId)
+                                    {
+                                        <span class="badge text-bg-light border ms-1">@L["you"]</span>
+                                    }
+                                </div>
+                                <div class="entity-sub">@u.Email</div>
+                            </div>
+                        </div>
+                        <div class="entity-meta">
+                            <span class="badge @RoleBadge(u.Role)">@L[Roles.Label(u.Role)]</span>
+                            @if (u.Locked)
+                            {
+                                <span class="badge bg-danger-subtle text-danger-emphasis badge-dot">@L["Blocked"]</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success-subtle text-success-emphasis badge-dot">@L["Active"]</span>
+                            }
+                            <span class="badge text-bg-light border"><i class="bi bi-camera-video me-1"></i>@L["{0} stream(s)", u.StreamCount]</span>
+                            <span class="badge text-bg-light border"><i class="bi bi-calendar3 me-1"></i>@u.CreatedAt.ToLocalTime().ToString("d")</span>
+                        </div>
+                        <div class="entity-actions">
+                            <a class="btn btn-sm btn-outline-primary" href="users/@u.Id"><i class="bi bi-pencil"></i> @L["Edit"]</a>
                             @if (u.Id != myId)
                             {
-                                <button class="btn btn-sm btn-outline-secondary" @onclick="() => ToggleLock(u)">@(u.Locked ? "Unblock" : "Block")</button>
+                                <button class="btn btn-sm btn-outline-secondary" @onclick="() => ToggleLock(u)" title="@(u.Locked ? L["Allow this account to log in again"] : L["Sign this account out and stop it from logging in"])">
+                                    <i class="bi @(u.Locked ? "bi-unlock" : "bi-slash-circle")"></i> @(u.Locked ? L["Unblock"] : L["Block"])
+                                </button>
                                 @if (confirmDelete == u.Id)
                                 {
-                                    <button class="btn btn-sm btn-danger" @onclick="() => Delete(u)">Confirm</button>
+                                    <button class="btn btn-sm btn-danger" @onclick="() => Delete(u)"><i class="bi bi-trash"></i> @L["Confirm delete"]</button>
+                                    <button class="btn btn-sm btn-outline-secondary" @onclick="() => confirmDelete = null">@L["Cancel"]</button>
                                 }
                                 else
                                 {
-                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => confirmDelete = u.Id">Delete</button>
+                                    <button class="btn btn-sm btn-outline-danger ms-auto btn-icon" title="@L["Delete"]" @onclick="() => confirmDelete = u.Id"><i class="bi bi-trash"></i></button>
                                 }
                             }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
 }
 
 @code {
     [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
 
+    private record RoleBlock(string Role, string Icon, string Color, string Description, string[] Can, string AddLabel);
+
+    // English texts; translated through L[...] when shown.
+    private static readonly RoleBlock[] RoleBlocks =
+    [
+        new(Roles.Admin, "bi-shield-lock", "danger",
+            "Full control over the panel.",
+            ["Manage all streams of everyone", "Add and configure MediaMTX servers", "Create, block and delete accounts", "Change the panel's settings"],
+            "Add administrator"),
+        new(Roles.User, "bi-person-workspace", "",
+            "Operators who run their own streams.",
+            ["Create and edit their own streams", "See live status and viewers", "Copy publish and view addresses for OBS, ffmpeg and players"],
+            "Add user"),
+        new(Roles.Customer, "bi-person-video3", "info",
+            "Clients who broadcast on streams you assign to them.",
+            ["Only see the customer portal", "Watch a live preview and statistics", "Sell tickets behind a paywall (iDEAL, PayPal)"],
+            "Add customer"),
+    ];
+
     private List<UserSummary>? users;
     private string myId = "";
     private string? confirmDelete;
     private string? message;
     private bool isError;
+    private string? filter;
+    private string search = "";
+
+    private IEnumerable<UserSummary> Visible => (users ?? [])
+        .Where(u => filter is null || u.Role == filter)
+        .Where(u => string.IsNullOrWhiteSpace(search)
+                    || u.Email.Contains(search, StringComparison.OrdinalIgnoreCase)
+                    || (u.DisplayName?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false));
 
     protected override async Task OnInitializedAsync()
     {
@@ -73,10 +177,19 @@ else
         users = await UserAdmin.ListAsync();
     }
 
+    private static string Initial(UserSummary u) => (u.DisplayName ?? u.Email) is { Length: > 0 } n ? n[..1].ToUpperInvariant() : "?";
+
+    private static string RoleBadge(string role) => role switch
+    {
+        Roles.Admin => "bg-danger-subtle text-danger-emphasis",
+        Roles.Customer => "bg-info-subtle text-info-emphasis",
+        _ => "bg-primary-subtle text-primary-emphasis",
+    };
+
     private async Task ToggleLock(UserSummary u)
     {
         var r = await UserAdmin.SetLockedAsync(u.Id, !u.Locked, myId);
-        Report(r, u.Locked ? $"{u.Email} has been unblocked." : $"{u.Email} has been blocked and signed out.");
+        Report(r, u.Locked ? L["{0} has been unblocked.", u.Email] : L["{0} has been blocked and signed out.", u.Email]);
         users = await UserAdmin.ListAsync();
     }
 
@@ -84,7 +197,7 @@ else
     {
         confirmDelete = null;
         var r = await UserAdmin.DeleteAsync(u.Id, myId);
-        Report(r, $"{u.Email} has been deleted. Any streams of this user remain, without an owner.");
+        Report(r, L["{0} has been deleted. Any streams of this user remain, without an owner.", u.Email]);
         users = await UserAdmin.ListAsync();
     }
 
