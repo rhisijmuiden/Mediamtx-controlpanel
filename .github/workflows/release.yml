@@ -1,0 +1,97 @@
+name: Release
+
+# Publishes a GitHub release. Installed panels pick it up through their release channel
+# (Settings > General > Release channel, or the channel menu under Info):
+#   - Stable channel: finished releases only.
+#   - Test channel:   prereleases as well.
+#
+# Run it from the Actions tab ("Run workflow") and pick a channel:
+#   - test   → tag v<Version>-test.<n>, published as a prerelease. When v<Version> was already
+#              released, the next patch version is used (v1.2.1-test.1 after v1.2.0), so test
+#              versions always count as newer than the last stable release.
+#   - stable → tag v<Version>, a normal release. Bump <Version> in MediaMtxPanel.csproj first.
+# Pushing a tag by hand works too: a tag with a hyphen (v1.3.0-beta.1) becomes a prerelease.
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: Release channel
+        type: choice
+        options: [test, stable]
+        default: test
+  push:
+    tags: ["v*"]
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  DOTNET_NOLOGO: "1"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Pick the tag
+        id: tag
+        env:
+          CHANNEL: ${{ inputs.channel }}
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
+            tag="$GITHUB_REF_NAME"
+          else
+            version="$(grep -oP '(?<=<Version>)[^<]+' src/MediaMtxPanel/MediaMtxPanel.csproj)"
+            if [[ "$CHANNEL" == "stable" ]]; then
+              tag="v$version"
+              if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+                echo "::error::$tag already exists. Raise <Version> in src/MediaMtxPanel/MediaMtxPanel.csproj first."
+                exit 1
+              fi
+            else
+              if git rev-parse -q --verify "refs/tags/v$version" >/dev/null; then
+                IFS=. read -r major minor patch <<<"$version"
+                version="$major.$minor.$((patch + 1))"
+              fi
+              n=1
+              while git rev-parse -q --verify "refs/tags/v$version-test.$n" >/dev/null; do n=$((n + 1)); done
+              tag="v$version-test.$n"
+            fi
+          fi
+          if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::'$tag' is not a release tag like v1.2.0 or v1.3.0-test.1."
+            exit 1
+          fi
+          prerelease=false
+          [[ "$tag" == *-* ]] && prerelease=true
+          {
+            echo "tag=$tag"
+            echo "version=${tag#v}"
+            echo "prerelease=$prerelease"
+          } >>"$GITHUB_OUTPUT"
+          echo "Release $tag (prerelease: $prerelease)" >>"$GITHUB_STEP_SUMMARY"
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - name: Build and test
+        run: |
+          dotnet publish src/MediaMtxPanel/MediaMtxPanel.csproj -c Release -o publish \
+            -p:Version=${{ steps.tag.outputs.version }} -p:SourceRevisionId=${{ github.sha }}
+          dotnet test MediaMtxPanel.slnx
+          python3 tools/check-translations.py
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.tag.outputs.tag }}
+          PRERELEASE: ${{ steps.tag.outputs.prerelease }}
+        run: |
+          flags=(--title "$TAG" --generate-notes --target "$GITHUB_SHA")
+          [[ "$PRERELEASE" == "true" ]] && flags+=(--prerelease) || flags+=(--latest)
+          gh release create "$TAG" "${flags[@]}"

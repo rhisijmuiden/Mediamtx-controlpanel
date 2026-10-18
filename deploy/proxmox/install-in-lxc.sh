@@ -18,6 +18,8 @@ PANEL_HOST="${PANEL_HOST:-$(hostname -I | awk '{print $1}')}"
 PUBLIC_HOST="${PUBLIC_HOST:-$PANEL_HOST}"
 SET_LOCALE="${SET_LOCALE:-yes}"                # make en_US.UTF-8 the system language (no = leave it alone)
 LOG_TAG="${LOG_TAG:-lxc}"
+PANEL_VERSION="${PANEL_VERSION:-}"             # version of the release being installed (empty = from the sources)
+RELEASE_CHANNEL="${RELEASE_CHANNEL:-stable}"   # stable | test; a new installation starts on this channel
 
 WORK=/tmp/mediamtx-panel-install
 SOURCE_TARBALL="${SOURCE_TARBALL:-$WORK/source.tar.gz}"
@@ -76,6 +78,7 @@ build_panel() {
   export DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1
   local revision=()
   [[ -n "${SOURCE_COMMIT:-}" ]] && revision=("-p:SourceRevisionId=${SOURCE_COMMIT}")
+  [[ -n "$PANEL_VERSION" ]] && revision+=("-p:Version=${PANEL_VERSION}")
   dotnet publish "$WORK/src/src/MediaMtxPanel/MediaMtxPanel.csproj" -c Release -o "$WORK/publish" -v quiet -nologo "${revision[@]}"
   mkdir -p "$APP_DIR"
   # Replace the application files but keep nothing else in APP_DIR.
@@ -141,6 +144,11 @@ configure_panel() {
   mkdir -p "$DATA_DIR/keys" "$CONF_DIR"
   chown -R mediamtx-panel:mediamtx-panel "$DATA_DIR"
   chmod 0750 "$DATA_DIR"
+  # The panel keeps its release channel in panel-settings.json; Stable is its default.
+  if [[ "$RELEASE_CHANNEL" == "test" && ! -f "$DATA_DIR/panel-settings.json" ]]; then
+    echo '{ "ReleaseChannel": "Test" }' >"$DATA_DIR/panel-settings.json"
+    chown mediamtx-panel:mediamtx-panel "$DATA_DIR/panel-settings.json"
+  fi
 
   local api_password
   api_password="$(random_secret 32)"

@@ -44,7 +44,21 @@
                     <dd>@Environment.Version</dd>
                 </dl>
 
-                <h3 class="h6 mb-2">@L["Updates"]</h3>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <h3 class="h6 mb-0 me-auto">@L["Updates"]</h3>
+                    <AuthorizeView Roles="@Roles.Admin">
+                        <Authorized>
+                            <label class="small text-secondary" for="release-channel">@L["Release channel"]</label>
+                            <select id="release-channel" class="form-select form-select-sm w-auto" value="@Settings.Current.ReleaseChannel" @onchange="ChangeChannel" disabled="@Updates.Checking">
+                                <option value="@ReleaseChannel.Stable">@L["Stable release"]</option>
+                                <option value="@ReleaseChannel.Test">@L["Test release"]</option>
+                            </select>
+                        </Authorized>
+                        <NotAuthorized>
+                            <span class="badge text-bg-light">@ChannelName(Settings.Current.ReleaseChannel)</span>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                </div>
                 @{ var s = Updates.Status; }
                 @if (Updates.Checking)
                 {
@@ -74,6 +88,10 @@
                             else
                             {
                                 @L["Latest version: {0}", s.Latest ?? ""]
+                                @if (s.Prerelease)
+                                {
+                                    <span class="badge text-bg-warning ms-1">@L["Test version"]</span>
+                                }
                             }
                             @if (s.Url is not null)
                             {
@@ -126,6 +144,17 @@
     protected override void OnInitialized() => Updates.Changed += OnChanged;
 
     private async Task CheckNow() => await Updates.CheckAsync();
+
+    private string ChannelName(ReleaseChannel c) => c == ReleaseChannel.Test ? L["Test release"] : L["Stable release"];
+
+    // Admins only (the select is not shown to others). Saved right away and checked again for the new channel.
+    private async Task ChangeChannel(ChangeEventArgs e)
+    {
+        if (!Enum.TryParse<ReleaseChannel>(e.Value?.ToString(), out var channel) || channel == Settings.Current.ReleaseChannel)
+            return;
+        Settings.Save(Settings.Current with { ReleaseChannel = channel });
+        await Updates.CheckAsync();
+    }
 
     private void OnChanged() => _ = InvokeAsync(StateHasChanged);
 

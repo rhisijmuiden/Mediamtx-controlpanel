@@ -249,10 +249,10 @@
     "de": "Allgemeine Einstellungen",
     "fr": "Paramètres généraux"
   },
-  "The name of the panel, the default language and automatic update checks. These settings apply to everyone.": {
-    "nl": "De naam van het paneel, de standaardtaal en automatische updatecontroles. Deze instellingen gelden voor iedereen.",
-    "de": "Der Name des Panels, die Standardsprache und automatische Update-Prüfungen. Diese Einstellungen gelten für alle.",
-    "fr": "Le nom du panneau, la langue par défaut et la vérification automatique des mises à jour. Ces paramètres s'appliquent à tous."
+  "The name of the panel, the default language and updates. These settings apply to everyone.": {
+    "nl": "De naam van het paneel, de standaardtaal en updates. Deze instellingen gelden voor iedereen.",
+    "de": "Der Name des Panels, die Standardsprache und Updates. Diese Einstellungen gelten für alle.",
+    "fr": "Le nom du panneau, la langue par défaut et les mises à jour. Ces paramètres s'appliquent à tous."
   },
   "Settings saved.": {
     "nl": "Instellingen opgeslagen.",

@@ -9,7 +9,9 @@
 #     bash -c "$(wget -qO- https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/debian/install.sh)"
 # or from a checkout of the repository:
 #     bash deploy/debian/install.sh
-# Without a checkout next to it, the script downloads the sources of $REPO_BRANCH from GitHub.
+# Without a checkout next to it, the script downloads the newest GitHub release of the release channel
+# (RELEASE_CHANNEL=stable or test; on update the channel chosen in the panel), or the sources of
+# $REPO_BRANCH while that channel has no release yet.
 #
 # In a terminal the script asks what to install: the panel together with a local MediaMTX, or only
 # the panel (you then add MediaMTX servers that run elsewhere under Servers in the panel).
@@ -34,7 +36,10 @@ INTERACTIVE="${INTERACTIVE:-yes}"                  # "no" = never ask, use the s
 
 # Where the sources come from when the script does not run from a checkout
 REPO="${REPO:-rhisijmuiden/Mediamtx-controlpanel}"
-REPO_BRANCH="${REPO_BRANCH:-main}"
+REPO_BRANCH_SET="${REPO_BRANCH:+yes}"              # set by hand: always build that branch
+REPO_BRANCH="${REPO_BRANCH:-main}"                 # used while the release channel has no release yet
+RELEASE_CHANNEL="${RELEASE_CHANNEL:-}"             # stable | test; empty = stable, on update: the panel's choice
+PANEL_VERSION=""
 
 MODE=install
 MIN_MEMORY_MB=1536                                 # building the panel needs ~1.5 GB (RAM + swap)
@@ -112,6 +117,25 @@ install_bootstrap_packages() {
   apt-get install -y -qq "${missing[@]}" >/dev/null
 }
 
+# Tag of the newest GitHub release of a release channel: stable = the newest release that is not a
+# prerelease, test = the newest release of either kind. Prints nothing when there is none (or GitHub
+# cannot be reached). The releases come newest first, and every release lists tag_name before
+# draft and prerelease.
+latest_release_tag() {
+  curl -fsSL "https://api.github.com/repos/${REPO}/releases?per_page=30" 2>/dev/null | awk -v channel="$1" '
+    /^ *"tag_name": / { tag = $2; gsub(/[",]/, "", tag) }
+    /^ *"draft": / { draft = ($2 ~ /true/) }
+    /^ *"prerelease": / {
+      if (tag != "" && !draft && (channel == "test" || $2 ~ /false/)) { print tag; exit }
+      tag = ""
+    }' || true
+}
+
+# The release channel chosen in the panel (Settings > General), read from its panel-settings.json on stdin.
+channel_from_settings() {
+  grep -oE '"ReleaseChannel": *"[A-Za-z]+"' | grep -oiE 'stable|test' | tr '[:upper:]' '[:lower:]' | head -n1 || true
+}
+
 # Downloads the sources from GitHub when there is no checkout next to the script.
 # SOURCE_COMMIT ends up in the panel's Info screen and is used for its update check.
 fetch_sources() {
@@ -121,12 +145,22 @@ fetch_sources() {
   fi
   SOURCE_TMP="$(mktemp -d)"
   trap 'rm -rf "$SOURCE_TMP"' EXIT
-  info "Downloading the panel from github.com/${REPO} (${REPO_BRANCH})…"
-  local ref="refs/heads/${REPO_BRANCH}"
-  SOURCE_COMMIT="$(curl -fsSL -H 'Accept: application/vnd.github.sha' "https://api.github.com/repos/${REPO}/commits/${REPO_BRANCH}" 2>/dev/null || true)"
+  # A release of the chosen channel when there is one, otherwise the branch (or REPO_BRANCH when it was set).
+  local channel="${RELEASE_CHANNEL:-stable}" what tag="" ref="${REPO_BRANCH:-main}"
+  [[ -n "$REPO_BRANCH_SET" ]] || tag="$(latest_release_tag "$channel")"
+  if [[ -n "$tag" ]]; then
+    ref="$tag"
+    PANEL_VERSION="${tag#[vV]}"
+    what="release ${tag}, ${channel} channel"
+  else
+    what="branch ${ref}"
+    [[ -n "$REPO_BRANCH_SET" ]] || what+=", no ${channel} release yet"
+  fi
+  info "Downloading the panel from github.com/${REPO} (${what})…"
+  SOURCE_COMMIT="$(curl -fsSL -H 'Accept: application/vnd.github.sha' "https://api.github.com/repos/${REPO}/commits/${ref}" 2>/dev/null || true)"
   [[ "$SOURCE_COMMIT" =~ ^[0-9a-f]{40}$ ]] && ref="$SOURCE_COMMIT" || SOURCE_COMMIT=""
   curl -fsSL "https://codeload.github.com/${REPO}/tar.gz/${ref}" | tar -xz -C "$SOURCE_TMP" --strip-components=1 \
-    || die "Could not download https://github.com/${REPO} (branch ${REPO_BRANCH})."
+    || die "Could not download https://github.com/${REPO} (${what})."
   PROJECT_DIR="$SOURCE_TMP"
 }
 
@@ -141,7 +175,8 @@ run_installer() {
   chmod 0700 "$WORK"
   tar -C "$PROJECT_DIR" --exclude='bin' --exclude='obj' --exclude='*.db' -czf "$WORK/source.tar.gz" src deploy
   # SET_LOCALE=no: unlike in a fresh container, this machine's language is the owner's choice.
-  env "$@" SET_LOCALE=no LOG_TAG=install SOURCE_COMMIT="${SOURCE_COMMIT:-}" bash "$installer"
+  env "$@" SET_LOCALE=no LOG_TAG=install SOURCE_COMMIT="${SOURCE_COMMIT:-}" PANEL_VERSION="${PANEL_VERSION:-}" \
+    RELEASE_CHANNEL="${RELEASE_CHANNEL:-stable}" bash "$installer"
 }
 
 machine_ip() { hostname -I 2>/dev/null | awk '{print $1}'; }
@@ -262,6 +297,9 @@ preflight
 if [[ "$MODE" == "update" ]]; then
   [[ -f "$CONF_FILE" ]] || die "No installation found ($CONF_FILE is missing). Run the script without 'update' to install."
   install_bootstrap_packages
+  if [[ -z "$RELEASE_CHANNEL" && -f /var/lib/mediamtx-panel/panel-settings.json ]]; then
+    RELEASE_CHANNEL="$(channel_from_settings </var/lib/mediamtx-panel/panel-settings.json)"
+  fi
   fetch_sources
   info "Updating the panel (this takes a few minutes)…"
   run_installer MODE=update

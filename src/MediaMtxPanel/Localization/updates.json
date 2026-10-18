@@ -1,0 +1,37 @@
+{
+  "Release channel": {
+    "nl": "Releasekanaal",
+    "de": "Release-Kanal",
+    "fr": "Canal de publication"
+  },
+  "Stable release": {
+    "nl": "Stabiele release",
+    "de": "Stabile Version",
+    "fr": "Version stable"
+  },
+  "Test release": {
+    "nl": "Testrelease",
+    "de": "Testversion",
+    "fr": "Version de test"
+  },
+  "Test version": {
+    "nl": "Testversie",
+    "de": "Testversion",
+    "fr": "Version de test"
+  },
+  "Only finished releases. Recommended for production.": {
+    "nl": "Alleen afgeronde releases. Aanbevolen voor productie.",
+    "de": "Nur fertige Versionen. Empfohlen für den Produktivbetrieb.",
+    "fr": "Uniquement les versions finalisées. Recommandé pour la production."
+  },
+  "Also test versions (prereleases): new features earlier, but they may contain bugs.": {
+    "nl": "Ook testversies (prereleases): nieuwe functies eerder, maar ze kunnen fouten bevatten.",
+    "de": "Auch Testversionen (Vorabversionen): neue Funktionen früher, sie können aber Fehler enthalten.",
+    "fr": "Aussi les versions de test (préversions) : les nouveautés plus tôt, mais elles peuvent contenir des bugs."
+  },
+  "The update command of the installers installs the newest version of this channel.": {
+    "nl": "Het updatecommando van de installers installeert de nieuwste versie van dit kanaal.",
+    "de": "Der Update-Befehl der Installer installiert die neueste Version dieses Kanals.",
+    "fr": "La commande de mise à jour des installateurs installe la version la plus récente de ce canal."
+  }
+}

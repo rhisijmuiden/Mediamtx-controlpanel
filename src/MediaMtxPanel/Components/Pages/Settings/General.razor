@@ -9,7 +9,7 @@
 <div class="page-header">
     <div>
         <h1><i class="bi bi-sliders text-primary"></i> @L["General settings"]</h1>
-        <p class="page-subtitle">@L["The name of the panel, the default language and automatic update checks. These settings apply to everyone."]</p>
+        <p class="page-subtitle">@L["The name of the panel, the default language and updates. These settings apply to everyone."]</p>
     </div>
 </div>
 
@@ -60,7 +60,24 @@
                     <input class="form-check-input" type="checkbox" role="switch" id="autoupdate" @bind="autoUpdate" />
                     <label class="form-check-label" for="autoupdate">@L["Check for updates every 24 hours"]</label>
                 </div>
-                <div class="form-text">@L["You can always check by hand under Info."]</div>
+                <div class="form-text mb-3">@L["You can always check by hand under Info."]</div>
+
+                <div class="form-label">@L["Release channel"]</div>
+                <div class="row g-2">
+                    @foreach (var (value, icon, title, text) in Channels)
+                    {
+                        <div class="col-md-6">
+                            <label class="action-card p-3 flex-row align-items-start gap-2 h-100 @(channel == value ? "border-primary" : null)" style="cursor:pointer">
+                                <input class="form-check-input mt-1" type="radio" name="channel" checked="@(channel == value)" @onchange="() => channel = value" />
+                                <span>
+                                    <strong><i class="bi @icon me-1"></i>@title</strong>
+                                    <span class="d-block small text-secondary">@text</span>
+                                </span>
+                            </label>
+                        </div>
+                    }
+                </div>
+                <div class="form-text">@L["The update command of the installers installs the newest version of this channel."]</div>
             </div>
         </section>
     </div>
@@ -76,6 +93,7 @@
     private string appName = "";
     private string language = TextLocalizer.DefaultLanguage;
     private bool autoUpdate;
+    private ReleaseChannel channel;
     private bool saved;
 
     protected override void OnInitialized()
@@ -84,12 +102,19 @@
         appName = s.AppName == PanelSettings.DefaultAppName ? "" : s.AppName;
         language = s.DefaultLanguage;
         autoUpdate = s.AutoUpdateCheck;
+        channel = s.ReleaseChannel;
         saved = Saved;
     }
 
+    private IEnumerable<(ReleaseChannel, string, string, string)> Channels =>
+    [
+        (ReleaseChannel.Stable, "bi-shield-check", L["Stable release"], L["Only finished releases. Recommended for production."]),
+        (ReleaseChannel.Test, "bi-cone-striped", L["Test release"], L["Also test versions (prereleases): new features earlier, but they may contain bugs."]),
+    ];
+
     private void Save()
     {
-        Store.Save(Store.Current with { AppName = appName, DefaultLanguage = language, AutoUpdateCheck = autoUpdate });
+        Store.Save(Store.Current with { AppName = appName, DefaultLanguage = language, AutoUpdateCheck = autoUpdate, ReleaseChannel = channel });
         // Reload the whole page so the menu and the language pick up the change.
         Nav.NavigateTo("settings?saved=true", forceLoad: true);
     }
