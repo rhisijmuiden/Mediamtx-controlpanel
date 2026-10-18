@@ -5,7 +5,9 @@
 #     bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/proxmox/create-lxc.sh)"
 # or from a checkout of the repository:
 #     bash deploy/proxmox/create-lxc.sh
-# Without a checkout next to it, the script downloads the sources of $REPO_BRANCH from GitHub.
+# Without a checkout next to it, the script downloads the newest GitHub release of the release channel
+# (RELEASE_CHANNEL=stable or test; on update the channel chosen in the panel), or the sources of
+# $REPO_BRANCH while that channel has no release yet.
 #
 # Update the panel in an existing container to the latest code:
 #     bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/proxmox/create-lxc.sh)" _ update <CTID>
@@ -48,7 +50,10 @@ INTERACTIVE="${INTERACTIVE:-yes}"                 # "no" = never ask, use the se
 
 # Where the sources come from when the script does not run from a checkout
 REPO="${REPO:-rhisijmuiden/Mediamtx-controlpanel}"
-REPO_BRANCH="${REPO_BRANCH:-main}"
+REPO_BRANCH_SET="${REPO_BRANCH:+yes}"              # set by hand: always build that branch
+REPO_BRANCH="${REPO_BRANCH:-main}"                 # used while the release channel has no release yet
+RELEASE_CHANNEL="${RELEASE_CHANNEL:-}"             # stable | test; empty = stable, on update: the panel's choice
+PANEL_VERSION=""
 
 # Container OS: Debian 13. TEMPLATE_NAME picks a specific debian-13 template build.
 TEMPLATE_NAME="${TEMPLATE_NAME:-debian-13-standard}"
@@ -71,6 +76,25 @@ if [[ -n "${BASH_SOURCE[0]:-}" && -f "${BASH_SOURCE[0]}" ]]; then
   PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 fi
 
+# Tag of the newest GitHub release of a release channel: stable = the newest release that is not a
+# prerelease, test = the newest release of either kind. Prints nothing when there is none (or GitHub
+# cannot be reached). The releases come newest first, and every release lists tag_name before
+# draft and prerelease.
+latest_release_tag() {
+  curl -fsSL "https://api.github.com/repos/${REPO}/releases?per_page=30" 2>/dev/null | awk -v channel="$1" '
+    /^ *"tag_name": / { tag = $2; gsub(/[",]/, "", tag) }
+    /^ *"draft": / { draft = ($2 ~ /true/) }
+    /^ *"prerelease": / {
+      if (tag != "" && !draft && (channel == "test" || $2 ~ /false/)) { print tag; exit }
+      tag = ""
+    }' || true
+}
+
+# The release channel chosen in the panel (Settings > General), read from its panel-settings.json on stdin.
+channel_from_settings() {
+  grep -oE '"ReleaseChannel": *"[A-Za-z]+"' | grep -oiE 'stable|test' | tr '[:upper:]' '[:lower:]' | head -n1 || true
+}
+
 # Downloads the sources from GitHub when there is no checkout next to the script.
 # SOURCE_COMMIT ends up in the panel's Info screen and is used for its update check.
 fetch_sources() {
@@ -81,12 +105,22 @@ fetch_sources() {
   command -v curl >/dev/null || die "curl is needed to download the sources."
   SOURCE_TMP="$(mktemp -d)"
   trap 'rm -rf "$SOURCE_TMP"' EXIT
-  info "Downloading the panel from github.com/${REPO} (${REPO_BRANCH})…"
-  local ref="refs/heads/${REPO_BRANCH}"
-  SOURCE_COMMIT="$(curl -fsSL -H 'Accept: application/vnd.github.sha' "https://api.github.com/repos/${REPO}/commits/${REPO_BRANCH}" 2>/dev/null || true)"
+  # A release of the chosen channel when there is one, otherwise the branch (or REPO_BRANCH when it was set).
+  local channel="${RELEASE_CHANNEL:-stable}" what tag="" ref="${REPO_BRANCH:-main}"
+  [[ -n "$REPO_BRANCH_SET" ]] || tag="$(latest_release_tag "$channel")"
+  if [[ -n "$tag" ]]; then
+    ref="$tag"
+    PANEL_VERSION="${tag#[vV]}"
+    what="release ${tag}, ${channel} channel"
+  else
+    what="branch ${ref}"
+    [[ -n "$REPO_BRANCH_SET" ]] || what+=", no ${channel} release yet"
+  fi
+  info "Downloading the panel from github.com/${REPO} (${what})…"
+  SOURCE_COMMIT="$(curl -fsSL -H 'Accept: application/vnd.github.sha' "https://api.github.com/repos/${REPO}/commits/${ref}" 2>/dev/null || true)"
   [[ "$SOURCE_COMMIT" =~ ^[0-9a-f]{40}$ ]] && ref="$SOURCE_COMMIT" || SOURCE_COMMIT=""
   curl -fsSL "https://codeload.github.com/${REPO}/tar.gz/${ref}" | tar -xz -C "$SOURCE_TMP" --strip-components=1 \
-    || die "Could not download https://github.com/${REPO} (branch ${REPO_BRANCH})."
+    || die "Could not download https://github.com/${REPO} (${what})."
   PROJECT_DIR="$SOURCE_TMP"
   SCRIPT_DIR="$SOURCE_TMP/deploy/proxmox"
 }
@@ -115,7 +149,8 @@ push_and_install() {
   # Start from a clean environment: pct exec passes on the host shell's variables, such as a
   # LANG the container has no locale for and an XDG_RUNTIME_DIR (/run/user/0) that does not exist there.
   pct exec "$id" -- env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
-    HOME=/root LANG=C.UTF-8 LC_ALL=C.UTF-8 TERM="${TERM:-xterm}" SOURCE_COMMIT="${SOURCE_COMMIT:-}" "$@" bash /tmp/mediamtx-panel-install/install-in-lxc.sh
+    HOME=/root LANG=C.UTF-8 LC_ALL=C.UTF-8 TERM="${TERM:-xterm}" SOURCE_COMMIT="${SOURCE_COMMIT:-}" PANEL_VERSION="${PANEL_VERSION:-}" \
+    RELEASE_CHANNEL="${RELEASE_CHANNEL:-stable}" "$@" bash /tmp/mediamtx-panel-install/install-in-lxc.sh
 }
 
 wait_for_network() {
@@ -286,10 +321,11 @@ ask_settings() {
 # ---------------------------------------------------------------- update mode
 if [[ "${1:-}" == "update" ]]; then
   preflight
-  prepare_sources
   id="${2:-}"
   [[ -n "$id" ]] || die "Usage: $0 update <CTID>"
   pct status "$id" | grep -q running || pct start "$id"
+  [[ -n "$RELEASE_CHANNEL" ]] || RELEASE_CHANNEL="$(pct exec "$id" -- cat /var/lib/mediamtx-panel/panel-settings.json 2>/dev/null | channel_from_settings || true)"
+  prepare_sources
   wait_for_network "$id"
   info "Updating the panel in container $id…"
   push_and_install "$id" MODE=update

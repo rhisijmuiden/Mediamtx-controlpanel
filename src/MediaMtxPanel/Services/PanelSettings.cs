@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using MediaMtxPanel.Services.Localization;
 using Microsoft.Data.Sqlite;
@@ -24,8 +25,20 @@ public record PanelSettings
     /// <summary>Check GitHub for a newer version every 24 hours.</summary>
     public bool AutoUpdateCheck { get; init; } = true;
 
+    /// <summary>Which GitHub releases count as updates; the installers' update mode reads it too.</summary>
+    [JsonConverter(typeof(JsonStringEnumConverter<ReleaseChannel>))]
+    public ReleaseChannel ReleaseChannel { get; init; } = ReleaseChannel.Stable;
+
     /// <summary>Outgoing mail (password reset links and test mails). Null until configured.</summary>
     public MailSettings? Mail { get; init; }
+}
+
+public enum ReleaseChannel
+{
+    /// <summary>Only finished GitHub releases (not marked as prerelease).</summary>
+    Stable,
+    /// <summary>Prereleases as well: new versions arrive earlier, for testing.</summary>
+    Test,
 }
 
 public enum MailSecurity

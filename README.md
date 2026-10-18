@@ -13,7 +13,7 @@ A control panel for [MediaMTX](https://github.com/bluenviron/mediamtx), written 
 - **Customer portal and paywall**: customers see their own streams with a live preview and statistics, and sell tickets with iDEAL (Mollie) or PayPal.
 - **Settings**: application name, default language, web interface port and outgoing mail (any SMTP server).
 - **Languages**: English (default), Dutch, German and French; everyone can pick their own language.
-- **Info and updates**: the current version and build, with an update check against GitHub every 24 hours and on demand.
+- **Info and updates**: the current version and build, with an update check against GitHub every 24 hours and on demand, on a **Stable** or **Test** release channel.
 - **Proxmox**: create an LXC container with the panel and MediaMTX using a single command in the Proxmox shell (see [Proxmox LXC](#proxmox-lxc)).
 
 **Install on Proxmox VE** by pasting this into the Proxmox host shell (details in [Proxmox LXC](#proxmox-lxc)):
@@ -94,7 +94,7 @@ The top of the page explains each role in a block with what that role can do and
 
 Only administrators see *Settings*. The settings are stored in `panel-settings.json` next to the database, so they survive updates.
 
-- **General**: the application name (shown in the menu, browser tab and login page), the default language for visitors who have not chosen one, and whether the panel checks for updates every 24 hours.
+- **General**: the application name (shown in the menu, browser tab and login page), the default language for visitors who have not chosen one, whether the panel checks for updates every 24 hours, and the release channel (see [Release channels](#release-channels)).
 
   ![General settings](docs/screenshots/settings-general.png)
 
@@ -116,7 +116,25 @@ The panel is available in English, Dutch, German and French. English is the defa
 
 ![Info](docs/screenshots/info.png)
 
-The **Info** button at the bottom left shows the version, the build (git commit) and the build date. The panel checks GitHub for a newer version when it starts and then every 24 hours (switch this off under *Settings → General*); administrators can also check by hand with *Check for updates*. When the repository has releases, the latest release is compared with the version; otherwise the panel compares its build with the newest commit on `main`, which is what the Proxmox installer builds. A dot on the Info button means an update is available; the panel shows how to install it. Nothing is installed automatically.
+The **Info** button at the bottom left shows the version, the build (git commit) and the build date. The panel checks GitHub for a newer version when it starts and then every 24 hours (switch this off under *Settings → General*); administrators can also check by hand with *Check for updates*. The check follows the [release channel](#release-channels); while that channel has no release yet, the panel compares its build with the newest commit on `main`, which is what the installers then build. A dot on the Info button means an update is available; the panel shows how to install it. Nothing is installed automatically.
+
+### Release channels
+
+Administrators choose a release channel under *Settings → General* or in the Info window:
+
+| Channel | Gets | For |
+|---|---|---|
+| **Stable** (default) | finished GitHub releases only | production |
+| **Test** | prereleases as well (`v1.3.0-test.1`), plus every stable release | trying new versions early |
+
+The channel decides what the update check reports and what the installers install: the `update` command of the Proxmox and Debian installers reads the channel from the panel (`panel-settings.json`) and builds the newest release of that channel. Set `RELEASE_CHANNEL=test` (or `stable`) in front of the command to override it, for example on a first install; set `REPO_BRANCH` to build a branch instead of a release. Switching from Test back to Stable does not downgrade: the panel waits until a stable release is newer than the test version it runs.
+
+Releases are published with the **Release** workflow (*Actions → Release → Run workflow*):
+
+- **test** tags the chosen commit as `v<Version>-test.<n>` and publishes it as a prerelease. When `v<Version>` was already released, the next patch number is used, so a test version is always newer than the last stable release.
+- **stable** tags it as `v<Version>` (from `<Version>` in `src/MediaMtxPanel/MediaMtxPanel.csproj`) and publishes a normal release. Raise `<Version>` before each stable release.
+
+Pushing a tag by hand works too: a tag with a hyphen (`v1.4.0-beta.1`) becomes a prerelease, any other `v*` tag a stable release.
 
 ## Running with Docker
 
@@ -205,7 +223,7 @@ pct exec <CTID> -- systemctl restart mediamtx-panel     # restart after editing 
 
 ### Updating
 
-Run the same script with `update` and the container ID. The latest code from GitHub is built and installed. The database and settings are kept.
+Run the same script with `update` and the container ID. The newest release of the panel's [release channel](#release-channels) is built and installed (the latest code on `main` while there are no releases). The database and settings are kept.
 
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/proxmox/create-lxc.sh)" _ update <CTID>
@@ -315,7 +333,7 @@ Running `bash deploy/debian/install.sh` from a copy of this repository also work
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/debian/install.sh)" _ update
 ```
 
-The latest code is built and installed; the database and settings are kept. Running the installer again without `update` on a machine that already has the panel is refused, so the existing configuration is never overwritten.
+The newest release of the panel's [release channel](#release-channels) is built and installed (the latest code on `main` while there are no releases); the database and settings are kept. Running the installer again without `update` on a machine that already has the panel is refused, so the existing configuration is never overwritten.
 
 ### Removing
 
@@ -424,7 +442,7 @@ All settings live in `appsettings.json` and can be overridden with environment v
 | `MediaMtx__SyncIntervalSeconds` | `30` | Synchronization interval |
 | `Panel__SettingsPath` | next to the database | Where the settings from the Settings page are stored (`panel-settings.json`) |
 | `Panel__UpdateRepository` | `rhisijmuiden/Mediamtx-controlpanel` | GitHub repository for the update check (empty = no check) |
-| `Panel__UpdateBranch` | `main` | Branch compared when the repository has no releases |
+| `Panel__UpdateBranch` | `main` | Branch compared while the release channel has no release |
 | `Panel__PathBase` | empty | Serve the panel under this path, e.g. `/channel1` (see [Build My TV Station](#running-as-part-of-build-my-tv-station)) |
 | `Panel__ServiceToken` | empty | Bearer token with administrator rights on `/api/v1/` (at least 32 characters) |
 | `Panel__TrustedProxies` | empty | IPs or CIDRs whose `X-Forwarded-*` headers are believed (empty = any address, as before) |
