@@ -32,6 +32,10 @@ public partial class StreamInput : IValidatableObject
     public bool SourceOnDemand { get; set; }
     public bool Enabled { get; set; } = true;
     public bool Record { get; set; }
+
+    [Range(0, 3650, ErrorMessage = "Keep recordings between 0 and 3650 days.")]
+    public int RecordRetentionDays { get; set; } = StreamDefinition.DefaultRetentionDays;
+
     public bool PublicRead { get; set; }
 
     [Range(0, 10000)]
@@ -64,6 +68,7 @@ public partial class StreamInput : IValidatableObject
         SourceOnDemand = s.SourceOnDemand,
         Enabled = s.Enabled,
         Record = s.Record,
+        RecordRetentionDays = s.RecordRetentionDays,
         PublicRead = s.PublicRead,
         MaxReaders = s.MaxReaders,
         OwnerId = s.OwnerId,
@@ -266,6 +271,8 @@ public class StreamService(
         Source = s.SourceType == StreamSourceType.Pull ? s.SourceUrl : "publisher",
         SourceOnDemand = s.SourceType == StreamSourceType.Pull && s.SourceOnDemand,
         Record = s.Record,
+        // MediaMTX deletes recordings after one day unless told otherwise; "0s" keeps them.
+        RecordDeleteAfter = s.RecordRetentionDays > 0 ? $"{s.RecordRetentionDays}d" : "0s",
         MaxReaders = s.MaxReaders,
     };
 
@@ -273,6 +280,7 @@ public class StreamService(
         current.Source == desired.Source
         && (current.SourceOnDemand ?? false) == (desired.SourceOnDemand ?? false)
         && (current.Record ?? false) == (desired.Record ?? false)
+        && MtxDuration.Parse(current.RecordDeleteAfter) == MtxDuration.Parse(desired.RecordDeleteAfter)
         && (current.MaxReaders ?? 0) == (desired.MaxReaders ?? 0);
 
     private static void Apply(StreamDefinition s, StreamInput input)
@@ -284,6 +292,7 @@ public class StreamService(
         s.SourceOnDemand = input.SourceOnDemand;
         s.Enabled = input.Enabled;
         s.Record = input.Record;
+        s.RecordRetentionDays = input.RecordRetentionDays;
         s.PublicRead = input.PublicRead;
         s.MaxReaders = input.MaxReaders;
         s.UpdatedAt = DateTime.UtcNow;

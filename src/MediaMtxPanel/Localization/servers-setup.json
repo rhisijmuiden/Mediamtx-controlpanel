@@ -119,11 +119,6 @@
     "de": "Binden Sie diese mediamtx.yml in Docker in den Container ein. Enthält die Datei diese Einstellungen bereits, genügt diese Umgebungsvariable:",
     "fr": "Dans Docker, montez ce mediamtx.yml dans le conteneur. Si le fichier contient déjà ces paramètres, cette variable d'environnement suffit :"
   },
-  "Check the network in both directions: the server must reach the panel at {0}, and the panel must reach port {1} on the server. Open that port to the panel only, for example:": {
-    "nl": "Controleer het netwerk in beide richtingen: de server moet het paneel bereiken op {0}, en het paneel moet poort {1} op de server bereiken. Zet die poort alleen open voor het paneel, bijvoorbeeld:",
-    "de": "Prüfen Sie das Netzwerk in beide Richtungen: Der Server muss das Panel unter {0} erreichen, und das Panel muss Port {1} auf dem Server erreichen. Öffnen Sie diesen Port nur für das Panel, zum Beispiel:",
-    "fr": "Vérifiez le réseau dans les deux sens : le serveur doit atteindre le panneau à {0}, et le panneau doit atteindre le port {1} du serveur. N'ouvrez ce port qu'au panneau, par exemple :"
-  },
   "Restart MediaMTX:": {
     "nl": "Herstart MediaMTX:",
     "de": "Starten Sie MediaMTX neu:",

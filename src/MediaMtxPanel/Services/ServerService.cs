@@ -38,6 +38,10 @@ public class ServerInput
     [StringLength(256), Url(ErrorMessage = "Enter a full URL, for example http://10.0.0.21:9100/metrics.")]
     public string? MetricsUrl { get; set; }
 
+    [StringLength(256)]
+    [RegularExpression(@"^https?://\S+$", ErrorMessage = "Use a URL such as http://10.0.0.5:9996.")]
+    public string? PlaybackUrl { get; set; }
+
     public bool RemoveUnmanagedPaths { get; set; }
     public bool Enabled { get; set; } = true;
 
@@ -56,6 +60,7 @@ public class ServerInput
         WebRtcPort = s.WebRtcPort,
         HttpsUrls = s.HttpsUrls,
         MetricsUrl = s.MetricsUrl,
+        PlaybackUrl = s.PlaybackUrl,
         RemoveUnmanagedPaths = s.RemoveUnmanagedPaths,
         Enabled = s.Enabled,
     };
@@ -75,6 +80,7 @@ public class ServerInput
         s.WebRtcPort = WebRtcPort;
         s.HttpsUrls = HttpsUrls;
         s.MetricsUrl = string.IsNullOrWhiteSpace(MetricsUrl) ? null : MetricsUrl.Trim();
+        s.PlaybackUrl = string.IsNullOrWhiteSpace(PlaybackUrl) ? null : PlaybackUrl.Trim().TrimEnd('/');
         s.RemoveUnmanagedPaths = RemoveUnmanagedPaths;
         s.Enabled = Enabled;
     }

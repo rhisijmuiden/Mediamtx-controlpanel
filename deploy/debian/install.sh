@@ -187,7 +187,7 @@ memory_mb() { awk '/^(MemTotal|SwapTotal):/ {kb += $2} END {print int(kb / 1024)
 needed_ports() {
   echo "${PANEL_PORT}/tcp panel"
   [[ "$INSTALL_MEDIAMTX" == "yes" ]] || return 0
-  printf '%s\n' "8554/tcp RTSP" "1935/tcp RTMP" "8890/udp SRT" "8888/tcp HLS" "8889/tcp WebRTC" "8189/udp WebRTC" "9997/tcp MediaMTX-API"
+  printf '%s\n' "8554/tcp RTSP" "1935/tcp RTMP" "8890/udp SRT" "8888/tcp HLS" "8889/tcp WebRTC" "8189/udp WebRTC" "9997/tcp MediaMTX-API" "9996/tcp MediaMTX-playback"
 }
 
 check_ports() {

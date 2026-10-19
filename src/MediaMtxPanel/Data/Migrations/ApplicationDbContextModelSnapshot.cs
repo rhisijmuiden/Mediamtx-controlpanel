@@ -139,6 +139,10 @@ namespace MediaMtxPanel.Data.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("PlaybackUrl")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("PublicHost")
                         .IsRequired()
                         .HasMaxLength(256)
@@ -272,6 +276,9 @@ namespace MediaMtxPanel.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("Record")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RecordRetentionDays")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("ServerId")

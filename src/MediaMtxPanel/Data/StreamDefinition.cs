@@ -39,6 +39,11 @@ public class StreamDefinition
 
     public bool Record { get; set; }
 
+    /// <summary>MediaMTX deletes recordings older than this many days; 0 keeps them until they are deleted by hand.</summary>
+    public int RecordRetentionDays { get; set; } = DefaultRetentionDays;
+
+    public const int DefaultRetentionDays = 7;
+
     /// <summary>Allow viewers without credentials.</summary>
     public bool PublicRead { get; set; }
 

@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using MediaMtxPanel.Data;
 
 namespace MediaMtxPanel.Services.Setup;
 
@@ -53,16 +54,20 @@ public static partial class MediaMtxConfigEditor
     }
 
     /// <summary>
-    /// Applies the settings the panel needs: authentication through the panel's hook and the Control API on
-    /// <paramref name="apiPort"/>. Adds <paramref name="publicHost"/> to webrtcAdditionalHosts when that list is empty.
+    /// Applies the settings the panel needs: authentication through the panel's hook, the Control API on
+    /// <paramref name="apiPort"/> and the playback server (recordings) on <paramref name="playbackPort"/>.
+    /// Adds <paramref name="publicHost"/> to webrtcAdditionalHosts when that list is empty.
     /// </summary>
-    public static string ConfigureForPanel(string yaml, string hookUrl, int apiPort, string? publicHost)
+    public static string ConfigureForPanel(string yaml, string hookUrl, int apiPort, string? publicHost,
+        int playbackPort = MediaServer.DefaultPlaybackPort)
     {
         yaml = Set(yaml, "authMethod", "http");
         yaml = Set(yaml, "authHTTPAddress", Quote(hookUrl));
         yaml = Set(yaml, "authHTTPExclude", "[]");
         yaml = Set(yaml, "api", "yes");
         yaml = Set(yaml, "apiAddress", $":{apiPort}");
+        yaml = Set(yaml, "playback", "yes");
+        yaml = Set(yaml, "playbackAddress", $":{playbackPort}");
 
         var hosts = Get(yaml, "webrtcAdditionalHosts");
         if (!string.IsNullOrWhiteSpace(publicHost) && (hosts is null || hosts == "[]"))
@@ -71,13 +76,17 @@ public static partial class MediaMtxConfigEditor
     }
 
     /// <summary>The snippet shown for manual setup; the same settings <see cref="ConfigureForPanel"/> writes.</summary>
-    public static string ManualSnippet(string hookUrl, int apiPort, string? publicHost) => $"""
+    public static string ManualSnippet(string hookUrl, int apiPort, string? publicHost,
+        int playbackPort = MediaServer.DefaultPlaybackPort) => $"""
         authMethod: http
         authHTTPAddress: {Quote(hookUrl)}
         authHTTPExclude: []
 
         api: yes
         apiAddress: :{apiPort}
+
+        playback: yes
+        playbackAddress: :{playbackPort}
 
         webrtcAdditionalHosts: [{Quote(string.IsNullOrWhiteSpace(publicHost) ? "<public address>" : publicHost.Trim())}]
         """;

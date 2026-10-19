@@ -1,0 +1,86 @@
+@page "/recordings"
+@page "/portal/recordings"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject StreamService Streams
+@inject NavigationManager Nav
+
+<AppPageTitle Text="@L["Recordings"]" />
+
+<div class="page-header">
+    <div>
+        <h1><i class="bi bi-film text-primary"></i> @L["Recordings"]</h1>
+        <p class="page-subtitle">@L["Watch, download or delete what your streams recorded. Turn recording on per stream in its settings."]</p>
+    </div>
+</div>
+
+@if (streams is null)
+{
+    <p class="text-secondary"><span class="spinner-border spinner-border-sm me-2"></span>@L["Loading…"]</p>
+}
+else if (streams.Count == 0)
+{
+    <div class="empty-state">
+        <i class="bi bi-camera-video-off"></i>
+        <p class="mb-0">@L["There are no streams yet."]</p>
+    </div>
+}
+else
+{
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+        <label class="form-label mb-0" for="stream">@L["Stream"]</label>
+        <select id="stream" class="form-select w-auto" value="@selected?.Id" @onchange="Select">
+            @foreach (var s in streams)
+            {
+                <option value="@s.Id">@s.DisplayName (@s.Server!.Name/@s.Name)@(s.Record ? " ●" : "")</option>
+            }
+        </select>
+        <span class="small text-secondary"><span class="text-danger">●</span> @L["recording on"]</span>
+        @if (selected is not null)
+        {
+            <a class="btn btn-sm btn-outline-secondary ms-auto" href="@StreamLink(selected)"><i class="bi bi-box-arrow-up-right"></i> @L["Open stream"]</a>
+        }
+    </div>
+
+    @if (selected is not null)
+    {
+        <RecordingList Stream="selected" ShowServerHint="isStaff" />
+    }
+}
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
+
+    [SupplyParameterFromQuery(Name = "stream")] private int? StreamId { get; set; }
+
+    private List<StreamDefinition>? streams;
+    private StreamDefinition? selected;
+    private bool isStaff;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await AuthState).User;
+        isStaff = Roles.Staff.Split(',').Any(user.IsInRole);
+        streams = await Streams.ListAsync(user);
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (streams is null)
+            return;
+        selected = streams.FirstOrDefault(s => s.Id == StreamId)
+                   ?? streams.FirstOrDefault(s => s.Record)
+                   ?? streams.FirstOrDefault();
+    }
+
+    private void Select(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var id))
+            Nav.NavigateTo(Nav.GetUriWithQueryParameter("stream", id), replace: true);
+    }
+
+    // Staff manage streams in the admin screens; customers in the portal.
+    private string StreamLink(StreamDefinition s) =>
+        isStaff && !Nav.ToBaseRelativePath(Nav.Uri).StartsWith("portal", StringComparison.OrdinalIgnoreCase)
+            ? $"streams/{s.Id}" : $"portal/streams/{s.Id}";
+}

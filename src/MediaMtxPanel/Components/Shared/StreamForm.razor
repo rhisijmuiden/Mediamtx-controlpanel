@@ -136,6 +136,15 @@
                             <div class="form-text mt-0">@L["MediaMTX saves everything that is published to disk on the server. Mind the disk space."]</div>
                         </div>
                     </div>
+                    @if (Model.Record)
+                    {
+                        <div class="col-md-6">
+                            <label class="form-label" for="retention">@L["Keep recordings for (days)"]</label>
+                            <InputNumber id="retention" class="form-control" min="0" max="3650" @bind-Value="Model.RecordRetentionDays" />
+                            <div class="form-text">@L["Older recordings are deleted automatically. 0 keeps them until you delete them."]</div>
+                            <ValidationMessage For="() => Model.RecordRetentionDays" />
+                        </div>
+                    }
                 </div>
             </section>
 

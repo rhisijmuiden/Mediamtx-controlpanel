@@ -6,6 +6,7 @@ A control panel for [MediaMTX](https://github.com/bluenviron/mediamtx), written 
 
 - **Streams**: create, edit, enable/disable and delete. A stream is either a *publisher* stream (OBS, ffmpeg, a camera or a browser sends to the server) or a *pull* stream (the server pulls an external RTSP/RTMP/SRT/HLS/WHEP source). Options: public viewing, recording, maximum number of viewers.
 - **Right after creating a stream** the panel shows the credentials (publish and view), the OBS settings, all endpoints (RTSP, RTMP, SRT, WebRTC WHIP/WHEP, HLS) with copy buttons, and example commands for ffmpeg/ffplay.
+- **Recordings**: per stream, MediaMTX records everything that is broadcast and deletes it after a chosen number of days. Recordings can be played, downloaded as MP4 and deleted in the panel and in the customer portal (see [Recordings](#recordings)).
 - **Live status**: the dashboard and stream pages show live/offline, codecs, viewers and traffic; publishers and viewers can be disconnected.
 - **Multiple MediaMTX servers**: administrators add as many MediaMTX instances as needed under *Servers*. Each stream is assigned to a server; its URLs use that server's public address and ports.
 - **Server setup over SSH**: when adding a server, the administrator can enter its SSH login. The panel then logs in, installs MediaMTX if it is missing, points it at the panel, restarts it and adds the server as soon as the connection works (see [Adding a MediaMTX server](#adding-a-mediamtx-server)).
@@ -74,9 +75,18 @@ After saving you land on the stream page. Its tabs hold everything needed to bro
 - **Credentials & OBS**: the OBS server and stream key, and the publish and view usernames and passwords, each with a copy button and a *Regenerate* button.
 - **Endpoints**: every publish and watch URL (RTSP, RTMP, SRT, WebRTC, HLS) and example ffmpeg/ffplay commands.
 - **Live status**: tracks, traffic and the connected publishers and viewers, who can be disconnected.
+- **Recordings**: what the stream recorded (see [Recordings](#recordings)).
 - **Manage**: enable or disable, regenerate credentials and delete.
 
 ![Stream details](docs/screenshots/stream-details.png)
+
+### Recordings
+
+Switch on *Record on the server* in a stream's options and choose how many days MediaMTX keeps recordings (0 keeps them until they are deleted by hand). Every broadcast becomes a recording; a broadcast that stops and starts again becomes a new one.
+
+*Streams → Recordings* (staff) and *Customer portal → Recordings* (customers, their own streams only) list the recordings per stream, with a player, an MP4 download and a delete button. The same list is on the stream page and in the customer portal's stream page.
+
+The panel fetches recordings from the MediaMTX **playback server** (`playback: yes`, port 9996) of the server the stream runs on, and signs in with the stream's viewer credentials; the browser only talks to the panel. The bundled `deploy/mediamtx.yml` and the SSH setup switch playback on. For a server set up by hand, add `playback: yes` and `playbackAddress: :9996` to its mediamtx.yml and open port 9996 to the panel. When the playback server is not on the API host at port 9996, set *Playback URL* on the server's page. Recordings use MediaMTX's default fMP4 format; MPEG-TS recordings cannot be played back by MediaMTX.
 
 ### Servers
 

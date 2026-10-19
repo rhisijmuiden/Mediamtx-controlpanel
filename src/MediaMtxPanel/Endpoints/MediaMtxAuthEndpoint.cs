@@ -71,7 +71,7 @@ public static class MediaMtxAuthEndpoint
                     .FirstOrDefaultAsync(s => s.ServerId == server.Id && s.Name == path, ct);
                 allowed = stream is { Enabled: true } && IsAllowed(stream, req.Action, user, pass);
                 // Paying viewers watch with user "ticket" and their ticket token as password.
-                if (!allowed && stream is { Enabled: true, PaywallEnabled: true } && req.Action != "publish" && user == TicketUser)
+                if (!allowed && stream is { Enabled: true, PaywallEnabled: true } && req.Action == "read" && user == TicketUser)
                 {
                     var now = DateTime.UtcNow;
                     allowed = await db.Orders.AnyAsync(o => o.StreamId == stream.Id && o.AccessToken == pass
@@ -107,6 +107,8 @@ public static class MediaMtxAuthEndpoint
         return action switch
         {
             "publish" => s.SourceType == StreamSourceType.Publisher && PublishCreds(),
+            // Recordings: a public live stream does not make its recordings public, and tickets are for live only.
+            "playback" => ReadCreds() || PublishCreds(),
             // Publishers may always watch their own stream. A paywall overrides "public".
             _ => (s.PublicRead && !s.PaywallEnabled) || ReadCreds() || PublishCreds(),
         };
