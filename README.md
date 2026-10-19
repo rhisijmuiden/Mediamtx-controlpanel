@@ -51,7 +51,7 @@ The menu on the left is grouped by purpose. Groups with more than one page fold 
 
 | Group | Pages | Who |
 |---|---|---|
-| **Overview** | Dashboard, *Streams* (All streams, New stream), *Customer portal* (My streams, Payment settings) | Administrators and users; customers only see the customer portal |
+| **Overview** | Dashboard, Statistics, *Streams* (All streams, New stream), *Customer portal* (My streams, Payment settings) | Administrators and users; customers only see the customer portal |
 | **Administration** | *Management* (Servers, Users), *Settings* (General, Web server, Mail) | Administrators |
 | **Account** | *My account* (Profile, Password, Two-factor authentication, Passkeys) | Everyone |
 
@@ -60,6 +60,10 @@ At the bottom of the menu are your name (click it for your account, or use the b
 ### Dashboard
 
 Shows at a glance how many streams there are, how many are live, how many people are watching and whether every MediaMTX server is reachable. The data refreshes every few seconds. Click a server to open its settings, or a stream to open its details.
+
+### Statistics
+
+The panel stores the number of viewers and the traffic of every live stream once a minute. **Statistics** in the menu shows them for all your streams together: peak viewers, viewing hours, data sent and peak bandwidth, a chart of viewers (peak and average) and one of bandwidth (out to viewers and in from the source), and a table with the totals per stream. Choose the last hour, 24 hours, 7 days, 30 days or 90 days; hover over a chart to see the values at that moment, and use **CSV** to download the chart data. Every stream has the same statistics on its own **Statistics** tab, and customers see them for their streams in the customer portal. Statistics older than 90 days are deleted (see `MediaMtx__StatisticsRetentionDays`).
 
 ### Streams
 
@@ -440,6 +444,8 @@ All settings live in `appsettings.json` and can be overridden with environment v
 | `MediaMtx__AuthHookSecret` | empty | Hook secret of the first server (empty = random) |
 | `MediaMtx__PublicHost`, `…Port`, `HttpsUrls` | `localhost`, default ports | Public address of the first server |
 | `MediaMtx__SyncIntervalSeconds` | `30` | Synchronization interval |
+| `MediaMtx__StatisticsIntervalSeconds` | `60` | How often viewers and traffic of live streams are stored for the statistics |
+| `MediaMtx__StatisticsRetentionDays` | `90` | Statistics older than this are deleted |
 | `Panel__SettingsPath` | next to the database | Where the settings from the Settings page are stored (`panel-settings.json`) |
 | `Panel__UpdateRepository` | `rhisijmuiden/Mediamtx-controlpanel` | GitHub repository for the update check (empty = no check) |
 | `Panel__UpdateBranch` | `main` | Branch compared while the release channel has no release |

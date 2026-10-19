@@ -1,0 +1,114 @@
+@using System.Globalization
+@* Line/area chart of statistics buckets, drawn as SVG without any JavaScript. Hovering a bar shows its values. *@
+
+<div class="tchart">
+    <div class="tchart-legend">
+        @foreach (var s in Series)
+        {
+            <span><i class="swatch @s.Css"></i>@s.Label</span>
+        }
+    </div>
+    <div class="tchart-body">
+        <div class="tchart-yaxis">
+            @foreach (var t in ticks)
+            {
+                <span style="top:@Pct(100 - t / max * 100)%">@FormatValue(t)</span>
+            }
+        </div>
+        <div class="tchart-plot">
+            @foreach (var t in ticks)
+            {
+                <div class="tchart-grid" style="top:@Pct(100 - t / max * 100)%"></div>
+            }
+            @if (Buckets.Count > 0)
+            {
+                <svg viewBox="0 0 @Buckets.Count 100" preserveAspectRatio="none" aria-hidden="true">
+                    @foreach (var s in Series)
+                    {
+                        if (s.Fill)
+                        {
+                            <path class="area @s.Css" d="@AreaPath(s)" />
+                        }
+                        <path class="line @s.Css" d="@LinePath(s)" vector-effect="non-scaling-stroke" />
+                    }
+                </svg>
+                <div class="tchart-cols">
+                    @for (var i = 0; i < Buckets.Count; i++)
+                    {
+                        var b = Buckets[i];
+                        <div class="col-hit">
+                            <div class="tip @(i > Buckets.Count / 2 ? "left" : "")">
+                                <strong>@TipTime(b)</strong>
+                                @foreach (var s in Series)
+                                {
+                                    <span><i class="swatch @s.Css"></i>@s.Label: @FormatValue(s.Value(b))</span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+    <div class="tchart-xaxis">
+        @foreach (var i in xLabels)
+        {
+            <span style="left:@Pct((i + 0.5) / Buckets.Count * 100)%">@AxisTime(Buckets[i].Start)</span>
+        }
+    </div>
+</div>
+
+@code {
+    public record ChartSeries(string Label, string Css, Func<StatsBucket, double> Value, bool Fill = true);
+
+    [Parameter, EditorRequired] public List<StatsBucket> Buckets { get; set; } = [];
+    [Parameter, EditorRequired] public List<ChartSeries> Series { get; set; } = [];
+    [Parameter, EditorRequired] public StatsRange Range { get; set; } = StatsRange.Default;
+    [Parameter] public Func<double, string> FormatValue { get; set; } = v => v.ToString("0.#", CultureInfo.CurrentCulture);
+
+    private double max = 1;
+    private List<double> ticks = [];
+    private List<int> xLabels = [];
+
+    protected override void OnParametersSet()
+    {
+        var top = Buckets.Count == 0 || Series.Count == 0 ? 0 : Buckets.Max(b => Series.Max(s => s.Value(b)));
+        max = NiceCeiling(top);
+        ticks = Enumerable.Range(0, 5).Select(i => max * i / 4).ToList();
+        var step = Math.Max(1, Buckets.Count / 6);
+        xLabels = Enumerable.Range(0, Buckets.Count).Where(i => i % step == step / 2).ToList();
+    }
+
+    /// <summary>A round number (1, 2 or 5 × 10ⁿ, in quarters) just above <paramref name="value"/>.</summary>
+    internal static double NiceCeiling(double value)
+    {
+        if (value <= 0) return 4;
+        var quarter = value / 4;
+        var magnitude = Math.Pow(10, Math.Floor(Math.Log10(quarter)));
+        var nice = new[] { 1, 2, 2.5, 5, 10 }.First(m => m * magnitude >= quarter) * magnitude;
+        return nice * 4;
+    }
+
+    private double Y(double v) => 100 - Math.Clamp(v / max, 0, 1) * 100;
+
+    private string LinePath(ChartSeries s) =>
+        string.Join(" ", Buckets.Select((b, i) => $"{(i == 0 ? "M" : "L")}{Num(i + 0.5)},{Num(Y(s.Value(b)))}"));
+
+    private string AreaPath(ChartSeries s) =>
+        $"M0.5,100 {LinePath(s).Replace("M", "L")} L{Num(Buckets.Count - 0.5)},100 Z";
+
+    private string AxisTime(DateTime utc) =>
+        utc.ToLocalTime().ToString(Range.Length <= TimeSpan.FromDays(1) ? "t" : Range.Bucket < TimeSpan.FromDays(1) ? "ddd d" : "d MMM", CultureInfo.CurrentCulture);
+
+    private string TipTime(StatsBucket b)
+    {
+        var from = b.Start.ToLocalTime();
+        var to = from.AddSeconds(b.Seconds);
+        return Range.Bucket >= TimeSpan.FromDays(1)
+            ? from.ToString("D", CultureInfo.CurrentCulture)
+            : $"{from.ToString("g", CultureInfo.CurrentCulture)} – {to.ToString("t", CultureInfo.CurrentCulture)}";
+    }
+
+    private static string Num(double v) => v.ToString("0.###", CultureInfo.InvariantCulture);
+    private static string Pct(double v) => v.ToString("0.##", CultureInfo.InvariantCulture);
+}

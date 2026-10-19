@@ -91,6 +91,9 @@ builder.Services.AddSingleton<StreamEndpointBuilder>();
 builder.Services.AddSingleton<MediaMtxStatus>();
 builder.Services.AddSingleton<MediaMtxSyncService>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<MediaMtxSyncService>());
+builder.Services.AddSingleton<StreamStatsService>();
+builder.Services.AddSingleton<StreamStatsCollector>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<StreamStatsCollector>());
 builder.Services.AddHttpClient("github", c =>
 {
     c.BaseAddress = new Uri("https://api.github.com/");
@@ -203,6 +206,7 @@ app.MapAdditionalIdentityEndpoints();
 app.MapMediaMtxAuth();
 app.MapStationEndpoints();
 app.MapPaymentEndpoints();
+app.MapStatisticsEndpoints();
 app.MapLanguageEndpoint();
 
 app.Run();

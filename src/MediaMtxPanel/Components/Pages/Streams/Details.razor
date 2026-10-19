@@ -110,6 +110,11 @@ else
             </button>
         </li>
         <li class="nav-item">
+            <button type="button" class="nav-link @(tab == Tab.Statistics ? "active" : "")" @onclick="() => tab = Tab.Statistics">
+                <i class="bi bi-bar-chart-line me-1"></i>@L["Statistics"]
+            </button>
+        </li>
+        <li class="nav-item">
             <button type="button" class="nav-link @(tab == Tab.Manage ? "active" : "")" @onclick="() => tab = Tab.Manage">
                 <i class="bi bi-gear me-1"></i>@L["Manage"]
             </button>
@@ -340,6 +345,10 @@ else
             }
             break;
 
+        case Tab.Statistics:
+            <StatsView Streams="[stream]" />
+            break;
+
         case Tab.Manage:
             <div class="row g-3">
                 <div class="col-md-6 col-xl-4">
@@ -408,7 +417,7 @@ else
     [SupplyParameterFromQuery] public string? Warning { get; set; }
     [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
 
-    private enum Tab { Connect, Endpoints, Live, Manage }
+    private enum Tab { Connect, Endpoints, Live, Statistics, Manage }
 
     private Tab tab = Tab.Connect;
     private StreamDefinition? stream;
