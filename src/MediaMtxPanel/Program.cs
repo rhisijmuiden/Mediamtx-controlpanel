@@ -45,6 +45,12 @@ builder.Services.AddAuthentication(options =>
 // Station contract: "Authorization: Bearer <Panel:ServiceToken>" on /api/v1 only; does nothing without a token.
 builder.Services.AddAuthentication()
     .AddScheme<AuthenticationSchemeOptions, ServiceTokenAuthenticationHandler>(ServiceTokenAuthenticationHandler.SchemeName, null);
+// Microsoft Entra ID: the scheme is added and removed at runtime by EntraSso, following Settings → Single sign-on.
+builder.Services.AddAuthentication().AddOpenIdConnect(EntraSso.Scheme, EntraSso.DisplayName, _ => { });
+builder.Services.AddOptions<Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectOptions>(EntraSso.Scheme)
+    .Configure<EntraSso>((options, sso) => sso.Configure(options));
+builder.Services.AddSingleton<EntraSso>();
+builder.Services.AddHttpClient("entra", c => c.Timeout = TimeSpan.FromSeconds(15));
 builder.Services.AddAuthorization();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
@@ -131,6 +137,7 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 var app = builder.Build();
 
 await DbInitializer.InitializeAsync(app.Services);
+app.Services.GetRequiredService<EntraSso>().Start();
 
 if (stationCommand is not null)
 {
