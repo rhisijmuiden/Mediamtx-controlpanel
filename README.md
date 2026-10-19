@@ -52,7 +52,7 @@ The menu on the left is grouped by purpose. Groups with more than one page fold 
 | Group | Pages | Who |
 |---|---|---|
 | **Overview** | Dashboard, *Streams* (All streams, New stream), *Customer portal* (My streams, Payment settings) | Administrators and users; customers only see the customer portal |
-| **Administration** | *Management* (Servers, Users), *Settings* (General, Web server, Mail, Alerts) | Administrators |
+| **Administration** | *Management* (Servers, Users), *Settings* (General, Web server, Mail, Single sign-on, Alerts) | Administrators |
 | **Account** | *My account* (Profile, Password, Two-factor authentication, Passkeys) | Everyone |
 
 At the bottom of the menu are your name (click it for your account, or use the button next to it to log out), the **language** menu and the **Info** button.
@@ -106,6 +106,10 @@ Only administrators see *Settings*. The settings are stored in `panel-settings.j
 
   ![Mail settings](docs/screenshots/settings-mail.png)
 
+- **Single sign-on**: log in with a Microsoft work account (Microsoft Entra ID), next to passwords and passkeys. See [Microsoft Entra SSO](#microsoft-entra-sso).
+
+  ![Single sign-on settings](docs/screenshots/settings-sso.png)
+
 - **Alerts**: monitoring. Every 15 seconds the panel checks each enabled MediaMTX server and its streams, and sends a mail (through the server under *Mail*) and/or a webhook when a server cannot be reached or a live stream stops, and again when it is back. A grace time (default 60 seconds) filters short hiccups. A stream is only watched after it was live once, on-demand pull streams are skipped, and single streams can be muted. Webhook formats: plain JSON (`event` is `server.down`, `server.up`, `stream.down`, `stream.up` or `test`), Slack/Mattermost, Discord and Microsoft Teams (workflow webhook). With a signing secret every request carries `X-Panel-Signature: sha256=<HMAC-SHA256 of the body>`. Messages are written in the default language. The page also shows what is offline right now and the recent alerts.
 
   ![Alert settings](docs/screenshots/settings-alerts.png)
@@ -139,6 +143,23 @@ Releases are published with the **Release** workflow (*Actions → Release → R
 - **stable** tags it as `v<Version>` (from `<Version>` in `src/MediaMtxPanel/MediaMtxPanel.csproj`) and publishes a normal release. Raise `<Version>` before each stable release.
 
 Pushing a tag by hand works too: a tag with a hyphen (`v1.4.0-beta.1`) becomes a prerelease, any other `v*` tag a stable release.
+
+## Microsoft Entra SSO
+
+The login page can offer *Sign in with Microsoft* for the people in your Microsoft 365 / Entra ID organisation. It is off until an administrator turns it on under *Settings → Single sign-on*; no restart is needed.
+
+1. In the [Entra admin center](https://entra.microsoft.com) go to *App registrations → New registration*. Pick *Accounts in this organizational directory only* and add the **Redirect URI** shown on the settings page as a *Web* platform (for example `https://panel.example.com/signin-entra`). Behind a reverse proxy, use the public address and set `Panel:TrustedProxies` so the panel sees `https`.
+2. Under *Certificates & secrets* create a client secret and copy its **Value**.
+3. On the settings page enter the **Directory (tenant) ID**, the **Application (client) ID** and the secret, then click *Test settings*. The panel checks the tenant and gets a token with the ID and secret. The secret is stored encrypted.
+4. Switch on *Allow signing in with Microsoft* and save.
+
+Who gets in:
+
+- Someone signing in for the first time gets the panel account with the same e-mail address, and the two are linked from then on.
+- Without such an account they are refused, unless *Create an account at the first sign-in* is on; new accounts get the role chosen there.
+- Optional: create **app roles** with the values `Admin`, `User` and `Customer` in the app registration and assign them to users or groups. The role in the token then sets the panel role at every sign-in.
+- Locked users stay locked. The panel's own two-factor step is skipped for Microsoft logins; require MFA with Entra Conditional Access instead.
+- Only a single tenant is accepted (`common` and `organizations` are refused), so accounts from other organisations cannot sign in.
 
 ## Running with Docker
 
@@ -492,7 +513,7 @@ cd tools/screenshots && npm ci && npx playwright install chromium && node take-s
 ```
 src/MediaMtxPanel/
   Components/Layout/       Menu (NavMenu), Info panel with the update check, layouts
-  Components/Pages/        Dashboard, Streams (list, new, details, edit), Servers, Users, Settings (general, web server, mail),
+  Components/Pages/        Dashboard, Streams (list, new, details, edit), Servers, Users, Settings (general, web server, mail, single sign-on),
                            Portal (customer portal, payment settings), Watch (public watch and payment page)
   Components/Shared/       Form, copy fields, endpoint table, status badges, player, statistics bar
   Data/                    EF Core context, entities, migrations, seeding of roles/administrator

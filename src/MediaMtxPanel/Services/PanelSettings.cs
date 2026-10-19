@@ -32,6 +32,9 @@ public record PanelSettings
     /// <summary>Outgoing mail (password reset links and test mails). Null until configured.</summary>
     public MailSettings? Mail { get; init; }
 
+    /// <summary>Sign-in with Microsoft Entra ID. Null until configured.</summary>
+    public EntraSettings? Entra { get; init; }
+
     /// <summary>Monitoring: mail and/or webhook when a server or stream goes offline. Null until configured.</summary>
     public AlertSettings? Alerts { get; init; }
 }

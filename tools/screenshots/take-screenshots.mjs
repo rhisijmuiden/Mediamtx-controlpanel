@@ -128,6 +128,8 @@ await go("/settings/web");
 await shot("settings-web");
 await go("/settings/mail");
 await shot("settings-mail");
+await go("/settings/sso");
+await shot("settings-sso");
 await go("/settings/alerts");
 await shot("settings-alerts");
 

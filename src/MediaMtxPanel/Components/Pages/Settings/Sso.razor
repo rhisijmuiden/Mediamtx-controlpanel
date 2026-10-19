@@ -1,0 +1,194 @@
+@page "/settings/sso"
+@attribute [Authorize(Roles = Roles.Admin)]
+@rendermode InteractiveServer
+@inject PanelSettingsStore Store
+@inject EntraSso Entra
+@inject NavigationManager Nav
+
+<AppPageTitle Text="@L["Single sign-on"]" />
+
+<div class="page-header">
+    <div>
+        <h1><i class="bi bi-microsoft text-primary"></i> @L["Single sign-on"]</h1>
+        <p class="page-subtitle">@L["Let people log in with their Microsoft work account (Microsoft Entra ID). Logging in with a password and passkeys keeps working."]</p>
+    </div>
+    <div class="page-actions">
+        @if (Entra.IsActive)
+        {
+            <span class="badge bg-success-subtle text-success-emphasis badge-dot fs-6">@L["Single sign-on is on"]</span>
+        }
+        else
+        {
+            <span class="badge text-bg-light border badge-dot fs-6">@L["Single sign-on is off"]</span>
+        }
+    </div>
+</div>
+
+@if (message is not null)
+{
+    <div class="alert alert-@(isError ? "danger" : "success") d-flex align-items-center gap-2">
+        <i class="bi @(isError ? "bi-exclamation-octagon" : "bi-check-circle")"></i> <span class="text-break">@message</span>
+    </div>
+}
+
+<div class="card mb-3">
+    <div class="card-body">
+        <section class="form-section">
+            <header>
+                <h2>@L["Microsoft Entra ID"]</h2>
+                <p>@L["When this is on, the login page shows \"Sign in with Microsoft\"."]</p>
+            </header>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="sso-on" @bind="enabled" />
+                <label class="form-check-label" for="sso-on">@L["Allow signing in with Microsoft"]</label>
+            </div>
+        </section>
+
+        <section class="form-section">
+            <header>
+                <h2>@L["App registration"]</h2>
+                <p>@L["In the Entra admin center, go to App registrations → New registration. Choose \"Accounts in this organizational directory only\" and add the redirect URI below as a Web platform. Then create a client secret under Certificates & secrets."]</p>
+            </header>
+            <div class="row g-3">
+                <div class="col-12">
+                    <CopyField Value="@RedirectUri" Label="@L["Redirect URI"]" Note="@L["Use the address people open the panel with. Behind a reverse proxy, that is the public address."]" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="tenant">@L["Directory (tenant) ID"]</label>
+                    <input id="tenant" class="form-control font-monospace" @bind="tenantId" placeholder="00000000-0000-0000-0000-000000000000" autocomplete="off" />
+                    <div class="form-text">@L["Or a verified domain, such as contoso.onmicrosoft.com."]</div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="client">@L["Application (client) ID"]</label>
+                    <input id="client" class="form-control font-monospace" @bind="clientId" placeholder="00000000-0000-0000-0000-000000000000" autocomplete="off" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="secret">@L["Client secret"]</label>
+                    <input id="secret" type="password" class="form-control" @bind="secret" autocomplete="new-password"
+                           placeholder="@(hasSecret ? L["Unchanged (stored encrypted)"] : "")" />
+                    <div class="form-text">@L["The secret's Value, not its ID. Secrets expire: put a new one here before the old one does."]</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="form-section">
+            <header>
+                <h2>@L["Accounts"]</h2>
+                <p>@L["Someone who signs in with Microsoft gets the panel account with the same e-mail address. Without such an account they cannot log in, unless accounts are created automatically."]</p>
+            </header>
+            <div class="form-check form-switch mb-3">
+                <input class="form-check-input" type="checkbox" role="switch" id="create" @bind="createAccounts" />
+                <label class="form-check-label" for="create">@L["Create an account at the first sign-in"]</label>
+            </div>
+            @if (createAccounts)
+            {
+                <div class="mb-3" style="max-width: 20rem">
+                    <label class="form-label" for="role">@L["Role of new accounts"]</label>
+                    <select id="role" class="form-select" @bind="defaultRole">
+                        @foreach (var role in Roles.All)
+                        {
+                            <option value="@role">@L[Roles.Label(role)]</option>
+                        }
+                    </select>
+                </div>
+            }
+            <div class="form-text d-flex align-items-start gap-2">
+                <i class="bi bi-info-circle"></i>
+                <span>@L["Roles can also come from Entra: create app roles with the values Admin, User and Customer in the app registration and assign them to users or groups. The role in the token then replaces the panel role at every sign-in."]</span>
+            </div>
+        </section>
+    </div>
+    <div class="card-footer bg-transparent d-flex flex-wrap gap-2 py-3">
+        <button class="btn btn-primary" @onclick="Save"><i class="bi bi-check-lg"></i> @L["Save settings"]</button>
+        <button class="btn btn-outline-primary" @onclick="Test" disabled="@testing">
+            @if (testing)
+            {
+                <span class="spinner-border spinner-border-sm"></span>
+            }
+            else
+            {
+                <i class="bi bi-plug"></i>
+            }
+            @L["Test settings"]
+        </button>
+    </div>
+</div>
+
+@code {
+    private bool enabled;
+    private string tenantId = "";
+    private string clientId = "";
+    private string? secret;
+    private bool hasSecret;
+    private bool createAccounts;
+    private string defaultRole = Roles.User;
+    private bool testing;
+    private string? message;
+    private bool isError;
+
+    private string RedirectUri => Nav.BaseUri.TrimEnd('/') + EntraSso.CallbackPath;
+
+    protected override void OnInitialized()
+    {
+        var s = Store.Current.Entra ?? new EntraSettings();
+        (enabled, tenantId, clientId, createAccounts, defaultRole) = (s.Enabled, s.TenantId, s.ClientId, s.CreateAccounts, s.DefaultRole);
+        hasSecret = !string.IsNullOrEmpty(s.ClientSecretProtected);
+    }
+
+    private string? Validate()
+    {
+        if (!EntraSso.IsValidTenant(tenantId)) return L["Enter the directory (tenant) ID of your organization. \"common\" and \"organizations\" are not allowed."];
+        if (!Guid.TryParse(clientId.Trim(), out _)) return L["Enter the application (client) ID; it looks like 00000000-0000-0000-0000-000000000000."];
+        if (string.IsNullOrEmpty(secret) && !hasSecret) return L["Enter the client secret."];
+        return null;
+    }
+
+    private void Save()
+    {
+        if (enabled && Validate() is { } problem)
+        {
+            (message, isError) = (problem, true);
+            return;
+        }
+        var entra = new EntraSettings
+        {
+            Enabled = enabled,
+            TenantId = tenantId.Trim(),
+            ClientId = clientId.Trim(),
+            // An empty secret field keeps the stored one.
+            ClientSecretProtected = string.IsNullOrEmpty(secret) ? Store.Current.Entra?.ClientSecretProtected : Entra.Protect(secret.Trim()),
+            CreateAccounts = createAccounts,
+            DefaultRole = Roles.All.Contains(defaultRole) ? defaultRole : Roles.User,
+        };
+        Store.Save(Store.Current with { Entra = entra });
+        hasSecret = !string.IsNullOrEmpty(entra.ClientSecretProtected);
+        secret = null;
+        (message, isError) = (L["Settings saved."], false);
+    }
+
+    private async Task Test()
+    {
+        if (Validate() is { } problem)
+        {
+            (message, isError) = (problem, true);
+            return;
+        }
+        testing = true;
+        message = null;
+        try
+        {
+            var error = await Entra.TestAsync(tenantId, clientId, string.IsNullOrEmpty(secret) ? null : secret.Trim());
+            (message, isError) = error is null
+                ? (L["Microsoft accepted the tenant, client ID and secret."], false)
+                : (L["Microsoft refused the settings: {0}", error], true);
+        }
+        catch (Exception ex)
+        {
+            (message, isError) = (L["Microsoft could not be reached: {0}", ex.Message], true);
+        }
+        finally
+        {
+            testing = false;
+        }
+    }
+}
