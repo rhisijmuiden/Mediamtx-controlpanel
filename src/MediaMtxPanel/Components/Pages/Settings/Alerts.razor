@@ -1,0 +1,398 @@
+@page "/settings/alerts"
+@attribute [Authorize(Roles = Roles.Admin)]
+@rendermode InteractiveServer
+@implements IDisposable
+@inject PanelSettingsStore Store
+@inject AlertMonitor Monitor
+@inject MailService Mailer
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@using Microsoft.EntityFrameworkCore
+
+<AppPageTitle Text="@L["Alerts"]" />
+
+<div class="page-header">
+    <div>
+        <h1><i class="bi bi-bell text-primary"></i> @L["Alerts"]</h1>
+        <p class="page-subtitle">@L["The panel watches your MediaMTX servers and streams and sends a mail or webhook when one goes offline, and again when it is back."]</p>
+    </div>
+    <div class="page-actions">
+        @if (Store.Current.Alerts?.Enabled == true)
+        {
+            <span class="badge bg-success-subtle text-success-emphasis badge-dot fs-6">@L["Monitoring is on"]</span>
+        }
+        else
+        {
+            <span class="badge text-bg-light border badge-dot fs-6">@L["Monitoring is off"]</span>
+        }
+    </div>
+</div>
+
+@if (message is not null)
+{
+    <div class="alert alert-@(isError ? "danger" : "success") d-flex align-items-center gap-2">
+        <i class="bi @(isError ? "bi-exclamation-octagon" : "bi-check-circle")"></i> <span class="text-break">@message</span>
+    </div>
+}
+
+@if (Store.Current.Alerts?.Enabled == true)
+{
+    var down = Monitor.Down;
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <h2 class="h6 mb-0">@L["Current status"]</h2>
+                <small class="text-secondary">
+                    @if (Monitor.LastCheck is { } last)
+                    {
+                        @L["Last check: {0}", last.ToLocalTime().ToString("HH:mm:ss")]
+                    }
+                    else
+                    {
+                        @L["Waiting for the first check…"]
+                    }
+                </small>
+            </div>
+            @if (down.Count == 0)
+            {
+                <div class="text-success"><i class="bi bi-check-circle-fill"></i> @L["Everything that is watched is online."]</div>
+            }
+            else
+            {
+                <ul class="list-unstyled mb-0">
+                    @foreach (var d in down)
+                    {
+                        <li class="d-flex align-items-center gap-2 py-1">
+                            <i class="bi @(d.IsServer ? "bi-hdd-network" : "bi-camera-video") text-danger"></i>
+                            <strong>@d.Name</strong>
+                            @if (d.ServerName is not null)
+                            {
+                                <small class="text-secondary">@d.ServerName</small>
+                            }
+                            <span class="badge bg-danger-subtle text-danger-emphasis">@L["Offline for {0}", Format.Duration(DateTime.UtcNow - d.Since)]</span>
+                            @if (!d.Alerted)
+                            {
+                                <small class="text-secondary">@L["alert after the grace time"]</small>
+                            }
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+}
+
+<div class="card mb-3">
+    <div class="card-body">
+        <section class="form-section">
+            <header>
+                <h2>@L["Monitoring"]</h2>
+                <p>@L["Every enabled server is checked every {0} seconds.", (int)AlertMonitor.CheckInterval.TotalSeconds]</p>
+            </header>
+            <div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" role="switch" id="alerts-on" @bind="enabled" />
+                    <label class="form-check-label" for="alerts-on">@L["Watch servers and streams and send alerts"]</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="watch-servers" @bind="watchServers" />
+                    <label class="form-check-label" for="watch-servers">@L["Alert when a MediaMTX server cannot be reached"]</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="watch-streams" @bind="watchStreams" />
+                    <label class="form-check-label" for="watch-streams">@L["Alert when a live stream stops"]</label>
+                </div>
+                <div class="form-text mb-2">@L["A stream is only watched after it was live once, so streams that are not used yet stay quiet. On-demand pull streams are skipped."]</div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="recovery" @bind="notifyRecovery" />
+                    <label class="form-check-label" for="recovery">@L["Send a message when it is back online"]</label>
+                </div>
+                <label class="form-label" for="grace">@L["Grace time (seconds)"]</label>
+                <input id="grace" type="number" min="0" max="3600" class="form-control" style="max-width: 10rem" @bind="graceSeconds" />
+                <div class="form-text">@L["How long something has to stay offline before an alert goes out. Filters short hiccups, such as a publisher that reconnects."]</div>
+            </div>
+        </section>
+
+        <section class="form-section">
+            <header>
+                <h2>@L["Mail"]</h2>
+                <p>@L["Uses the mail server from Settings → Mail. One address per line."]</p>
+            </header>
+            <div>
+                @if (!Mailer.IsConfigured)
+                {
+                    <div class="alert alert-warning py-2 d-flex align-items-center gap-2">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <span>@L["Outgoing mail is not set up yet."] <a href="settings/mail">@L["Set up mail"]</a></span>
+                    </div>
+                }
+                <label class="form-label" for="recipients">@L["Recipients"]</label>
+                <textarea id="recipients" class="form-control" rows="3" @bind="recipients" placeholder="ops@example.com"></textarea>
+            </div>
+        </section>
+
+        <section class="form-section">
+            <header>
+                <h2>@L["Webhook"]</h2>
+                <p>@L["The panel sends a POST request to this URL for every alert. Leave empty for no webhook."]</p>
+            </header>
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="form-label" for="webhook-url">@L["URL"]</label>
+                    <input id="webhook-url" type="url" class="form-control" @bind="webhookUrl" placeholder="https://hooks.example.com/…" autocomplete="off" />
+                </div>
+                <div class="col-12">
+                    <label class="form-label">@L["Format"]</label>
+                    <div class="row g-2">
+                        @foreach (var (value, icon, title, text) in Formats)
+                        {
+                            <div class="col-sm-6 col-xl-3">
+                                <label class="action-card p-3 h-100 @(webhookFormat == value ? "border-primary" : null)" style="cursor:pointer">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <input class="form-check-input mt-0" type="radio" name="format" checked="@(webhookFormat == value)" @onchange="() => webhookFormat = value" />
+                                        <strong><i class="bi @icon me-1"></i>@title</strong>
+                                    </div>
+                                    <small class="text-secondary">@L[text]</small>
+                                </label>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="webhook-secret">@L["Signing secret (optional)"]</label>
+                    <input id="webhook-secret" type="password" class="form-control" @bind="webhookSecret" autocomplete="new-password"
+                           placeholder="@(hasSecret ? L["Unchanged (stored encrypted)"] : "")" />
+                    <div class="form-text">@L["Adds the header X-Panel-Signature: sha256=<HMAC of the body>, so your receiver can check that the request comes from the panel."]</div>
+                    @if (hasSecret)
+                    {
+                        <div class="form-check mt-1">
+                            <input class="form-check-input" type="checkbox" id="clear-secret" @bind="clearSecret" />
+                            <label class="form-check-label" for="clear-secret">@L["Remove the stored secret"]</label>
+                        </div>
+                    }
+                </div>
+            </div>
+        </section>
+
+        @if (streams.Count > 0)
+        {
+            <section class="form-section">
+                <header>
+                    <h2>@L["Muted streams"]</h2>
+                    <p>@L["Streams you tick here never cause an alert, for example test streams."]</p>
+                </header>
+                <div class="row g-1">
+                    @foreach (var s in streams)
+                    {
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="mute-@s.Id" checked="@muted.Contains(s.Id)" @onchange="e => ToggleMute(s.Id, e.Value is true)" />
+                                <label class="form-check-label" for="mute-@s.Id">
+                                    @(string.IsNullOrWhiteSpace(s.DisplayName) ? s.Name : s.DisplayName)
+                                    <small class="text-secondary">@s.Server?.Name</small>
+                                </label>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </section>
+        }
+    </div>
+    <div class="card-footer bg-transparent d-flex flex-wrap gap-2 py-3">
+        <button class="btn btn-primary" @onclick="Save"><i class="bi bi-check-lg"></i> @L["Save settings"]</button>
+        <button class="btn btn-outline-primary" @onclick="SendTest" disabled="@sending">
+            @if (sending)
+            {
+                <span class="spinner-border spinner-border-sm"></span>
+            }
+            else
+            {
+                <i class="bi bi-send"></i>
+            }
+            @L["Send test alert"]
+        </button>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h2 class="h6">@L["Recent alerts"]</h2>
+        @if (Monitor.History.Count == 0)
+        {
+            <p class="text-secondary mb-0">@L["No alerts yet."]</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>@L["Time"]</th>
+                            <th>@L["Alert"]</th>
+                            <th>@L["Sent by"]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var entry in Monitor.History)
+                        {
+                            <tr>
+                                <td class="text-nowrap">@entry.Event.At.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                <td>
+                                    <i class="bi @(entry.Event.IsProblem ? "bi-x-circle-fill text-danger" : "bi-check-circle-fill text-success")"></i>
+                                    @entry.Event.Title
+                                    @if (entry.Error is not null)
+                                    {
+                                        <div class="small text-danger text-break">@entry.Error</div>
+                                    }
+                                </td>
+                                <td class="text-nowrap">
+                                    @if (entry.MailSent)
+                                    {
+                                        <span class="badge text-bg-light border"><i class="bi bi-envelope"></i> @L["Mail"]</span>
+                                    }
+                                    @if (entry.WebhookSent)
+                                    {
+                                        <span class="badge text-bg-light border"><i class="bi bi-link-45deg"></i> @L["Webhook"]</span>
+                                    }
+                                    @if (!entry.MailSent && !entry.WebhookSent)
+                                    {
+                                        <span class="text-secondary">–</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="form-text">@L["Kept until the panel restarts. Alerts are also written to the log."]</div>
+        }
+    </div>
+</div>
+
+@code {
+    private static readonly (WebhookFormat Value, string Icon, string Title, string Text)[] Formats =
+    [
+        (WebhookFormat.Json, "bi-braces", "JSON", "All event fields, for your own scripts, n8n, Home Assistant or Uptime tools."),
+        (WebhookFormat.Slack, "bi-slack", "Slack", "Also Mattermost, Rocket.Chat and Google Chat."),
+        (WebhookFormat.Discord, "bi-discord", "Discord", "A Discord channel webhook."),
+        (WebhookFormat.Teams, "bi-microsoft-teams", "Microsoft Teams", "A Teams workflow \"When a Teams webhook request is received\"."),
+    ];
+
+    private bool enabled;
+    private bool watchServers = true;
+    private bool watchStreams = true;
+    private bool notifyRecovery = true;
+    private int graceSeconds = 60;
+    private string recipients = "";
+    private string? webhookUrl;
+    private WebhookFormat webhookFormat;
+    private string? webhookSecret;
+    private bool hasSecret;
+    private bool clearSecret;
+    private HashSet<int> muted = [];
+    private List<StreamDefinition> streams = [];
+    private bool sending;
+    private string? message;
+    private bool isError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var a = Store.Current.Alerts ?? new AlertSettings();
+        (enabled, watchServers, watchStreams, notifyRecovery, graceSeconds) = (a.Enabled, a.WatchServers, a.WatchStreams, a.NotifyRecovery, a.GraceSeconds);
+        recipients = string.Join("\n", a.EmailRecipients);
+        (webhookUrl, webhookFormat) = (a.WebhookUrl, a.WebhookFormat);
+        hasSecret = !string.IsNullOrEmpty(a.WebhookSecretProtected);
+        muted = [.. a.MutedStreamIds];
+
+        await using var db = await DbFactory.CreateDbContextAsync();
+        streams = await db.Streams.AsNoTracking().Include(s => s.Server)
+            .OrderBy(s => s.Server!.Name).ThenBy(s => s.DisplayName).ThenBy(s => s.Name).ToListAsync();
+
+        Monitor.Changed += OnMonitorChanged;
+    }
+
+    private void OnMonitorChanged() => InvokeAsync(StateHasChanged);
+
+    private void ToggleMute(int id, bool on)
+    {
+        if (on) muted.Add(id);
+        else muted.Remove(id);
+    }
+
+    private List<string> Recipients() =>
+        recipients.Split(['\n', '\r', ',', ';'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+
+    private AlertSettings Build() => new()
+    {
+        Enabled = enabled,
+        WatchServers = watchServers,
+        WatchStreams = watchStreams,
+        NotifyRecovery = notifyRecovery,
+        GraceSeconds = graceSeconds,
+        // Streams that were deleted are dropped from the list.
+        MutedStreamIds = muted.Where(id => streams.Any(s => s.Id == id)).Order().ToList(),
+        EmailRecipients = Recipients(),
+        WebhookUrl = string.IsNullOrWhiteSpace(webhookUrl) ? null : webhookUrl.Trim(),
+        WebhookFormat = webhookFormat,
+        // An empty secret field keeps the stored one.
+        WebhookSecretProtected = clearSecret ? null
+            : string.IsNullOrEmpty(webhookSecret) ? Store.Current.Alerts?.WebhookSecretProtected : Monitor.Protect(webhookSecret),
+    };
+
+    private string? Validate()
+    {
+        if (graceSeconds is < 0 or > 3600) return L["Enter a grace time between 0 and 3600 seconds."];
+        if (Recipients().FirstOrDefault(r => !System.Net.Mail.MailAddress.TryCreate(r, out _)) is { } bad)
+            return L["{0} is not a valid mail address.", bad];
+        if (!string.IsNullOrWhiteSpace(webhookUrl)
+            && !(Uri.TryCreate(webhookUrl.Trim(), UriKind.Absolute, out var uri) && uri.Scheme is "http" or "https"))
+            return L["Enter a webhook URL that starts with http:// or https://."];
+        if (enabled && Recipients().Count == 0 && string.IsNullOrWhiteSpace(webhookUrl))
+            return L["Enter at least one mail recipient or a webhook URL."];
+        return null;
+    }
+
+    private void Save()
+    {
+        if (Validate() is { } problem)
+        {
+            (message, isError) = (problem, true);
+            return;
+        }
+        var alerts = Build();
+        Store.Save(Store.Current with { Alerts = alerts });
+        hasSecret = !string.IsNullOrEmpty(alerts.WebhookSecretProtected);
+        (webhookSecret, clearSecret) = (null, false);
+        (message, isError) = (L["Settings saved."], false);
+    }
+
+    private async Task SendTest()
+    {
+        if (Validate() is { } problem)
+        {
+            (message, isError) = (problem, true);
+            return;
+        }
+        var settings = Build();
+        if (settings.EmailRecipients.Count == 0 && settings.WebhookUrl is null)
+        {
+            (message, isError) = (L["Enter at least one mail recipient or a webhook URL."], true);
+            return;
+        }
+        sending = true;
+        message = null;
+        try
+        {
+            var result = await Monitor.SendTestAsync(settings);
+            (message, isError) = result.Error is { } error
+                ? (L["Sending failed: {0}", error], true)
+                : (L["Test alert sent."], false);
+        }
+        finally
+        {
+            sending = false;
+        }
+    }
+
+    public void Dispose() => Monitor.Changed -= OnMonitorChanged;
+}
