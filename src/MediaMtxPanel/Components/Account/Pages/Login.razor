@@ -12,6 +12,7 @@
 @inject IdentityRedirectManager RedirectManager
 @inject PanelSettingsStore Settings
 @inject MailService Mail
+@inject EntraSso Entra
 
 <AppPageTitle Text="@L["Log in"]" />
 
@@ -50,6 +51,19 @@
                 </div>
                 <PasskeySubmit Operation="PasskeyOperation.Request" Name="Input.Passkey" EmailName="Input.Email" class="w-100 btn btn-outline-secondary"><i class="bi bi-fingerprint"></i> @L["Log in with a passkey"]</PasskeySubmit>
             </EditForm>
+            @if (Entra.IsActive)
+            {
+                @* Turned on under Settings → Single sign-on. *@
+                <form action="Account/PerformExternalLogin" method="post" class="mt-2">
+                    <AntiforgeryToken />
+                    <input type="hidden" name="provider" value="@EntraSso.Scheme" />
+                    <input type="hidden" name="ReturnUrl" value="@ReturnUrl" />
+                    <button type="submit" class="w-100 btn btn-outline-secondary btn-microsoft">
+                        <svg class="ms-logo" viewBox="0 0 21 21" aria-hidden="true"><rect x="1" y="1" width="9" height="9" fill="#f25022" /><rect x="11" y="1" width="9" height="9" fill="#7fba00" /><rect x="1" y="11" width="9" height="9" fill="#00a4ef" /><rect x="11" y="11" width="9" height="9" fill="#ffb900" /></svg>
+                        @L["Sign in with Microsoft"]
+                    </button>
+                </form>
+            }
             <p class="text-secondary small mt-4 mb-0 d-flex align-items-start gap-2">
                 <i class="bi bi-info-circle mt-1"></i>
                 <span>@L["No account yet? Ask an administrator to create one for you."]</span>
