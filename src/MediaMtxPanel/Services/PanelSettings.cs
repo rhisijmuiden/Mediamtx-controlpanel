@@ -31,6 +31,9 @@ public record PanelSettings
 
     /// <summary>Outgoing mail (password reset links and test mails). Null until configured.</summary>
     public MailSettings? Mail { get; init; }
+
+    /// <summary>Monitoring: mail and/or webhook when a server or stream goes offline. Null until configured.</summary>
+    public AlertSettings? Alerts { get; init; }
 }
 
 public enum ReleaseChannel
@@ -69,6 +72,49 @@ public record MailSettings
 
     /// <summary>Accept certificates that do not validate (self-signed relay). Off by default.</summary>
     public bool AllowInvalidCertificate { get; init; }
+}
+
+public enum WebhookFormat
+{
+    /// <summary>Plain JSON with the event fields, for your own scripts, n8n, Home Assistant and the like.</summary>
+    Json,
+    /// <summary>{"text": "..."}: Slack, Mattermost, Rocket.Chat and Google Chat.</summary>
+    Slack,
+    /// <summary>{"content": "..."}: Discord.</summary>
+    Discord,
+    /// <summary>Adaptive card for a Microsoft Teams workflow ("When a Teams webhook request is received").</summary>
+    Teams,
+}
+
+public record AlertSettings
+{
+    public bool Enabled { get; init; }
+
+    /// <summary>Alert when a MediaMTX server cannot be reached.</summary>
+    public bool WatchServers { get; init; } = true;
+
+    /// <summary>Alert when a stream that was live stops (on-demand pull streams are skipped).</summary>
+    public bool WatchStreams { get; init; } = true;
+
+    /// <summary>Also send a message when a server or stream is back.</summary>
+    public bool NotifyRecovery { get; init; } = true;
+
+    /// <summary>How long a server or stream has to stay down before an alert goes out; filters short hiccups.</summary>
+    public int GraceSeconds { get; init; } = 60;
+
+    /// <summary>Streams (by id) that never cause an alert, for example test streams.</summary>
+    public List<int> MutedStreamIds { get; init; } = [];
+
+    /// <summary>Mail recipients; uses the SMTP server from Settings → Mail.</summary>
+    public List<string> EmailRecipients { get; init; } = [];
+
+    public string? WebhookUrl { get; init; }
+
+    [JsonConverter(typeof(JsonStringEnumConverter<WebhookFormat>))]
+    public WebhookFormat WebhookFormat { get; init; } = WebhookFormat.Json;
+
+    /// <summary>Optional; signs each request (X-Panel-Signature: sha256=HMAC of the body). Data Protection encrypted.</summary>
+    public string? WebhookSecretProtected { get; init; }
 }
 
 /// <summary>

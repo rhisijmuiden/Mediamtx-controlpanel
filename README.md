@@ -52,7 +52,7 @@ The menu on the left is grouped by purpose. Groups with more than one page fold 
 | Group | Pages | Who |
 |---|---|---|
 | **Overview** | Dashboard, *Streams* (All streams, New stream), *Customer portal* (My streams, Payment settings) | Administrators and users; customers only see the customer portal |
-| **Administration** | *Management* (Servers, Users), *Settings* (General, Web server, Mail) | Administrators |
+| **Administration** | *Management* (Servers, Users), *Settings* (General, Web server, Mail, Alerts) | Administrators |
 | **Account** | *My account* (Profile, Password, Two-factor authentication, Passkeys) | Everyone |
 
 At the bottom of the menu are your name (click it for your account, or use the button next to it to log out), the **language** menu and the **Info** button.
@@ -105,6 +105,10 @@ Only administrators see *Settings*. The settings are stored in `panel-settings.j
 - **Mail**: the SMTP server for outgoing mail, such as password reset links. Any server works: plain, STARTTLS (automatic or required) or SSL/TLS, with or without a login, optionally accepting a self-signed certificate. The password is stored encrypted. *Send test mail* tries the settings before you save them. Once mail is on, the login page offers *Forgot your password?*.
 
   ![Mail settings](docs/screenshots/settings-mail.png)
+
+- **Alerts**: monitoring. Every 15 seconds the panel checks each enabled MediaMTX server and its streams, and sends a mail (through the server under *Mail*) and/or a webhook when a server cannot be reached or a live stream stops, and again when it is back. A grace time (default 60 seconds) filters short hiccups. A stream is only watched after it was live once, on-demand pull streams are skipped, and single streams can be muted. Webhook formats: plain JSON (`event` is `server.down`, `server.up`, `stream.down`, `stream.up` or `test`), Slack/Mattermost, Discord and Microsoft Teams (workflow webhook). With a signing secret every request carries `X-Panel-Signature: sha256=<HMAC-SHA256 of the body>`. Messages are written in the default language. The page also shows what is offline right now and the recent alerts.
+
+  ![Alert settings](docs/screenshots/settings-alerts.png)
 
 ### Languages
 
