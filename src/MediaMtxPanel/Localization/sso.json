@@ -1,0 +1,167 @@
+{
+  "Signing in with Microsoft is turned off.": {
+    "nl": "Inloggen met Microsoft staat uit.",
+    "de": "Die Anmeldung mit Microsoft ist deaktiviert.",
+    "fr": "La connexion avec Microsoft est désactivée."
+  },
+  "Your Microsoft account has no e-mail address the panel can use.": {
+    "nl": "Je Microsoft-account heeft geen e-mailadres dat het paneel kan gebruiken.",
+    "de": "Ihr Microsoft-Konto hat keine E-Mail-Adresse, die das Panel verwenden kann.",
+    "fr": "Votre compte Microsoft n'a pas d'adresse e-mail utilisable par le panneau."
+  },
+  "There is no account for {0}. Ask an administrator to create one for you.": {
+    "nl": "Er is geen account voor {0}. Vraag een beheerder om er een voor je aan te maken.",
+    "de": "Für {0} gibt es kein Konto. Bitten Sie einen Administrator, eines für Sie anzulegen.",
+    "fr": "Il n'existe aucun compte pour {0}. Demandez à un administrateur d'en créer un pour vous."
+  },
+  "Your account could not be set up. Ask an administrator to check the log.": {
+    "nl": "Je account kon niet worden ingesteld. Vraag een beheerder om het logboek te bekijken.",
+    "de": "Ihr Konto konnte nicht eingerichtet werden. Bitten Sie einen Administrator, das Protokoll zu prüfen.",
+    "fr": "Votre compte n'a pas pu être configuré. Demandez à un administrateur de consulter le journal."
+  },
+  "Sign in with Microsoft": {
+    "nl": "Inloggen met Microsoft",
+    "de": "Mit Microsoft anmelden",
+    "fr": "Se connecter avec Microsoft"
+  },
+  "Single sign-on": {
+    "nl": "Single sign-on",
+    "de": "Single Sign-On",
+    "fr": "Authentification unique"
+  },
+  "Let people log in with their Microsoft work account (Microsoft Entra ID). Logging in with a password and passkeys keeps working.": {
+    "nl": "Laat mensen inloggen met hun Microsoft-werkaccount (Microsoft Entra ID). Inloggen met een wachtwoord en passkeys blijft werken.",
+    "de": "Lassen Sie Personen sich mit ihrem Microsoft-Geschäftskonto (Microsoft Entra ID) anmelden. Die Anmeldung mit Passwort und Passkeys funktioniert weiterhin.",
+    "fr": "Permettez aux utilisateurs de se connecter avec leur compte professionnel Microsoft (Microsoft Entra ID). La connexion par mot de passe et par clé d'accès reste possible."
+  },
+  "Single sign-on is on": {
+    "nl": "Single sign-on staat aan",
+    "de": "Single Sign-On ist aktiv",
+    "fr": "Authentification unique activée"
+  },
+  "Single sign-on is off": {
+    "nl": "Single sign-on staat uit",
+    "de": "Single Sign-On ist aus",
+    "fr": "Authentification unique désactivée"
+  },
+  "Microsoft Entra ID": {
+    "nl": "Microsoft Entra ID",
+    "de": "Microsoft Entra ID",
+    "fr": "Microsoft Entra ID"
+  },
+  "When this is on, the login page shows \"Sign in with Microsoft\".": {
+    "nl": "Als dit aan staat, toont de inlogpagina \"Inloggen met Microsoft\".",
+    "de": "Wenn dies aktiv ist, zeigt die Anmeldeseite \"Mit Microsoft anmelden\".",
+    "fr": "Lorsque cette option est activée, la page de connexion affiche « Se connecter avec Microsoft »."
+  },
+  "Allow signing in with Microsoft": {
+    "nl": "Inloggen met Microsoft toestaan",
+    "de": "Anmeldung mit Microsoft erlauben",
+    "fr": "Autoriser la connexion avec Microsoft"
+  },
+  "App registration": {
+    "nl": "App-registratie",
+    "de": "App-Registrierung",
+    "fr": "Inscription d'application"
+  },
+  "In the Entra admin center, go to App registrations → New registration. Choose \"Accounts in this organizational directory only\" and add the redirect URI below as a Web platform. Then create a client secret under Certificates & secrets.": {
+    "nl": "Ga in het Entra-beheercentrum naar App-registraties → Nieuwe registratie. Kies \"Alleen accounts in deze organisatiemap\" en voeg de omleidings-URI hieronder toe als Web-platform. Maak daarna een clientgeheim aan onder Certificaten en geheimen.",
+    "de": "Gehen Sie im Entra Admin Center zu App-Registrierungen → Neue Registrierung. Wählen Sie \"Nur Konten in diesem Organisationsverzeichnis\" und fügen Sie den Umleitungs-URI unten als Web-Plattform hinzu. Erstellen Sie dann unter Zertifikate & Geheimnisse einen geheimen Clientschlüssel.",
+    "fr": "Dans le centre d'administration Entra, allez dans Inscriptions d'applications → Nouvelle inscription. Choisissez « Comptes dans cet annuaire d'organisation uniquement » et ajoutez l'URI de redirection ci-dessous comme plateforme Web. Créez ensuite un secret client sous Certificats et secrets."
+  },
+  "Redirect URI": {
+    "nl": "Omleidings-URI",
+    "de": "Umleitungs-URI",
+    "fr": "URI de redirection"
+  },
+  "Use the address people open the panel with. Behind a reverse proxy, that is the public address.": {
+    "nl": "Gebruik het adres waarmee mensen het paneel openen. Achter een reverse proxy is dat het publieke adres.",
+    "de": "Verwenden Sie die Adresse, mit der das Panel geöffnet wird. Hinter einem Reverse Proxy ist das die öffentliche Adresse.",
+    "fr": "Utilisez l'adresse avec laquelle on ouvre le panneau. Derrière un proxy inverse, c'est l'adresse publique."
+  },
+  "Directory (tenant) ID": {
+    "nl": "Map-ID (tenant)",
+    "de": "Verzeichnis-ID (Mandant)",
+    "fr": "ID de l'annuaire (locataire)"
+  },
+  "Or a verified domain, such as contoso.onmicrosoft.com.": {
+    "nl": "Of een geverifieerd domein, zoals contoso.onmicrosoft.com.",
+    "de": "Oder eine verifizierte Domäne, etwa contoso.onmicrosoft.com.",
+    "fr": "Ou un domaine vérifié, par exemple contoso.onmicrosoft.com."
+  },
+  "Application (client) ID": {
+    "nl": "Toepassings-ID (client)",
+    "de": "Anwendungs-ID (Client)",
+    "fr": "ID d'application (client)"
+  },
+  "Client secret": {
+    "nl": "Clientgeheim",
+    "de": "Geheimer Clientschlüssel",
+    "fr": "Secret client"
+  },
+  "The secret's Value, not its ID. Secrets expire: put a new one here before the old one does.": {
+    "nl": "De Waarde van het geheim, niet de ID. Geheimen verlopen: zet hier een nieuw geheim neer voordat het oude verloopt.",
+    "de": "Der Wert des Geheimnisses, nicht seine ID. Geheimnisse laufen ab: Tragen Sie hier ein neues ein, bevor das alte abläuft.",
+    "fr": "La Valeur du secret, pas son ID. Les secrets expirent : saisissez-en un nouveau ici avant l'expiration de l'ancien."
+  },
+  "Accounts": {
+    "nl": "Accounts",
+    "de": "Konten",
+    "fr": "Comptes"
+  },
+  "Someone who signs in with Microsoft gets the panel account with the same e-mail address. Without such an account they cannot log in, unless accounts are created automatically.": {
+    "nl": "Wie inlogt met Microsoft krijgt het paneelaccount met hetzelfde e-mailadres. Zonder zo'n account kan diegene niet inloggen, tenzij accounts automatisch worden aangemaakt.",
+    "de": "Wer sich mit Microsoft anmeldet, erhält das Panel-Konto mit derselben E-Mail-Adresse. Ohne ein solches Konto ist keine Anmeldung möglich, es sei denn, Konten werden automatisch angelegt.",
+    "fr": "Une personne qui se connecte avec Microsoft obtient le compte du panneau ayant la même adresse e-mail. Sans ce compte, elle ne peut pas se connecter, sauf si les comptes sont créés automatiquement."
+  },
+  "Create an account at the first sign-in": {
+    "nl": "Account aanmaken bij de eerste keer inloggen",
+    "de": "Konto bei der ersten Anmeldung anlegen",
+    "fr": "Créer un compte lors de la première connexion"
+  },
+  "Role of new accounts": {
+    "nl": "Rol van nieuwe accounts",
+    "de": "Rolle neuer Konten",
+    "fr": "Rôle des nouveaux comptes"
+  },
+  "Roles can also come from Entra: create app roles with the values Admin, User and Customer in the app registration and assign them to users or groups. The role in the token then replaces the panel role at every sign-in.": {
+    "nl": "Rollen kunnen ook uit Entra komen: maak in de app-registratie app-rollen aan met de waarden Admin, User en Customer en wijs ze toe aan gebruikers of groepen. De rol in het token vervangt dan bij elke keer inloggen de rol in het paneel.",
+    "de": "Rollen können auch aus Entra kommen: Legen Sie in der App-Registrierung App-Rollen mit den Werten Admin, User und Customer an und weisen Sie sie Benutzern oder Gruppen zu. Die Rolle im Token ersetzt dann bei jeder Anmeldung die Panel-Rolle.",
+    "fr": "Les rôles peuvent aussi venir d'Entra : créez dans l'inscription d'application des rôles d'application avec les valeurs Admin, User et Customer et attribuez-les à des utilisateurs ou des groupes. Le rôle du jeton remplace alors le rôle du panneau à chaque connexion."
+  },
+  "Test settings": {
+    "nl": "Instellingen testen",
+    "de": "Einstellungen testen",
+    "fr": "Tester les paramètres"
+  },
+  "Enter the directory (tenant) ID of your organization. \"common\" and \"organizations\" are not allowed.": {
+    "nl": "Vul de map-ID (tenant) van je organisatie in. \"common\" en \"organizations\" zijn niet toegestaan.",
+    "de": "Geben Sie die Verzeichnis-ID (Mandant) Ihrer Organisation ein. \"common\" und \"organizations\" sind nicht erlaubt.",
+    "fr": "Saisissez l'ID d'annuaire (locataire) de votre organisation. « common » et « organizations » ne sont pas autorisés."
+  },
+  "Enter the application (client) ID; it looks like 00000000-0000-0000-0000-000000000000.": {
+    "nl": "Vul de toepassings-ID (client) in; die ziet eruit als 00000000-0000-0000-0000-000000000000.",
+    "de": "Geben Sie die Anwendungs-ID (Client) ein; sie sieht aus wie 00000000-0000-0000-0000-000000000000.",
+    "fr": "Saisissez l'ID d'application (client) ; il ressemble à 00000000-0000-0000-0000-000000000000."
+  },
+  "Enter the client secret.": {
+    "nl": "Vul het clientgeheim in.",
+    "de": "Geben Sie den geheimen Clientschlüssel ein.",
+    "fr": "Saisissez le secret client."
+  },
+  "Microsoft accepted the tenant, client ID and secret.": {
+    "nl": "Microsoft heeft de tenant, client-ID en het geheim geaccepteerd.",
+    "de": "Microsoft hat Mandant, Client-ID und Geheimnis akzeptiert.",
+    "fr": "Microsoft a accepté le locataire, l'ID client et le secret."
+  },
+  "Microsoft refused the settings: {0}": {
+    "nl": "Microsoft weigerde de instellingen: {0}",
+    "de": "Microsoft hat die Einstellungen abgelehnt: {0}",
+    "fr": "Microsoft a refusé les paramètres : {0}"
+  },
+  "Microsoft could not be reached: {0}": {
+    "nl": "Microsoft is niet bereikbaar: {0}",
+    "de": "Microsoft ist nicht erreichbar: {0}",
+    "fr": "Impossible de joindre Microsoft : {0}"
+  }
+}

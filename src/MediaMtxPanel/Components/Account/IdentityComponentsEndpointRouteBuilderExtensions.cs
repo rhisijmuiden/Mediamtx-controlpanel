@@ -26,10 +26,10 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
             HttpContext context,
             [FromServices] SignInManager<ApplicationUser> signInManager,
             [FromForm] string provider,
-            [FromForm] string returnUrl) =>
+            [FromForm] string? returnUrl) =>
         {
             IEnumerable<KeyValuePair<string, StringValues>> query = [
-                new("ReturnUrl", returnUrl),
+                new("ReturnUrl", returnUrl ?? ""),
                 new("Action", ExternalLogin.LoginCallbackAction)];
 
             var redirectUrl = UriHelper.BuildRelative(
