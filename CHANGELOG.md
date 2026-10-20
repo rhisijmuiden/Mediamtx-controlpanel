@@ -19,6 +19,10 @@ Added, Changed, Deprecated, Removed, Fixed or Security, and rename Unreleased to
 - After WebRTC failed once, the web player starts with HLS for 30 minutes instead of waiting for WebRTC again.
 - The SSH setup of a server sets `hlsTrustedProxies` and `webrtcTrustedProxies` to the panel's address, so MediaMTX sees viewers' own addresses through the panel.
 
+### Fixed
+
+- The web player now switches to HLS when WebRTC cannot connect from outside the local network. MediaMTX answers the late ICE candidates of a failed connection with "not found", which the player took for a stream that is not live, so it kept retrying WebRTC without a picture. It now asks HLS whether the stream is live before it decides.
+
 ## [1.3.0] - 2026-10-20
 
 ### Added

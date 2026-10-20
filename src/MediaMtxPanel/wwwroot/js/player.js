@@ -98,13 +98,11 @@
         }
         setStatus(video, "Connecting via WebRTC…", "wait");
         let gotTrack = false;
-        let lastError = null;
         const reader = new window.MediaMTXWebRTCReader({
             url: o.whepUrl,
             user: o.user || "",
             pass: o.pass || "",
             onError: (err) => {
-                lastError = String(err);
                 if (String(err).includes("codecs not supported")) {
                     // This browser cannot decode the stream's codecs over WebRTC; HLS usually can.
                     stop(video);
@@ -126,12 +124,30 @@
             },
         });
         players.set(video, reader);
-        setTimeout(() => {
-            // A stream that is simply not live yet is not a connection problem; keep waiting on WebRTC then.
-            if (players.get(video) === reader && !gotTrack && !(lastError || "").includes("not found")) {
-                fallBackToHls(video, o);
+        // reader.js also reports "stream not found" when its session ended before it could send its ICE
+        // candidates (a 404 on the PATCH), which is what a failed connection looks like from outside the
+        // network. So ask HLS whether the stream is live: if it is, WebRTC is the problem and HLS takes over;
+        // if not, keep waiting on WebRTC and ask again later.
+        const check = async () => {
+            if (players.get(video) !== reader || gotTrack) return;
+            if (await isLive(o)) {
+                if (players.get(video) === reader && !gotTrack) fallBackToHls(video, o);
+            } else {
+                setTimeout(check, WEBRTC_FALLBACK_MS);
             }
-        }, WEBRTC_FALLBACK_MS);
+        };
+        setTimeout(check, WEBRTC_FALLBACK_MS);
+    }
+
+    async function isLive(o) {
+        if (!o.hlsUrl) return false;
+        try {
+            const headers = o.user ? { Authorization: "Basic " + btoa(o.user + ":" + o.pass) } : {};
+            const res = await fetch(o.hlsUrl, { headers, cache: "no-store" });
+            return res.ok;
+        } catch {
+            return false;
+        }
     }
 
     async function startHls(video, o) {
