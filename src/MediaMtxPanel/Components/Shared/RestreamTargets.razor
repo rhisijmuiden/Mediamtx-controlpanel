@@ -1,0 +1,296 @@
+@implements IDisposable
+@inject RestreamService Restream
+@inject RestreamManager Manager
+
+@if (Manager.FfmpegAvailable == false)
+{
+    <div class="alert alert-warning d-flex gap-2">
+        <i class="bi bi-exclamation-triangle"></i>
+        <div>@L["ffmpeg is not installed on the panel server, so restreaming cannot start. Install it (apt install ffmpeg) and restart the panel."]</div>
+    </div>
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <p class="small text-secondary mb-0" style="max-width: 48rem">
+        @L["Send this stream on to YouTube, Twitch, Facebook or any RTMP(S) server. While the stream is live, the panel reads it from the server and forwards it to every enabled target; it starts and stops by itself. Every target uses as much upload bandwidth on the panel server as the stream itself."]
+    </p>
+    @if (editing is null)
+    {
+        <button class="btn btn-primary" @onclick="New"><i class="bi bi-plus-lg"></i> @L["Add target"]</button>
+    }
+</div>
+
+@if (message is not null)
+{
+    <div class="alert alert-@(messageIsError ? "danger" : "success") alert-dismissible d-flex align-items-center gap-2">
+        <i class="bi @(messageIsError ? "bi-exclamation-octagon" : "bi-check-circle")"></i> @message
+        <button type="button" class="btn-close" aria-label="@L["Close"]" @onclick="() => message = null"></button>
+    </div>
+}
+
+@if (editing is not null)
+{
+    var info = RestreamPlatforms.Get(editing.Platform);
+    <div class="card mb-4">
+        <div class="card-header"><i class="bi @(editingId is null ? "bi-plus-circle" : "bi-pencil")"></i> @(editingId is null ? L["New restream target"] : L["Edit restream target"])</div>
+        <div class="card-body">
+            <EditForm Model="editing" OnValidSubmit="Save" FormName="restream-target">
+                <LocalizedValidator />
+                <div class="mb-3">
+                    <label class="form-label">@L["Platform"]</label>
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var p in RestreamPlatforms.All)
+                        {
+                            <button type="button" class="btn @(editing.Platform == p.Platform ? "btn-primary" : "btn-outline-secondary")" @onclick="() => editing.Platform = p.Platform">
+                                <i class="bi @p.Icon"></i> @(p.Platform == RestreamPlatform.Custom ? L["Custom RTMP(S)"] : p.Label)
+                            </button>
+                        }
+                    </div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-5">
+                        <label class="form-label" for="rs-name">@L["Name"]</label>
+                        <InputText id="rs-name" class="form-control" @bind-Value="editing.Name" placeholder="@(editing.Platform == RestreamPlatform.Custom ? L["Custom RTMP(S)"] : info.Label)" />
+                        <div class="form-text">@L["Shown in the list, e.g. the channel name. Empty = the platform name."]</div>
+                    </div>
+                    <div class="col-md-7">
+                        <label class="form-label" for="rs-url">@L["Server URL"]</label>
+                        <InputText id="rs-url" class="form-control font-monospace" @bind-Value="editing.ServerUrl" placeholder="@(info.DefaultUrl ?? "rtmps://live.example.com/app")" />
+                        <div class="form-text">
+                            @(info.DefaultUrl is null
+                                ? L["The RTMP or RTMPS address the service gives you."]
+                                : L["Leave empty to use the platform's default ingest server."])
+                        </div>
+                        <ValidationMessage For="() => editing.ServerUrl" />
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label" for="rs-key">@L["Stream key"]</label>
+                        <InputText id="rs-key" type="password" autocomplete="new-password" class="form-control font-monospace" @bind-Value="editing.StreamKey"
+                                   placeholder="@(editing.HasStoredKey ? L["Stored (encrypted). Leave empty to keep it."] : "")" />
+                        <div class="form-text">
+                            @L["The key is stored encrypted and is never shown again."]
+                            @if (info.KeyHelpUrl is not null)
+                            {
+                                <a class="ms-1" href="@info.KeyHelpUrl" target="_blank" rel="noopener">@L["Where do I find the key on {0}?", info.Label] <i class="bi bi-box-arrow-up-right small"></i></a>
+                            }
+                            else
+                            {
+                                @L["Added to the end of the server URL. Leave empty if the URL already contains it."]
+                            }
+                        </div>
+                        <ValidationMessage For="() => editing.StreamKey" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="rs-abr">@L["Audio bitrate (kbit/s)"]</label>
+                        <InputNumber id="rs-abr" class="form-control" @bind-Value="editing.AudioBitrateKbps" />
+                        <ValidationMessage For="() => editing.AudioBitrateKbps" />
+                    </div>
+                    <div class="col-md-8">
+                        <div class="form-check form-switch mt-md-4 pt-md-2">
+                            <InputCheckbox class="form-check-input" id="rs-transcode" @bind-Value="editing.TranscodeVideo" />
+                            <label class="form-check-label" for="rs-transcode">@L["Re-encode video to H.264"]</label>
+                        </div>
+                        <div class="form-text">@L["Off: the video is passed on as it is, which costs almost no CPU. Turn it on when the source is not H.264 (e.g. H.265 or WebRTC with VP8/AV1) or to send a lower bitrate."]</div>
+                    </div>
+                    @if (editing.TranscodeVideo)
+                    {
+                        <div class="col-md-4">
+                            <label class="form-label" for="rs-vbr">@L["Video bitrate (kbit/s)"]</label>
+                            <InputNumber id="rs-vbr" class="form-control" @bind-Value="editing.VideoBitrateKbps" />
+                            <ValidationMessage For="() => editing.VideoBitrateKbps" />
+                        </div>
+                    }
+                    <div class="col-md-12">
+                        <div class="form-check form-switch">
+                            <InputCheckbox class="form-check-input" id="rs-enabled" @bind-Value="editing.Enabled" />
+                            <label class="form-check-label" for="rs-enabled">@L["Enabled: forward automatically whenever the stream is live"]</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> @L["Save"]</button>
+                    <button type="button" class="btn btn-outline-secondary" @onclick="() => editing = null">@L["Cancel"]</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+}
+
+@if (targets is null)
+{
+    <p class="text-secondary"><span class="spinner-border spinner-border-sm me-2"></span>@L["Loading…"]</p>
+}
+else if (targets.Count == 0 && editing is null)
+{
+    <div class="empty-state">
+        <i class="bi bi-cast"></i>
+        <p class="mb-3">@L["No restream targets yet. Add one to send this stream to YouTube, Twitch or Facebook as well."]</p>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var t in targets)
+        {
+            var info = RestreamPlatforms.Get(t.Platform);
+            var st = Manager.GetStatus(t);
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="platform-icon @t.Platform.ToString().ToLowerInvariant()"><i class="bi @info.Icon"></i></div>
+                                <div>
+                                    <div class="fw-semibold">@t.Name</div>
+                                    <div class="small text-secondary font-monospace text-break">@(t.ServerUrl ?? info.DefaultUrl)</div>
+                                </div>
+                            </div>
+                            <span class="badge badge-dot @StateClass(st.State)">@StateLabel(st.State)</span>
+                        </div>
+                        <div class="small text-secondary mt-3">
+                            @if (st.State == RestreamState.Live)
+                            {
+                                <span><i class="bi bi-clock me-1"></i>@L["Live since"]: @st.LiveSince?.ToLocalTime().ToString("T")</span>
+                                @if (st.BitrateKbps is { } kbps)
+                                {
+                                    <span class="ms-3"><i class="bi bi-speedometer2 me-1"></i>@kbps.ToString("N0") kbit/s</span>
+                                }
+                            }
+                            else if (st.State == RestreamState.Retrying)
+                            {
+                                <div class="text-danger-emphasis text-break"><i class="bi bi-exclamation-triangle me-1"></i>@L[st.Error ?? "ffmpeg stopped."]</div>
+                            }
+                            else if (st.State == RestreamState.Waiting)
+                            {
+                                <span>@L["Starts as soon as the stream is live."]</span>
+                            }
+                            <div class="mt-1">
+                                @(t.TranscodeVideo ? L["Video re-encoded to H.264 at {0} kbit/s", t.VideoBitrateKbps] : L["Video passed through"])
+                                · @L["Audio AAC {0} kbit/s", t.AudioBitrateKbps]
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent d-flex flex-wrap gap-2">
+                        <button class="btn btn-sm @(t.Enabled ? "btn-outline-warning" : "btn-outline-success")" @onclick="() => Toggle(t)">
+                            <i class="bi @(t.Enabled ? "bi-pause-circle" : "bi-play-circle")"></i> @(t.Enabled ? L["Disable"] : L["Enable"])
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary" @onclick="() => Edit(t)"><i class="bi bi-pencil"></i> @L["Edit"]</button>
+                        @if (confirmDeleteId == t.Id)
+                        {
+                            <span class="small fw-semibold align-self-center">@L["Are you sure?"]</span>
+                            <button class="btn btn-sm btn-danger" @onclick="() => Delete(t)"><i class="bi bi-trash"></i> @L["Yes, delete"]</button>
+                            <button class="btn btn-sm btn-outline-secondary" @onclick="() => confirmDeleteId = null">@L["No"]</button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-sm btn-outline-danger" @onclick="() => confirmDeleteId = t.Id"><i class="bi bi-trash"></i> @L["Delete"]</button>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired] public int StreamId { get; set; }
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
+
+    private List<RestreamTarget>? targets;
+    private RestreamTargetInput? editing;
+    private int? editingId;
+    private int? confirmDeleteId;
+    private string? message;
+    private bool messageIsError;
+    private readonly CancellationTokenSource cts = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+        _ = PollAsync();
+    }
+
+    private async Task LoadAsync() =>
+        targets = await Restream.ListAsync((await AuthState).User, StreamId) ?? [];
+
+    // The status lives in RestreamManager; refresh the cards every couple of seconds.
+    private async Task PollAsync()
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(2));
+        try
+        {
+            while (await timer.WaitForNextTickAsync(cts.Token))
+                await InvokeAsync(StateHasChanged);
+        }
+        catch (OperationCanceledException) { }
+    }
+
+    private void New()
+    {
+        editingId = null;
+        editing = new RestreamTargetInput();
+    }
+
+    private void Edit(RestreamTarget t)
+    {
+        editingId = t.Id;
+        editing = RestreamTargetInput.From(t);
+    }
+
+    private async Task Save()
+    {
+        var saved = await Restream.SaveAsync((await AuthState).User, StreamId, editingId, editing!);
+        if (saved is null)
+        {
+            Show(L["The target could not be saved."], true);
+            return;
+        }
+        editing = null;
+        await LoadAsync();
+        Show(editingId is null ? L["Restream target added."] : L["Changes saved."], false);
+    }
+
+    private async Task Toggle(RestreamTarget t)
+    {
+        await Restream.SetEnabledAsync((await AuthState).User, t.Id, !t.Enabled);
+        await LoadAsync();
+    }
+
+    private async Task Delete(RestreamTarget t)
+    {
+        await Restream.DeleteAsync((await AuthState).User, t.Id);
+        confirmDeleteId = null;
+        await LoadAsync();
+        Show(L["Restream target deleted."], false);
+    }
+
+    private void Show(string text, bool isError)
+    {
+        message = text;
+        messageIsError = isError;
+    }
+
+    private string StateLabel(RestreamState s) => s switch
+    {
+        RestreamState.Off => L["Off"],
+        RestreamState.Waiting => L["Waiting for stream"],
+        RestreamState.Connecting => L["Connecting…"],
+        RestreamState.Live => L["Live"],
+        _ => L["Retrying"],
+    };
+
+    private static string StateClass(RestreamState s) => s switch
+    {
+        RestreamState.Live => "bg-success-subtle text-success-emphasis",
+        RestreamState.Connecting => "bg-info-subtle text-info-emphasis",
+        RestreamState.Retrying => "bg-danger-subtle text-danger-emphasis",
+        RestreamState.Waiting => "bg-warning-subtle text-warning-emphasis",
+        _ => "text-bg-light border",
+    };
+
+    public void Dispose()
+    {
+        cts.Cancel();
+        cts.Dispose();
+    }
+}

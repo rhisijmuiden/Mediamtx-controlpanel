@@ -588,3 +588,12 @@ pre.cmd {
 .tchart-cols .col-hit:hover .tip { display: flex; }
 .tchart-xaxis { position: relative; height: 1.5rem; margin-left: 4.75rem; }
 .tchart-xaxis span { position: absolute; top: .35rem; transform: translateX(-50%); white-space: nowrap; }
+
+/* Restream target tile: platform logo in its brand colour. */
+.platform-icon {
+    width: 2.75rem; height: 2.75rem; border-radius: .75rem; flex-shrink: 0;
+    display: grid; place-items: center; font-size: 1.35rem; color: #fff; background: var(--app-accent);
+}
+.platform-icon.youtube { background: #ff0033; }
+.platform-icon.twitch { background: #9146ff; }
+.platform-icon.facebook { background: #0866ff; }

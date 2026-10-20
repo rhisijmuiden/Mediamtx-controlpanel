@@ -7,6 +7,7 @@ A control panel for [MediaMTX](https://github.com/bluenviron/mediamtx), written 
 - **Streams**: create, edit, enable/disable and delete. A stream is either a *publisher* stream (OBS, ffmpeg, a camera or a browser sends to the server) or a *pull* stream (the server pulls an external RTSP/RTMP/SRT/HLS/WHEP source). Options: public viewing, recording, maximum number of viewers.
 - **Right after creating a stream** the panel shows the credentials (publish and view), the OBS settings, all endpoints (RTSP, RTMP, SRT, WebRTC WHIP/WHEP, HLS) with copy buttons, and example commands for ffmpeg/ffplay.
 - **Live status**: the dashboard and stream pages show live/offline, codecs, viewers and traffic; publishers and viewers can be disconnected.
+- **Restream**: forward a stream to YouTube, Twitch, Facebook or any RTMP(S) server while it is live. Stream keys are stored encrypted (see [Restream](#restream)).
 - **Multiple MediaMTX servers**: administrators add as many MediaMTX instances as needed under *Servers*. Each stream is assigned to a server; its URLs use that server's public address and ports.
 - **Server setup over SSH**: when adding a server, the administrator can enter its SSH login. The panel then logs in, installs MediaMTX if it is missing, points it at the panel, restarts it and adds the server as soon as the connection works (see [Adding a MediaMTX server](#adding-a-mediamtx-server)).
 - **Users**: administrators create accounts (no open registration). Roles: *Administrator*, *User* (own streams only) and *Customer* (customer portal only).
@@ -78,9 +79,19 @@ After saving you land on the stream page. Its tabs hold everything needed to bro
 - **Credentials & OBS**: the OBS server and stream key, and the publish and view usernames and passwords, each with a copy button and a *Regenerate* button.
 - **Endpoints**: every publish and watch URL (RTSP, RTMP, SRT, WebRTC, HLS) and example ffmpeg/ffplay commands.
 - **Live status**: tracks, traffic and the connected publishers and viewers, who can be disconnected.
+- **Restream**: the platforms this stream is forwarded to (see [Restream](#restream)).
 - **Manage**: enable or disable, regenerate credentials and delete.
 
 ![Stream details](docs/screenshots/stream-details.png)
+
+### Restream
+
+On the *Restream* tab of a stream you add targets: **YouTube**, **Twitch**, **Facebook** or a **custom RTMP(S)** server (Kick, LinkedIn, a CDN, another MediaMTX…). For the platforms you only paste the stream key; the default ingest server is filled in (RTMPS), and you can enter another server URL if the platform gives you one.
+
+- While the stream is live, the panel runs `ffmpeg` for every enabled target: it reads the stream from its MediaMTX server over RTSP (with the stream's viewer credentials, so it counts as one viewer) and pushes it to the target. It starts when the stream goes live, stops when it ends, and retries with a growing delay when the platform refuses the connection. Each target shows its state (waiting, connecting, live with bitrate, or the last error).
+- The video is passed through unchanged by default (no CPU load). Turn on *Re-encode video to H.264* when the source is H.265, VP8 or AV1 (e.g. WebRTC publishers) or to send a lower bitrate. Audio is always sent as AAC, because the platforms require it.
+- Stream keys are encrypted with ASP.NET Data Protection (the keys in `Panel:DataProtectionKeysPath`), never shown again and kept out of the logs and error messages.
+- The panel server needs `ffmpeg` (`apt install ffmpeg`); the Proxmox/Debian installer and the Docker image include it. Use `Restream:FfmpegPath` for another location. Every target uses as much upload bandwidth on the panel server as the stream itself.
 
 ### Servers
 

@@ -66,6 +66,8 @@ public class StreamDefinition
 
     public List<StreamOffer> Offers { get; set; } = [];
 
+    public List<RestreamTarget> RestreamTargets { get; set; } = [];
+
     public string? OwnerId { get; set; }
     public ApplicationUser? Owner { get; set; }
 

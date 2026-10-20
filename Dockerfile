@@ -8,6 +8,8 @@ ARG GIT_COMMIT=""
 RUN dotnet publish src/MediaMtxPanel/MediaMtxPanel.csproj -c Release -o /app --no-restore -p:SourceRevisionId="$GIT_COMMIT"
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
+# ffmpeg forwards streams to YouTube, Twitch, Facebook and other RTMP(S) servers (Restream).
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY --from=build /app .
 ENV ASPNETCORE_URLS=http://+:8080 \
