@@ -115,6 +115,11 @@ else
             </button>
         </li>
         <li class="nav-item">
+            <button type="button" class="nav-link @(tab == Tab.Restream ? "active" : "")" @onclick="() => tab = Tab.Restream">
+                <i class="bi bi-cast me-1"></i>@L["Restream"]
+            </button>
+        </li>
+        <li class="nav-item">
             <button type="button" class="nav-link @(tab == Tab.Recordings ? "active" : "")" @onclick="() => tab = Tab.Recordings">
                 <i class="bi bi-film me-1"></i>@L["Recordings"]
             </button>
@@ -354,6 +359,10 @@ else
             <StatsView Streams="[stream]" />
             break;
 
+        case Tab.Restream:
+            <RestreamTargets StreamId="stream.Id" />
+            break;
+
         case Tab.Recordings:
             <RecordingList Stream="stream" ShowServerHint="true" />
             break;
@@ -427,7 +436,7 @@ else
     [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
 
 
-    private enum Tab { Connect, Endpoints, Live, Statistics, Recordings, Manage }
+    private enum Tab { Connect, Endpoints, Live, Statistics, Restream, Recordings, Manage }
 
     private Tab tab = Tab.Connect;
     private StreamDefinition? stream;

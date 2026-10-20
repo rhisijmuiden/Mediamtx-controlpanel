@@ -37,6 +37,8 @@ public record PanelSettings
 
     /// <summary>Monitoring: mail and/or webhook when a server or stream goes offline. Null until configured.</summary>
     public AlertSettings? Alerts { get; init; }
+    /// <summary>Settings → Backup. Null until configured.</summary>
+    public Backup.BackupSettings? Backup { get; init; }
 }
 
 public enum ReleaseChannel

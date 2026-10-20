@@ -11,6 +11,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<TicketOrder> Orders => Set<TicketOrder>();
     public DbSet<PaymentAccount> PaymentAccounts => Set<PaymentAccount>();
     public DbSet<StreamStatSample> StatSamples => Set<StreamStatSample>();
+    public DbSet<RestreamTarget> RestreamTargets => Set<RestreamTarget>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -34,6 +35,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         builder.Entity<StreamOffer>(e =>
         {
             e.HasOne(o => o.Stream).WithMany(s => s.Offers).HasForeignKey(o => o.StreamId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<RestreamTarget>(e =>
+        {
+            e.HasOne(t => t.Stream).WithMany(s => s.RestreamTargets).HasForeignKey(t => t.StreamId).OnDelete(DeleteBehavior.Cascade);
         });
 
         builder.Entity<TicketOrder>(e =>

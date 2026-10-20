@@ -8,6 +8,7 @@ A control panel for [MediaMTX](https://github.com/bluenviron/mediamtx), written 
 - **Right after creating a stream** the panel shows the credentials (publish and view), the OBS settings, all endpoints (RTSP, RTMP, SRT, WebRTC WHIP/WHEP, HLS) with copy buttons, and example commands for ffmpeg/ffplay.
 - **Recordings**: per stream, MediaMTX records everything that is broadcast and deletes it after a chosen number of days. Recordings can be played, downloaded as MP4 and deleted in the panel and in the customer portal (see [Recordings](#recordings)).
 - **Live status**: the dashboard and stream pages show live/offline, codecs, viewers and traffic; publishers and viewers can be disconnected.
+- **Restream**: forward a stream to YouTube, Twitch, Facebook or any RTMP(S) server while it is live. Stream keys are stored encrypted (see [Restream](#restream)).
 - **Multiple MediaMTX servers**: administrators add as many MediaMTX instances as needed under *Servers*. Each stream is assigned to a server; its URLs use that server's public address and ports.
 - **Server setup over SSH**: when adding a server, the administrator can enter its SSH login. The panel then logs in, installs MediaMTX if it is missing, points it at the panel, restarts it and adds the server as soon as the connection works (see [Adding a MediaMTX server](#adding-a-mediamtx-server)).
 - **Users**: administrators create accounts (no open registration). Roles: *Administrator*, *User* (own streams only) and *Customer* (customer portal only).
@@ -79,10 +80,20 @@ After saving you land on the stream page. Its tabs hold everything needed to bro
 - **Credentials & OBS**: the OBS server and stream key, and the publish and view usernames and passwords, each with a copy button and a *Regenerate* button.
 - **Endpoints**: every publish and watch URL (RTSP, RTMP, SRT, WebRTC, HLS) and example ffmpeg/ffplay commands.
 - **Live status**: tracks, traffic and the connected publishers and viewers, who can be disconnected.
+- **Restream**: the platforms this stream is forwarded to (see [Restream](#restream)).
 - **Recordings**: what the stream recorded (see [Recordings](#recordings)).
 - **Manage**: enable or disable, regenerate credentials and delete.
 
 ![Stream details](docs/screenshots/stream-details.png)
+
+### Restream
+
+On the *Restream* tab of a stream you add targets: **YouTube**, **Twitch**, **Facebook** or a **custom RTMP(S)** server (Kick, LinkedIn, a CDN, another MediaMTX…). For the platforms you only paste the stream key; the default ingest server is filled in (RTMPS), and you can enter another server URL if the platform gives you one.
+
+- While the stream is live, the panel runs `ffmpeg` for every enabled target: it reads the stream from its MediaMTX server over RTSP (with the stream's viewer credentials, so it counts as one viewer) and pushes it to the target. It starts when the stream goes live, stops when it ends, and retries with a growing delay when the platform refuses the connection. Each target shows its state (waiting, connecting, live with bitrate, or the last error).
+- The video is passed through unchanged by default (no CPU load). Turn on *Re-encode video to H.264* when the source is H.265, VP8 or AV1 (e.g. WebRTC publishers) or to send a lower bitrate. Audio is always sent as AAC, because the platforms require it.
+- Stream keys are encrypted with ASP.NET Data Protection (the keys in `Panel:DataProtectionKeysPath`), never shown again and kept out of the logs and error messages.
+- The panel server needs `ffmpeg` (`apt install ffmpeg`); the Proxmox/Debian installer and the Docker image include it. Use `Restream:FfmpegPath` for another location. Every target uses as much upload bandwidth on the panel server as the stream itself.
 
 ### Recordings
 
@@ -127,6 +138,14 @@ Only administrators see *Settings*. The settings are stored in `panel-settings.j
 - **Alerts**: monitoring. Every 15 seconds the panel checks each enabled MediaMTX server and its streams, and sends a mail (through the server under *Mail*) and/or a webhook when a server cannot be reached or a live stream stops, and again when it is back. A grace time (default 60 seconds) filters short hiccups. A stream is only watched after it was live once, on-demand pull streams are skipped, and single streams can be muted. Webhook formats: plain JSON (`event` is `server.down`, `server.up`, `stream.down`, `stream.up` or `test`), Slack/Mattermost, Discord and Microsoft Teams (workflow webhook). With a signing secret every request carries `X-Panel-Signature: sha256=<HMAC-SHA256 of the body>`. Messages are written in the default language. The page also shows what is offline right now and the recent alerts.
 
   ![Alert settings](docs/screenshots/settings-alerts.png)
+
+- **Backup & restore**: backups of the database, the settings and the encryption keys to another machine over **SFTP**, **SCP**, **FTPS** (explicit or implicit), **FTP** or a local folder (such as a mounted NAS share). *Test connection* checks the login and that the folder is writable.
+  - **Full and incremental**: a full backup holds everything; an incremental backup only holds the 64 KB pieces that changed since the previous backup of the same full backup. The schedule makes a backup every day at a chosen time, a full one on a chosen weekday (or every day) and incremental ones on the other days, keeps the last *n* full backups with their incremental ones, and can mail the administrators when a scheduled backup fails.
+  - **Encryption**: with a passphrase every archive is encrypted with AES-256-GCM (key from PBKDF2-SHA256) before it leaves the machine. Keep the passphrase outside the panel: without it the backups cannot be restored. Passwords, keys and the passphrase are stored encrypted in `panel-settings.json`. An SSH host key is trusted at the first connection and checked after that.
+  - **Restore**: the page lists the backups at the remote location. *Restore* downloads the backup with the archives it builds on, checks every checksum and the database, and restarts the panel, which puts the data in place before it opens the database. The previous data is kept in `pre-restore/` next to the database. The backup location, schedule and web port of the running installation stay as they are, so a fresh installation can restore from the same location. A backup made by a newer version is refused until the panel is updated.
+  - Archives are named `mediamtx-panel_<time>_full.tar` and `mediamtx-panel_<time>_incr_<time of its full backup>.tar`; an unencrypted archive is a plain tar file with a `manifest.json`.
+
+  ![Backup settings](docs/screenshots/settings-backup.png)
 
 ### Languages
 

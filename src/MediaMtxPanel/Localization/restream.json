@@ -1,0 +1,207 @@
+{
+  "Restream": {
+    "nl": "Restream",
+    "de": "Restream",
+    "fr": "Restream"
+  },
+  "ffmpeg is not installed on the panel server, so restreaming cannot start. Install it (apt install ffmpeg) and restart the panel.": {
+    "nl": "ffmpeg is niet geïnstalleerd op de panelserver, dus restreamen kan niet starten. Installeer het (apt install ffmpeg) en herstart het paneel.",
+    "de": "ffmpeg ist auf dem Panel-Server nicht installiert, daher kann das Restreaming nicht starten. Installiere es (apt install ffmpeg) und starte das Panel neu.",
+    "fr": "ffmpeg n'est pas installé sur le serveur du panneau, le restreaming ne peut donc pas démarrer. Installez-le (apt install ffmpeg) et redémarrez le panneau."
+  },
+  "Send this stream on to YouTube, Twitch, Facebook or any RTMP(S) server. While the stream is live, the panel reads it from the server and forwards it to every enabled target; it starts and stops by itself. Every target uses as much upload bandwidth on the panel server as the stream itself.": {
+    "nl": "Stuur deze stream door naar YouTube, Twitch, Facebook of elke RTMP(S)-server. Zolang de stream live is, leest het paneel hem van de server en stuurt hem door naar elk ingeschakeld doel; dit start en stopt vanzelf. Elk doel gebruikt evenveel uploadbandbreedte op de panelserver als de stream zelf.",
+    "de": "Leite diesen Stream an YouTube, Twitch, Facebook oder einen beliebigen RTMP(S)-Server weiter. Solange der Stream live ist, liest das Panel ihn vom Server und leitet ihn an jedes aktivierte Ziel weiter; das startet und stoppt von selbst. Jedes Ziel braucht auf dem Panel-Server so viel Upload-Bandbreite wie der Stream selbst.",
+    "fr": "Renvoyez ce flux vers YouTube, Twitch, Facebook ou n'importe quel serveur RTMP(S). Tant que le flux est en direct, le panneau le lit sur le serveur et le transmet à chaque cible activée ; cela démarre et s'arrête tout seul. Chaque cible utilise autant de bande passante montante sur le serveur du panneau que le flux lui-même."
+  },
+  "Add target": {
+    "nl": "Doel toevoegen",
+    "de": "Ziel hinzufügen",
+    "fr": "Ajouter une cible"
+  },
+  "New restream target": {
+    "nl": "Nieuw restreamdoel",
+    "de": "Neues Restream-Ziel",
+    "fr": "Nouvelle cible de restream"
+  },
+  "Edit restream target": {
+    "nl": "Restreamdoel bewerken",
+    "de": "Restream-Ziel bearbeiten",
+    "fr": "Modifier la cible de restream"
+  },
+  "Platform": {
+    "nl": "Platform",
+    "de": "Plattform",
+    "fr": "Plateforme"
+  },
+  "Custom RTMP(S)": {
+    "nl": "Eigen RTMP(S)",
+    "de": "Eigener RTMP(S)-Server",
+    "fr": "RTMP(S) personnalisé"
+  },
+  "Shown in the list, e.g. the channel name. Empty = the platform name.": {
+    "nl": "Wordt in de lijst getoond, bijvoorbeeld de kanaalnaam. Leeg = de naam van het platform.",
+    "de": "Wird in der Liste angezeigt, z. B. der Kanalname. Leer = der Name der Plattform.",
+    "fr": "Affiché dans la liste, par exemple le nom de la chaîne. Vide = le nom de la plateforme."
+  },
+  "Server URL": {
+    "nl": "Server-URL",
+    "de": "Server-URL",
+    "fr": "URL du serveur"
+  },
+  "The RTMP or RTMPS address the service gives you.": {
+    "nl": "Het RTMP- of RTMPS-adres dat de dienst je geeft.",
+    "de": "Die RTMP- oder RTMPS-Adresse, die dir der Dienst gibt.",
+    "fr": "L'adresse RTMP ou RTMPS fournie par le service."
+  },
+  "Leave empty to use the platform's default ingest server.": {
+    "nl": "Laat leeg om de standaard ingest-server van het platform te gebruiken.",
+    "de": "Leer lassen, um den Standard-Ingest-Server der Plattform zu verwenden.",
+    "fr": "Laissez vide pour utiliser le serveur d'ingestion par défaut de la plateforme."
+  },
+  "Stored (encrypted). Leave empty to keep it.": {
+    "nl": "Opgeslagen (versleuteld). Laat leeg om hem te behouden.",
+    "de": "Gespeichert (verschlüsselt). Leer lassen, um ihn zu behalten.",
+    "fr": "Enregistrée (chiffrée). Laissez vide pour la conserver."
+  },
+  "The key is stored encrypted and is never shown again.": {
+    "nl": "De sleutel wordt versleuteld opgeslagen en nooit meer getoond.",
+    "de": "Der Schlüssel wird verschlüsselt gespeichert und nie wieder angezeigt.",
+    "fr": "La clé est enregistrée chiffrée et n'est plus jamais affichée."
+  },
+  "Where do I find the key on {0}?": {
+    "nl": "Waar vind ik de sleutel op {0}?",
+    "de": "Wo finde ich den Schlüssel bei {0}?",
+    "fr": "Où trouver la clé sur {0} ?"
+  },
+  "Added to the end of the server URL. Leave empty if the URL already contains it.": {
+    "nl": "Wordt achter de server-URL geplakt. Laat leeg als de URL hem al bevat.",
+    "de": "Wird ans Ende der Server-URL angehängt. Leer lassen, wenn die URL ihn bereits enthält.",
+    "fr": "Ajoutée à la fin de l'URL du serveur. Laissez vide si l'URL la contient déjà."
+  },
+  "Audio bitrate (kbit/s)": {
+    "nl": "Audiobitrate (kbit/s)",
+    "de": "Audiobitrate (kbit/s)",
+    "fr": "Débit audio (kbit/s)"
+  },
+  "Re-encode video to H.264": {
+    "nl": "Video opnieuw coderen naar H.264",
+    "de": "Video neu in H.264 kodieren",
+    "fr": "Réencoder la vidéo en H.264"
+  },
+  "Off: the video is passed on as it is, which costs almost no CPU. Turn it on when the source is not H.264 (e.g. H.265 or WebRTC with VP8/AV1) or to send a lower bitrate.": {
+    "nl": "Uit: de video wordt ongewijzigd doorgestuurd, wat bijna geen CPU kost. Zet dit aan als de bron geen H.264 is (bijvoorbeeld H.265 of WebRTC met VP8/AV1) of om een lagere bitrate te sturen.",
+    "de": "Aus: Das Video wird unverändert weitergeleitet, was kaum CPU kostet. Schalte es ein, wenn die Quelle kein H.264 ist (z. B. H.265 oder WebRTC mit VP8/AV1) oder um eine niedrigere Bitrate zu senden.",
+    "fr": "Désactivé : la vidéo est transmise telle quelle, ce qui ne coûte presque pas de CPU. Activez-le si la source n'est pas en H.264 (par ex. H.265 ou WebRTC avec VP8/AV1) ou pour envoyer un débit plus faible."
+  },
+  "Video bitrate (kbit/s)": {
+    "nl": "Videobitrate (kbit/s)",
+    "de": "Videobitrate (kbit/s)",
+    "fr": "Débit vidéo (kbit/s)"
+  },
+  "Enabled: forward automatically whenever the stream is live": {
+    "nl": "Ingeschakeld: automatisch doorsturen zodra de stream live is",
+    "de": "Aktiviert: automatisch weiterleiten, sobald der Stream live ist",
+    "fr": "Activé : transmettre automatiquement dès que le flux est en direct"
+  },
+  "No restream targets yet. Add one to send this stream to YouTube, Twitch or Facebook as well.": {
+    "nl": "Nog geen restreamdoelen. Voeg er een toe om deze stream ook naar YouTube, Twitch of Facebook te sturen.",
+    "de": "Noch keine Restream-Ziele. Füge eines hinzu, um diesen Stream auch an YouTube, Twitch oder Facebook zu senden.",
+    "fr": "Aucune cible de restream pour l'instant. Ajoutez-en une pour envoyer aussi ce flux vers YouTube, Twitch ou Facebook."
+  },
+  "Starts as soon as the stream is live.": {
+    "nl": "Start zodra de stream live is.",
+    "de": "Startet, sobald der Stream live ist.",
+    "fr": "Démarre dès que le flux est en direct."
+  },
+  "Video re-encoded to H.264 at {0} kbit/s": {
+    "nl": "Video opnieuw gecodeerd naar H.264 met {0} kbit/s",
+    "de": "Video neu kodiert in H.264 mit {0} kbit/s",
+    "fr": "Vidéo réencodée en H.264 à {0} kbit/s"
+  },
+  "Video passed through": {
+    "nl": "Video ongewijzigd doorgestuurd",
+    "de": "Video unverändert weitergeleitet",
+    "fr": "Vidéo transmise telle quelle"
+  },
+  "Audio AAC {0} kbit/s": {
+    "nl": "Audio AAC {0} kbit/s",
+    "de": "Audio AAC {0} kbit/s",
+    "fr": "Audio AAC {0} kbit/s"
+  },
+  "The target could not be saved.": {
+    "nl": "Het doel kon niet worden opgeslagen.",
+    "de": "Das Ziel konnte nicht gespeichert werden.",
+    "fr": "La cible n'a pas pu être enregistrée."
+  },
+  "Restream target added.": {
+    "nl": "Restreamdoel toegevoegd.",
+    "de": "Restream-Ziel hinzugefügt.",
+    "fr": "Cible de restream ajoutée."
+  },
+  "Restream target deleted.": {
+    "nl": "Restreamdoel verwijderd.",
+    "de": "Restream-Ziel gelöscht.",
+    "fr": "Cible de restream supprimée."
+  },
+  "Waiting for stream": {
+    "nl": "Wacht op stream",
+    "de": "Wartet auf Stream",
+    "fr": "En attente du flux"
+  },
+  "Connecting…": {
+    "nl": "Verbinden…",
+    "de": "Verbinde…",
+    "fr": "Connexion…"
+  },
+  "Retrying": {
+    "nl": "Opnieuw proberen",
+    "de": "Neuer Versuch",
+    "fr": "Nouvelle tentative"
+  },
+  "Choose a video bitrate between 300 and 51000 kbit/s.": {
+    "nl": "Kies een videobitrate tussen 300 en 51000 kbit/s.",
+    "de": "Wähle eine Videobitrate zwischen 300 und 51000 kbit/s.",
+    "fr": "Choisissez un débit vidéo entre 300 et 51000 kbit/s."
+  },
+  "Choose an audio bitrate between 64 and 320 kbit/s.": {
+    "nl": "Kies een audiobitrate tussen 64 en 320 kbit/s.",
+    "de": "Wähle eine Audiobitrate zwischen 64 und 320 kbit/s.",
+    "fr": "Choisissez un débit audio entre 64 et 320 kbit/s."
+  },
+  "Enter the RTMP or RTMPS server URL.": {
+    "nl": "Vul de RTMP- of RTMPS-server-URL in.",
+    "de": "Gib die RTMP- oder RTMPS-Server-URL ein.",
+    "fr": "Saisissez l'URL du serveur RTMP ou RTMPS."
+  },
+  "The server URL must start with rtmp:// or rtmps://.": {
+    "nl": "De server-URL moet beginnen met rtmp:// of rtmps://.",
+    "de": "Die Server-URL muss mit rtmp:// oder rtmps:// beginnen.",
+    "fr": "L'URL du serveur doit commencer par rtmp:// ou rtmps://."
+  },
+  "Enter the stream key from the platform.": {
+    "nl": "Vul de streamsleutel van het platform in.",
+    "de": "Gib den Stream-Schlüssel der Plattform ein.",
+    "fr": "Saisissez la clé de stream de la plateforme."
+  },
+  "A stream key cannot contain spaces.": {
+    "nl": "Een streamsleutel mag geen spaties bevatten.",
+    "de": "Ein Stream-Schlüssel darf keine Leerzeichen enthalten.",
+    "fr": "Une clé de stream ne peut pas contenir d'espaces."
+  },
+  "ffmpeg is not installed on the panel server.": {
+    "nl": "ffmpeg is niet geïnstalleerd op de panelserver.",
+    "de": "ffmpeg ist auf dem Panel-Server nicht installiert.",
+    "fr": "ffmpeg n'est pas installé sur le serveur du panneau."
+  },
+  "The stored stream key cannot be decrypted (the panel's encryption keys changed). Enter the key again.": {
+    "nl": "De opgeslagen streamsleutel kan niet worden ontsleuteld (de encryptiesleutels van het paneel zijn veranderd). Vul de sleutel opnieuw in.",
+    "de": "Der gespeicherte Stream-Schlüssel kann nicht entschlüsselt werden (die Verschlüsselungsschlüssel des Panels haben sich geändert). Gib den Schlüssel erneut ein.",
+    "fr": "La clé de stream enregistrée ne peut pas être déchiffrée (les clés de chiffrement du panneau ont changé). Saisissez à nouveau la clé."
+  },
+  "ffmpeg stopped.": {
+    "nl": "ffmpeg is gestopt.",
+    "de": "ffmpeg wurde beendet.",
+    "fr": "ffmpeg s'est arrêté."
+  }
+}

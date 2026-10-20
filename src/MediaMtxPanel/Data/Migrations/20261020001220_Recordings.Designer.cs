@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MediaMtxPanel.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20261020000948_Recordings")]
+    [Migration("20261020001220_Recordings")]
     partial class Recordings
     {
         /// <inheritdoc />
@@ -218,6 +218,56 @@ namespace MediaMtxPanel.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("PaymentAccounts");
+                });
+
+            modelBuilder.Entity("MediaMtxPanel.Data.RestreamTarget", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AudioBitrateKbps")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Platform")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ServerUrl")
+                        .HasMaxLength(512)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("StreamId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("StreamKeyProtected")
+                        .HasMaxLength(2048)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("TranscodeVideo")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("VideoBitrateKbps")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StreamId");
+
+                    b.ToTable("RestreamTargets");
                 });
 
             modelBuilder.Entity("MediaMtxPanel.Data.StreamDefinition", b =>
@@ -622,6 +672,17 @@ namespace MediaMtxPanel.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("MediaMtxPanel.Data.RestreamTarget", b =>
+                {
+                    b.HasOne("MediaMtxPanel.Data.StreamDefinition", "Stream")
+                        .WithMany("RestreamTargets")
+                        .HasForeignKey("StreamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Stream");
+                });
+
             modelBuilder.Entity("MediaMtxPanel.Data.StreamDefinition", b =>
                 {
                     b.HasOne("MediaMtxPanel.Data.ApplicationUser", "Owner")
@@ -795,6 +856,8 @@ namespace MediaMtxPanel.Data.Migrations
             modelBuilder.Entity("MediaMtxPanel.Data.StreamDefinition", b =>
                 {
                     b.Navigation("Offers");
+
+                    b.Navigation("RestreamTargets");
                 });
 #pragma warning restore 612, 618
         }

@@ -47,7 +47,7 @@ install_packages() {
   # shellcheck source=/dev/null
   . /etc/os-release
   apt-get update -qq
-  apt-get install -y -qq curl ca-certificates tar sqlite3 iproute2 locales >/dev/null
+  apt-get install -y -qq curl ca-certificates tar sqlite3 iproute2 locales ffmpeg >/dev/null
   # English (en_US.UTF-8) as the container's default language, so logins from a host shell with that LANG work.
   if [[ "$SET_LOCALE" == "yes" ]] && ! locale -a 2>/dev/null | grep -qi '^en_US\.utf-\?8$'; then
     sed -i 's/^# *\(en_US.UTF-8 UTF-8\)/\1/' /etc/locale.gen

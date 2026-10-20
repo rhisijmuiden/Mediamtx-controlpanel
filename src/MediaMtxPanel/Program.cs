@@ -12,8 +12,10 @@ using MediaMtxPanel.Data;
 using MediaMtxPanel.Endpoints;
 using MediaMtxPanel.Options;
 using MediaMtxPanel.Services;
+using MediaMtxPanel.Services.Backup;
 using MediaMtxPanel.Services.Localization;
 using MediaMtxPanel.Services.Payments;
+using MediaMtxPanel.Services.Restream;
 using MediaMtxPanel.Services.Setup;
 
 // "admin-reset" and "station-info" run a command for deploy/mediamtx-panel-station.sh instead of the web server.
@@ -21,6 +23,13 @@ var stationCommand = StationCommands.Parse(args);
 var builder = WebApplication.CreateBuilder(stationCommand is null ? args : args[1..]);
 if (stationCommand is not null)
     StationCommands.ConfigureLogging(builder);
+
+// A restore staged under Settings → Backup replaces the data before anything opens it. Not from a
+// station command, which may run as root and would leave files the service cannot write.
+var backupPaths = BackupPaths.Resolve(builder.Configuration, builder.Environment.ContentRootPath);
+if (stationCommand is null)
+    PendingRestore.Apply(backupPaths, Console.WriteLine);
+builder.Services.AddSingleton(backupPaths);
 
 // Settings from the panel's Settings page; the web port has to be known before the server starts.
 var settingsStore = new PanelSettingsStore(PanelSettingsStore.ResolvePath(builder.Configuration, builder.Environment.ContentRootPath));
@@ -106,6 +115,9 @@ builder.Services.AddHostedService(sp => sp.GetRequiredService<StreamStatsCollect
 builder.Services.AddHttpClient("alerts", c => c.Timeout = TimeSpan.FromSeconds(15));
 builder.Services.AddSingleton<AlertMonitor>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<AlertMonitor>());
+builder.Services.AddSingleton<RestreamManager>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<RestreamManager>());
+builder.Services.AddScoped<RestreamService>();
 builder.Services.AddHttpClient("github", c =>
 {
     c.BaseAddress = new Uri("https://api.github.com/");
@@ -115,6 +127,8 @@ builder.Services.AddHttpClient("github", c =>
 });
 builder.Services.AddSingleton<UpdateChecker>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<UpdateChecker>());
+builder.Services.AddSingleton<BackupService>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<BackupService>());
 
 // Keep the cookie encryption keys next to the database so logins survive container restarts.
 var keysDir = builder.Configuration["Panel:DataProtectionKeysPath"];
