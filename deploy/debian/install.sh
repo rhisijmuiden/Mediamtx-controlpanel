@@ -39,6 +39,7 @@ REPO="${REPO:-rhisijmuiden/Mediamtx-controlpanel}"
 REPO_BRANCH_SET="${REPO_BRANCH:+yes}"              # set by hand: always build that branch
 REPO_BRANCH="${REPO_BRANCH:-main}"                 # used while the release channel has no release yet
 RELEASE_CHANNEL="${RELEASE_CHANNEL:-}"             # stable | test; empty = stable, on update: the panel's choice
+FROM_GITHUB="${FROM_GITHUB:-no}"                   # "yes" = download even when run from a checkout (the panel's updater)
 PANEL_VERSION=""
 
 MODE=install
@@ -139,7 +140,7 @@ channel_from_settings() {
 # Downloads the sources from GitHub when there is no checkout next to the script.
 # SOURCE_COMMIT ends up in the panel's Info screen and is used for its update check.
 fetch_sources() {
-  if [[ -n "$PROJECT_DIR" && -f "$PROJECT_DIR/src/MediaMtxPanel/MediaMtxPanel.csproj" ]]; then
+  if [[ "$FROM_GITHUB" != "yes" && -n "$PROJECT_DIR" && -f "$PROJECT_DIR/src/MediaMtxPanel/MediaMtxPanel.csproj" ]]; then
     SOURCE_COMMIT="$(git -C "$PROJECT_DIR" rev-parse HEAD 2>/dev/null || true)"
     return 0
   fi

@@ -1,0 +1,173 @@
+@* "Update now" in the Info window (administrators): installs the newest release of the release channel. *@
+@implements IDisposable
+@inject PanelUpdater Updater
+@inject MediaMtxPanel.Services.Backup.BackupService Backups
+
+@if (Updater.Busy)
+{
+    <div class="update-progress mb-2">
+        <div class="d-flex align-items-center gap-2 fw-semibold mb-2">
+            <span class="spinner-border spinner-border-sm text-primary"></span> @L["Updating the panel…"]
+        </div>
+        <ol class="update-steps">
+            @foreach (var (step, text) in Steps)
+            {
+                <li class="@StepClass(step)">
+                    <i class="bi @StepIcon(step)"></i> @text
+                </li>
+            }
+        </ol>
+        <div class="small text-secondary mb-2">
+            @L["The panel restarts at the end and is unavailable for a moment; this page reconnects by itself. Do not close the panel's server in the meantime."]
+        </div>
+        @if (Updater.Log.Count > 0)
+        {
+            <pre class="update-log small mb-0">@string.Join('\n', Updater.Log.TakeLast(40))</pre>
+        }
+    </div>
+}
+else
+{
+    @if (Updater.Error is { } error)
+    {
+        <div class="alert alert-danger mb-2"><i class="bi bi-x-circle me-1"></i> @error</div>
+    }
+    else if (Updater.LastRun is { State: "failed" } failed && Recent(failed))
+    {
+        <div class="alert alert-danger mb-2">
+            <div class="fw-semibold"><i class="bi bi-x-circle me-1"></i> @L["The last update failed"]</div>
+            <div class="small">@FailureText(failed)</div>
+            @if (Updater.Log.Count > 0)
+            {
+                <button type="button" class="btn btn-link btn-sm p-0" @onclick="() => showLog = !showLog">
+                    @(showLog ? L["Hide log"] : L["Show log"])
+                </button>
+                @if (showLog)
+                {
+                    <pre class="update-log small mt-2 mb-0">@string.Join('\n', Updater.Log)</pre>
+                }
+            }
+        </div>
+    }
+    else if (Updater.LastRun is { State: "succeeded" } done && Recent(done))
+    {
+        <div class="alert alert-success mb-2">
+            <i class="bi bi-check-circle me-1"></i>
+            @if (!string.IsNullOrEmpty(Updater.FromVersion) && Updater.FromVersion != BuildInfo.Version)
+            {
+                @L["Updated from {0} to {1} on {2}.", Updater.FromVersion, BuildInfo.Version, done.Finished?.ToLocalTime().ToString("g") ?? ""]
+            }
+            else
+            {
+                @L["The update finished on {0}.", done.Finished?.ToLocalTime().ToString("g") ?? ""]
+            }
+        </div>
+    }
+
+    @if (UpdateAvailable)
+    {
+        <div class="update-now mb-2">
+            @if (!confirming)
+            {
+                <div class="d-flex align-items-center flex-wrap gap-2">
+                    <div class="me-auto">
+                        <div class="fw-semibold">@L["Install the update"]</div>
+                        <div class="small text-secondary">@L["Downloads, builds and installs the new version, then restarts the panel. Takes a few minutes."]</div>
+                    </div>
+                    <button type="button" class="btn btn-success btn-sm" @onclick="() => confirming = true">
+                        <i class="bi bi-cloud-arrow-down"></i> @L["Update now"]
+                    </button>
+                </div>
+            }
+            else
+            {
+                <div class="fw-semibold mb-1"><i class="bi bi-question-circle me-1"></i> @L["Update the panel now?"]</div>
+                <div class="small text-secondary mb-2">
+                    @L["Streams keep running, but the panel is unavailable for a few minutes while it is built and restarted. A copy of the current installation is saved first; if the new version does not start, it is put back automatically."]
+                </div>
+                @if (Backups.Settings.IsConfigured)
+                {
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="update-backup" @bind="backupFirst" />
+                        <label class="form-check-label small" for="update-backup">@L["Make a backup to the backup location first"]</label>
+                    </div>
+                }
+                <div class="d-flex gap-2 justify-content-end">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="() => confirming = false">@L["Cancel"]</button>
+                    <button type="button" class="btn btn-success btn-sm" @onclick="StartUpdate">
+                        <i class="bi bi-cloud-arrow-down"></i> @L["Yes, update now"]
+                    </button>
+                </div>
+            }
+        </div>
+    }
+}
+
+@code {
+    /// <summary>An update is available (or the last one failed, so it can be tried again).</summary>
+    [Parameter] public bool UpdateAvailable { get; set; }
+
+    private bool confirming;
+    private bool backupFirst = true;
+    private bool showLog;
+
+    private IEnumerable<(string Step, string Text)> Steps
+    {
+        get
+        {
+            if (Backups.Settings.IsConfigured && (backupFirst || Updater.State == UpdaterState.BackingUp))
+                yield return ("backup", L["Backup to the backup location"]);
+            yield return ("snapshot", L["Saving a copy of the current installation"]);
+            yield return ("install", L["Downloading, building and installing the new version"]);
+            yield return ("restart", L["Restarting the panel"]);
+        }
+    }
+
+    private int StepIndex(string step) => Array.IndexOf(["backup", "start", "snapshot", "install", "restart"], step);
+
+    // Where the update is now, on the same scale as StepIndex.
+    private int Current => Updater.State switch
+    {
+        UpdaterState.BackingUp => 0,
+        UpdaterState.Starting => 1,
+        _ => Updater.LastRun?.Step switch
+        {
+            "snapshot" => 2,
+            "install" when Updater.Log.Any(l => l.Contains("Restart", StringComparison.OrdinalIgnoreCase)) => 4,
+            "install" => 3,
+            _ => 1,
+        },
+    };
+
+    private string StepClass(string step) => StepIndex(step) < Current ? "done" : StepIndex(step) == Current ? "active" : "";
+
+    private string StepIcon(string step) => StepIndex(step) < Current ? "bi-check-circle-fill" : StepIndex(step) == Current ? "bi-arrow-right-circle-fill" : "bi-circle";
+
+    private static bool Recent(UpdaterStatusFile run) => run.Finished is { } at && DateTimeOffset.UtcNow - at < TimeSpan.FromDays(1);
+
+    private string FailureText(UpdaterStatusFile run) => run.Step switch
+    {
+        "rollback" when run.Message.StartsWith("The new version did not start, so", StringComparison.Ordinal) =>
+            L["The new version did not start, so the previous version was put back."],
+        "rollback" => L["The new version did not start and putting the previous version back failed too. Restore {0} by hand.", run.Snapshot],
+        "snapshot" => L["Could not save a copy of the current installation; nothing was changed."],
+        "prepare" => L["The updater is not set up completely. Update once from the command line."],
+        _ => L["The update failed; the current version keeps running. See the log for details."],
+    };
+
+    private async Task StartUpdate()
+    {
+        confirming = false;
+        await Updater.UpdateNowAsync(backupFirst);
+    }
+
+    protected override void OnInitialized()
+    {
+        Updater.Changed += OnChanged;
+        Updater.Refresh();
+    }
+
+    private void OnChanged() => _ = InvokeAsync(StateHasChanged);
+
+    public void Dispose() => Updater.Changed -= OnChanged;
+}

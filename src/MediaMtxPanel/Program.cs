@@ -147,6 +147,8 @@ builder.Services.AddSingleton<UpdateChecker>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<UpdateChecker>());
 builder.Services.AddSingleton<BackupService>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<BackupService>());
+builder.Services.AddSingleton<PanelUpdater>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<PanelUpdater>());
 
 // Keep the cookie encryption keys next to the database so logins survive container restarts.
 var keysDir = builder.Configuration["Panel:DataProtectionKeysPath"];

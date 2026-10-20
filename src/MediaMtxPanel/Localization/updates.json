@@ -33,5 +33,135 @@
     "nl": "Het updatecommando van de installers installeert de nieuwste versie van dit kanaal.",
     "de": "Der Update-Befehl der Installer installiert die neueste Version dieses Kanals.",
     "fr": "La commande de mise à jour des installateurs installe la version la plus récente de ce canal."
+  },
+  "Updating the panel…": {
+    "nl": "Het paneel wordt bijgewerkt…",
+    "de": "Das Panel wird aktualisiert…",
+    "fr": "Mise à jour du panneau…"
+  },
+  "The panel restarts at the end and is unavailable for a moment; this page reconnects by itself. Do not close the panel's server in the meantime.": {
+    "nl": "Het paneel herstart aan het eind en is even niet bereikbaar; deze pagina maakt vanzelf weer verbinding. Zet de server van het paneel in de tussentijd niet uit.",
+    "de": "Das Panel startet am Ende neu und ist kurz nicht erreichbar; diese Seite verbindet sich von selbst wieder. Schalte den Server des Panels in der Zwischenzeit nicht aus.",
+    "fr": "Le panneau redémarre à la fin et reste brièvement indisponible ; cette page se reconnecte d'elle-même. N'éteignez pas le serveur du panneau entre-temps."
+  },
+  "The last update failed": {
+    "nl": "De laatste update is mislukt",
+    "de": "Das letzte Update ist fehlgeschlagen",
+    "fr": "La dernière mise à jour a échoué"
+  },
+  "Hide log": {
+    "nl": "Log verbergen",
+    "de": "Protokoll ausblenden",
+    "fr": "Masquer le journal"
+  },
+  "Show log": {
+    "nl": "Log tonen",
+    "de": "Protokoll anzeigen",
+    "fr": "Afficher le journal"
+  },
+  "Updated from {0} to {1} on {2}.": {
+    "nl": "Bijgewerkt van {0} naar {1} op {2}.",
+    "de": "Am {2} von {0} auf {1} aktualisiert.",
+    "fr": "Mis à jour de {0} vers {1} le {2}."
+  },
+  "The update finished on {0}.": {
+    "nl": "De update is voltooid op {0}.",
+    "de": "Das Update wurde am {0} abgeschlossen.",
+    "fr": "La mise à jour s'est terminée le {0}."
+  },
+  "Install the update": {
+    "nl": "Update installeren",
+    "de": "Update installieren",
+    "fr": "Installer la mise à jour"
+  },
+  "Downloads, builds and installs the new version, then restarts the panel. Takes a few minutes.": {
+    "nl": "Downloadt, bouwt en installeert de nieuwe versie en herstart daarna het paneel. Duurt een paar minuten.",
+    "de": "Lädt die neue Version herunter, baut und installiert sie und startet dann das Panel neu. Dauert einige Minuten.",
+    "fr": "Télécharge, compile et installe la nouvelle version, puis redémarre le panneau. Prend quelques minutes."
+  },
+  "Update now": {
+    "nl": "Nu updaten",
+    "de": "Jetzt aktualisieren",
+    "fr": "Mettre à jour maintenant"
+  },
+  "Update the panel now?": {
+    "nl": "Het paneel nu bijwerken?",
+    "de": "Das Panel jetzt aktualisieren?",
+    "fr": "Mettre à jour le panneau maintenant ?"
+  },
+  "Streams keep running, but the panel is unavailable for a few minutes while it is built and restarted. A copy of the current installation is saved first; if the new version does not start, it is put back automatically.": {
+    "nl": "Streams blijven draaien, maar het paneel is een paar minuten niet bereikbaar terwijl het gebouwd en herstart wordt. Eerst wordt een kopie van de huidige installatie bewaard; start de nieuwe versie niet, dan wordt die automatisch teruggezet.",
+    "de": "Streams laufen weiter, aber das Panel ist einige Minuten nicht erreichbar, während es gebaut und neu gestartet wird. Zuerst wird eine Kopie der aktuellen Installation gesichert; startet die neue Version nicht, wird sie automatisch zurückgespielt.",
+    "fr": "Les flux continuent, mais le panneau est indisponible pendant quelques minutes, le temps de le compiler et de le redémarrer. Une copie de l'installation actuelle est d'abord enregistrée ; si la nouvelle version ne démarre pas, elle est restaurée automatiquement."
+  },
+  "Make a backup to the backup location first": {
+    "nl": "Eerst een back-up naar de back-uplocatie maken",
+    "de": "Zuerst ein Backup am Backup-Speicherort erstellen",
+    "fr": "Faire d'abord une sauvegarde vers l'emplacement de sauvegarde"
+  },
+  "Yes, update now": {
+    "nl": "Ja, nu updaten",
+    "de": "Ja, jetzt aktualisieren",
+    "fr": "Oui, mettre à jour"
+  },
+  "Backup to the backup location": {
+    "nl": "Back-up naar de back-uplocatie",
+    "de": "Backup am Backup-Speicherort",
+    "fr": "Sauvegarde vers l'emplacement de sauvegarde"
+  },
+  "Saving a copy of the current installation": {
+    "nl": "Kopie van de huidige installatie bewaren",
+    "de": "Kopie der aktuellen Installation sichern",
+    "fr": "Enregistrement d'une copie de l'installation actuelle"
+  },
+  "Downloading, building and installing the new version": {
+    "nl": "Nieuwe versie downloaden, bouwen en installeren",
+    "de": "Neue Version herunterladen, bauen und installieren",
+    "fr": "Téléchargement, compilation et installation de la nouvelle version"
+  },
+  "Restarting the panel": {
+    "nl": "Paneel herstarten",
+    "de": "Panel neu starten",
+    "fr": "Redémarrage du panneau"
+  },
+  "The new version did not start, so the previous version was put back.": {
+    "nl": "De nieuwe versie startte niet, daarom is de vorige versie teruggezet.",
+    "de": "Die neue Version startete nicht, daher wurde die vorherige Version wiederhergestellt.",
+    "fr": "La nouvelle version n'a pas démarré, la version précédente a donc été restaurée."
+  },
+  "The new version did not start and putting the previous version back failed too. Restore {0} by hand.": {
+    "nl": "De nieuwe versie startte niet en het terugzetten van de vorige versie is ook mislukt. Zet {0} met de hand terug.",
+    "de": "Die neue Version startete nicht und auch die Wiederherstellung der vorherigen Version schlug fehl. Stelle {0} manuell wieder her.",
+    "fr": "La nouvelle version n'a pas démarré et la restauration de la version précédente a également échoué. Restaurez {0} manuellement."
+  },
+  "Could not save a copy of the current installation; nothing was changed.": {
+    "nl": "Kon geen kopie van de huidige installatie bewaren; er is niets gewijzigd.",
+    "de": "Die Kopie der aktuellen Installation konnte nicht gesichert werden; es wurde nichts geändert.",
+    "fr": "Impossible d'enregistrer une copie de l'installation actuelle ; rien n'a été modifié."
+  },
+  "The updater is not set up completely. Update once from the command line.": {
+    "nl": "De updater is niet volledig ingesteld. Update één keer via de opdrachtregel.",
+    "de": "Der Updater ist nicht vollständig eingerichtet. Aktualisiere einmal über die Kommandozeile.",
+    "fr": "Le programme de mise à jour n'est pas entièrement configuré. Mettez à jour une fois depuis la ligne de commande."
+  },
+  "The update failed; the current version keeps running. See the log for details.": {
+    "nl": "De update is mislukt; de huidige versie blijft draaien. Zie het log voor details.",
+    "de": "Das Update ist fehlgeschlagen; die aktuelle Version läuft weiter. Details stehen im Protokoll.",
+    "fr": "La mise à jour a échoué ; la version actuelle continue de fonctionner. Consultez le journal pour plus de détails."
+  },
+  "The backup failed, so nothing was updated: {0}": {
+    "nl": "De back-up is mislukt, daarom is er niets bijgewerkt: {0}",
+    "de": "Das Backup ist fehlgeschlagen, daher wurde nichts aktualisiert: {0}",
+    "fr": "La sauvegarde a échoué, rien n'a donc été mis à jour : {0}"
+  },
+  "Could not start the update: {0}": {
+    "nl": "Kon de update niet starten: {0}",
+    "de": "Das Update konnte nicht gestartet werden: {0}",
+    "fr": "Impossible de lancer la mise à jour : {0}"
+  },
+  "The updater did not start. Update once from the command line to set it up.": {
+    "nl": "De updater is niet gestart. Update één keer via de opdrachtregel om hem in te stellen.",
+    "de": "Der Updater ist nicht gestartet. Aktualisiere einmal über die Kommandozeile, um ihn einzurichten.",
+    "fr": "Le programme de mise à jour n'a pas démarré. Mettez à jour une fois depuis la ligne de commande pour le configurer."
   }
 }

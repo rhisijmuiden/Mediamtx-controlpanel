@@ -10,6 +10,10 @@ Added, Changed, Deprecated, Removed, Fixed or Security, and rename Unreleased to
 
 ## [Unreleased]
 
+### Added
+
+- **Update now** in the Info window: administrators install an available update from the web interface. A backup to the backup location (optional), a local copy of the installation and an automatic roll-back when the new version does not start; steps and log are shown while it runs. Works on installations made with the Proxmox and Debian installers (they set up the updater with their next update), not in Docker.
+
 ## [1.3.0] - 2026-10-20
 
 ### Added
