@@ -1,5 +1,6 @@
 using MediaMtxPanel.Data;
 using MediaMtxPanel.Options;
+using MediaMtxPanel.Services;
 using MediaMtxPanel.Services.Payments;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -19,11 +20,11 @@ public static class PaymentEndpoints
             [FromForm] string? email,
             HttpContext http,
             PaywallService paywall,
-            IOptions<PanelOptions> options) =>
+            PublicAddress address) =>
         {
             try
             {
-                var url = await paywall.StartPurchaseAsync(slug, offerId, provider, email, PublicBaseUrl(http, options.Value), http.RequestAborted);
+                var url = await paywall.StartPurchaseAsync(slug, offerId, provider, email, address.For(http), http.RequestAborted);
                 return Results.Redirect(url);
             }
             catch (PaymentException ex)
@@ -54,8 +55,4 @@ public static class PaymentEndpoints
         return app;
     }
 
-    public static string PublicBaseUrl(HttpContext http, PanelOptions options) =>
-        !string.IsNullOrWhiteSpace(options.PublicUrl)
-            ? options.PublicUrl.TrimEnd('/')
-            : $"{http.Request.Scheme}://{http.Request.Host}{http.Request.PathBase}";
 }

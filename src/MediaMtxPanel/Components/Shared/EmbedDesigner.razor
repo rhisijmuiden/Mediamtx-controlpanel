@@ -6,7 +6,7 @@
 @inject EmbedService Embeds
 @inject IJSRuntime JS
 @inject NavigationManager Nav
-@inject IOptions<PanelOptions> PanelOptions
+@inject PublicAddress Address
 
 <AppPageTitle Text="@L["Embed player"]" />
 
@@ -344,7 +344,7 @@ else
     private bool Dirty => State != savedState;
     private string State => JsonSerializer.Serialize(look, Json) + "\n" + string.Join('\n', StreamEmbed.ParseSites(allowedSites));
 
-    private string BaseUrl => (string.IsNullOrWhiteSpace(PanelOptions.Value.PublicUrl) ? Nav.BaseUri : PanelOptions.Value.PublicUrl).TrimEnd('/');
+    private string BaseUrl => Address.For(Nav.BaseUri);
     private string EmbedUrl => $"{BaseUrl}/embed/{stream!.WatchSlug}";
     private string ImageUrl(string kind) => $"embed/{stream!.WatchSlug}/{kind}?v={embed!.UpdatedAt.Ticks}";
 

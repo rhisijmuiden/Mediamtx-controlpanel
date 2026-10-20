@@ -8,6 +8,8 @@
 @inject NavigationManager Nav
 @inject IOptions<PanelOptions> PanelOptions
 @inject WebPortInfo Port
+@inject StreamEndpointBuilder Endpoints
+@inject PublicAddress Address
 
 <AppPageTitle Text="@(IsNew ? L["Add server"] : server?.Name ?? L["Server"])" />
 
@@ -180,6 +182,51 @@ else
 
                         <section class="form-section">
                             <header>
+                                <h2><i class="bi bi-shield-lock me-1 text-primary"></i> @L["Viewer connections (HLS and WebRTC)"]</h2>
+                                <p>@L["How web players and viewers reach HLS and WebRTC. Behind a reverse proxy with https, let them go through the panel: then no extra ports are needed in the browser."]</p>
+                            </header>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label" for="route">@L["Route"]</label>
+                                    <InputSelect id="route" class="form-select" @bind-Value="input.ViewerRoute">
+                                        <option value="@ViewerRoute.Auto">@L["Automatic (follows Settings → Web server)"]</option>
+                                        <option value="@ViewerRoute.Direct">@L["Directly to the MediaMTX ports"]</option>
+                                        <option value="@ViewerRoute.Panel">@L["Through the panel (reverse proxy, https)"]</option>
+                                        <option value="@ViewerRoute.Custom">@L["Custom public URLs"]</option>
+                                    </InputSelect>
+                                </div>
+                                @if (input.ViewerRoute == ViewerRoute.Custom)
+                                {
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="pubhls">@L["Public HLS URL"]</label>
+                                        <InputText id="pubhls" class="form-control font-monospace" @bind-Value="input.PublicHlsUrl" placeholder="https://stream.example.com/hls" />
+                                        <ValidationMessage For="() => input.PublicHlsUrl" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="pubwebrtc">@L["Public WebRTC URL"]</label>
+                                        <InputText id="pubwebrtc" class="form-control font-monospace" @bind-Value="input.PublicWebRtcUrl" placeholder="https://stream.example.com/webrtc" />
+                                        <ValidationMessage For="() => input.PublicWebRtcUrl" />
+                                    </div>
+                                    <div class="col-12 form-text mt-1">@L["Your reverse proxy forwards these URLs to the HLS port ({0}) and the WebRTC port ({1}) of MediaMTX. Leave a field empty to use the port directly.", input.HlsPort, input.WebRtcPort]</div>
+                                }
+                                <div class="col-12">
+                                    <div class="small text-secondary mb-1">@L["Viewers will use:"]</div>
+                                    <div class="small font-monospace text-break">@RoutePreview.Hls/&lt;stream&gt;/index.m3u8</div>
+                                    <div class="small font-monospace text-break">@RoutePreview.WebRtc/&lt;stream&gt;/whep</div>
+                                    @if (PreviewRoute == ViewerRoute.Panel)
+                                    {
+                                        @if (Address.Configured is null)
+                                        {
+                                            <div class="alert alert-warning small mt-2 mb-0"><i class="bi bi-exclamation-triangle"></i> @L["Set the public address of the panel under Settings → Web server, otherwise https://{0} is assumed.", input.PublicHost]</div>
+                                        }
+                                        <div class="form-text">@L["WebRTC video itself does not pass through the proxy: open port 8189 (UDP, and TCP when webrtcLocalTCPAddress is set) to MediaMTX and put the public address in webrtcAdditionalHosts. Players fall back to HLS when WebRTC cannot connect."]</div>
+                                    }
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="form-section">
+                            <header>
                                 <h2><i class="bi bi-speedometer2 me-1 text-primary"></i> @L["Statistics"]</h2>
                                 <p>@L["CPU, RAM and network of the server in the customer portal."]</p>
                             </header>
@@ -333,6 +380,32 @@ else
     private string HookBase => (string.IsNullOrWhiteSpace(PanelOptions.Value.HookBaseUrl)
         ? Nav.BaseUri
         : Port.Rewrite(PanelOptions.Value.HookBaseUrl)).TrimEnd('/');
+
+    private MediaServer PreviewServer
+    {
+        get
+        {
+            var i = input!;
+            return new MediaServer
+            {
+                Id = server?.Id ?? 0, ApiUrl = i.ApiUrl ?? "", PublicHost = (i.PublicHost ?? "").Trim(), HlsPort = i.HlsPort,
+                WebRtcPort = i.WebRtcPort, HttpsUrls = i.HttpsUrls, ViewerRoute = i.ViewerRoute,
+                PublicHlsUrl = i.PublicHlsUrl?.Trim().TrimEnd('/'), PublicWebRtcUrl = i.PublicWebRtcUrl?.Trim().TrimEnd('/'),
+            };
+        }
+    }
+
+    private ViewerRoute PreviewRoute => Endpoints.RouteOf(PreviewServer);
+
+    private (string Hls, string WebRtc) RoutePreview
+    {
+        get
+        {
+            var s = PreviewServer;
+            var id = s.Id == 0 ? "<id>" : s.Id.ToString();
+            return (Endpoints.HlsBase(s).Replace("/media/0/", $"/media/{id}/"), Endpoints.WebRtcBase(s).Replace("/media/0/", $"/media/{id}/"));
+        }
+    }
 
     private string HookUrl => ssh.HookUrl(IsNew ? newHookSecret : server!.HookSecret);
 

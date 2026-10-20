@@ -35,6 +35,16 @@ public class ServerInput
 
     public bool HttpsUrls { get; set; }
 
+    public ViewerRoute ViewerRoute { get; set; }
+
+    [StringLength(256)]
+    [RegularExpression(@"^https?://[^\s?#]+$", ErrorMessage = "Use a URL such as https://stream.example.com/hls.")]
+    public string? PublicHlsUrl { get; set; }
+
+    [StringLength(256)]
+    [RegularExpression(@"^https?://[^\s?#]+$", ErrorMessage = "Use a URL such as https://stream.example.com/webrtc.")]
+    public string? PublicWebRtcUrl { get; set; }
+
     [StringLength(256), Url(ErrorMessage = "Enter a full URL, for example http://10.0.0.21:9100/metrics.")]
     public string? MetricsUrl { get; set; }
 
@@ -59,6 +69,9 @@ public class ServerInput
         HlsPort = s.HlsPort,
         WebRtcPort = s.WebRtcPort,
         HttpsUrls = s.HttpsUrls,
+        ViewerRoute = s.ViewerRoute,
+        PublicHlsUrl = s.PublicHlsUrl,
+        PublicWebRtcUrl = s.PublicWebRtcUrl,
         MetricsUrl = s.MetricsUrl,
         PlaybackUrl = s.PlaybackUrl,
         RemoveUnmanagedPaths = s.RemoveUnmanagedPaths,
@@ -79,6 +92,9 @@ public class ServerInput
         s.HlsPort = HlsPort;
         s.WebRtcPort = WebRtcPort;
         s.HttpsUrls = HttpsUrls;
+        s.ViewerRoute = ViewerRoute;
+        s.PublicHlsUrl = string.IsNullOrWhiteSpace(PublicHlsUrl) ? null : PublicHlsUrl.Trim().TrimEnd('/');
+        s.PublicWebRtcUrl = string.IsNullOrWhiteSpace(PublicWebRtcUrl) ? null : PublicWebRtcUrl.Trim().TrimEnd('/');
         s.MetricsUrl = string.IsNullOrWhiteSpace(MetricsUrl) ? null : MetricsUrl.Trim();
         s.PlaybackUrl = string.IsNullOrWhiteSpace(PlaybackUrl) ? null : PlaybackUrl.Trim().TrimEnd('/');
         s.RemoveUnmanagedPaths = RemoveUnmanagedPaths;
@@ -97,6 +113,7 @@ public class ServerService(
     MediaMtxClientFactory clients,
     MediaMtxSyncService sync,
     MediaMtxStatus status,
+    Endpoints.MediaProxyServers proxyServers,
     TextLocalizer L,
     SshServerSetup sshSetup)
 {
@@ -134,6 +151,7 @@ public class ServerService(
         await using var db = await dbFactory.CreateDbContextAsync(ct);
         db.Servers.Add(server);
         await db.SaveChangesAsync(ct);
+        proxyServers.Invalidate();
         return server;
     }
 
@@ -145,6 +163,7 @@ public class ServerService(
             return null;
         input.ApplyTo(server);
         await db.SaveChangesAsync(ct);
+        proxyServers.Invalidate();
         return server;
     }
 
@@ -156,6 +175,7 @@ public class ServerService(
             return null;
         server.HookSecret = CredentialGenerator.Password(32);
         await db.SaveChangesAsync(ct);
+        proxyServers.Invalidate();
         return server;
     }
 
@@ -170,6 +190,7 @@ public class ServerService(
             return L["This server still has {0} stream(s). Move or delete them first.", server.Streams.Count];
         db.Servers.Remove(server);
         await db.SaveChangesAsync(ct);
+        proxyServers.Invalidate();
         status.Forget(id);
         return null;
     }

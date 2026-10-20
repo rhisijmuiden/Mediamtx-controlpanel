@@ -118,7 +118,10 @@ builder.Services.AddScoped<PaywallService>();
 builder.Services.AddScoped<ViewerAccounts>();
 builder.Services.AddScoped<EmbedService>();
 builder.Services.AddScoped<UserAdminService>();
+builder.Services.AddSingleton<PublicAddress>();
 builder.Services.AddSingleton<StreamEndpointBuilder>();
+builder.Services.AddHttpForwarder();
+builder.Services.AddSingleton<MediaProxyServers>();
 builder.Services.AddSingleton<MediaMtxStatus>();
 builder.Services.AddSingleton<MediaMtxSyncService>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<MediaMtxSyncService>());
@@ -160,8 +163,9 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
     options.KnownIPNetworks.Clear();
     options.KnownProxies.Clear();
-    // Panel:TrustedProxies: only these addresses may set X-Forwarded-*; without it any address may (as before).
-    var trusted = builder.Configuration["Panel:TrustedProxies"];
+    // Trusted proxies (Settings → Web server, else Panel:TrustedProxies): only these addresses may set
+    // X-Forwarded-*; without them any address may (as before).
+    var trusted = PublicAddress.TrustedProxies(settingsStore.Current, builder.Configuration);
     if (!string.IsNullOrWhiteSpace(trusted))
     {
         options.ForwardedHeaders |= ForwardedHeaders.XForwardedHost;
@@ -254,6 +258,7 @@ app.MapMediaMtxAuth();
 app.MapStationEndpoints();
 app.MapPaymentEndpoints();
 app.MapEmbedEndpoints();
+app.MapMediaProxy();
 app.MapViewerEndpoints();
 app.MapStatisticsEndpoints();
 app.MapReportEndpoints();

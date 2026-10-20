@@ -44,22 +44,22 @@ public static class StationEndpoints
             // A JSON API: 401 and 404 must not be re-executed as the HTML not-found page.
             .WithMetadata(new SkipStatusCodePagesAttribute());
 
-        api.MapGet("/", async (ClaimsPrincipal user, StreamService streams, IDbContextFactory<ApplicationDbContext> dbFactory, CancellationToken ct) =>
+        api.MapGet("/", async (ClaimsPrincipal user, StreamService streams, StreamEndpointBuilder endpoints, IDbContextFactory<ApplicationDbContext> dbFactory, CancellationToken ct) =>
         {
             var server = await DefaultServerAsync(dbFactory, ct);
             if (server is null)
                 return Results.Ok(Array.Empty<StreamResource>());
             var list = await streams.ListAsync(user, ct);
-            return Results.Ok(list.Where(s => s.ServerId == server.Id).Select(s => ToResource(s)).ToList());
+            return Results.Ok(list.Where(s => s.ServerId == server.Id).Select(s => ToResource(endpoints, s)).ToList());
         });
 
-        api.MapGet("/{id:int}", async (int id, ClaimsPrincipal user, StreamService streams, IDbContextFactory<ApplicationDbContext> dbFactory, CancellationToken ct) =>
+        api.MapGet("/{id:int}", async (int id, ClaimsPrincipal user, StreamService streams, StreamEndpointBuilder endpoints, IDbContextFactory<ApplicationDbContext> dbFactory, CancellationToken ct) =>
         {
             var stream = await GetOnDefaultServerAsync(id, user, streams, dbFactory, ct);
-            return stream is null ? Results.NotFound() : Results.Ok(ToResource(stream));
+            return stream is null ? Results.NotFound() : Results.Ok(ToResource(endpoints, stream));
         });
 
-        api.MapPost("/", async (CreateStreamRequest body, HttpContext http, ClaimsPrincipal user, StreamService streams,
+        api.MapPost("/", async (CreateStreamRequest body, HttpContext http, ClaimsPrincipal user, StreamService streams, StreamEndpointBuilder endpoints,
             IDbContextFactory<ApplicationDbContext> dbFactory, CancellationToken ct) =>
         {
             var server = await DefaultServerAsync(dbFactory, ct);
@@ -82,7 +82,7 @@ public static class StationEndpoints
                 return Results.Problem($"A stream named '{input.Name}' already exists.", statusCode: StatusCodes.Status409Conflict);
 
             var (stream, warning) = await streams.CreateAsync(user, input, ct);
-            return Results.Created($"{http.Request.PathBase}{ServiceTokenAuthenticationHandler.ApiPrefix}/streams/{stream.Id}", ToResource(stream, warning));
+            return Results.Created($"{http.Request.PathBase}{ServiceTokenAuthenticationHandler.ApiPrefix}/streams/{stream.Id}", ToResource(endpoints, stream, warning));
         });
 
         api.MapDelete("/{id:int}", async (int id, ClaimsPrincipal user, StreamService streams, IDbContextFactory<ApplicationDbContext> dbFactory, CancellationToken ct) =>
@@ -115,11 +115,10 @@ public static class StationEndpoints
         member.Length == 0 ? "" : char.ToLowerInvariant(member[0]) + member[1..];
 
     /// <summary>The stream with its connection URLs; read URLs carry the read credentials unless the stream is public.</summary>
-    public static StreamResource ToResource(StreamDefinition s, string? warning = null)
+    public static StreamResource ToResource(StreamEndpointBuilder endpoints, StreamDefinition s, string? warning = null)
     {
         var server = s.Server ?? throw new InvalidOperationException("Load the stream together with its server.");
         var h = server.PublicHost;
-        var http = server.HttpsUrls ? "https" : "http";
         string Enc(string v) => Uri.EscapeDataString(v);
 
         PublishUrls? publish = s.SourceType != StreamSourceType.Publisher ? null : new(
@@ -129,8 +128,8 @@ public static class StationEndpoints
 
         var creds = s.PublicRead ? "" : $"{Enc(s.ReadUser)}:{Enc(s.ReadPassword)}@";
         var play = new PlayUrls(
-            $"{http}://{creds}{h}:{server.HlsPort}/{s.Name}/index.m3u8",
-            $"{http}://{creds}{h}:{server.WebRtcPort}/{s.Name}/",
+            StreamEndpointBuilder.WithUserInfo($"{endpoints.HlsBase(server)}/{s.Name}/index.m3u8", creds),
+            StreamEndpointBuilder.WithUserInfo($"{endpoints.WebRtcBase(server)}/{s.Name}/", creds),
             $"rtsp://{creds}{h}:{server.RtspPort}/{s.Name}",
             $"srt://{h}:{server.SrtPort}?streamid=read:{s.Name}{(s.PublicRead ? "" : $":{s.ReadUser}:{s.ReadPassword}")}");
 

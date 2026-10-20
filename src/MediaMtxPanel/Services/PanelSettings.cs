@@ -40,8 +40,23 @@ public record PanelSettings
     /// <summary>Settings → Backup. Null until configured.</summary>
     public Backup.BackupSettings? Backup { get; init; }
 
+    /// <summary>Settings → Web server → Reverse proxy. Null until configured.</summary>
+    public ReverseProxySettings? ReverseProxy { get; init; }
+
     /// <summary>Random key for the hashes that count unique viewers without storing IP addresses; created on first use.</summary>
     public string? ViewerKeySecret { get; init; }
+}
+
+public record ReverseProxySettings
+{
+    /// <summary>The panel is reached through a reverse proxy (usually with https); viewer traffic goes through the panel.</summary>
+    public bool Enabled { get; init; }
+
+    /// <summary>The address visitors use, e.g. https://stream.example.com (with the path base, if any).</summary>
+    public string? PublicUrl { get; init; }
+
+    /// <summary>Comma-separated IPs or CIDRs of the proxies whose X-Forwarded-* headers are believed; read at startup.</summary>
+    public string? TrustedProxies { get; init; }
 }
 
 public enum ReleaseChannel
