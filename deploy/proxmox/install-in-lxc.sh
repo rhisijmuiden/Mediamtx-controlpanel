@@ -114,6 +114,8 @@ install_mediamtx() {
       -e "s#^webrtcAdditionalHosts:.*#webrtcAdditionalHosts: [${PUBLIC_HOST}]#" \
       -e "s#recordPath: .*#recordPath: ${MTX_REC_DIR}/%path/%Y-%m-%d_%H-%M-%S-%f#" \
       -e "s#^apiAddress:.*#apiAddress: 127.0.0.1:9997#" \
+    -e "s#^playbackAddress:.*#playbackAddress: 127.0.0.1:9996#" \
+      -e "s#^playbackAddress:.*#playbackAddress: 127.0.0.1:9996#" \
       "$WORK/src/deploy/mediamtx.yml" > "$MTX_CONF_DIR/mediamtx.yml"
   chmod 0640 "$MTX_CONF_DIR/mediamtx.yml"
   chown root:mediamtx "$MTX_CONF_DIR/mediamtx.yml"

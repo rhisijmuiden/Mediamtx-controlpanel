@@ -1,0 +1,191 @@
+@* Recordings of one stream: play in the browser, download as MP4, delete. The page has already checked that
+   the user manages the stream; the download endpoint checks it again for every file. *@
+@inject RecordingService Recordings
+
+<div class="card">
+    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <span>
+            <i class="bi bi-film"></i> @L["Recordings"]
+            @if (recordings is { Count: > 0 })
+            {
+                <span class="badge text-bg-light border ms-1">@recordings.Count</span>
+            }
+        </span>
+        <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="LoadAsync" disabled="@loading">
+            <i class="bi bi-arrow-clockwise"></i> @L["Refresh"]
+        </button>
+    </div>
+    <div class="card-body">
+        <p class="small text-secondary">
+            @if (!Stream.Record)
+            {
+                <span><i class="bi bi-pause-circle me-1"></i>@L["Recording is off for this stream, so new broadcasts are not saved."]</span>
+            }
+            else if (Stream.RecordRetentionDays > 0)
+            {
+                <span><i class="bi bi-record-circle text-danger me-1"></i>@L["Everything that is broadcast is recorded. Recordings are deleted automatically after {0} day(s).", Stream.RecordRetentionDays]</span>
+            }
+            else
+            {
+                <span><i class="bi bi-record-circle text-danger me-1"></i>@L["Everything that is broadcast is recorded. Recordings are kept until you delete them."]</span>
+            }
+        </p>
+
+        @if (message is not null)
+        {
+            <div class="alert alert-@(messageIsError ? "danger" : "success") alert-dismissible d-flex align-items-center gap-2 py-2">
+                <i class="bi @(messageIsError ? "bi-exclamation-octagon" : "bi-check-circle")"></i> @message
+                <button type="button" class="btn-close" aria-label="@L["Close"]" @onclick="() => message = null"></button>
+            </div>
+        }
+
+        @if (playing is not null)
+        {
+            <div class="recording-player mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <strong><i class="bi bi-play-circle me-1 text-primary"></i>@playing.Start.ToLocalTime().ToString("g")</strong>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => playing = null"><i class="bi bi-x-lg"></i> @L["Close player"]</button>
+                </div>
+                @* The key makes Blazor create a new element, so the browser loads the newly chosen recording. *@
+                <video @key="playing" class="w-100 rounded bg-black" style="max-height: 60vh" controls autoplay playsinline preload="metadata" src="@FileUrl(playing, false)"></video>
+            </div>
+        }
+
+        @if (loading && recordings is null)
+        {
+            <p class="text-secondary mb-0"><span class="spinner-border spinner-border-sm me-2"></span>@L["Loading…"]</p>
+        }
+        else if (error is not null)
+        {
+            <div class="alert alert-warning d-flex gap-2 mb-0">
+                <i class="bi bi-exclamation-triangle"></i>
+                <div>
+                    @L["The recordings could not be loaded from server {0}: {1}", Stream.Server!.Name, error]
+                    @if (ShowServerHint)
+                    {
+                        <div class="small mt-1">@L["Check that playback is switched on in the server's mediamtx.yml (playback: yes) and that the panel can reach {0}.", Stream.Server.PlaybackBaseUrl()]</div>
+                    }
+                </div>
+            </div>
+        }
+        else if (recordings is { Count: 0 })
+        {
+            <div class="empty-state py-4">
+                <i class="bi bi-film"></i>
+                <p class="mb-0">@L["There are no recordings of this stream yet."]</p>
+            </div>
+        }
+        else if (recordings is not null)
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>@L["Started"]</th>
+                            <th>@L["Ended"]</th>
+                            <th>@L["Duration"]</th>
+                            <th class="text-end">@L["Actions"]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var r in recordings)
+                        {
+                            <tr class="@(r == playing ? "table-active" : null)">
+                                <td class="text-nowrap">@r.Start.ToLocalTime().ToString("g")</td>
+                                <td class="text-nowrap text-secondary">@r.End.ToLocalTime().ToString("t")</td>
+                                <td class="text-nowrap">@Format.Duration(r.Duration)</td>
+                                <td class="text-end text-nowrap">
+                                    @if (confirmDelete == r)
+                                    {
+                                        <span class="small me-1">@L["Delete this recording?"]</span>
+                                        <button type="button" class="btn btn-sm btn-danger" @onclick="() => DeleteAsync(r)" disabled="@busy"><i class="bi bi-trash"></i> @L["Yes, delete"]</button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => confirmDelete = null"><i class="bi bi-x-lg"></i> @L["No"]</button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-sm btn-outline-primary" @onclick="() => playing = r" title="@L["Play"]"><i class="bi bi-play-fill"></i> <span class="d-none d-md-inline">@L["Play"]</span></button>
+                                        <a class="btn btn-sm btn-outline-secondary" href="@FileUrl(r, true)" download data-enhance-nav="false" title="@L["Download as MP4"]"><i class="bi bi-download"></i> <span class="d-none d-md-inline">@L["Download"]</span></a>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" @onclick="() => confirmDelete = r" title="@L["Delete"]"><i class="bi bi-trash"></i></button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <p class="small text-secondary mt-2 mb-0">@L["Total: {0}. Times are shown in the server's time zone.", Format.Duration(TimeSpan.FromTicks(recordings.Sum(r => r.Duration.Ticks)))]</p>
+        }
+    </div>
+</div>
+
+@code {
+    /// <summary>The stream, loaded with its server, that the current user is allowed to manage.</summary>
+    [Parameter, EditorRequired] public StreamDefinition Stream { get; set; } = default!;
+
+    /// <summary>Show technical hints (playback address) when loading fails; for staff.</summary>
+    [Parameter] public bool ShowServerHint { get; set; }
+
+    private List<Recording>? recordings;
+    private Recording? playing;
+    private Recording? confirmDelete;
+    private string? error;
+    private string? message;
+    private bool messageIsError;
+    private bool loading;
+    private bool busy;
+    private int loadedFor;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (loadedFor == Stream.Id)
+            return;
+        loadedFor = Stream.Id;
+        recordings = null;
+        playing = null;
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        loading = true;
+        error = null;
+        try
+        {
+            recordings = await Recordings.ListAsync(Stream);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or MediaMtxException or TaskCanceledException)
+        {
+            recordings = null;
+            error = ex.Message;
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task DeleteAsync(Recording r)
+    {
+        busy = true;
+        try
+        {
+            await Recordings.DeleteAsync(Stream, r);
+            if (playing == r)
+                playing = null;
+            (message, messageIsError) = (L["Recording deleted."], false);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or MediaMtxException or TaskCanceledException)
+        {
+            (message, messageIsError) = (L["The recording could not be deleted: {0}", ex.Message], true);
+        }
+        finally
+        {
+            busy = false;
+            confirmDelete = null;
+        }
+        await LoadAsync();
+    }
+
+    private string FileUrl(Recording r, bool download) =>
+        $"api/recordings/{Stream.Id}?{r.Query}" + (download ? "&download=true" : "");
+}

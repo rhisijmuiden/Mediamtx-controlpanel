@@ -83,6 +83,36 @@ public class MediaMtxClient
         await EnsureSuccess(res, ct);
     }
 
+    /// <summary>Start times of the recording segments (files) of a path; empty when there are none.</summary>
+    public async Task<List<DateTimeOffset>> ListRecordingSegmentsAsync(string name, CancellationToken ct = default)
+    {
+        using var res = await _http.GetAsync($"v3/recordings/get/{Escape(name)}", ct);
+        if (res.StatusCode == HttpStatusCode.NotFound)
+            return [];
+        await EnsureSuccess(res, ct);
+        var rec = await res.Content.ReadFromJsonAsync<MtxRecording>(Json, ct);
+        return rec?.Segments.Select(s => s.Start).ToList() ?? [];
+    }
+
+    /// <summary>Deletes one recording segment (file), identified by its exact start time.</summary>
+    public async Task DeleteRecordingSegmentAsync(string name, DateTimeOffset start, CancellationToken ct = default)
+    {
+        var query = $"path={Uri.EscapeDataString(name)}&start={Uri.EscapeDataString(RecordingTime(start))}";
+        var res = await _http.DeleteAsync($"v3/recordings/segments/delete?{query}", ct);
+        if (res.StatusCode == HttpStatusCode.NotFound)
+        {
+            // Older MediaMTX versions only know the deprecated name of this endpoint.
+            res.Dispose();
+            res = await _http.DeleteAsync($"v3/recordings/deletesegment?{query}", ct);
+        }
+        using (res)
+            await EnsureSuccess(res, ct);
+    }
+
+    /// <summary>RFC 3339 with all the precision MediaMTX needs to find a segment by its start.</summary>
+    public static string RecordingTime(DateTimeOffset t) =>
+        t.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss.fffffff'Z'", System.Globalization.CultureInfo.InvariantCulture);
+
     /// <summary>Disconnects a publisher or reader, using the type reported in /v3/paths/list.</summary>
     public async Task KickAsync(string type, string id, CancellationToken ct = default)
     {
@@ -165,6 +195,10 @@ public class MtxPath
 
 public record MtxConnRef(string Type, string Id);
 
+public record MtxRecording(string Name, List<MtxRecordingSegment> Segments);
+
+public record MtxRecordingSegment(DateTimeOffset Start);
+
 public class MtxTrack
 {
     public string? Codec { get; set; }
@@ -177,7 +211,41 @@ public class MtxPathConfig
     public string? Source { get; set; }
     public bool? SourceOnDemand { get; set; }
     public bool? Record { get; set; }
+    public string? RecordDeleteAfter { get; set; }
     public int? MaxReaders { get; set; }
+}
+
+/// <summary>Durations as MediaMTX writes them in its configuration: Go durations with an optional day part, e.g. "7d" or "1d2h0m0s".</summary>
+public static partial class MtxDuration
+{
+    public static TimeSpan? Parse(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return null;
+        var match = Pattern().Match(value.Trim());
+        if (!match.Success)
+            return null;
+        var total = TimeSpan.Zero;
+        foreach (System.Text.RegularExpressions.Capture part in match.Groups["part"].Captures)
+        {
+            var unit = part.Value.TrimStart("0123456789.".ToCharArray());
+            var number = double.Parse(part.Value[..^unit.Length], System.Globalization.CultureInfo.InvariantCulture);
+            total += unit switch
+            {
+                "d" => TimeSpan.FromDays(number),
+                "h" => TimeSpan.FromHours(number),
+                "m" => TimeSpan.FromMinutes(number),
+                "s" => TimeSpan.FromSeconds(number),
+                "ms" => TimeSpan.FromMilliseconds(number),
+                "us" or "µs" => TimeSpan.FromMicroseconds(number),
+                _ => TimeSpan.FromTicks((long)(number / 100)),
+            };
+        }
+        return total;
+    }
+
+    [System.Text.RegularExpressions.GeneratedRegex(@"^(?:(?<part>[0-9.]+(?:d|h|ms|m|s|us|µs|ns)))+$")]
+    private static partial System.Text.RegularExpressions.Regex Pattern();
 }
 
 public class MediaMtxClientFactory(IHttpClientFactory httpClientFactory)

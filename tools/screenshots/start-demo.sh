@@ -21,6 +21,7 @@ fi
 sed -e "s#^authHTTPAddress:.*#authHTTPAddress: http://127.0.0.1:5080/api/mediamtx/auth?secret=${SECRET}#" \
     -e "s#recordPath: .*#recordPath: ${DEMO_DIR}/recordings/%path/%Y-%m-%d_%H-%M-%S-%f#" \
     -e "s#^apiAddress:.*#apiAddress: 127.0.0.1:9997#" \
+    -e "s#^playbackAddress:.*#playbackAddress: 127.0.0.1:9996#" \
     "$ROOT/deploy/mediamtx.yml" > "$DEMO_DIR/mediamtx.yml"
 
 export ASPNETCORE_URLS=http://127.0.0.1:5080

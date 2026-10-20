@@ -95,6 +95,10 @@ else
                     </dl>
                 </div>
             </div>
+
+            <div class="mt-4">
+                <RecordingList Stream="stream" ShowServerHint="@isStaff" />
+            </div>
         </div>
 
         <div class="col-xl-4">
@@ -310,6 +314,7 @@ else
     private MtxPath? live;
     private bool notFound;
     private string tab = "connect";
+    private bool isStaff;
 
     private List<StreamOffer> offers = [];
     private List<PaymentProvider> providers = [];
@@ -325,6 +330,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        isStaff = Roles.Staff.Split(',').Any((await AuthState).User.IsInRole);
         await LoadAsync();
         if (stream is not null)
             await LoadPaywallAsync();

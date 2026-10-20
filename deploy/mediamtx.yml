@@ -15,7 +15,10 @@ api: true
 apiAddress: :9997
 
 metrics: false
-playback: false
+
+# Playback server: the panel lists, plays and downloads recordings through it (checked by the auth hook).
+playback: true
+playbackAddress: :9996
 
 rtsp: true
 rtspAddress: :8554
@@ -33,7 +36,7 @@ webrtcLocalUDPAddress: :8189
 # docker-compose sets this with MTX_WEBRTCADDITIONALHOSTS.
 webrtcAdditionalHosts: []
 
-# Recordings (enabled per stream in the panel).
+# Recordings (enabled per stream in the panel; the panel also sets how long they are kept).
 pathDefaults:
   recordPath: /recordings/%path/%Y-%m-%d_%H-%M-%S-%f
 

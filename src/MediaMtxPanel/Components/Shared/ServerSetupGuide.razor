@@ -17,8 +17,8 @@
         </div>
     </li>
     <li class="mb-2">
-        @L["Check the network in both directions: the server must reach the panel at {0}, and the panel must reach port {1} on the server. Open that port to the panel only, for example:", PanelBase, ApiPort]
-        <code>ufw allow from &lt;panel IP&gt; to any port @ApiPort proto tcp</code>
+        @L["Check the network in both directions: the server must reach the panel at {0}, and the panel must reach ports {1} (API) and {2} (recordings) on the server. Open these ports to the panel only, for example:", PanelBase, ApiPort, PlaybackPort]
+        <code>ufw allow from &lt;panel IP&gt; to any port @ApiPort,@PlaybackPort proto tcp</code>
     </li>
     <li class="mb-2">@L["Restart MediaMTX:"] <code>systemctl restart mediamtx</code></li>
     <li>@LastStep</li>
@@ -27,10 +27,11 @@
 @code {
     [Parameter, EditorRequired] public string HookUrl { get; set; } = "";
     [Parameter] public int ApiPort { get; set; } = 9997;
+    [Parameter] public int PlaybackPort { get; set; } = MediaServer.DefaultPlaybackPort;
     [Parameter] public string? PublicHost { get; set; }
     [Parameter] public string LastStep { get; set; } = "";
 
-    private string Snippet => MediaMtxConfigEditor.ManualSnippet(HookUrl, ApiPort, PublicHost);
+    private string Snippet => MediaMtxConfigEditor.ManualSnippet(HookUrl, ApiPort, PublicHost, PlaybackPort);
 
     private bool copied;
 

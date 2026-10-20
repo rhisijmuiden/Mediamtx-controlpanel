@@ -140,6 +140,12 @@ else
                                     <InputText id="apipass" class="form-control font-monospace" @bind-Value="input.ApiPassword" />
                                 </div>
                                 <div class="col-12">
+                                    <label class="form-label" for="playback">@L["Playback URL for recordings (optional)"]</label>
+                                    <InputText id="playback" class="form-control font-monospace" @bind-Value="input.PlaybackUrl" placeholder="@DefaultPlaybackUrl" />
+                                    <div class="form-text">@L["The MediaMTX playback server, used to list and download recordings. Empty: the API host on port {0}.", MediaServer.DefaultPlaybackPort]</div>
+                                    <ValidationMessage For="() => input.PlaybackUrl" />
+                                </div>
+                                <div class="col-12">
                                     <div class="form-check form-switch">
                                         <InputCheckbox class="form-check-input" id="unmanaged" @bind-Value="input.RemoveUnmanagedPaths" />
                                         <label class="form-check-label" for="unmanaged">@L["Remove paths that are not in the panel"]</label>
@@ -292,7 +298,7 @@ else
                 </div>
                 <div class="card-body">
                     <p class="small">@L["To set up MediaMTX on the server yourself so that the panel can manage it:"]</p>
-                    <ServerSetupGuide HookUrl="@HookUrl" ApiPort="ApiPort" PublicHost="@input.PublicHost"
+                    <ServerSetupGuide HookUrl="@HookUrl" ApiPort="ApiPort" PlaybackPort="PlaybackPort" PublicHost="@input.PublicHost"
                                       LastStep="@(IsNew ? L["Fill in this form and click Add server, then Test connection."] : L["Click Test connection."])" />
                 </div>
             </div>
@@ -329,6 +335,11 @@ else
         : Port.Rewrite(PanelOptions.Value.HookBaseUrl)).TrimEnd('/');
 
     private string HookUrl => ssh.HookUrl(IsNew ? newHookSecret : server!.HookSecret);
+
+    private string DefaultPlaybackUrl => new MediaServer { ApiUrl = input?.ApiUrl ?? "" }.PlaybackBaseUrl();
+
+    private int PlaybackPort => Uri.TryCreate(new MediaServer { ApiUrl = input?.ApiUrl ?? "", PlaybackUrl = input?.PlaybackUrl }.PlaybackBaseUrl(), UriKind.Absolute, out var uri)
+        ? uri.Port : MediaServer.DefaultPlaybackPort;
 
     private int ApiPort => Uri.TryCreate(input?.ApiUrl, UriKind.Absolute, out var uri) && uri.Host.Length > 0 ? uri.Port : 9997;
 

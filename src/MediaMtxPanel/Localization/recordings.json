@@ -1,0 +1,91 @@
+{
+  "Recordings": { "nl": "Opnames", "de": "Aufnahmen", "fr": "Enregistrements" },
+  "Watch, download or delete what your streams recorded. Turn recording on per stream in its settings.": {
+    "nl": "Bekijk, download of verwijder wat je streams hebben opgenomen. Zet opnemen per stream aan in de instellingen van die stream.",
+    "de": "Sieh dir an, was deine Streams aufgezeichnet haben, lade es herunter oder lösche es. Die Aufnahme schaltest du pro Stream in dessen Einstellungen ein.",
+    "fr": "Regardez, téléchargez ou supprimez ce que vos flux ont enregistré. Activez l'enregistrement par flux dans ses paramètres."
+  },
+  "recording on": { "nl": "opname aan", "de": "Aufnahme an", "fr": "enregistrement activé" },
+  "Open stream": { "nl": "Stream openen", "de": "Stream öffnen", "fr": "Ouvrir le flux" },
+  "Playback URL for recordings (optional)": {
+    "nl": "Playback-URL voor opnames (optioneel)",
+    "de": "Playback-URL für Aufnahmen (optional)",
+    "fr": "URL de lecture des enregistrements (facultatif)"
+  },
+  "The MediaMTX playback server, used to list and download recordings. Empty: the API host on port {0}.": {
+    "nl": "De playback-server van MediaMTX, waarmee opnames worden opgehaald en gedownload. Leeg: de API-host op poort {0}.",
+    "de": "Der Playback-Server von MediaMTX, über den Aufnahmen aufgelistet und heruntergeladen werden. Leer: der API-Host auf Port {0}.",
+    "fr": "Le serveur de lecture de MediaMTX, utilisé pour lister et télécharger les enregistrements. Vide : l'hôte de l'API sur le port {0}."
+  },
+  "Use a URL such as http://10.0.0.5:9996.": {
+    "nl": "Gebruik een URL zoals http://10.0.0.5:9996.",
+    "de": "Verwenden Sie eine URL wie http://10.0.0.5:9996.",
+    "fr": "Utilisez une URL telle que http://10.0.0.5:9996."
+  },
+  "Refresh": { "nl": "Vernieuwen", "de": "Aktualisieren", "fr": "Actualiser" },
+  "Recording is off for this stream, so new broadcasts are not saved.": {
+    "nl": "Opnemen staat uit voor deze stream, dus nieuwe uitzendingen worden niet bewaard.",
+    "de": "Die Aufnahme ist für diesen Stream ausgeschaltet, neue Sendungen werden also nicht gespeichert.",
+    "fr": "L'enregistrement est désactivé pour ce flux : les nouvelles diffusions ne sont pas conservées."
+  },
+  "Everything that is broadcast is recorded. Recordings are deleted automatically after {0} day(s).": {
+    "nl": "Alles wat wordt uitgezonden, wordt opgenomen. Opnames worden na {0} dag(en) automatisch verwijderd.",
+    "de": "Alles, was gesendet wird, wird aufgezeichnet. Aufnahmen werden nach {0} Tag(en) automatisch gelöscht.",
+    "fr": "Tout ce qui est diffusé est enregistré. Les enregistrements sont supprimés automatiquement après {0} jour(s)."
+  },
+  "Everything that is broadcast is recorded. Recordings are kept until you delete them.": {
+    "nl": "Alles wat wordt uitgezonden, wordt opgenomen. Opnames blijven bewaard tot je ze verwijdert.",
+    "de": "Alles, was gesendet wird, wird aufgezeichnet. Aufnahmen bleiben erhalten, bis du sie löschst.",
+    "fr": "Tout ce qui est diffusé est enregistré. Les enregistrements sont conservés jusqu'à ce que vous les supprimiez."
+  },
+  "Close player": { "nl": "Speler sluiten", "de": "Player schließen", "fr": "Fermer le lecteur" },
+  "The recordings could not be loaded from server {0}: {1}": {
+    "nl": "De opnames konden niet worden opgehaald van server {0}: {1}",
+    "de": "Die Aufnahmen konnten nicht von Server {0} geladen werden: {1}",
+    "fr": "Impossible de charger les enregistrements depuis le serveur {0} : {1}"
+  },
+  "Check that playback is switched on in the server's mediamtx.yml (playback: yes) and that the panel can reach {0}.": {
+    "nl": "Controleer of playback aanstaat in de mediamtx.yml van de server (playback: yes) en of het paneel {0} kan bereiken.",
+    "de": "Prüfe, ob Playback in der mediamtx.yml des Servers eingeschaltet ist (playback: yes) und ob das Panel {0} erreicht.",
+    "fr": "Vérifiez que la lecture est activée dans le mediamtx.yml du serveur (playback: yes) et que le panneau peut joindre {0}."
+  },
+  "There are no recordings of this stream yet.": {
+    "nl": "Er zijn nog geen opnames van deze stream.",
+    "de": "Von diesem Stream gibt es noch keine Aufnahmen.",
+    "fr": "Ce flux n'a pas encore d'enregistrements."
+  },
+  "Started": { "nl": "Begonnen", "de": "Beginn", "fr": "Début" },
+  "Ended": { "nl": "Geëindigd", "de": "Ende", "fr": "Fin" },
+  "Duration": { "nl": "Duur", "de": "Dauer", "fr": "Durée" },
+  "Actions": { "nl": "Acties", "de": "Aktionen", "fr": "Actions" },
+  "Delete this recording?": { "nl": "Deze opname verwijderen?", "de": "Diese Aufnahme löschen?", "fr": "Supprimer cet enregistrement ?" },
+  "Play": { "nl": "Afspelen", "de": "Abspielen", "fr": "Lire" },
+  "Download as MP4": { "nl": "Downloaden als MP4", "de": "Als MP4 herunterladen", "fr": "Télécharger en MP4" },
+  "Total: {0}. Times are shown in the server's time zone.": {
+    "nl": "Totaal: {0}. Tijden staan in de tijdzone van de server.",
+    "de": "Gesamt: {0}. Die Zeiten sind in der Zeitzone des Servers angegeben.",
+    "fr": "Total : {0}. Les heures sont indiquées dans le fuseau horaire du serveur."
+  },
+  "Recording deleted.": { "nl": "Opname verwijderd.", "de": "Aufnahme gelöscht.", "fr": "Enregistrement supprimé." },
+  "The recording could not be deleted: {0}": {
+    "nl": "De opname kon niet worden verwijderd: {0}",
+    "de": "Die Aufnahme konnte nicht gelöscht werden: {0}",
+    "fr": "Impossible de supprimer l'enregistrement : {0}"
+  },
+  "Check the network in both directions: the server must reach the panel at {0}, and the panel must reach ports {1} (API) and {2} (recordings) on the server. Open these ports to the panel only, for example:": {
+    "nl": "Controleer het netwerk in beide richtingen: de server moet het paneel bereiken op {0}, en het paneel moet de poorten {1} (API) en {2} (opnames) op de server bereiken. Open deze poorten alleen voor het paneel, bijvoorbeeld:",
+    "de": "Prüfe das Netzwerk in beide Richtungen: Der Server muss das Panel unter {0} erreichen, und das Panel muss die Ports {1} (API) und {2} (Aufnahmen) auf dem Server erreichen. Öffne diese Ports nur für das Panel, zum Beispiel:",
+    "fr": "Vérifiez le réseau dans les deux sens : le serveur doit joindre le panneau à {0}, et le panneau doit joindre les ports {1} (API) et {2} (enregistrements) du serveur. N'ouvrez ces ports qu'au panneau, par exemple :"
+  },
+  "Keep recordings for (days)": { "nl": "Opnames bewaren (dagen)", "de": "Aufnahmen aufbewahren (Tage)", "fr": "Conserver les enregistrements (jours)" },
+  "Older recordings are deleted automatically. 0 keeps them until you delete them.": {
+    "nl": "Oudere opnames worden automatisch verwijderd. Bij 0 blijven ze bewaard tot je ze verwijdert.",
+    "de": "Ältere Aufnahmen werden automatisch gelöscht. Bei 0 bleiben sie erhalten, bis du sie löschst.",
+    "fr": "Les enregistrements plus anciens sont supprimés automatiquement. 0 les conserve jusqu'à ce que vous les supprimiez."
+  },
+  "Keep recordings between 0 and 3650 days.": {
+    "nl": "Bewaar opnames tussen 0 en 3650 dagen.",
+    "de": "Bewahre Aufnahmen zwischen 0 und 3650 Tagen auf.",
+    "fr": "Conservez les enregistrements entre 0 et 3650 jours."
+  }
+}

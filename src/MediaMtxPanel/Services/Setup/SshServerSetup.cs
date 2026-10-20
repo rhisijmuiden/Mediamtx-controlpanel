@@ -102,6 +102,7 @@ public class SshServerSetup(ILogger<SshServerSetup> logger, TextLocalizer L)
     private SshSetupResult ConfigureCore(MediaServer server, SshLoginInput login, string hookUrl, Action<string> log, CancellationToken ct)
     {
         var apiPort = new Uri(server.ApiUrl).Port;
+        var playbackPort = new Uri(server.PlaybackBaseUrl()).Port;
 
         using var client = new SshClient(Connection(login));
         client.HostKeyReceived += (_, e) =>
@@ -165,7 +166,7 @@ public class SshServerSetup(ILogger<SshServerSetup> logger, TextLocalizer L)
                 break;
         }
 
-        var updated = MediaMtxConfigEditor.ConfigureForPanel(found.Config, hookUrl, apiPort, server.PublicHost);
+        var updated = MediaMtxConfigEditor.ConfigureForPanel(found.Config, hookUrl, apiPort, server.PublicHost, playbackPort);
         if (updated == found.Config && found.Running)
         {
             log("mediamtx.yml already has the right settings.");
@@ -187,7 +188,7 @@ public class SshServerSetup(ILogger<SshServerSetup> logger, TextLocalizer L)
                 ? "MediaMTX does not run as a systemd service or Docker container; it reloads mediamtx.yml by itself."
                 : "MediaMTX is not running and has no systemd service or Docker container the panel can start. Start it on the server.");
         if (apply.Output.Contains("ufw=active"))
-            log($"  Note: the ufw firewall is active. Port {apiPort} must be open for the panel.");
+            log($"  Note: the ufw firewall is active. Ports {apiPort} (API) and {playbackPort} (recordings) must be open for the panel.");
         return new(true, L["MediaMTX is configured for the panel."]);
     }
 

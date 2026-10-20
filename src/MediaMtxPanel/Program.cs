@@ -90,6 +90,9 @@ builder.Services.Configure<PanelOptions>(builder.Configuration.GetSection(PanelO
 builder.Services.AddHttpClient("mediamtx");
 builder.Services.AddSingleton<MediaMtxClientFactory>();
 builder.Services.AddScoped<StreamService>();
+// Recordings can be large: no overall timeout, the request's own cancellation stops a download.
+builder.Services.AddHttpClient(RecordingService.HttpClientName, c => c.Timeout = Timeout.InfiniteTimeSpan);
+builder.Services.AddScoped<RecordingService>();
 builder.Services.AddScoped<ServerService>();
 builder.Services.AddSingleton<SshServerSetup>();
 builder.Services.AddSingleton<LiveStatusReader>();
@@ -231,6 +234,7 @@ app.MapMediaMtxAuth();
 app.MapStationEndpoints();
 app.MapPaymentEndpoints();
 app.MapStatisticsEndpoints();
+app.MapRecordingEndpoints();
 app.MapLanguageEndpoint();
 
 app.Run();

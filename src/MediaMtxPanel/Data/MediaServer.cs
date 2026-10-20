@@ -53,6 +53,24 @@ public class MediaServer
     [MaxLength(256)]
     public string? MetricsUrl { get; set; }
 
+    /// <summary>
+    /// Base URL of the MediaMTX playback server (recordings) as the panel reaches it, e.g. http://10.0.0.21:9996.
+    /// Empty: the host of <see cref="ApiUrl"/> on port <see cref="DefaultPlaybackPort"/>.
+    /// </summary>
+    [MaxLength(256)]
+    public string? PlaybackUrl { get; set; }
+
+    public const int DefaultPlaybackPort = 9996;
+
+    public string PlaybackBaseUrl()
+    {
+        if (!string.IsNullOrWhiteSpace(PlaybackUrl))
+            return PlaybackUrl.Trim().TrimEnd('/');
+        return Uri.TryCreate(ApiUrl, UriKind.Absolute, out var api)
+            ? $"{api.Scheme}://{new UriBuilder(api) { Port = DefaultPlaybackPort }.Uri.Authority}"
+            : $"http://127.0.0.1:{DefaultPlaybackPort}";
+    }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public List<StreamDefinition> Streams { get; set; } = [];
