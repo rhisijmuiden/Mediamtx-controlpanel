@@ -246,7 +246,7 @@ This applies to the watch page, the embedded player, the customer portal and the
 
 The panel reaches HLS and WebRTC over plain HTTP on the host of the server's API URL. When MediaMTX runs on another machine, the panel must be able to reach ports 8888 and 8889 there. Set `hlsTrustedProxies` and `webrtcTrustedProxies` in `mediamtx.yml` to the panel's IP address so MediaMTX sees the viewers' own addresses (the SSH setup on the server page does this when the hook URL contains an IP address).
 
-**WebRTC media does not go through the proxy.** Only the signalling (offer/answer) does; the video itself flows over port 8189 directly to MediaMTX. Forward UDP 8189 (and TCP 8189 if you set `webrtcLocalTCPAddress: :8189` for networks that block UDP) to the MediaMTX server and put its public address or host name in `webrtcAdditionalHosts`. When WebRTC cannot connect, the web player switches to HLS by itself after about 12 seconds, so viewers still get a picture.
+**WebRTC media does not go through the proxy.** Only the signalling (offer/answer) does; the video itself flows over port 8189 directly to MediaMTX, see [WebRTC and port 8189 (UDP)](#webrtc-and-port-8189-udp). When WebRTC cannot connect, the web player switches to HLS by itself after about 12 seconds, so viewers still get a picture.
 
 Optionally set **Trusted proxies** to the IP address of the proxy; then only that address may pass `X-Forwarded-For`, `X-Forwarded-Proto` and `X-Forwarded-Host` (applied after a restart). The **Check** line on the same page shows how the panel sees the request: behind a working proxy it starts with `https://` and shows the public host.
 
@@ -291,6 +291,28 @@ server {
 ```
 
 **Nginx Proxy Manager**: add a *Proxy Host* for `stream.example.com`, scheme `http`, forward to the panel's IP and port `8080`, switch on *Websockets Support* and *Block Common Exploits*, and request a certificate on the *SSL* tab (*Force SSL*, *HTTP/2 Support*). On the *Advanced* tab add `proxy_buffering off;`.
+
+### WebRTC and port 8189 (UDP)
+
+WebRTC has two parts. The **signalling** (the browser's offer and MediaMTX's answer, `reader.js`, WHEP/WHIP) is ordinary HTTPS and goes through your reverse proxy and the panel. The **video and audio** do not: after the signalling, the viewer's browser sends and receives media packets directly to MediaMTX on **port 8189**, by default over **UDP**. An HTTP reverse proxy (Nginx Proxy Manager, Caddy, nginx, Traefik) cannot carry that traffic, so it needs its own port forward.
+
+What to set up:
+
+1. **Port forward on the router/firewall**: forward **UDP 8189** from the public IP to the machine (or Proxmox container) where MediaMTX runs, for example `UDP 8189 → 10.0.0.21:8189`. With a firewall on that machine, allow it too: `ufw allow 8189/udp`. On Proxmox with the firewall enabled, add the same rule to the container.
+2. **Tell MediaMTX its public address** in `mediamtx.yml`, otherwise it only offers its internal IP and browsers on the internet cannot reach it:
+   ```yaml
+   webrtcLocalUDPAddress: :8189
+   webrtcAdditionalHosts: [stream.example.com]   # or the public IP; must resolve to the router's public address
+   ```
+   The Proxmox/Debian installers and the SSH setup on the server page fill in `webrtcAdditionalHosts` with the server's public host. Restart MediaMTX after a change (`systemctl restart mediamtx`).
+3. **Optional, TCP for networks that block UDP** (some company and guest networks): also set `webrtcLocalTCPAddress: :8189` and forward **TCP 8189** the same way. This is a plain TCP port forward, not an HTTP proxy host; in Nginx Proxy Manager it can be a *Stream* (incoming port 8189, TCP, to the MediaMTX IP port 8189). UDP stays preferred; TCP is only used when UDP does not work.
+4. **Docker**: `docker-compose.yml` already publishes `8189:8189/udp`; add `8189:8189/tcp` when you use the TCP option.
+
+Port 8189 carries only media for sessions the panel authorised through the signalling, so opening it does not expose the panel or the Control API.
+
+**Checking**: open a watch page from outside your own network (for example on a phone over 4G/5G). The status under the player shows *Live (WebRTC)* when port 8189 works. When it shows *WebRTC could not connect; switching to HLS…* followed by *Live (HLS)*, the signalling works but the media port is not reachable: check the port forward and `webrtcAdditionalHosts`. HLS always works through the reverse proxy alone, only with a few seconds more delay.
+
+Testing from inside your own network with the public host name needs a router that supports NAT loopback (hairpin NAT); if it does not, test from outside.
 
 ## Proxmox LXC
 
