@@ -97,6 +97,9 @@ builder.Services.AddSingleton<StreamEndpointBuilder>();
 builder.Services.AddSingleton<MediaMtxStatus>();
 builder.Services.AddSingleton<MediaMtxSyncService>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<MediaMtxSyncService>());
+builder.Services.AddSingleton<StreamStatsService>();
+builder.Services.AddSingleton<StreamStatsCollector>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<StreamStatsCollector>());
 builder.Services.AddHttpClient("alerts", c => c.Timeout = TimeSpan.FromSeconds(15));
 builder.Services.AddSingleton<AlertMonitor>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<AlertMonitor>());
@@ -213,6 +216,7 @@ app.MapAdditionalIdentityEndpoints();
 app.MapMediaMtxAuth();
 app.MapStationEndpoints();
 app.MapPaymentEndpoints();
+app.MapStatisticsEndpoints();
 app.MapLanguageEndpoint();
 
 app.Run();

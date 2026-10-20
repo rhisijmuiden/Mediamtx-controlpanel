@@ -10,6 +10,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<StreamOffer> Offers => Set<StreamOffer>();
     public DbSet<TicketOrder> Orders => Set<TicketOrder>();
     public DbSet<PaymentAccount> PaymentAccounts => Set<PaymentAccount>();
+    public DbSet<StreamStatSample> StatSamples => Set<StreamStatSample>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -47,6 +48,13 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         {
             e.HasIndex(a => a.UserId).IsUnique();
             e.HasOne(a => a.User).WithMany().HasForeignKey(a => a.UserId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<StreamStatSample>(e =>
+        {
+            e.HasIndex(x => new { x.StreamId, x.Timestamp });
+            e.HasIndex(x => x.Timestamp);
+            e.HasOne(x => x.Stream).WithMany().HasForeignKey(x => x.StreamId).OnDelete(DeleteBehavior.Cascade);
         });
 
         builder.Entity<MediaServer>(e =>

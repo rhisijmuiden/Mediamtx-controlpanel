@@ -1,0 +1,210 @@
+@using System.Globalization
+@implements IAsyncDisposable
+@inject StreamStatsService Stats
+
+@* Viewer and bandwidth statistics of one or more streams over a chosen period. *@
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div class="btn-group btn-group-sm" role="group" aria-label="@L["Period"]">
+        @foreach (var r in StatsRange.All)
+        {
+            <button type="button" class="btn @(r == range ? "btn-primary" : "btn-outline-primary")" @onclick="() => SelectAsync(r)">@L[r.Label]</button>
+        }
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        @if (loading)
+        {
+            <span class="spinner-border spinner-border-sm text-secondary"></span>
+        }
+        <a class="btn btn-sm btn-outline-secondary" href="@ExportUrl" download data-enhance-nav="false" title="@L["Download the chart data as a CSV file"]"><i class="bi bi-download"></i> CSV</a>
+    </div>
+</div>
+
+@if (report is null)
+{
+    <p class="text-secondary"><span class="spinner-border spinner-border-sm me-2"></span>@L["Loading…"]</p>
+}
+else
+{
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card stat-card h-100"><div class="card-body">
+                <div class="stat-icon info"><i class="bi bi-people"></i></div>
+                <div><div class="label">@L["Peak viewers"]</div><div class="value">@report.PeakViewers</div></div>
+            </div></div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card stat-card h-100"><div class="card-body">
+                <div class="stat-icon success"><i class="bi bi-hourglass-split"></i></div>
+                <div><div class="label">@L["Viewing hours"]</div><div class="value">@Number(report.ViewerHours)</div></div>
+            </div></div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card stat-card h-100"><div class="card-body">
+                <div class="stat-icon"><i class="bi bi-cloud-arrow-up"></i></div>
+                <div><div class="label">@L["Data sent to viewers"]</div><div class="value">@Format.Bytes((ulong)report.BytesOut)</div></div>
+            </div></div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card stat-card h-100"><div class="card-body">
+                <div class="stat-icon warning"><i class="bi bi-speedometer"></i></div>
+                <div><div class="label">@L["Peak bandwidth"]</div><div class="value">@Format.Bitrate(report.PeakOutBytesPerSec)</div></div>
+            </div></div>
+        </div>
+    </div>
+
+    @if (report.IsEmpty)
+    {
+        <div class="alert alert-light border d-flex gap-2">
+            <i class="bi bi-info-circle"></i>
+            <span>@L["No statistics for this period yet. The panel records viewers and bandwidth every minute while a stream is live."]</span>
+        </div>
+    }
+
+    <div class="row g-4 mb-4">
+        <div class="col-xl-6">
+            <div class="card h-100">
+                <div class="card-header"><i class="bi bi-people"></i> @L["Viewers"]</div>
+                <div class="card-body">
+                    <TimeChart Buckets="report.Buckets" Range="range" Series="viewerSeries" FormatValue="Number" />
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card h-100">
+                <div class="card-header"><i class="bi bi-activity"></i> @L["Bandwidth"]</div>
+                <div class="card-body">
+                    <TimeChart Buckets="report.Buckets" Range="range" Series="bandwidthSeries" FormatValue="v => Format.Bitrate(v)" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (ShowPerStream && Streams.Count > 1)
+    {
+        <div class="card">
+            <div class="card-header"><i class="bi bi-list-ol"></i> @L["Per stream"]</div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>@L["Stream"]</th>
+                            <th class="text-end">@L["Peak viewers"]</th>
+                            <th class="text-end">@L["Viewing hours"]</th>
+                            <th class="text-end">@L["Hours live"]</th>
+                            <th class="text-end">@L["Data received"]</th>
+                            <th class="text-end">@L["Data sent"]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var s in StreamRows())
+                        {
+                            <tr>
+                                <td>
+                                    <a href="@string.Format(CultureInfo.InvariantCulture, StreamLink, s.Stream.Id)" class="fw-semibold">@s.Stream.DisplayName</a>
+                                    <div class="small text-secondary"><code>@s.Stream.Name</code> · @s.Stream.Server?.Name</div>
+                                </td>
+                                <td class="text-end">@(s.Stats?.PeakViewers ?? 0)</td>
+                                <td class="text-end">@Number(s.Stats?.ViewerHours ?? 0)</td>
+                                <td class="text-end">@Number(s.Stats?.LiveHours ?? 0)</td>
+                                <td class="text-end">@Format.Bytes((ulong)(s.Stats?.BytesIn ?? 0))</td>
+                                <td class="text-end">@Format.Bytes((ulong)(s.Stats?.BytesOut ?? 0))</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    /// <summary>The streams to show; the page has already checked the user may see them.</summary>
+    [Parameter, EditorRequired] public List<StreamDefinition> Streams { get; set; } = [];
+
+    /// <summary>Show a table with the totals of every stream.</summary>
+    [Parameter] public bool ShowPerStream { get; set; }
+
+    /// <summary>Link of a stream in the table; {0} is its id.</summary>
+    [Parameter] public string StreamLink { get; set; } = "streams/{0}";
+
+    private StatsRange range = StatsRange.Default;
+    private StatsReport? report;
+    private bool loading;
+    private List<TimeChart.ChartSeries> viewerSeries = [];
+    private List<TimeChart.ChartSeries> bandwidthSeries = [];
+    private readonly CancellationTokenSource cts = new();
+
+    private string ExportUrl =>
+        $"api/statistics/export.csv?range={range.Key}" + (Streams.Count == 1 ? $"&stream={Streams[0].Id}" : "");
+
+    protected override async Task OnInitializedAsync()
+    {
+        viewerSeries =
+        [
+            new(L["Peak viewers"], "s1", b => b.PeakViewers),
+            new(L["Average viewers"], "s2", b => b.AvgViewers),
+        ];
+        bandwidthSeries =
+        [
+            new(L["Out (to viewers)"], "s1", b => b.OutBytesPerSec),
+            new(L["In (from source)"], "s2", b => b.InBytesPerSec),
+        ];
+        await LoadAsync();
+        _ = RefreshLoopAsync();
+    }
+
+    private async Task SelectAsync(StatsRange r)
+    {
+        range = r;
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        loading = true;
+        try
+        {
+            report = await Stats.GetAsync(Streams.Select(s => s.Id).ToList(), range, ct: cts.Token);
+        }
+        catch (OperationCanceledException) { }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    // New samples arrive every minute; keep the open page current.
+    private async Task RefreshLoopAsync()
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(60));
+        try
+        {
+            while (await timer.WaitForNextTickAsync(cts.Token))
+            {
+                await LoadAsync();
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (OperationCanceledException) { }
+    }
+
+    private IEnumerable<(StreamDefinition Stream, StreamStatsSummary? Stats)> StreamRows()
+    {
+        var byId = report!.Streams.ToDictionary(s => s.StreamId);
+        return Streams
+            .Select(s => (Stream: s, Stats: byId.GetValueOrDefault(s.Id)))
+            .OrderByDescending(x => x.Stats?.ViewerHours ?? -1)
+            .ThenByDescending(x => x.Stats?.BytesOut ?? 0)
+            .ThenBy(x => x.Stream.DisplayName);
+    }
+
+    private static string Number(double v) => v.ToString(v >= 100 ? "N0" : "0.#", CultureInfo.CurrentCulture);
+
+    public ValueTask DisposeAsync()
+    {
+        cts.Cancel();
+        cts.Dispose();
+        return ValueTask.CompletedTask;
+    }
+}

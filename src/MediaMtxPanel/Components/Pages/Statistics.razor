@@ -1,0 +1,45 @@
+@page "/statistics"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject StreamService Streams
+
+<AppPageTitle Text="@L["Statistics"]" />
+
+<div class="page-header">
+    <div>
+        <h1><i class="bi bi-bar-chart-line text-primary"></i> @L["Statistics"]</h1>
+        <p class="page-subtitle">@L["Viewers and bandwidth of all your streams over time. Open a stream to see its own statistics."]</p>
+    </div>
+</div>
+
+@if (streams is null)
+{
+    <p class="text-secondary"><span class="spinner-border spinner-border-sm me-2"></span>@L["Loading…"]</p>
+}
+else if (streams.Count == 0)
+{
+    <div class="empty-state">
+        <i class="bi bi-bar-chart-line"></i>
+        <p>@L["There are no streams yet, so there are no statistics either."]</p>
+    </div>
+}
+else
+{
+    <StatsView Streams="streams" ShowPerStream="true" StreamLink="@streamLink" />
+}
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
+
+    private List<StreamDefinition>? streams;
+    private string streamLink = "streams/{0}";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await AuthState).User;
+        // Customers open their streams in the customer portal.
+        if (!Roles.Staff.Split(',').Any(user.IsInRole))
+            streamLink = "portal/streams/{0}";
+        streams = await Streams.ListAsync(user);
+    }
+}
