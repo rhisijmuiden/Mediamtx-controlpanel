@@ -12,6 +12,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<PaymentAccount> PaymentAccounts => Set<PaymentAccount>();
     public DbSet<StreamStatSample> StatSamples => Set<StreamStatSample>();
     public DbSet<RestreamTarget> RestreamTargets => Set<RestreamTarget>();
+    public DbSet<ViewerDailyStat> ViewerDailyStats => Set<ViewerDailyStat>();
+    public DbSet<ViewerVisit> ViewerVisits => Set<ViewerVisit>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -61,6 +63,18 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             e.HasIndex(x => new { x.StreamId, x.Timestamp });
             e.HasIndex(x => x.Timestamp);
             e.HasOne(x => x.Stream).WithMany().HasForeignKey(x => x.StreamId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<ViewerDailyStat>(e =>
+        {
+            e.HasIndex(x => new { x.StreamId, x.Day }).IsUnique();
+            e.HasIndex(x => x.Day);
+        });
+
+        builder.Entity<ViewerVisit>(e =>
+        {
+            e.HasIndex(x => new { x.Day, x.StreamId, x.ViewerKey }).IsUnique();
+            e.HasIndex(x => new { x.StreamId, x.Day });
         });
 
         builder.Entity<MediaServer>(e =>

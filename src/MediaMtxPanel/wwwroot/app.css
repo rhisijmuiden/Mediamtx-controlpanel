@@ -597,3 +597,21 @@ pre.cmd {
 .platform-icon.youtube { background: #ff0033; }
 .platform-icon.twitch { background: #9146ff; }
 .platform-icon.facebook { background: #0866ff; }
+
+/* Viewer report chart (Components/Shared/ReportChart.razor): grouped bars per period. */
+.rchart .rbars { position: absolute; inset: 0 12%; display: flex; align-items: flex-end; justify-content: center; gap: 2px; pointer-events: none; }
+.rchart .rbar { flex: 1; max-width: 1.25rem; min-height: 0; border-radius: 3px 3px 0 0; }
+.rchart .rbar.s1 { background: var(--chart-1); }
+.rchart .rbar.s2 { background: var(--chart-2); }
+
+/* Export menu on the viewer report. */
+.export-menu { position: relative; }
+.export-menu > summary { list-style: none; }
+.export-menu > summary::-webkit-details-marker { display: none; }
+.export-menu .menu {
+    position: absolute; right: 0; top: calc(100% + .35rem); z-index: 20; min-width: 13rem; padding: .35rem;
+    background: var(--app-surface); border: 1px solid var(--app-border); border-radius: .75rem; box-shadow: var(--app-shadow-lg);
+}
+.export-menu .menu a { display: flex; align-items: center; gap: .6rem; padding: .45rem .7rem; border-radius: .5rem; color: var(--app-text); font-size: .875rem; }
+.export-menu .menu a:hover { background: #f3f4f8; text-decoration: none; }
+.min-w-0 { min-width: 0; }

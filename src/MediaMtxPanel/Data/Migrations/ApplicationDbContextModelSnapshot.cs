@@ -419,6 +419,9 @@ namespace MediaMtxPanel.Data.Migrations
                     b.Property<long>("BytesOut")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("NewViewers")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Seconds")
                         .HasColumnType("INTEGER");
 
@@ -507,6 +510,79 @@ namespace MediaMtxPanel.Data.Migrations
                     b.HasIndex("StreamId");
 
                     b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("MediaMtxPanel.Data.ViewerDailyStat", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("BytesIn")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("BytesOut")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateOnly>("Day")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("LiveSeconds")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PeakViewers")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Sessions")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("StreamId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("StreamName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("UniqueViewers")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("ViewerSeconds")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Day");
+
+                    b.HasIndex("StreamId", "Day")
+                        .IsUnique();
+
+                    b.ToTable("ViewerDailyStats");
+                });
+
+            modelBuilder.Entity("MediaMtxPanel.Data.ViewerVisit", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateOnly>("Day")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("StreamId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ViewerKey")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StreamId", "Day");
+
+                    b.HasIndex("Day", "StreamId", "ViewerKey")
+                        .IsUnique();
+
+                    b.ToTable("ViewerVisits");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

@@ -18,6 +18,11 @@ public class MediaMtxOptions
     /// <summary>Statistics older than this are deleted.</summary>
     public int StatisticsRetentionDays { get; set; } = 90;
 
+    /// <summary>
+    /// Days of history kept for the viewer report (one row per stream per day). 0 keeps it forever.
+    /// </summary>
+    public int ReportRetentionDays { get; set; }
+
     // --- First server, created on startup when no servers exist ---
 
     public string ServerName { get; set; } = "Default";

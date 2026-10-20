@@ -1,4 +1,5 @@
 using MediaMtxPanel.Data;
+using MediaMtxPanel.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace MediaMtxPanel.Endpoints;
@@ -27,6 +28,7 @@ public static class MediaMtxAuthEndpoint
         HttpContext http,
         AuthRequest req,
         IDbContextFactory<ApplicationDbContext> dbFactory,
+        ViewerReportService reports,
         ILoggerFactory loggerFactory)
     {
         var logger = loggerFactory.CreateLogger("MediaMtxAuth");
@@ -53,6 +55,7 @@ public static class MediaMtxAuthEndpoint
         }
 
         bool allowed;
+        StreamDefinition? stream = null;
         switch (req.Action)
         {
             case "api":
@@ -67,7 +70,7 @@ public static class MediaMtxAuthEndpoint
             case "read":
             case "playback":
                 var path = req.Path ?? "";
-                var stream = await db.Streams.AsNoTracking()
+                stream = await db.Streams.AsNoTracking()
                     .FirstOrDefaultAsync(s => s.ServerId == server.Id && s.Name == path, ct);
                 allowed = stream is { Enabled: true } && IsAllowed(stream, req.Action, user, pass);
                 // Paying viewers watch with user "ticket" and their ticket token as password.
@@ -93,6 +96,10 @@ public static class MediaMtxAuthEndpoint
                     req.Action, server.Name, req.Path, user, req.Ip, req.Protocol);
             return Results.Text("denied", statusCode: StatusCodes.Status401Unauthorized);
         }
+
+        // Count the viewer for the viewer report; paying viewers by their ticket, others by IP address.
+        if (req.Action == "read" && stream is not null)
+            await reports.RecordVisitAsync(stream.Id, req.Ip, user == TicketUser ? pass : null, ct);
 
         return Results.Text("ok");
     }

@@ -20,6 +20,9 @@ public class StreamStatSample
     /// <summary>Viewers connected at the moment of the sample.</summary>
     public int Viewers { get; set; }
 
+    /// <summary>Viewers that were not connected in the previous round: people who started watching.</summary>
+    public int NewViewers { get; set; }
+
     /// <summary>Bytes received from the source during the period.</summary>
     public long BytesIn { get; set; }
 

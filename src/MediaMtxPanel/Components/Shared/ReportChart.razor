@@ -1,0 +1,77 @@
+@using System.Globalization
+@* Bar chart of the viewer report: peak and unique viewers per period, drawn with HTML and CSS. Hovering a period shows all its values. *@
+
+<div class="tchart rchart">
+    <div class="tchart-legend">
+        <span><i class="swatch s1"></i>@L["Peak viewers"]</span>
+        <span><i class="swatch s2"></i>@L["Unique viewers"]</span>
+    </div>
+    <div class="tchart-body">
+        <div class="tchart-yaxis">
+            @foreach (var t in ticks)
+            {
+                <span style="top:@Pct(100 - t / max * 100)%">@t.ToString("0.#", CultureInfo.CurrentCulture)</span>
+            }
+        </div>
+        <div class="tchart-plot">
+            @foreach (var t in ticks)
+            {
+                <div class="tchart-grid" style="top:@Pct(100 - t / max * 100)%"></div>
+            }
+            <div class="tchart-cols">
+                @for (var i = 0; i < Report.Periods.Count; i++)
+                {
+                    var p = Report.Periods[i];
+                    <div class="col-hit">
+                        <div class="rbars">
+                            <div class="rbar s1" style="height:@Pct(p.Totals.PeakViewers / max * 100)%"></div>
+                            <div class="rbar s2" style="height:@Pct(p.Totals.UniqueViewers / max * 100)%"></div>
+                        </div>
+                        <div class="tip @(i > Report.Periods.Count / 2 ? "left" : "")">
+                            <strong>@ViewerReportService.PeriodLabel(p, Report.Grouping, L)</strong>
+                            <span><i class="swatch s1"></i>@L["Peak viewers"]: @p.Totals.PeakViewers</span>
+                            <span><i class="swatch s2"></i>@L["Unique viewers"]: @p.Totals.UniqueViewers</span>
+                            <span>@L["Views"]: @p.Totals.Sessions</span>
+                            <span>@L["Watch time"]: @Hours(p.Totals.WatchHours)</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="tchart-xaxis">
+        @foreach (var i in xLabels)
+        {
+            <span style="left:@Pct((i + 0.5) / Report.Periods.Count * 100)%">@ShortLabel(Report.Periods[i])</span>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public ViewerReport Report { get; set; } = default!;
+
+    private double max = 4;
+    private List<double> ticks = [];
+    private List<int> xLabels = [];
+
+    protected override void OnParametersSet()
+    {
+        var periods = Report.Periods;
+        var top = periods.Count == 0 ? 0 : periods.Max(p => Math.Max(p.Totals.PeakViewers, p.Totals.UniqueViewers));
+        max = TimeChart.NiceCeiling(top);
+        ticks = Enumerable.Range(0, 5).Select(i => max * i / 4).ToList();
+        var step = Math.Max(1, (int)Math.Ceiling(periods.Count / 8.0));
+        xLabels = Enumerable.Range(0, periods.Count).Where(i => i % step == 0).ToList();
+    }
+
+    public static string Hours(double h) => h.ToString(h >= 100 ? "N0" : "0.#", CultureInfo.CurrentCulture) + " h";
+
+    private string ShortLabel(ReportPeriod p) => Report.Grouping switch
+    {
+        ReportGrouping.Week => L["Wk {0}", ISOWeek.GetWeekOfYear(p.Start.ToDateTime(TimeOnly.MinValue))],
+        ReportGrouping.Month => p.Start.ToString("MMM yyyy", CultureInfo.CurrentCulture),
+        _ => p.Start.ToString("d MMM", CultureInfo.CurrentCulture),
+    };
+
+    private static string Pct(double v) => v.ToString("0.##", CultureInfo.InvariantCulture);
+}

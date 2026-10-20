@@ -39,6 +39,9 @@ public record PanelSettings
     public AlertSettings? Alerts { get; init; }
     /// <summary>Settings → Backup. Null until configured.</summary>
     public Backup.BackupSettings? Backup { get; init; }
+
+    /// <summary>Random key for the hashes that count unique viewers without storing IP addresses; created on first use.</summary>
+    public string? ViewerKeySecret { get; init; }
 }
 
 public enum ReleaseChannel
