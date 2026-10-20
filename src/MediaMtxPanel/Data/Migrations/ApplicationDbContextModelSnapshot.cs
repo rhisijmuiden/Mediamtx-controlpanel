@@ -260,6 +260,18 @@ namespace MediaMtxPanel.Data.Migrations
                     b.Property<int>("VideoBitrateKbps")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("ViewerChannel")
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ViewerClientId")
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ViewerSecretProtected")
+                        .HasMaxLength(4096)
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("StreamId");
@@ -417,6 +429,9 @@ namespace MediaMtxPanel.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<long>("BytesOut")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlatformViewers")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Seconds")

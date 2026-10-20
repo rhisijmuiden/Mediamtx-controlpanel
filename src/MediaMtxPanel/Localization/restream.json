@@ -203,5 +203,95 @@
     "nl": "ffmpeg is gestopt.",
     "de": "ffmpeg wurde beendet.",
     "fr": "ffmpeg s'est arrêté."
+  },
+  "Viewer count on {0} (optional)": {
+    "nl": "Kijkersaantal op {0} (optioneel)",
+    "de": "Zuschauerzahl auf {0} (optional)",
+    "fr": "Nombre de spectateurs sur {0} (facultatif)"
+  },
+  "Shows how many people watch on YouTube. Create an API key in the Google Cloud console with the YouTube Data API v3 switched on, and enter the ID of your channel (starts with UC, see YouTube Studio → Settings → Channel → Advanced). It uses only a small part of the free daily quota.": {
+    "nl": "Toont hoeveel mensen er op YouTube kijken. Maak in de Google Cloud-console een API-sleutel aan met de YouTube Data API v3 ingeschakeld, en vul de ID van je kanaal in (begint met UC, zie YouTube Studio → Instellingen → Kanaal → Geavanceerd). Dit gebruikt maar een klein deel van het gratis dagquotum.",
+    "de": "Zeigt, wie viele Personen auf YouTube zuschauen. Erstelle in der Google-Cloud-Konsole einen API-Schlüssel mit aktivierter YouTube Data API v3 und gib die ID deines Kanals ein (beginnt mit UC, siehe YouTube Studio → Einstellungen → Kanal → Erweitert). Das verbraucht nur einen kleinen Teil des kostenlosen Tageskontingents.",
+    "fr": "Affiche combien de personnes regardent sur YouTube. Créez une clé d'API dans la console Google Cloud avec l'API YouTube Data v3 activée, et saisissez l'ID de votre chaîne (commence par UC, voir YouTube Studio → Paramètres → Chaîne → Paramètres avancés). Cela n'utilise qu'une petite partie du quota quotidien gratuit."
+  },
+  "Shows how many people watch on Twitch. Register an application in the Twitch developer console (any OAuth redirect URL, e.g. http://localhost) and enter its client ID and a new client secret, plus your channel name.": {
+    "nl": "Toont hoeveel mensen er op Twitch kijken. Registreer een applicatie in de Twitch developer console (elke OAuth-redirect-URL is goed, bijvoorbeeld http://localhost) en vul de client-ID, een nieuw client secret en je kanaalnaam in.",
+    "de": "Zeigt, wie viele Personen auf Twitch zuschauen. Registriere eine Anwendung in der Twitch-Entwicklerkonsole (jede OAuth-Weiterleitungs-URL, z. B. http://localhost) und gib ihre Client-ID, ein neues Client-Secret und deinen Kanalnamen ein.",
+    "fr": "Affiche combien de personnes regardent sur Twitch. Enregistrez une application dans la console développeur Twitch (n'importe quelle URL de redirection OAuth, par ex. http://localhost) et saisissez son ID client, un nouveau secret client et le nom de votre chaîne."
+  },
+  "Shows how many people watch on Facebook. Only for live videos on a Facebook page: enter the page ID and a long-lived page access token with the pages_read_engagement permission (for example from the Graph API Explorer).": {
+    "nl": "Toont hoeveel mensen er op Facebook kijken. Alleen voor livevideo's op een Facebook-pagina: vul de pagina-ID in en een langlevend paginatoegangstoken met de machtiging pages_read_engagement (bijvoorbeeld uit de Graph API Explorer).",
+    "de": "Zeigt, wie viele Personen auf Facebook zuschauen. Nur für Live-Videos auf einer Facebook-Seite: Gib die Seiten-ID und ein langlebiges Seiten-Zugriffstoken mit der Berechtigung pages_read_engagement ein (z. B. aus dem Graph API Explorer).",
+    "fr": "Affiche combien de personnes regardent sur Facebook. Uniquement pour les vidéos en direct d'une page Facebook : saisissez l'ID de la page et un jeton d'accès de page longue durée avec l'autorisation pages_read_engagement (par exemple depuis l'explorateur de l'API Graph)."
+  },
+  "Channel ID": {
+    "nl": "Kanaal-ID",
+    "de": "Kanal-ID",
+    "fr": "ID de la chaîne"
+  },
+  "Channel name": {
+    "nl": "Kanaalnaam",
+    "de": "Kanalname",
+    "fr": "Nom de la chaîne"
+  },
+  "Page ID": {
+    "nl": "Pagina-ID",
+    "de": "Seiten-ID",
+    "fr": "ID de la page"
+  },
+  "Empty = no viewer count": {
+    "nl": "Leeg = geen kijkersaantal",
+    "de": "Leer = keine Zuschauerzahl",
+    "fr": "Vide = pas de nombre de spectateurs"
+  },
+  "Page access token": {
+    "nl": "Paginatoegangstoken",
+    "de": "Seiten-Zugriffstoken",
+    "fr": "Jeton d'accès de la page"
+  },
+  "Asking {0} for the viewer count…": {
+    "nl": "Kijkersaantal opvragen bij {0}…",
+    "de": "Zuschauerzahl wird bei {0} abgefragt…",
+    "fr": "Demande du nombre de spectateurs à {0}…"
+  },
+  "{0} watching on {1}": {
+    "nl": "{0} kijkers op {1}",
+    "de": "{0} Zuschauer auf {1}",
+    "fr": "{0} spectateurs sur {1}"
+  },
+  "Viewer count unavailable: {0}": {
+    "nl": "Kijkersaantal niet beschikbaar: {0}",
+    "de": "Zuschauerzahl nicht verfügbar: {0}",
+    "fr": "Nombre de spectateurs indisponible : {0}"
+  },
+  "{0} does not report a live broadcast yet.": {
+    "nl": "{0} meldt nog geen live-uitzending.",
+    "de": "{0} meldet noch keine Live-Übertragung.",
+    "fr": "{0} ne signale pas encore de diffusion en direct."
+  },
+  "Enter a YouTube Data API key.": {
+    "nl": "Vul een YouTube Data API-sleutel in.",
+    "de": "Gib einen YouTube-Data-API-Schlüssel ein.",
+    "fr": "Saisissez une clé d'API YouTube Data."
+  },
+  "Enter the client secret of your Twitch application.": {
+    "nl": "Vul het client secret van je Twitch-applicatie in.",
+    "de": "Gib das Client-Secret deiner Twitch-Anwendung ein.",
+    "fr": "Saisissez le secret client de votre application Twitch."
+  },
+  "Enter a page access token.": {
+    "nl": "Vul een paginatoegangstoken in.",
+    "de": "Gib ein Seiten-Zugriffstoken ein.",
+    "fr": "Saisissez un jeton d'accès de page."
+  },
+  "Enter the client ID of your Twitch application.": {
+    "nl": "Vul de client-ID van je Twitch-applicatie in.",
+    "de": "Gib die Client-ID deiner Twitch-Anwendung ein.",
+    "fr": "Saisissez l'ID client de votre application Twitch."
+  },
+  "The platform could not be reached.": {
+    "nl": "Het platform is niet bereikbaar.",
+    "de": "Die Plattform ist nicht erreichbar.",
+    "fr": "La plateforme est injoignable."
   }
 }

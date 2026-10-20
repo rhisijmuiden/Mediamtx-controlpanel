@@ -118,6 +118,9 @@ builder.Services.AddHostedService(sp => sp.GetRequiredService<AlertMonitor>());
 builder.Services.AddSingleton<RestreamManager>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<RestreamManager>());
 builder.Services.AddScoped<RestreamService>();
+builder.Services.AddHttpClient("platforms", c => c.Timeout = TimeSpan.FromSeconds(15));
+builder.Services.AddSingleton<PlatformViewerService>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<PlatformViewerService>());
 builder.Services.AddHttpClient("github", c =>
 {
     c.BaseAddress = new Uri("https://api.github.com/");
