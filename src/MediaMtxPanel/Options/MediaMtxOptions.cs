@@ -71,6 +71,15 @@ public class PanelOptions
     /// <summary>Branch that is compared when the repository has no releases (the Proxmox installer builds from it).</summary>
     public string UpdateBranch { get; set; } = "main";
 
+    /// <summary>
+    /// Status folder of the updater behind "Update now" under Info, set up by the installers. When it does not
+    /// exist (Docker, development) the Info window shows how to update by hand instead.
+    /// </summary>
+    public string UpdaterDirectory { get; set; } = "/var/lib/mediamtx-panel-update";
+
+    /// <summary>The updater the systemd unit runs; only checked to exist.</summary>
+    public string UpdaterCommand { get; set; } = "/usr/local/sbin/mediamtx-panel-update";
+
     // --- Station contract (see "Running as part of Build My TV Station" in the README); all off when empty ---
 
     /// <summary>

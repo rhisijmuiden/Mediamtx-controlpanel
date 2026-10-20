@@ -92,6 +92,44 @@ install_station_command() {
   install -m 0755 "$WORK/src/deploy/mediamtx-panel-station.sh" /usr/local/bin/mediamtx-panel-station
 }
 
+# "Update now" under Info: the panel (without root rights) creates a request file, a path unit starts
+# the updater as root. The updater runs this machine's copy of deploy/debian/install.sh in update mode.
+# New files are renamed into place, because the updater may be the one running this script.
+install_updater() {
+  local file
+  mkdir -p /usr/local/lib/mediamtx-panel
+  for file in "$WORK/src/deploy/debian/install.sh:/usr/local/lib/mediamtx-panel/install.sh" \
+              "$WORK/src/deploy/mediamtx-panel-update.sh:/usr/local/sbin/mediamtx-panel-update"; do
+    install -m 0755 "${file%%:*}" "${file#*:}.new"
+    mv -f "${file#*:}.new" "${file#*:}"
+  done
+  install -d -m 0750 -o root -g mediamtx-panel /var/lib/mediamtx-panel-update
+
+  cat > /etc/systemd/system/mediamtx-panel-update.path <<UNIT
+[Unit]
+Description=Start a MediaMTX Panel update when the panel asks for one
+
+[Path]
+PathExists=${DATA_DIR}/update-request
+Unit=mediamtx-panel-update.service
+
+[Install]
+WantedBy=paths.target
+UNIT
+
+  cat > /etc/systemd/system/mediamtx-panel-update.service <<UNIT
+[Unit]
+Description=MediaMTX Panel update (started from Info in the panel)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/mediamtx-panel-update
+TimeoutStartSec=45min
+UNIT
+}
+
 # ---------------------------------------------------------------- MediaMTX
 install_mediamtx() {
   local arch
@@ -233,8 +271,9 @@ case "$MODE" in
     install_station_command
     configure_panel
     [[ "$INSTALL_MEDIAMTX" == "yes" ]] && install_mediamtx
+    install_updater
     systemctl daemon-reload
-    systemctl enable --now mediamtx-panel >/dev/null
+    systemctl enable --now mediamtx-panel mediamtx-panel-update.path >/dev/null
     wait_for_panel
     # The administrator now exists; the one-time password does not need to stay on disk.
     sed -i '/^Panel__AdminPassword=/d' "$CONF_DIR/panel.env"
@@ -247,6 +286,10 @@ case "$MODE" in
     install_packages
     build_panel
     install_station_command
+    install_updater
+    systemctl daemon-reload
+    systemctl enable --now mediamtx-panel-update.path >/dev/null
+    log "Restarting the panel…"
     systemctl restart mediamtx-panel
     wait_for_panel
     remove_sdk

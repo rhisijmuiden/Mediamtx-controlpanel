@@ -2,6 +2,7 @@
 @implements IDisposable
 @inject UpdateChecker Updates
 @inject PanelSettingsStore Settings
+@inject PanelUpdater Updater
 
 <button type="button" class="btn btn-sidebar" @onclick="() => { open = true; tab = InfoTab.About; }" title="@L["Version and updates"]">
     <i class="bi bi-info-circle"></i> @L["Info"]
@@ -119,31 +120,40 @@
                             }
                         </div>
                     </div>
-                    @if (s.NewChanges.Count > 0)
-                    {
-                        <div class="whats-new mb-2">
-                            <div class="d-flex align-items-center mb-1">
-                                <span class="fw-semibold me-auto"><i class="bi bi-stars me-1"></i>@L["What's new"]</span>
-                                <button type="button" class="btn btn-link btn-sm p-0" @onclick="() => tab = InfoTab.Changelog">@L["Full changelog"] <i class="bi bi-arrow-right"></i></button>
-                            </div>
-                            <ul>
-                                @foreach (var item in s.NewChanges.SelectMany(r => r.Sections).SelectMany(x => x.Items).Take(5))
-                                {
-                                    <li>@((MarkupString)Changelog.ToHtml(item, Updates.Repository))</li>
-                                }
-                            </ul>
-                        </div>
-                    }
                     <AuthorizeView Roles="@Roles.Admin">
+                        @if (!Updater.Available)
+                        {
                         <div class="small text-secondary mb-2">
                             @L["Proxmox: run the installer with update and the container ID on the Proxmox host. Docker: pull the new code and run docker compose up -d --build."]
                         </div>
                         <pre class="cmd small mb-2">bash -c "$(curl -fsSL https://raw.githubusercontent.com/@Updates.Repository/@Updates.Branch/deploy/proxmox/create-lxc.sh)" _ update &lt;CTID&gt;</pre>
+                        }
                     </AuthorizeView>
                 }
                 else
                 {
                     <div class="alert alert-success mb-2"><i class="bi bi-check-circle me-1"></i> @L["You are running the latest version."]</div>
+                }
+                @if (Updater.Available)
+                {
+                    <AuthorizeView Roles="@Roles.Admin">
+                        <UpdateNow UpdateAvailable="@(s.UpdateAvailable && !Updates.Checking)" />
+                    </AuthorizeView>
+                }
+                @if (s.UpdateAvailable && !Updates.Checking && s.NewChanges.Count > 0)
+                {
+                    <div class="whats-new mb-2">
+                        <div class="d-flex align-items-center mb-1">
+                            <span class="fw-semibold me-auto"><i class="bi bi-stars me-1"></i>@L["What's new"]</span>
+                            <button type="button" class="btn btn-link btn-sm p-0" @onclick="() => tab = InfoTab.Changelog">@L["Full changelog"] <i class="bi bi-arrow-right"></i></button>
+                        </div>
+                        <ul>
+                            @foreach (var item in s.NewChanges.SelectMany(r => r.Sections).SelectMany(x => x.Items).Take(5))
+                            {
+                                <li>@((MarkupString)Changelog.ToHtml(item, Updates.Repository))</li>
+                            }
+                        </ul>
+                    </div>
                 }
                 <div class="small text-secondary">
                     @if (s.CheckedAt is { } at)
@@ -164,7 +174,7 @@
             <footer>
                 <a class="btn btn-outline-secondary btn-sm me-auto" href="https://github.com/@Updates.Repository" target="_blank" rel="noopener"><i class="bi bi-github"></i> GitHub</a>
                 <AuthorizeView Roles="@Roles.Admin">
-                    <button type="button" class="btn btn-primary btn-sm" @onclick="CheckNow" disabled="@Updates.Checking">
+                    <button type="button" class="btn btn-primary btn-sm" @onclick="CheckNow" disabled="@(Updates.Checking || Updater.Busy)">
                         <i class="bi bi-arrow-repeat"></i> @L["Check for updates"]
                     </button>
                 </AuthorizeView>
@@ -180,7 +190,11 @@
     private bool open;
     private InfoTab tab;
 
-    protected override void OnInitialized() => Updates.Changed += OnChanged;
+    protected override void OnInitialized()
+    {
+        Updates.Changed += OnChanged;
+        Updater.Changed += OnChanged;
+    }
 
     private async Task CheckNow() => await Updates.CheckAsync();
 
@@ -197,5 +211,9 @@
 
     private void OnChanged() => _ = InvokeAsync(StateHasChanged);
 
-    public void Dispose() => Updates.Changed -= OnChanged;
+    public void Dispose()
+    {
+        Updates.Changed -= OnChanged;
+        Updater.Changed -= OnChanged;
+    }
 }
