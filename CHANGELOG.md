@@ -22,6 +22,7 @@ Added, Changed, Deprecated, Removed, Fixed or Security, and rename Unreleased to
 ### Fixed
 
 - The web player now switches to HLS when WebRTC cannot connect from outside the local network. MediaMTX answers the late ICE candidates of a failed connection with "not found", which the player took for a stream that is not live, so it kept retrying WebRTC without a picture. It now asks HLS whether the stream is live before it decides.
+- The embedded player now plays HLS on iPhone and iPad like the preview does: it uses hls.js first and the browser's own HLS player only when hls.js cannot run. The native player also reports live and error states now, so the embed no longer stays on its loading screen.
 
 ## [1.3.0] - 2026-10-20
 
