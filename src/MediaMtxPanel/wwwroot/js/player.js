@@ -155,18 +155,18 @@
         const withAuth = (xhr) => {
             if (o.user) xhr.setRequestHeader("Authorization", "Basic " + btoa(o.user + ":" + o.pass));
         };
-        if (!o.user && video.canPlayType("application/vnd.apple.mpegurl")) {
-            video.src = o.hlsUrl; // Safari plays HLS natively
-            players.set(video, { close() { } });
-        } else {
+        // hls.js first (Media Source Extensions, also ManagedMediaSource on iPhone): it handles MediaMTX's
+        // low-latency playlists, sends the viewer credentials and reports its state. The browser's own HLS
+        // player is only the fallback for browsers without MSE (older iPhones).
+        let hlsJs = null;
+        try {
             await loadScript(HLS_JS);
-            if (!window.Hls.isSupported()) {
-                setStatus(video, "This browser does not support HLS.", "error");
-                return;
-            }
-            const hls = new window.Hls({ xhrSetup: withAuth, liveSyncDurationCount: 2 });
-            hls.on(window.Hls.Events.MANIFEST_PARSED, () => setStatus(video, "Live (HLS)", "live"));
-            hls.on(window.Hls.Events.ERROR, (_, data) => {
+            hlsJs = window.Hls?.isSupported() ? window.Hls : null;
+        } catch { /* CDN blocked: try the native player below */ }
+        if (hlsJs) {
+            const hls = new hlsJs({ xhrSetup: withAuth, liveSyncDurationCount: 2 });
+            hls.on(hlsJs.Events.MANIFEST_PARSED, () => setStatus(video, "Live (HLS)", "live"));
+            hls.on(hlsJs.Events.ERROR, (_, data) => {
                 if (data.fatal) {
                     setStatus(video, tr(video, "No picture yet (HLS):") + " " + (data.response?.code || data.details), "error");
                     setTimeout(() => { if (players.get(video) === hls) { hls.loadSource(o.hlsUrl); } }, 4000);
@@ -175,6 +175,33 @@
             hls.loadSource(o.hlsUrl);
             hls.attachMedia(video);
             players.set(video, { close() { hls.destroy(); } });
+        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+            // The native player cannot send an Authorization header; put the credentials in the URL instead.
+            let src = o.hlsUrl;
+            if (o.user) {
+                const u = new URL(o.hlsUrl, location.href);
+                u.username = o.user;
+                u.password = o.pass;
+                src = u.toString();
+            }
+            const onPlaying = () => setStatus(video, "Live (HLS)", "live");
+            const onError = () => {
+                setStatus(video, tr(video, "No picture yet (HLS):") + " " + (video.error?.message || video.error?.code || ""), "error");
+                setTimeout(() => { if (players.get(video) === native) { video.src = src; video.play().catch(() => { }); } }, 4000);
+            };
+            const native = {
+                close() {
+                    video.removeEventListener("playing", onPlaying);
+                    video.removeEventListener("error", onError);
+                },
+            };
+            video.addEventListener("playing", onPlaying);
+            video.addEventListener("error", onError);
+            video.src = src;
+            players.set(video, native);
+        } else {
+            setStatus(video, "This browser does not support HLS.", "error");
+            return;
         }
         video.play().catch(() => { });
     }
