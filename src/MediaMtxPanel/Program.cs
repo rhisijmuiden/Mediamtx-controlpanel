@@ -14,6 +14,7 @@ using MediaMtxPanel.Options;
 using MediaMtxPanel.Services;
 using MediaMtxPanel.Services.Localization;
 using MediaMtxPanel.Services.Payments;
+using MediaMtxPanel.Services.Restream;
 using MediaMtxPanel.Services.Setup;
 
 // "admin-reset" and "station-info" run a command for deploy/mediamtx-panel-station.sh instead of the web server.
@@ -103,6 +104,9 @@ builder.Services.AddHostedService(sp => sp.GetRequiredService<StreamStatsCollect
 builder.Services.AddHttpClient("alerts", c => c.Timeout = TimeSpan.FromSeconds(15));
 builder.Services.AddSingleton<AlertMonitor>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<AlertMonitor>());
+builder.Services.AddSingleton<RestreamManager>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<RestreamManager>());
+builder.Services.AddScoped<RestreamService>();
 builder.Services.AddHttpClient("github", c =>
 {
     c.BaseAddress = new Uri("https://api.github.com/");
