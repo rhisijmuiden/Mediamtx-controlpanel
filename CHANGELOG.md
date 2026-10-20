@@ -23,7 +23,6 @@ Added, Changed, Deprecated, Removed, Fixed or Security, and rename Unreleased to
 
 - The web player now switches to HLS when WebRTC cannot connect from outside the local network. MediaMTX answers the late ICE candidates of a failed connection with "not found", which the player took for a stream that is not live, so it kept retrying WebRTC without a picture. It now asks HLS whether the stream is live before it decides.
 
-
 ## [1.3.0] - 2026-10-20
 
 ### Added
