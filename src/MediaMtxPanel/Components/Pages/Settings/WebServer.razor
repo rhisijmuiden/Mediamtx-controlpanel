@@ -6,13 +6,14 @@
 @inject IHostApplicationLifetime Lifetime
 @inject NavigationManager Nav
 @inject IJSRuntime JS
+@inject IConfiguration Config
 
 <AppPageTitle Text="@L["Web server"]" />
 
 <div class="page-header">
     <div>
         <h1><i class="bi bi-ethernet text-primary"></i> @L["Web server"]</h1>
-        <p class="page-subtitle">@L["The port on which the panel's web interface can be reached."]</p>
+        <p class="page-subtitle">@L["The port on which the panel's web interface can be reached, and the reverse proxy in front of it."]</p>
     </div>
 </div>
 
@@ -114,13 +115,177 @@ else
     </div>
 }
 
+@if (!restarting)
+{
+    <div class="card mt-4">
+        <div class="card-body">
+            <section class="form-section">
+                <header>
+                    <h2><i class="bi bi-shield-lock text-primary me-1"></i> @L["Reverse proxy"]</h2>
+                    <p>@L["Turn this on when visitors reach the panel through a reverse proxy such as Nginx Proxy Manager, Caddy, nginx or Traefik. Web players then load HLS and WebRTC through the panel's own https address instead of the MediaMTX ports."]</p>
+                </header>
+                <div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="rp-on" @bind="proxyEnabled" />
+                        <label class="form-check-label" for="rp-on">@L["The panel is behind a reverse proxy"]</label>
+                    </div>
+                    <label class="form-label" for="rp-url">@L["Public address"]</label>
+                    <input id="rp-url" class="form-control font-monospace" style="max-width: 32rem" @bind="proxyUrl" placeholder="https://stream.example.com" />
+                    <div class="form-text">@L["The address viewers open, without a port. Used for the player, watch and embed links and payment returns."]</div>
+                    <label class="form-label mt-3" for="rp-trusted">@L["Trusted proxies (optional)"]</label>
+                    <input id="rp-trusted" class="form-control font-monospace" style="max-width: 32rem" @bind="proxyTrusted" placeholder="10.0.0.2, 192.168.1.0/24" />
+                    <div class="form-text">@L["IP addresses or networks of the reverse proxy. Only they may pass the visitor's address and https via X-Forwarded-For, X-Forwarded-Proto and X-Forwarded-Host. Empty: X-Forwarded-For and X-Forwarded-Proto are accepted from anyone. A change applies after a restart."]</div>
+                    @if (proxyError is not null)
+                    {
+                        <div class="validation-message mt-2">@proxyError</div>
+                    }
+                    @if (proxySaved)
+                    {
+                        <div class="alert alert-success small mt-3 mb-0"><i class="bi bi-check-circle"></i> @L["Saved. Servers set to Automatic now send viewers through the panel."]</div>
+                    }
+                    @if (needsRestart)
+                    {
+                        <div class="alert alert-warning small mt-3 mb-0 d-flex flex-wrap align-items-center gap-2">
+                            <i class="bi bi-arrow-repeat"></i> @L["Restart the panel to apply the trusted proxies."]
+                            @if (!Port.InContainer)
+                            {
+                                <button class="btn btn-sm btn-outline-secondary" @onclick="Restart">@L["Restart now"]</button>
+                            }
+                        </div>
+                    }
+                </div>
+            </section>
+            <section class="form-section">
+                <header>
+                    <h2>@L["Check"]</h2>
+                    <p>@L["How this page reached the panel. Behind a working https proxy this starts with https:// and shows the public host."]</p>
+                </header>
+                <div class="small font-monospace text-break">@Nav.BaseUri</div>
+            </section>
+            <section class="form-section">
+                <header>
+                    <h2>@L["Proxy configuration"]</h2>
+                    <p>@L["Send everything for the public address to the panel, including WebSockets. The panel forwards /media/… to MediaMTX itself."]</p>
+                </header>
+                <div>
+                    <div class="small fw-semibold mb-1">Caddy</div>
+                    <pre class="cmd">@CaddySnippet</pre>
+                    <div class="small fw-semibold mb-1">nginx</div>
+                    <pre class="cmd">@NginxSnippet</pre>
+                    <div class="small text-secondary">@L["Nginx Proxy Manager: add a proxy host for the domain to http://{0}:{1}, turn on Websockets Support and request an SSL certificate. In the Advanced tab add: proxy_buffering off;", PanelHost, Port.ActivePort]</div>
+                </div>
+            </section>
+        </div>
+        <div class="card-footer bg-transparent d-flex flex-wrap gap-2 py-3">
+            <button class="btn btn-primary" @onclick="SaveProxy"><i class="bi bi-check-lg"></i> @L["Save"]</button>
+        </div>
+    </div>
+}
+
 @code {
     private int port;
     private string? error;
     private bool restarting;
     private string newUrl = "";
 
-    protected override void OnInitialized() => port = Port.ActivePort;
+    private bool proxyEnabled;
+    private string? proxyUrl;
+    private string? proxyTrusted;
+    private string? proxyError;
+    private bool proxySaved;
+    private bool needsRestart;
+    private string? startupTrusted;
+
+    protected override void OnInitialized()
+    {
+        port = Port.ActivePort;
+        var rp = Store.Current.ReverseProxy;
+        proxyEnabled = rp?.Enabled == true;
+        proxyUrl = rp?.PublicUrl;
+        proxyTrusted = rp?.TrustedProxies;
+        startupTrusted = PublicAddress.TrustedProxies(Store.Current, Config);
+    }
+
+    private string PanelHost =>
+        System.Net.IPAddress.TryParse(new Uri(Nav.BaseUri).Host, out var ip) && !System.Net.IPAddress.IsLoopback(ip) ? ip.ToString() : "<panel-ip>";
+
+    private string PublicHostName =>
+        Uri.TryCreate(proxyUrl?.Trim(), UriKind.Absolute, out var u) ? u.Host : "stream.example.com";
+
+    private string CaddySnippet => $$"""
+        {{PublicHostName}} {
+            reverse_proxy {{PanelHost}}:{{Port.ActivePort}} {
+                flush_interval -1
+            }
+        }
+        """;
+
+    private string NginxSnippet => $$"""
+        server {
+            listen 443 ssl;
+            http2 on;
+            server_name {{PublicHostName}};
+            # ssl_certificate ...; ssl_certificate_key ...;
+
+            location / {
+                proxy_pass http://{{PanelHost}}:{{Port.ActivePort}};
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection $connection_upgrade;
+                proxy_set_header Host $host;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+                proxy_set_header X-Forwarded-Host $host;
+                proxy_buffering off;
+                proxy_read_timeout 120s;
+                client_max_body_size 50m;
+            }
+        }
+        # In the http block: map $http_upgrade $connection_upgrade { default upgrade; '' close; }
+        """;
+
+    private void SaveProxy()
+    {
+        proxyError = null;
+        proxySaved = false;
+        if (proxyEnabled || !string.IsNullOrWhiteSpace(proxyUrl))
+        {
+            if (PublicAddress.Validate(proxyUrl) is { } problem)
+            {
+                proxyError = L[problem];
+                return;
+            }
+        }
+        var trusted = string.IsNullOrWhiteSpace(proxyTrusted) ? null : proxyTrusted.Trim();
+        foreach (var entry in (trusted ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            if (!(entry.Contains('/') ? System.Net.IPNetwork.TryParse(entry, out _) : System.Net.IPAddress.TryParse(entry, out _)))
+            {
+                proxyError = L["'{0}' is not an IP address or network (CIDR).", entry];
+                return;
+            }
+        }
+        Store.Save(Store.Current with
+        {
+            ReverseProxy = new ReverseProxySettings
+            {
+                Enabled = proxyEnabled,
+                PublicUrl = string.IsNullOrWhiteSpace(proxyUrl) ? null : proxyUrl.Trim().TrimEnd('/'),
+                TrustedProxies = trusted,
+            },
+        });
+        proxySaved = true;
+        needsRestart = PublicAddress.TrustedProxies(Store.Current, Config) != startupTrusted;
+    }
+
+    private async Task Restart()
+    {
+        newUrl = Nav.Uri;
+        restarting = true;
+        StateHasChanged();
+        await JS.InvokeVoidAsync("panel.goWhenUp", newUrl);
+        _ = Task.Delay(TimeSpan.FromSeconds(1)).ContinueWith(_ => Lifetime.StopApplication());
+    }
 
     private async Task SaveAndRestart()
     {

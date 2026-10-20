@@ -143,8 +143,16 @@ namespace MediaMtxPanel.Data.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("PublicHlsUrl")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("PublicHost")
                         .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PublicWebRtcUrl")
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
@@ -158,6 +166,9 @@ namespace MediaMtxPanel.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("SrtPort")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ViewerRoute")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("WebRtcPort")

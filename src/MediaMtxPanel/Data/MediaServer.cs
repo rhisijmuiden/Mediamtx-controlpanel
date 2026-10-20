@@ -41,6 +41,17 @@ public class MediaServer
     /// <summary>Use https:// for HLS and WebRTC URLs.</summary>
     public bool HttpsUrls { get; set; }
 
+    /// <summary>How browsers and players reach HLS and WebRTC on this server; see <see cref="Data.ViewerRoute"/>.</summary>
+    public ViewerRoute ViewerRoute { get; set; }
+
+    /// <summary>Public base URL of HLS for <see cref="ViewerRoute.Custom"/>, e.g. https://stream.example.com/hls.</summary>
+    [MaxLength(256)]
+    public string? PublicHlsUrl { get; set; }
+
+    /// <summary>Public base URL of WebRTC for <see cref="ViewerRoute.Custom"/>, e.g. https://stream.example.com/webrtc.</summary>
+    [MaxLength(256)]
+    public string? PublicWebRtcUrl { get; set; }
+
     /// <summary>Remove path configurations on this server that the panel does not know about.</summary>
     public bool RemoveUnmanagedPaths { get; set; }
 
@@ -74,4 +85,17 @@ public class MediaServer
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public List<StreamDefinition> Streams { get; set; } = [];
+}
+
+/// <summary>How viewers reach HLS and WebRTC (including WHIP/WHEP) on a server. RTSP, RTMP and SRT always use the ports.</summary>
+public enum ViewerRoute
+{
+    /// <summary><see cref="Panel"/> when Settings → Web server says the panel is behind a reverse proxy, otherwise <see cref="Direct"/>.</summary>
+    Auto,
+    /// <summary>Straight to the MediaMTX ports: http(s)://host:8888 and :8889.</summary>
+    Direct,
+    /// <summary>Through the panel at /media/{server}/hls and /media/{server}/webrtc, so on the panel's own https address.</summary>
+    Panel,
+    /// <summary>Public URLs the administrator set up in a reverse proxy.</summary>
+    Custom,
 }

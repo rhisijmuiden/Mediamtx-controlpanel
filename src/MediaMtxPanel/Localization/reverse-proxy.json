@@ -1,0 +1,172 @@
+{
+  "Viewer connections (HLS and WebRTC)": {
+    "nl": "Kijkersverbindingen (HLS en WebRTC)",
+    "de": "Zuschauerverbindungen (HLS und WebRTC)",
+    "fr": "Connexions des spectateurs (HLS et WebRTC)"
+  },
+  "How web players and viewers reach HLS and WebRTC. Behind a reverse proxy with https, let them go through the panel: then no extra ports are needed in the browser.": {
+    "nl": "Hoe webspelers en kijkers HLS en WebRTC bereiken. Achter een reverse proxy met https laat je ze via het paneel lopen: dan zijn er in de browser geen extra poorten nodig.",
+    "de": "Wie Web-Player und Zuschauer HLS und WebRTC erreichen. Hinter einem Reverse Proxy mit https leiten Sie sie über das Panel: Dann braucht der Browser keine zusätzlichen Ports.",
+    "fr": "Comment les lecteurs web et les spectateurs atteignent HLS et WebRTC. Derrière un reverse proxy en https, faites-les passer par le panneau : le navigateur n'a alors besoin d'aucun port supplémentaire."
+  },
+  "Route": {
+    "nl": "Route",
+    "de": "Weg",
+    "fr": "Itinéraire"
+  },
+  "Automatic (follows Settings → Web server)": {
+    "nl": "Automatisch (volgt Instellingen → Webserver)",
+    "de": "Automatisch (folgt Einstellungen → Webserver)",
+    "fr": "Automatique (suit Paramètres → Serveur web)"
+  },
+  "Directly to the MediaMTX ports": {
+    "nl": "Rechtstreeks naar de MediaMTX-poorten",
+    "de": "Direkt zu den MediaMTX-Ports",
+    "fr": "Directement vers les ports de MediaMTX"
+  },
+  "Through the panel (reverse proxy, https)": {
+    "nl": "Via het paneel (reverse proxy, https)",
+    "de": "Über das Panel (Reverse Proxy, https)",
+    "fr": "Via le panneau (reverse proxy, https)"
+  },
+  "Custom public URLs": {
+    "nl": "Eigen publieke URL's",
+    "de": "Eigene öffentliche URLs",
+    "fr": "URL publiques personnalisées"
+  },
+  "Public HLS URL": {
+    "nl": "Publieke HLS-URL",
+    "de": "Öffentliche HLS-URL",
+    "fr": "URL HLS publique"
+  },
+  "Public WebRTC URL": {
+    "nl": "Publieke WebRTC-URL",
+    "de": "Öffentliche WebRTC-URL",
+    "fr": "URL WebRTC publique"
+  },
+  "Your reverse proxy forwards these URLs to the HLS port ({0}) and the WebRTC port ({1}) of MediaMTX. Leave a field empty to use the port directly.": {
+    "nl": "Je reverse proxy stuurt deze URL's door naar de HLS-poort ({0}) en de WebRTC-poort ({1}) van MediaMTX. Laat een veld leeg om de poort rechtstreeks te gebruiken.",
+    "de": "Ihr Reverse Proxy leitet diese URLs an den HLS-Port ({0}) und den WebRTC-Port ({1}) von MediaMTX weiter. Lassen Sie ein Feld leer, um den Port direkt zu verwenden.",
+    "fr": "Votre reverse proxy transmet ces URL au port HLS ({0}) et au port WebRTC ({1}) de MediaMTX. Laissez un champ vide pour utiliser le port directement."
+  },
+  "Viewers will use:": {
+    "nl": "Kijkers gebruiken:",
+    "de": "Zuschauer verwenden:",
+    "fr": "Les spectateurs utiliseront :"
+  },
+  "Set the public address of the panel under Settings → Web server, otherwise https://{0} is assumed.": {
+    "nl": "Stel het publieke adres van het paneel in onder Instellingen → Webserver, anders wordt https://{0} aangenomen.",
+    "de": "Legen Sie die öffentliche Adresse des Panels unter Einstellungen → Webserver fest, sonst wird https://{0} angenommen.",
+    "fr": "Indiquez l'adresse publique du panneau dans Paramètres → Serveur web, sinon https://{0} est utilisé."
+  },
+  "WebRTC video itself does not pass through the proxy: open port 8189 (UDP, and TCP when webrtcLocalTCPAddress is set) to MediaMTX and put the public address in webrtcAdditionalHosts. Players fall back to HLS when WebRTC cannot connect.": {
+    "nl": "De WebRTC-video zelf gaat niet via de proxy: open poort 8189 (UDP, en TCP als webrtcLocalTCPAddress is ingesteld) naar MediaMTX en zet het publieke adres in webrtcAdditionalHosts. Spelers vallen terug op HLS als WebRTC geen verbinding krijgt.",
+    "de": "Das WebRTC-Video selbst läuft nicht über den Proxy: Öffnen Sie Port 8189 (UDP, und TCP, wenn webrtcLocalTCPAddress gesetzt ist) zu MediaMTX und tragen Sie die öffentliche Adresse in webrtcAdditionalHosts ein. Player wechseln zu HLS, wenn WebRTC keine Verbindung bekommt.",
+    "fr": "La vidéo WebRTC elle-même ne passe pas par le proxy : ouvrez le port 8189 (UDP, et TCP si webrtcLocalTCPAddress est défini) vers MediaMTX et indiquez l'adresse publique dans webrtcAdditionalHosts. Les lecteurs basculent sur HLS si WebRTC ne parvient pas à se connecter."
+  },
+  "The port on which the panel's web interface can be reached, and the reverse proxy in front of it.": {
+    "nl": "De poort waarop de webinterface van het paneel bereikbaar is, en de reverse proxy ervoor.",
+    "de": "Der Port, unter dem die Weboberfläche des Panels erreichbar ist, und der Reverse Proxy davor.",
+    "fr": "Le port sur lequel l'interface web du panneau est accessible, et le reverse proxy placé devant."
+  },
+  "Reverse proxy": {
+    "nl": "Reverse proxy",
+    "de": "Reverse Proxy",
+    "fr": "Reverse proxy"
+  },
+  "Turn this on when visitors reach the panel through a reverse proxy such as Nginx Proxy Manager, Caddy, nginx or Traefik. Web players then load HLS and WebRTC through the panel's own https address instead of the MediaMTX ports.": {
+    "nl": "Zet dit aan als bezoekers het paneel bereiken via een reverse proxy zoals Nginx Proxy Manager, Caddy, nginx of Traefik. Webspelers laden HLS en WebRTC dan via het eigen https-adres van het paneel in plaats van via de MediaMTX-poorten.",
+    "de": "Aktivieren Sie dies, wenn Besucher das Panel über einen Reverse Proxy wie Nginx Proxy Manager, Caddy, nginx oder Traefik erreichen. Web-Player laden HLS und WebRTC dann über die eigene https-Adresse des Panels statt über die MediaMTX-Ports.",
+    "fr": "Activez ceci lorsque les visiteurs accèdent au panneau via un reverse proxy comme Nginx Proxy Manager, Caddy, nginx ou Traefik. Les lecteurs web chargent alors HLS et WebRTC via l'adresse https du panneau au lieu des ports de MediaMTX."
+  },
+  "The panel is behind a reverse proxy": {
+    "nl": "Het paneel staat achter een reverse proxy",
+    "de": "Das Panel steht hinter einem Reverse Proxy",
+    "fr": "Le panneau est derrière un reverse proxy"
+  },
+  "Public address": {
+    "nl": "Publiek adres",
+    "de": "Öffentliche Adresse",
+    "fr": "Adresse publique"
+  },
+  "The address viewers open, without a port. Used for the player, watch and embed links and payment returns.": {
+    "nl": "Het adres dat kijkers openen, zonder poort. Wordt gebruikt voor de speler, kijk- en embedlinks en het terugkeren na betalingen.",
+    "de": "Die Adresse, die Zuschauer öffnen, ohne Port. Wird für den Player, Watch- und Embed-Links und die Rückkehr nach Zahlungen verwendet.",
+    "fr": "L'adresse que les spectateurs ouvrent, sans port. Utilisée pour le lecteur, les liens de visionnage et d'intégration et le retour après paiement."
+  },
+  "Trusted proxies (optional)": {
+    "nl": "Vertrouwde proxy's (optioneel)",
+    "de": "Vertrauenswürdige Proxys (optional)",
+    "fr": "Proxys de confiance (facultatif)"
+  },
+  "IP addresses or networks of the reverse proxy. Only they may pass the visitor's address and https via X-Forwarded-For, X-Forwarded-Proto and X-Forwarded-Host. Empty: X-Forwarded-For and X-Forwarded-Proto are accepted from anyone. A change applies after a restart.": {
+    "nl": "IP-adressen of netwerken van de reverse proxy. Alleen zij mogen het adres van de bezoeker en https doorgeven via X-Forwarded-For, X-Forwarded-Proto en X-Forwarded-Host. Leeg: X-Forwarded-For en X-Forwarded-Proto worden van iedereen geaccepteerd. Een wijziging geldt na een herstart.",
+    "de": "IP-Adressen oder Netzwerke des Reverse Proxys. Nur sie dürfen die Adresse des Besuchers und https über X-Forwarded-For, X-Forwarded-Proto und X-Forwarded-Host weitergeben. Leer: X-Forwarded-For und X-Forwarded-Proto werden von allen akzeptiert. Eine Änderung gilt nach einem Neustart.",
+    "fr": "Adresses IP ou réseaux du reverse proxy. Eux seuls peuvent transmettre l'adresse du visiteur et le https via X-Forwarded-For, X-Forwarded-Proto et X-Forwarded-Host. Vide : X-Forwarded-For et X-Forwarded-Proto sont acceptés de tous. Une modification s'applique après un redémarrage."
+  },
+  "Saved. Servers set to Automatic now send viewers through the panel.": {
+    "nl": "Opgeslagen. Servers die op Automatisch staan, sturen kijkers nu via het paneel.",
+    "de": "Gespeichert. Server mit der Einstellung Automatisch leiten Zuschauer jetzt über das Panel.",
+    "fr": "Enregistré. Les serveurs réglés sur Automatique font désormais passer les spectateurs par le panneau."
+  },
+  "Restart the panel to apply the trusted proxies.": {
+    "nl": "Herstart het paneel om de vertrouwde proxy's toe te passen.",
+    "de": "Starten Sie das Panel neu, um die vertrauenswürdigen Proxys zu übernehmen.",
+    "fr": "Redémarrez le panneau pour appliquer les proxys de confiance."
+  },
+  "Check": {
+    "nl": "Controle",
+    "de": "Prüfung",
+    "fr": "Vérification"
+  },
+  "How this page reached the panel. Behind a working https proxy this starts with https:// and shows the public host.": {
+    "nl": "Hoe deze pagina het paneel bereikte. Achter een werkende https-proxy begint dit met https:// en staat hier de publieke host.",
+    "de": "Wie diese Seite das Panel erreicht hat. Hinter einem funktionierenden https-Proxy beginnt dies mit https:// und zeigt den öffentlichen Host.",
+    "fr": "Comment cette page a atteint le panneau. Derrière un proxy https fonctionnel, ceci commence par https:// et affiche l'hôte public."
+  },
+  "Proxy configuration": {
+    "nl": "Proxyconfiguratie",
+    "de": "Proxy-Konfiguration",
+    "fr": "Configuration du proxy"
+  },
+  "Send everything for the public address to the panel, including WebSockets. The panel forwards /media/… to MediaMTX itself.": {
+    "nl": "Stuur alles voor het publieke adres naar het paneel, inclusief WebSockets. Het paneel stuurt /media/… zelf door naar MediaMTX.",
+    "de": "Leiten Sie alles für die öffentliche Adresse an das Panel weiter, einschließlich WebSockets. Das Panel leitet /media/… selbst an MediaMTX weiter.",
+    "fr": "Envoyez tout le trafic de l'adresse publique au panneau, WebSockets compris. Le panneau transmet lui-même /media/… à MediaMTX."
+  },
+  "Nginx Proxy Manager: add a proxy host for the domain to http://{0}:{1}, turn on Websockets Support and request an SSL certificate. In the Advanced tab add: proxy_buffering off;": {
+    "nl": "Nginx Proxy Manager: voeg een proxy host toe voor het domein naar http://{0}:{1}, zet Websockets Support aan en vraag een SSL-certificaat aan. Voeg op het tabblad Advanced toe: proxy_buffering off;",
+    "de": "Nginx Proxy Manager: Fügen Sie einen Proxy-Host für die Domain zu http://{0}:{1} hinzu, aktivieren Sie Websockets Support und fordern Sie ein SSL-Zertifikat an. Fügen Sie im Tab Advanced hinzu: proxy_buffering off;",
+    "fr": "Nginx Proxy Manager : ajoutez un proxy host pour le domaine vers http://{0}:{1}, activez Websockets Support et demandez un certificat SSL. Dans l'onglet Advanced, ajoutez : proxy_buffering off;"
+  },
+  "'{0}' is not an IP address or network (CIDR).": {
+    "nl": "'{0}' is geen IP-adres of netwerk (CIDR).",
+    "de": "'{0}' ist keine IP-Adresse und kein Netzwerk (CIDR).",
+    "fr": "« {0} » n'est pas une adresse IP ni un réseau (CIDR)."
+  },
+  "WebRTC could not connect; switching to HLS…": {
+    "nl": "WebRTC kreeg geen verbinding; overschakelen naar HLS…",
+    "de": "WebRTC konnte keine Verbindung herstellen; wechsle zu HLS…",
+    "fr": "WebRTC n'a pas pu se connecter ; passage à HLS…"
+  },
+  "Enter the public address, for example https://stream.example.com.": {
+    "nl": "Vul het publieke adres in, bijvoorbeeld https://stream.example.com.",
+    "de": "Geben Sie die öffentliche Adresse ein, zum Beispiel https://stream.example.com.",
+    "fr": "Saisissez l'adresse publique, par exemple https://stream.example.com."
+  },
+  "Use a URL such as https://stream.example.com.": {
+    "nl": "Gebruik een URL zoals https://stream.example.com.",
+    "de": "Verwenden Sie eine URL wie https://stream.example.com.",
+    "fr": "Utilisez une URL comme https://stream.example.com."
+  },
+  "Use a URL such as https://stream.example.com/hls.": {
+    "nl": "Gebruik een URL zoals https://stream.example.com/hls.",
+    "de": "Verwenden Sie eine URL wie https://stream.example.com/hls.",
+    "fr": "Utilisez une URL comme https://stream.example.com/hls."
+  },
+  "Use a URL such as https://stream.example.com/webrtc.": {
+    "nl": "Gebruik een URL zoals https://stream.example.com/webrtc.",
+    "de": "Verwenden Sie eine URL wie https://stream.example.com/webrtc.",
+    "fr": "Utilisez une URL comme https://stream.example.com/webrtc."
+  }
+}

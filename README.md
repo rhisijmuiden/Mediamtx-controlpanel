@@ -123,7 +123,7 @@ The panel fetches recordings from the MediaMTX **playback server** (`playback: y
 
 ![Servers](docs/screenshots/servers.png)
 
-Each MediaMTX server is a card with its status, version and number of streams. *Test* checks the connection; *Settings* opens the server page with its Control API address, public address and ports, statistics URL and the ready-to-paste `mediamtx.yml` lines for the authentication hook.
+Each MediaMTX server is a card with its status, version and number of streams. *Test* checks the connection; *Settings* opens the server page with its Control API address, public address and ports, statistics URL, the viewer route for HLS and WebRTC (see [Behind a reverse proxy (HTTPS)](#behind-a-reverse-proxy-https)) and the ready-to-paste `mediamtx.yml` lines for the authentication hook.
 
 ### Users
 
@@ -139,7 +139,7 @@ Only administrators see *Settings*. The settings are stored in `panel-settings.j
 
   ![General settings](docs/screenshots/settings-general.png)
 
-- **Web server**: the port of the web interface. Saving restarts the panel on the new port and the browser follows it. The port from the installation stays open on `127.0.0.1`, so a MediaMTX on the same machine keeps reaching the authentication hook. Other MediaMTX servers, a reverse proxy or a firewall must be updated to the new port. When the panel runs in Docker the port is set by the port mapping in `docker-compose.yml` instead. If the chosen port cannot be opened at startup, the panel falls back to the installation port and says so on this page.
+- **Web server**: the reverse proxy switch and public address (see [Behind a reverse proxy (HTTPS)](#behind-a-reverse-proxy-https)), and the port of the web interface. Saving restarts the panel on the new port and the browser follows it. The port from the installation stays open on `127.0.0.1`, so a MediaMTX on the same machine keeps reaching the authentication hook. Other MediaMTX servers, a reverse proxy or a firewall must be updated to the new port. When the panel runs in Docker the port is set by the port mapping in `docker-compose.yml` instead. If the chosen port cannot be opened at startup, the panel falls back to the installation port and says so on this page.
 
   ![Web server settings](docs/screenshots/settings-web.png)
 
@@ -231,7 +231,66 @@ Then open `http://<server>:8080` and log in with `ADMIN_EMAIL` / `ADMIN_PASSWORD
 
 MediaMTX ports: 8554 (RTSP), 1935 (RTMP), 8890/udp (SRT), 8888 (HLS), 8889 + 8189/udp (WebRTC). The Control API (9997) is only reachable inside the docker network.
 
-In production, put the panel behind a reverse proxy with HTTPS (Caddy, nginx, Traefik). Forwarded headers are supported.
+In production, put the panel behind a reverse proxy with HTTPS; see [Behind a reverse proxy (HTTPS)](#behind-a-reverse-proxy-https).
+
+## Behind a reverse proxy (HTTPS)
+
+Web players on an `https://` page cannot load `http://host:8889` or `http://host:8888`, and a reverse proxy usually only forwards 443. Turn on **Settings → Web server → The panel is behind a reverse proxy** and enter the public address (for example `https://stream.example.com`). From then on the panel forwards HLS and WebRTC itself, so viewers only need that address:
+
+| | Without reverse proxy | Behind a reverse proxy |
+|---|---|---|
+| WebRTC (WHEP, `reader.js`, WHIP) | `http://host:8889/<stream>/whep` | `https://stream.example.com/media/<server>/webrtc/<stream>/whep` |
+| HLS | `http://host:8888/<stream>/index.m3u8` | `https://stream.example.com/media/<server>/hls/<stream>/index.m3u8` |
+
+This applies to the watch page, the embedded player, the customer portal and the links shown per stream. RTSP, RTMP and SRT are not HTTP and keep their ports. Per server (under **Servers → Settings → Viewer connections**) the route can also be set to *Directly to the MediaMTX ports* or to *Custom public URLs*, when your proxy already publishes MediaMTX under its own URLs (for example `https://stream.example.com/hls` → port 8888). The default, *Automatic*, follows the switch under Settings.
+
+The panel reaches HLS and WebRTC over plain HTTP on the host of the server's API URL. When MediaMTX runs on another machine, the panel must be able to reach ports 8888 and 8889 there. Set `hlsTrustedProxies` and `webrtcTrustedProxies` in `mediamtx.yml` to the panel's IP address so MediaMTX sees the viewers' own addresses (the SSH setup on the server page does this when the hook URL contains an IP address).
+
+**WebRTC media does not go through the proxy.** Only the signalling (offer/answer) does; the video itself flows over port 8189 directly to MediaMTX. Forward UDP 8189 (and TCP 8189 if you set `webrtcLocalTCPAddress: :8189` for networks that block UDP) to the MediaMTX server and put its public address or host name in `webrtcAdditionalHosts`. When WebRTC cannot connect, the web player switches to HLS by itself after about 12 seconds, so viewers still get a picture.
+
+Optionally set **Trusted proxies** to the IP address of the proxy; then only that address may pass `X-Forwarded-For`, `X-Forwarded-Proto` and `X-Forwarded-Host` (applied after a restart). The **Check** line on the same page shows how the panel sees the request: behind a working proxy it starts with `https://` and shows the public host.
+
+Forward everything (including WebSockets, which the admin pages use) to the panel on port 8080. Turn off response buffering so live HLS is not delayed.
+
+**Caddy**
+
+```caddy
+stream.example.com {
+    reverse_proxy 10.0.0.10:8080 {
+        flush_interval -1
+    }
+}
+```
+
+**nginx**
+
+```nginx
+map $http_upgrade $connection_upgrade { default upgrade; '' close; }
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name stream.example.com;
+    ssl_certificate     /etc/letsencrypt/live/stream.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/stream.example.com/privkey.pem;
+
+    location / {
+        proxy_pass http://10.0.0.10:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_buffering off;
+        proxy_read_timeout 120s;
+        client_max_body_size 50m;
+    }
+}
+```
+
+**Nginx Proxy Manager**: add a *Proxy Host* for `stream.example.com`, scheme `http`, forward to the panel's IP and port `8080`, switch on *Websockets Support* and *Block Common Exploits*, and request a certificate on the *SSL* tab (*Force SSL*, *HTTP/2 Support*). On the *Advanced* tab add `proxy_buffering off;`.
 
 ## Proxmox LXC
 
@@ -282,7 +341,7 @@ The script `deploy/proxmox/create-lxc.sh` creates a Debian 13 container on a Pro
 
 - **Public address**: stream URLs use the container's IP by default. If viewers or encoders connect through a domain name or a NAT address, change it under **Servers** in the panel, or install with `PUBLIC_HOST=…`.
 - **Firewall and port forwarding**: open the MediaMTX ports you use: 8554 (RTSP), 1935 (RTMP), 8890/udp (SRT), 8888 (HLS), 8889 and 8189/udp (WebRTC), plus the panel port (8080).
-- **HTTPS**: for use on the internet, put the panel behind a reverse proxy with HTTPS (Caddy, nginx, Traefik). Forwarded headers are supported.
+- **HTTPS**: for use on the internet, put the panel behind a reverse proxy with HTTPS and switch on **Settings → Web server → The panel is behind a reverse proxy**; see [Behind a reverse proxy (HTTPS)](#behind-a-reverse-proxy-https).
 - **Root password**: if you shared the container's root password anywhere, change it with `pct exec <CTID> -- passwd`.
 - **More servers**: other containers or VMs that run only MediaMTX can be added under **Servers** in the panel, optionally set up over SSH (see [Adding a MediaMTX server](#adding-a-mediamtx-server)).
 
@@ -538,7 +597,7 @@ All settings live in `appsettings.json` and can be overridden with environment v
 | `Panel__AdminMustChangePassword` | `true` | The first administrator's password is one-time: a new password must be chosen at first login |
 | `Panel__DataProtectionKeysPath` | empty | Folder for cookie keys (so logins survive a restart) |
 | `Panel__HttpsRedirect` | `false` | Redirect HTTP → HTTPS |
-| `Panel__PublicUrl` | empty | Public address of the panel for payment providers (return URL and Mollie webhook) |
+| `Panel__PublicUrl` | empty | Public address of the panel for payment providers (return URL and Mollie webhook) and links; the address under Settings → Web server takes precedence |
 | `Panel__EnableTestPayments` | `false` | Allow test payments without real money (for testing only) |
 | `Panel__HookBaseUrl` | empty | Address at which MediaMTX servers reach the panel (for the configuration shown) |
 | `MediaMtx__ApiUrl` | empty | If set and there are no servers yet: creates the first server with it |
@@ -555,7 +614,7 @@ All settings live in `appsettings.json` and can be overridden with environment v
 | `Panel__UpdateBranch` | `main` | Branch compared while the release channel has no release |
 | `Panel__PathBase` | empty | Serve the panel under this path, e.g. `/channel1` (see [Build My TV Station](#running-as-part-of-build-my-tv-station)) |
 | `Panel__ServiceToken` | empty | Bearer token with administrator rights on `/api/v1/` (at least 32 characters) |
-| `Panel__TrustedProxies` | empty | IPs or CIDRs whose `X-Forwarded-*` headers are believed (empty = any address, as before) |
+| `Panel__TrustedProxies` | empty | IPs or CIDRs whose `X-Forwarded-*` headers are believed (empty = any address, as before); the list under Settings → Web server takes precedence |
 
 The application name, default language, web port and mail server are set in the panel under **Settings**, not here. A port chosen there overrides the port in `ASPNETCORE_URLS`.
 
@@ -568,6 +627,8 @@ The application name, default language, web port and mail server are set in the 
 | SRT | `srt://host:8890?streamid=publish:path:user:pass&pkt_size=1316` | `srt://host:8890?streamid=read:path:user:pass` |
 | WebRTC | WHIP: `http://host:8889/path/whip` (Basic auth) | WHEP: `http://host:8889/path/whep`, browser: `http://host:8889/path` |
 | HLS | – | `http://host:8888/path/index.m3u8` |
+
+Behind a reverse proxy, WebRTC and HLS use `https://<public address>/media/<server>/webrtc/...` and `/media/<server>/hls/...` instead; see [Behind a reverse proxy (HTTPS)](#behind-a-reverse-proxy-https).
 
 OBS: *Settings → Stream → Custom*, server `rtmp://host:1935`, stream key `path?user=..&pass=..` (the panel shows both ready to copy).
 

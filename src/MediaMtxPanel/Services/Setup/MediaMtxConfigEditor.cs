@@ -72,8 +72,25 @@ public static partial class MediaMtxConfigEditor
         var hosts = Get(yaml, "webrtcAdditionalHosts");
         if (!string.IsNullOrWhiteSpace(publicHost) && (hosts is null || hosts == "[]"))
             yaml = Set(yaml, "webrtcAdditionalHosts", $"[{Quote(publicHost.Trim())}]");
+
+        // Viewers that come through the panel (viewer route "through the panel") arrive from the panel's
+        // address; trusting it lets MediaMTX take the viewer's own address from X-Forwarded-For.
+        if (PanelAddress(hookUrl) is { } panel)
+        {
+            foreach (var key in new[] { "hlsTrustedProxies", "webrtcTrustedProxies" })
+            {
+                var current = Get(yaml, key);
+                if (current is null || current == "[]")
+                    yaml = Set(yaml, key, $"[{Quote(panel)}]");
+            }
+        }
         return yaml;
     }
+
+    /// <summary>The panel's IP address taken from the hook URL, or null when the URL uses a host name.</summary>
+    public static string? PanelAddress(string hookUrl) =>
+        Uri.TryCreate(hookUrl, UriKind.Absolute, out var u) && System.Net.IPAddress.TryParse(u.Host.Trim('[', ']'), out var ip)
+            ? ip.ToString() : null;
 
     /// <summary>The snippet shown for manual setup; the same settings <see cref="ConfigureForPanel"/> writes.</summary>
     public static string ManualSnippet(string hookUrl, int apiPort, string? publicHost,
@@ -89,6 +106,9 @@ public static partial class MediaMtxConfigEditor
         playbackAddress: :{playbackPort}
 
         webrtcAdditionalHosts: [{Quote(string.IsNullOrWhiteSpace(publicHost) ? "<public address>" : publicHost.Trim())}]
+
+        hlsTrustedProxies: [{Quote(PanelAddress(hookUrl) ?? "<panel IP>")}]
+        webrtcTrustedProxies: [{Quote(PanelAddress(hookUrl) ?? "<panel IP>")}]
         """;
 
     private static bool IsKeyLine(string line, string key) =>

@@ -49,14 +49,35 @@
         video.load();
     }
 
+    // WebRTC media needs UDP/TCP 8189 to MediaMTX, which a reverse proxy does not carry. When signalling works
+    // but no picture arrives, or reader.js cannot be loaded at all, switch to HLS, which runs over https only.
+    const WEBRTC_FALLBACK_MS = 12000;
+
+    function fallBackToHls(video, o) {
+        stop(video);
+        setStatus(video, "WebRTC could not connect; switching to HLS…", "wait");
+        startHls(video, o).catch((e) => setStatus(video, tr(video, "Player could not start:") + " " + e.message, "error"));
+    }
+
     async function startWebRtc(video, o) {
-        await loadScript(o.readerJsUrl);
+        try {
+            await loadScript(o.readerJsUrl);
+        } catch (e) {
+            if (o.hlsUrl) {
+                fallBackToHls(video, o);
+                return;
+            }
+            throw e;
+        }
         setStatus(video, "Connecting via WebRTC…", "wait");
+        let gotTrack = false;
+        let lastError = null;
         const reader = new window.MediaMTXWebRTCReader({
             url: o.whepUrl,
             user: o.user || "",
             pass: o.pass || "",
             onError: (err) => {
+                lastError = String(err);
                 if (String(err).includes("codecs not supported")) {
                     // This browser cannot decode the stream's codecs over WebRTC; HLS usually can.
                     stop(video);
@@ -68,6 +89,7 @@
                     : tr(video, "No picture yet:") + " " + err, "error");
             },
             onTrack: (evt) => {
+                gotTrack = true;
                 if (video.srcObject !== evt.streams[0]) {
                     video.srcObject = evt.streams[0];
                     video.play().catch(() => { /* the user can press play */ });
@@ -76,6 +98,12 @@
             },
         });
         players.set(video, reader);
+        setTimeout(() => {
+            // A stream that is simply not live yet is not a connection problem; keep waiting on WebRTC then.
+            if (players.get(video) === reader && !gotTrack && !(lastError || "").includes("not found")) {
+                fallBackToHls(video, o);
+            }
+        }, WEBRTC_FALLBACK_MS);
     }
 
     async function startHls(video, o) {

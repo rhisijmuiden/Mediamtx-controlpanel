@@ -26,7 +26,7 @@ public static class EmbedEndpoints
         "This stream is private.", "This stream is not available.", "Stream not found", "Preview",
         "Connecting via WebRTC…", "Player could not start:", "No picture yet: the stream is not live yet", "No picture yet:",
         "Live (WebRTC)", "Connecting via HLS…", "This browser does not support HLS.", "Live (HLS)", "No picture yet (HLS):",
-        "Something went wrong. Please try again.", "Loading player…",
+        "Something went wrong. Please try again.", "Loading player…", "WebRTC could not connect; switching to HLS…",
     ];
 
     public static IEndpointRouteBuilder MapEmbedEndpoints(this IEndpointRouteBuilder app)
