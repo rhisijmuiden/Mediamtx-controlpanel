@@ -168,5 +168,10 @@
     "nl": "Gebruik een URL zoals https://stream.example.com/webrtc.",
     "de": "Verwenden Sie eine URL wie https://stream.example.com/webrtc.",
     "fr": "Utilisez une URL comme https://stream.example.com/webrtc."
+  },
+  "Zoraxy: under HTTP Proxy create a proxy rule for the domain with target {0}:{1} (without TLS to the target) and request a certificate with ACME. WebSockets work automatically. For WebRTC add a Stream Proxy rule for UDP port 8189 to MediaMTX.": {
+    "nl": "Zoraxy: maak onder HTTP Proxy een proxyregel voor het domein met als doel {0}:{1} (zonder TLS naar het doel) en vraag een certificaat aan met ACME. WebSockets werken automatisch. Voeg voor WebRTC een Stream Proxy-regel toe voor UDP-poort 8189 naar MediaMTX.",
+    "de": "Zoraxy: Legen Sie unter HTTP Proxy eine Proxy-Regel für die Domain mit dem Ziel {0}:{1} an (ohne TLS zum Ziel) und fordern Sie mit ACME ein Zertifikat an. WebSockets funktionieren automatisch. Fügen Sie für WebRTC eine Stream-Proxy-Regel für UDP-Port 8189 zu MediaMTX hinzu.",
+    "fr": "Zoraxy : sous HTTP Proxy, créez une règle de proxy pour le domaine avec la cible {0}:{1} (sans TLS vers la cible) et demandez un certificat avec ACME. Les WebSockets fonctionnent automatiquement. Pour WebRTC, ajoutez une règle Stream Proxy pour le port UDP 8189 vers MediaMTX."
   }
 }
