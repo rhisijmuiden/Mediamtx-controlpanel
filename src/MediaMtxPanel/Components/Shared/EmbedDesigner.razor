@@ -1,0 +1,510 @@
+@* Designer for the embeddable player of one stream: settings on the left, live preview and the code to paste on the right. *@
+@using System.Text.Json
+@using Microsoft.Extensions.Options
+@using MediaMtxPanel.Options
+@inject StreamService Streams
+@inject EmbedService Embeds
+@inject IJSRuntime JS
+@inject NavigationManager Nav
+@inject IOptions<PanelOptions> PanelOptions
+
+<AppPageTitle Text="@L["Embed player"]" />
+
+<a class="back-link" href="@BackUrl"><i class="bi bi-arrow-left"></i> @L["Back to the stream"]</a>
+
+@if (notFound)
+{
+    <div class="empty-state">
+        <i class="bi bi-question-circle"></i>
+        <h1 class="h4">@L["Stream not found"]</h1>
+        <p>@L["It may have been deleted, or you don't have access to it."]</p>
+    </div>
+}
+else if (stream is null || look is null)
+{
+    <p class="text-secondary"><span class="spinner-border spinner-border-sm me-2"></span>@L["Loading…"]</p>
+}
+else
+{
+    <div class="page-header">
+        <div>
+            <h1><i class="bi bi-code-square text-primary"></i> @L["Embed player"]</h1>
+            <p class="page-subtitle">@L["Design the player for {0} and paste it on any website.", stream.DisplayName]</p>
+        </div>
+        <div class="page-actions">
+            @if (Dirty)
+            {
+                <span class="badge bg-warning-subtle text-warning-emphasis align-self-center"><i class="bi bi-circle-fill me-1" style="font-size:.5rem"></i>@L["Unsaved changes"]</span>
+            }
+            <button class="btn btn-outline-secondary" @onclick="ResetDefaults" title="@L["Back to the standard look"]"><i class="bi bi-arrow-counterclockwise"></i> @L["Defaults"]</button>
+            <button class="btn btn-primary" @onclick="SaveAsync" disabled="@(!Dirty || saving)">
+                @if (saving)
+                {
+                    <span class="spinner-border spinner-border-sm"></span>
+                }
+                else
+                {
+                    <i class="bi bi-check-lg"></i>
+                }
+                @L["Save"]
+            </button>
+        </div>
+    </div>
+
+    @if (message is not null)
+    {
+        <div class="alert alert-@(messageIsError ? "danger" : "success") alert-dismissible d-flex align-items-center gap-2">
+            <i class="bi @(messageIsError ? "bi-exclamation-octagon" : "bi-check-circle")"></i> @message
+            <button type="button" class="btn-close" aria-label="@L["Close"]" @onclick="() => message = null"></button>
+        </div>
+    }
+
+    @if (stream.PaywallEnabled)
+    {
+        <div class="alert alert-light border d-flex gap-2 small">
+            <i class="bi bi-ticket-perforated text-primary"></i>
+            <span>@L["The paywall is on. Visitors without a ticket see a ticket screen in the player: they can buy a ticket, sign in to their tickets or type a ticket code. Payment opens in a separate window."]</span>
+        </div>
+    }
+    else if (!stream.PublicRead)
+    {
+        <div class="alert alert-warning d-flex gap-2 small">
+            <i class="bi bi-lock"></i>
+            <span>@L["This stream is private: on other websites the player only shows a message. Make the stream public or turn on the paywall so visitors can watch."]</span>
+        </div>
+    }
+
+    <div class="row g-4">
+        <div class="col-xl-5">
+            <div class="card mb-4">
+                <div class="card-header"><i class="bi bi-palette"></i> @L["Appearance"]</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label small" for="accent">@L["Accent colour"]</label>
+                            <div class="d-flex gap-2 align-items-center">
+                                <input id="accent" type="color" class="form-control form-control-color" @bind="look.Accent" @bind:event="oninput" @bind:after="PushAsync" />
+                                <code class="small">@look.Accent</code>
+                            </div>
+                            <div class="d-flex gap-1 mt-2">
+                                @foreach (var c in Swatches)
+                                {
+                                    <button type="button" class="swatch @(look.Accent == c ? "active" : "")" style="background:@c" title="@c" @onclick="() => SetAccent(c)"></button>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small" for="bg">@L["Background"]</label>
+                            <div class="d-flex gap-2 align-items-center">
+                                <input id="bg" type="color" class="form-control form-control-color" @bind="look.Background" @bind:event="oninput" @bind:after="PushAsync" />
+                                <code class="small">@look.Background</code>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small d-flex justify-content-between" for="radius">@L["Rounded corners"] <span class="text-secondary">@look.Radius px</span></label>
+                            <input id="radius" type="range" class="form-range" min="0" max="32" @bind="look.Radius" @bind:event="oninput" @bind:after="PushAsync" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small">@L["Shape"]</label>
+                            <div class="btn-group btn-group-sm d-flex flex-wrap" role="group">
+                                @foreach (var a in EmbedLook.AspectRatios)
+                                {
+                                    <button type="button" class="btn @(look.Aspect == a ? "btn-primary" : "btn-outline-secondary")" @onclick="() => SetAspect(a)">
+                                        @a@(a == "9:16" ? " · " + L["vertical"] : "")
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small">@L["Size"]</label>
+                            <div class="d-flex flex-wrap gap-3 align-items-center">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="size" id="size-resp" checked="@look.Responsive" @onchange="() => look.Responsive = true" />
+                                    <label class="form-check-label small" for="size-resp">@L["Responsive (fills the width of the page)"]</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="size" id="size-fixed" checked="@(!look.Responsive)" @onchange="() => look.Responsive = false" />
+                                    <label class="form-check-label small" for="size-fixed">@L["Fixed width"]</label>
+                                </div>
+                                @if (!look.Responsive)
+                                {
+                                    <div class="input-group input-group-sm" style="width: 10rem">
+                                        <input type="number" class="form-control" min="240" max="1920" @bind="look.Width" />
+                                        <span class="input-group-text">× @look.Height px</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header"><i class="bi bi-play-btn"></i> @L["Playback"]</div>
+                <div class="card-body">
+                    <Switch Id="autoplay" Label="@L["Start automatically"]" Help="@L["Browsers only allow this without sound; viewers get a button to turn the sound on."]" @bind-Value="look.Autoplay" @bind-Value:after="ReloadPreviewAsync" />
+                    <Switch Id="muted" Label="@L["Start without sound"]" @bind-Value="look.Muted" @bind-Value:after="ReloadPreviewAsync" />
+                    <Switch Id="controls" Label="@L["Show controls"]" Help="@L["Play, volume, full screen. Without controls viewers can only unmute."]" @bind-Value="look.Controls" @bind-Value:after="PushAsync" />
+                    <label class="form-label small mt-2" for="protocol">@L["Technology"]</label>
+                    <select id="protocol" class="form-select form-select-sm" @bind="look.Protocol" @bind:after="ReloadPreviewAsync">
+                        <option value="webrtc">@L["WebRTC: lowest delay (under a second)"]</option>
+                        <option value="hls">@L["HLS: works everywhere, a few seconds of delay"]</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header"><i class="bi bi-layers"></i> @L["On the video"]</div>
+                <div class="card-body">
+                    <Switch Id="title" Label="@L["Show the stream title"]" @bind-Value="look.ShowTitle" @bind-Value:after="PushAsync" />
+                    <Switch Id="live" Label="@L["Show the LIVE badge"]" @bind-Value="look.ShowLive" @bind-Value:after="PushAsync" />
+                    <Switch Id="pip" Label="@L["Picture-in-picture button"]" @bind-Value="look.ShowPip" @bind-Value:after="PushAsync" />
+                    <Switch Id="fs" Label="@L["Full screen button"]" @bind-Value="look.ShowFullscreen" @bind-Value:after="PushAsync" />
+                    <label class="form-label small mt-2" for="offline">@L["Text while the stream is not live"]</label>
+                    <input id="offline" class="form-control form-control-sm" maxlength="200" placeholder="@L["The broadcast will start soon."]" @bind="look.OfflineText" @bind:event="oninput" @bind:after="PushAsync" />
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header"><i class="bi bi-badge-tm"></i> @L["Branding"]</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label class="form-label small">@L["Logo"]</label>
+                            <div class="image-drop">
+                                @if (embed!.LogoData is not null)
+                                {
+                                    <img src="@ImageUrl("logo")" alt="" />
+                                }
+                                else
+                                {
+                                    <i class="bi bi-image text-secondary fs-3"></i>
+                                }
+                            </div>
+                            <div class="d-flex gap-1 mt-2">
+                                <label class="btn btn-sm btn-outline-primary mb-0">
+                                    <i class="bi bi-upload"></i> @(embed.LogoData is null ? L["Upload"] : L["Replace"])
+                                    <InputFile class="d-none" accept="image/png,image/jpeg,image/webp,image/gif" OnChange="e => UploadAsync(e, EmbedImage.Logo)" />
+                                </label>
+                                @if (embed.LogoData is not null)
+                                {
+                                    <button class="btn btn-sm btn-outline-danger btn-icon" title="@L["Remove"]" @onclick="() => RemoveAsync(EmbedImage.Logo)"><i class="bi bi-trash"></i></button>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label small">@L["Poster image"]</label>
+                            <div class="image-drop">
+                                @if (embed.PosterData is not null)
+                                {
+                                    <img src="@ImageUrl("poster")" alt="" style="object-fit: cover" />
+                                }
+                                else
+                                {
+                                    <i class="bi bi-card-image text-secondary fs-3"></i>
+                                }
+                            </div>
+                            <div class="d-flex gap-1 mt-2">
+                                <label class="btn btn-sm btn-outline-primary mb-0">
+                                    <i class="bi bi-upload"></i> @(embed.PosterData is null ? L["Upload"] : L["Replace"])
+                                    <InputFile class="d-none" accept="image/png,image/jpeg,image/webp,image/gif" OnChange="e => UploadAsync(e, EmbedImage.Poster)" />
+                                </label>
+                                @if (embed.PosterData is not null)
+                                {
+                                    <button class="btn btn-sm btn-outline-danger btn-icon" title="@L["Remove"]" @onclick="() => RemoveAsync(EmbedImage.Poster)"><i class="bi bi-trash"></i></button>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-12 form-text mt-1">@L["PNG, JPG, WebP or GIF, at most 1 MB. A logo with a transparent background looks best. The poster is shown before the video starts and while the stream is not live."]</div>
+                        @if (embed.LogoData is not null)
+                        {
+                            <div class="col-12">
+                                <label class="form-label small">@L["Logo position"]</label>
+                                <div class="logo-positions">
+                                    @foreach (var p in EmbedLook.LogoPositions)
+                                    {
+                                        <button type="button" class="@p @(look.LogoPosition == p ? "active" : "")" title="@PositionLabel(p)" aria-label="@PositionLabel(p)" @onclick="() => SetLogoPosition(p)"></button>
+                                    }
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small d-flex justify-content-between" for="logo-size">@L["Logo size"] <span class="text-secondary">@look.LogoSize%</span></label>
+                                <input id="logo-size" type="range" class="form-range" min="5" max="40" @bind="look.LogoSize" @bind:event="oninput" @bind:after="PushAsync" />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small d-flex justify-content-between" for="logo-opacity">@L["Opacity"] <span class="text-secondary">@look.LogoOpacity%</span></label>
+                                <input id="logo-opacity" type="range" class="form-range" min="10" max="100" @bind="look.LogoOpacity" @bind:event="oninput" @bind:after="PushAsync" />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small" for="logo-link">@L["Link when the logo is clicked (optional)"]</label>
+                                <input id="logo-link" type="url" class="form-control form-control-sm" placeholder="https://www.example.com" @bind="look.LogoLink" @bind:after="PushAsync" />
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><i class="bi bi-shield-check"></i> @L["Where the player may appear"]</div>
+                <div class="card-body">
+                    <label class="form-label small" for="sites">@L["Allowed websites (one per line)"]</label>
+                    <textarea id="sites" class="form-control form-control-sm font-monospace" rows="3" placeholder="@("www.example.com\n*.example.org")" @bind="allowedSites" @bind:event="oninput"></textarea>
+                    <div class="form-text">@L["Leave empty to allow every website. With a list, other websites cannot show the player (the watch page keeps working)."]</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-7">
+            <div class="designer-sticky">
+                <div class="card mb-4">
+                    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <span><i class="bi bi-eye"></i> @L["Live preview"]</span>
+                        <div class="d-flex flex-wrap gap-2">
+                            @if (stream.PaywallEnabled)
+                            {
+                                <div class="btn-group btn-group-sm" role="group" aria-label="@L["Preview as"]">
+                                    <button type="button" class="btn @(!previewGate ? "btn-primary" : "btn-outline-secondary")" @onclick="() => SetGate(false)"><i class="bi bi-ticket-perforated"></i> @L["With ticket"]</button>
+                                    <button type="button" class="btn @(previewGate ? "btn-primary" : "btn-outline-secondary")" @onclick="() => SetGate(true)"><i class="bi bi-person"></i> @L["Without ticket"]</button>
+                                </div>
+                            }
+                            <div class="btn-group btn-group-sm" role="group" aria-label="@L["Screen"]">
+                                <button type="button" class="btn @(!mobile ? "btn-primary" : "btn-outline-secondary")" @onclick="() => mobile = false" title="@L["Computer"]"><i class="bi bi-display"></i></button>
+                                <button type="button" class="btn @(mobile ? "btn-primary" : "btn-outline-secondary")" @onclick="() => mobile = true" title="@L["Phone"]"><i class="bi bi-phone"></i></button>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-secondary btn-icon" title="@L["Reload preview"]" @onclick="ReloadPreviewAsync"><i class="bi bi-arrow-clockwise"></i></button>
+                        </div>
+                    </div>
+                    <div class="card-body preview-stage">
+                        <div class="preview-frame" style="@PreviewStyle">
+                            <iframe @ref="frame" src="@previewSrc" title="@L["Live preview"]" allow="autoplay; fullscreen; picture-in-picture"></iframe>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <span><i class="bi bi-code-slash"></i> @L["Code for your website"]</span>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn @(codeTab == "iframe" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => codeTab = "iframe"'>iframe</button>
+                            <button type="button" class="btn @(codeTab == "script" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => codeTab = "script"'>Script</button>
+                            <button type="button" class="btn @(codeTab == "link" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => codeTab = "link"'>@L["Link"]</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="small text-secondary">
+                            @(codeTab switch
+                            {
+                                "iframe" => L["Works everywhere: WordPress (Custom HTML block), Wix, Squarespace, Webflow, Joomla or your own HTML."],
+                                "script" => L["Two lines that build the player themselves. Handy for site builders that do not accept iframes."],
+                                _ => L["A direct link to the player, for example for an app, a QR code or a smart TV."],
+                            })
+                        </p>
+                        <pre class="embed-code"><code>@Snippet</code></pre>
+                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                            <button class="btn @(copied ? "btn-success" : "btn-primary")" @onclick="CopyAsync">
+                                <i class="bi @(copied ? "bi-check-lg" : "bi-clipboard")"></i> @(copied ? L["Copied"] : L["Copy code"])
+                            </button>
+                            <a class="btn btn-outline-secondary" href="@EmbedUrl" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right"></i> @L["Open player"]</a>
+                        </div>
+                        <div class="d-flex gap-2 small text-secondary mt-3">
+                            <i class="bi bi-info-circle"></i>
+                            <span>@L["Colours, logo and buttons change on every website as soon as you save; you only paste the code again when you change the shape or size."]</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired] public int StreamId { get; set; }
+    [Parameter, EditorRequired] public string BackUrl { get; set; } = "";
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
+
+    private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
+    private static readonly string[] Swatches = ["#6366f1", "#0ea5e9", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#ffffff"];
+
+    private StreamDefinition? stream;
+    private StreamEmbed? embed;
+    private EmbedLook? look;
+    private string? allowedSites;
+    private string savedState = "";
+    private bool notFound;
+    private bool saving;
+    private string? message;
+    private bool messageIsError;
+    private bool mobile;
+    private bool previewGate;
+    private bool copied;
+    private string codeTab = "iframe";
+    private string previewSrc = "about:blank";
+    private ElementReference frame;
+
+    private bool Dirty => State != savedState;
+    private string State => JsonSerializer.Serialize(look, Json) + "\n" + string.Join('\n', StreamEmbed.ParseSites(allowedSites));
+
+    private string BaseUrl => (string.IsNullOrWhiteSpace(PanelOptions.Value.PublicUrl) ? Nav.BaseUri : PanelOptions.Value.PublicUrl).TrimEnd('/');
+    private string EmbedUrl => $"{BaseUrl}/embed/{stream!.WatchSlug}";
+    private string ImageUrl(string kind) => $"embed/{stream!.WatchSlug}/{kind}?v={embed!.UpdatedAt.Ticks}";
+
+    private string PreviewStyle
+    {
+        get
+        {
+            var width = mobile ? "min(100%, 360px)" : look!.Responsive ? "100%" : $"min(100%, {look.Width}px)";
+            return $"width:{width};aspect-ratio:{look!.CssAspect};max-height:{(look.Aspect == "9:16" ? "640px" : "none")};border-radius:{look.Radius}px";
+        }
+    }
+
+    private string Snippet
+    {
+        get
+        {
+            var l = look!;
+            var title = System.Net.WebUtility.HtmlEncode(stream!.DisplayName);
+            return codeTab switch
+            {
+                "iframe" when l.Responsive =>
+                    $"<iframe src=\"{EmbedUrl}\" title=\"{title}\"\n  style=\"display:block;width:100%;aspect-ratio:{l.CssAspect};border:0;border-radius:{l.Radius}px\"\n  allow=\"autoplay; fullscreen; picture-in-picture; encrypted-media\" allowfullscreen></iframe>",
+                "iframe" =>
+                    $"<iframe src=\"{EmbedUrl}\" title=\"{title}\" width=\"{l.Width}\" height=\"{l.Height}\"\n  style=\"border:0;border-radius:{l.Radius}px;max-width:100%\"\n  allow=\"autoplay; fullscreen; picture-in-picture; encrypted-media\" allowfullscreen></iframe>",
+                "script" =>
+                    $"<div data-mediamtx-embed=\"{EmbedUrl}\" data-title=\"{title}\" data-aspect=\"{l.Aspect}\" data-radius=\"{l.Radius}\"{(l.Responsive ? "" : $" data-width=\"{l.Width}\"")}></div>\n<script src=\"{BaseUrl}/js/embed-loader.js\" async></script>",
+                _ => EmbedUrl,
+            };
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        stream = await Streams.GetAsync((await AuthState).User, StreamId);
+        if (stream is null)
+        {
+            notFound = true;
+            return;
+        }
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        embed = await Embeds.GetAsync(stream!.Id);
+        look = embed.Look;
+        allowedSites = embed.AllowedSites;
+        savedState = State;
+        BuildPreviewSrc();
+    }
+
+    private void BuildPreviewSrc()
+    {
+        var encoded = Microsoft.AspNetCore.WebUtilities.Base64UrlTextEncoder.Encode(JsonSerializer.SerializeToUtf8Bytes(look, Json));
+        previewSrc = $"embed/{stream!.WatchSlug}?preview={(previewGate ? "gate" : "1")}&lang={TextLocalizer.Current}&look={encoded}&v={embed!.UpdatedAt.Ticks}-{Environment.TickCount64}";
+    }
+
+    private async Task PushAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("panel.pushEmbedLook", frame, look!.Normalized());
+        }
+        catch (JSException) { }
+    }
+
+    private Task ReloadPreviewAsync()
+    {
+        BuildPreviewSrc();
+        return Task.CompletedTask;
+    }
+
+    private Task SetAccent(string c)
+    {
+        look!.Accent = c;
+        return PushAsync();
+    }
+
+    private void SetAspect(string a) => look!.Aspect = a;
+
+    private Task SetLogoPosition(string p)
+    {
+        look!.LogoPosition = p;
+        return PushAsync();
+    }
+
+    private void SetGate(bool gate)
+    {
+        previewGate = gate;
+        BuildPreviewSrc();
+    }
+
+    private void ResetDefaults()
+    {
+        look = new EmbedLook();
+        BuildPreviewSrc();
+    }
+
+    private async Task SaveAsync()
+    {
+        saving = true;
+        var ok = await Embeds.SaveAsync((await AuthState).User, stream!.Id, look!, allowedSites);
+        saving = false;
+        if (ok)
+            await LoadAsync();
+        Show(ok ? L["Saved. Embedded players show the new look the next time they load."] : L["Saving failed."], !ok);
+    }
+
+    private async Task UploadAsync(InputFileChangeEventArgs e, EmbedImage kind)
+    {
+        var file = e.File;
+        if (file.Size > EmbedService.MaxImageBytes || !EmbedService.ImageTypes.ContainsKey(file.ContentType))
+        {
+            Show(L["Choose a PNG, JPG, WebP or GIF image of at most 1 MB."], true);
+            return;
+        }
+        using var ms = new MemoryStream();
+        await file.OpenReadStream(EmbedService.MaxImageBytes).CopyToAsync(ms);
+        var ok = await Embeds.SetImageAsync((await AuthState).User, stream!.Id, kind, ms.ToArray(), file.ContentType);
+        await ReloadImagesAsync(ok);
+    }
+
+    private async Task RemoveAsync(EmbedImage kind)
+    {
+        var ok = await Embeds.SetImageAsync((await AuthState).User, stream!.Id, kind, null, null);
+        await ReloadImagesAsync(ok);
+    }
+
+    // Images are saved right away; keep the other, possibly unsaved, settings as they are.
+    private async Task ReloadImagesAsync(bool ok)
+    {
+        var fresh = await Embeds.GetAsync(stream!.Id);
+        embed = fresh;
+        var stored = fresh.Look;
+        savedState = JsonSerializer.Serialize(stored, Json) + "\n" + string.Join('\n', StreamEmbed.ParseSites(fresh.AllowedSites));
+        BuildPreviewSrc();
+        if (!ok)
+            Show(L["Saving failed."], true);
+    }
+
+    private async Task CopyAsync()
+    {
+        await JS.InvokeVoidAsync("panel.copy", Snippet);
+        copied = true;
+        StateHasChanged();
+        await Task.Delay(1500);
+        copied = false;
+    }
+
+    private void Show(string text, bool isError)
+    {
+        message = text;
+        messageIsError = isError;
+    }
+
+    private string PositionLabel(string p) => p switch
+    {
+        "top-left" => L["Top left"],
+        "top-right" => L["Top right"],
+        "bottom-left" => L["Bottom left"],
+        _ => L["Bottom right"],
+    };
+}

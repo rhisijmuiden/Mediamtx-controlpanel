@@ -1,0 +1,25 @@
+@* Form to type a ticket code (K7QM-4XPA-9TRC). Posts to tickets/redeem (any stream) or watch/{slug}/redeem. *@
+
+<div class="card">
+    <div class="card-body p-4">
+        <h2 class="h6 mb-1"><i class="bi bi-upc-scan text-primary me-1"></i> @L["Have a ticket code?"]</h2>
+        <p class="small text-secondary">@L["Type the code from your ticket or from the organiser to start watching."]</p>
+        @if (Error is "invalid" or "expired")
+        {
+            <div class="alert alert-danger small py-2 d-flex gap-2">
+                <i class="bi bi-exclamation-octagon"></i> @(Error == "expired" ? L["This code has expired."] : L["This code is not valid for this stream."])
+            </div>
+        }
+        <form method="post" action="@Action" data-enhance="false" class="d-flex gap-2">
+            <AntiforgeryToken />
+            <input name="code" class="form-control ticket-code text-uppercase" required maxlength="20" autocomplete="off" spellcheck="false"
+                   placeholder="XXXX-XXXX-XXXX" aria-label="@L["Ticket code"]" />
+            <button type="submit" class="btn btn-primary text-nowrap"><i class="bi bi-play-fill"></i> @L["Watch"]</button>
+        </form>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Action { get; set; } = "tickets/redeem";
+    [Parameter] public string? Error { get; set; }
+}

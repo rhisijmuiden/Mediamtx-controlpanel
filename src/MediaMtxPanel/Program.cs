@@ -51,6 +51,17 @@ builder.Services.AddAuthentication(options =>
         options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
     })
     .AddIdentityCookies();
+// Viewers who bought tickets sign in with a mailed code; their cookie is separate from panel accounts.
+builder.Services.AddAuthentication()
+    .AddCookie(ViewerAccounts.Scheme, o =>
+    {
+        o.Cookie.Name = ViewerAccounts.CookieName;
+        o.Cookie.HttpOnly = true;
+        o.Cookie.SameSite = SameSiteMode.Lax;
+        o.ExpireTimeSpan = TimeSpan.FromDays(30);
+        o.SlidingExpiration = true;
+        o.LoginPath = "/tickets";
+    });
 // Station contract: "Authorization: Bearer <Panel:ServiceToken>" on /api/v1 only; does nothing without a token.
 builder.Services.AddAuthentication()
     .AddScheme<AuthenticationSchemeOptions, ServiceTokenAuthenticationHandler>(ServiceTokenAuthenticationHandler.SchemeName, null);
@@ -104,6 +115,8 @@ builder.Services.AddSingleton<IPaymentGateway, PayPalGateway>();
 if (builder.Configuration.GetValue("Panel:EnableTestPayments", false))
     builder.Services.AddSingleton<IPaymentGateway, TestGateway>();
 builder.Services.AddScoped<PaywallService>();
+builder.Services.AddScoped<ViewerAccounts>();
+builder.Services.AddScoped<EmbedService>();
 builder.Services.AddScoped<UserAdminService>();
 builder.Services.AddSingleton<StreamEndpointBuilder>();
 builder.Services.AddSingleton<MediaMtxStatus>();
@@ -236,6 +249,8 @@ app.MapAdditionalIdentityEndpoints();
 app.MapMediaMtxAuth();
 app.MapStationEndpoints();
 app.MapPaymentEndpoints();
+app.MapEmbedEndpoints();
+app.MapViewerEndpoints();
 app.MapStatisticsEndpoints();
 app.MapRecordingEndpoints();
 app.MapLanguageEndpoint();

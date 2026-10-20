@@ -377,6 +377,41 @@ namespace MediaMtxPanel.Data.Migrations
                     b.ToTable("Streams");
                 });
 
+            modelBuilder.Entity("MediaMtxPanel.Data.StreamEmbed", b =>
+                {
+                    b.Property<int>("StreamId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("AllowedSites")
+                        .HasMaxLength(2048)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LogoContentType")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<byte[]>("LogoData")
+                        .HasColumnType("BLOB");
+
+                    b.Property<string>("LookJson")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PosterContentType")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<byte[]>("PosterData")
+                        .HasColumnType("BLOB");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("StreamId");
+
+                    b.ToTable("Embeds");
+                });
+
             modelBuilder.Entity("MediaMtxPanel.Data.StreamOffer", b =>
                 {
                     b.Property<int>("Id")
@@ -479,6 +514,10 @@ namespace MediaMtxPanel.Data.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Code")
+                        .HasMaxLength(16)
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
@@ -505,6 +544,9 @@ namespace MediaMtxPanel.Data.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("RedeemBefore")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");
 
@@ -515,6 +557,11 @@ namespace MediaMtxPanel.Data.Migrations
 
                     b.HasIndex("AccessToken");
 
+                    b.HasIndex("BuyerEmail");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
                     b.HasIndex("OfferId");
 
                     b.HasIndex("ProviderPaymentId");
@@ -522,6 +569,41 @@ namespace MediaMtxPanel.Data.Migrations
                     b.HasIndex("StreamId");
 
                     b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("MediaMtxPanel.Data.ViewerLoginCode", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CodeHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Used")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email", "CreatedAt");
+
+                    b.ToTable("ViewerLoginCodes");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -711,6 +793,17 @@ namespace MediaMtxPanel.Data.Migrations
                     b.Navigation("Owner");
 
                     b.Navigation("Server");
+                });
+
+            modelBuilder.Entity("MediaMtxPanel.Data.StreamEmbed", b =>
+                {
+                    b.HasOne("MediaMtxPanel.Data.StreamDefinition", "Stream")
+                        .WithOne()
+                        .HasForeignKey("MediaMtxPanel.Data.StreamEmbed", "StreamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Stream");
                 });
 
             modelBuilder.Entity("MediaMtxPanel.Data.StreamOffer", b =>

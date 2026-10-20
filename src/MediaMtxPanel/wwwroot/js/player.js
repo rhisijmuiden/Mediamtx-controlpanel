@@ -1,6 +1,6 @@
 // Stream preview player. Plays a MediaMTX path via WebRTC (WHEP, using MediaMTX's own reader.js)
 // with HLS (hls.js) as alternative. Used by the customer portal (through JS interop) and by the
-// public watch page (auto-initialised from data-player attributes).
+// public watch page (auto-initialised from data-player attributes) and by the embedded player (embed/embed.js).
 (function () {
     const HLS_JS = "https://cdn.jsdelivr.net/npm/hls.js@1.5.20/dist/hls.min.js";
     const players = new WeakMap();
@@ -110,7 +110,8 @@
     async function start(video, options) {
         stop(video);
         // Browsers only autoplay muted video. Set the property: Blazor renders "muted" as an attribute only.
-        video.muted = true;
+        // The embedded player passes muted: false after a click, when sound is allowed.
+        video.muted = options.muted !== false;
         video.autoplay = true;
         try {
             if (options.mode === "hls") {

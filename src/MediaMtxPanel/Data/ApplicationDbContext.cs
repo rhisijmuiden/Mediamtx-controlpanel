@@ -12,6 +12,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<PaymentAccount> PaymentAccounts => Set<PaymentAccount>();
     public DbSet<StreamStatSample> StatSamples => Set<StreamStatSample>();
     public DbSet<RestreamTarget> RestreamTargets => Set<RestreamTarget>();
+    public DbSet<StreamEmbed> Embeds => Set<StreamEmbed>();
+    public DbSet<ViewerLoginCode> ViewerLoginCodes => Set<ViewerLoginCode>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -46,9 +48,19 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         {
             e.HasIndex(o => o.AccessToken);
             e.HasIndex(o => o.ProviderPaymentId);
+            e.HasIndex(o => o.Code).IsUnique();
+            e.HasIndex(o => o.BuyerEmail);
             e.HasOne(o => o.Stream).WithMany().HasForeignKey(o => o.StreamId).OnDelete(DeleteBehavior.Cascade);
             e.HasOne(o => o.Offer).WithMany().HasForeignKey(o => o.OfferId).OnDelete(DeleteBehavior.SetNull);
         });
+
+        builder.Entity<StreamEmbed>(e =>
+        {
+            e.HasOne(x => x.Stream).WithOne().HasForeignKey<StreamEmbed>(x => x.StreamId).OnDelete(DeleteBehavior.Cascade);
+            e.Ignore(x => x.Look);
+        });
+
+        builder.Entity<ViewerLoginCode>(e => e.HasIndex(x => new { x.Email, x.CreatedAt }));
 
         builder.Entity<PaymentAccount>(e =>
         {

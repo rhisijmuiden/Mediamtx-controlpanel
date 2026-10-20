@@ -43,6 +43,23 @@ public class PaymentAccountInput
 
 public record SalesSummary(int PaidCount, int RevenueCents, int ActiveTickets, List<TicketOrder> Recent);
 
+public class AccessCodeInput
+{
+    [Range(1, 500, ErrorMessage = "Create between 1 and 500 codes at a time.")]
+    public int Count { get; set; } = 1;
+
+    [Range(1, 24 * 366, ErrorMessage = "Choose an access period of at least 1 hour.")]
+    public int AccessHours { get; set; } = 24;
+
+    /// <summary>Codes not used before this date stop working; empty means no deadline.</summary>
+    public DateTime? RedeemBefore { get; set; }
+
+    [StringLength(80)]
+    public string? Label { get; set; }
+}
+
+public enum RedeemStatus { Ok, NotFound, Expired }
+
 /// <summary>Offers, orders and tickets for paywalled streams.</summary>
 public class PaywallService(
     IDbContextFactory<ApplicationDbContext> dbFactory,
@@ -196,7 +213,9 @@ public class PaywallService(
         var s = await ManagedStreamAsync(db, user, streamId, ct);
         if (s is null)
             return "Stream not found.";
-        if (enabled)
+        // Access codes alone are enough for a paywall: the owner hands them out instead of selling tickets.
+        var hasCodes = await db.Orders.AnyAsync(o => o.StreamId == streamId && o.Provider == PaymentProvider.Manual && o.Status == OrderStatus.Paid, ct);
+        if (enabled && !hasCodes)
         {
             if (!await db.Offers.AnyAsync(o => o.StreamId == streamId && o.Active, ct))
                 return "Add at least one active offer first.";
@@ -212,13 +231,13 @@ public class PaywallService(
     public async Task<SalesSummary> SalesAsync(int streamId, CancellationToken ct = default)
     {
         await using var db = await dbFactory.CreateDbContextAsync(ct);
-        var paid = db.Orders.AsNoTracking().Where(o => o.StreamId == streamId && o.Status == OrderStatus.Paid);
+        var paid = db.Orders.AsNoTracking().Where(o => o.StreamId == streamId && o.Status == OrderStatus.Paid && o.Provider != PaymentProvider.Manual);
         var now = DateTime.UtcNow;
         return new SalesSummary(
             await paid.CountAsync(ct),
             await paid.SumAsync(o => (int?)o.AmountCents, ct) ?? 0,
-            await paid.CountAsync(o => o.AccessExpiresAt > now, ct),
-            await db.Orders.AsNoTracking().Where(o => o.StreamId == streamId && o.Status != OrderStatus.Open)
+            await db.Orders.CountAsync(o => o.StreamId == streamId && o.Status == OrderStatus.Paid && o.AccessExpiresAt > now, ct),
+            await db.Orders.AsNoTracking().Where(o => o.StreamId == streamId && o.Status != OrderStatus.Open && o.Provider != PaymentProvider.Manual)
                 .OrderByDescending(o => o.CreatedAt).Take(20).ToListAsync(ct));
     }
 
@@ -244,15 +263,20 @@ public class PaywallService(
         if (!(await ProvidersForOwnerAsync(stream.OwnerId, ct)).Contains(provider))
             throw new PaymentException("This payment method is not available.");
 
+        email = NormalizeEmail(email);
+        if (email is null)
+            throw new PaymentException("Enter your email address. You need it to sign in and find your ticket later.");
+
         var order = new TicketOrder
         {
             StreamId = stream.Id,
+            Code = TicketCode.New(),
             OfferId = offer.Id,
             OfferName = offer.Name,
             AmountCents = offer.PriceCents,
             Currency = offer.Currency,
             AccessHours = offer.AccessHours,
-            BuyerEmail = string.IsNullOrWhiteSpace(email) ? null : email.Trim(),
+            BuyerEmail = email,
             Provider = provider,
             AccessToken = CredentialGenerator.Password(32),
         };
@@ -360,6 +384,132 @@ public class PaywallService(
         var now = DateTime.UtcNow;
         return await db.Orders.AsNoTracking().FirstOrDefaultAsync(o =>
             o.StreamId == streamId && o.AccessToken == token && o.Status == OrderStatus.Paid && o.AccessExpiresAt > now, ct);
+    }
+
+    /// <summary>A valid ticket of a signed-in viewer for this stream (the one that lasts longest).</summary>
+    public async Task<TicketOrder?> ValidTicketForEmailAsync(int streamId, string? email, CancellationToken ct = default)
+    {
+        email = NormalizeEmail(email);
+        if (email is null)
+            return null;
+        await using var db = await dbFactory.CreateDbContextAsync(ct);
+        var now = DateTime.UtcNow;
+        return await db.Orders.AsNoTracking()
+            .Where(o => o.StreamId == streamId && o.BuyerEmail == email && o.Status == OrderStatus.Paid && o.AccessExpiresAt > now)
+            .OrderByDescending(o => o.AccessExpiresAt).FirstOrDefaultAsync(ct);
+    }
+
+    /// <summary>
+    /// Looks up a ticket code for a stream. An unused access code starts its access period now. When a
+    /// viewer is signed in, a code without an owner is added to their tickets.
+    /// </summary>
+    /// <param name="streamId">The stream the code must belong to; null accepts a code of any stream (My tickets).</param>
+    public async Task<(RedeemStatus Status, TicketOrder? Ticket)> RedeemCodeAsync(int? streamId, string? code, string? viewerEmail, CancellationToken ct = default)
+    {
+        code = TicketCode.Normalize(code);
+        if (code.Length != TicketCode.Length)
+            return (RedeemStatus.NotFound, null);
+        await using var db = await dbFactory.CreateDbContextAsync(ct);
+        var order = await db.Orders.Include(o => o.Stream)
+            .FirstOrDefaultAsync(o => o.Code == code && (streamId == null || o.StreamId == streamId), ct);
+        if (order is null || order.Status is not OrderStatus.Paid)
+            return (order is { Status: OrderStatus.Canceled } ? RedeemStatus.Expired : RedeemStatus.NotFound, null);
+
+        var now = DateTime.UtcNow;
+        if (order.IsUnusedCode)
+        {
+            if (order.RedeemBefore < now)
+                return (RedeemStatus.Expired, null);
+            order.PaidAt = now;
+            order.AccessExpiresAt = now.AddHours(order.AccessHours);
+            logger.LogInformation("Access code {Order} for stream {Stream} used for the first time", order.Id, order.StreamId);
+        }
+        if (!order.GivesAccess(now))
+            return (RedeemStatus.Expired, null);
+        if (order.BuyerEmail is null && NormalizeEmail(viewerEmail) is { } email)
+            order.BuyerEmail = email;
+        await db.SaveChangesAsync(ct);
+        return (RedeemStatus.Ok, order);
+    }
+
+    /// <summary>Tickets of a viewer: valid ones first, then those that expired in the last 60 days.</summary>
+    public async Task<List<TicketOrder>> TicketsForEmailAsync(string email, CancellationToken ct = default)
+    {
+        var normalized = NormalizeEmail(email);
+        if (normalized is null)
+            return [];
+        await using var db = await dbFactory.CreateDbContextAsync(ct);
+        var since = DateTime.UtcNow.AddDays(-60);
+        return await db.Orders.AsNoTracking().Include(o => o.Stream).ThenInclude(s => s!.Server)
+            .Where(o => o.BuyerEmail == normalized && o.Status == OrderStatus.Paid && o.AccessExpiresAt > since)
+            .OrderByDescending(o => o.AccessExpiresAt).ToListAsync(ct);
+    }
+
+    public async Task<bool> HasTicketsAsync(string email, CancellationToken ct = default)
+    {
+        var normalized = NormalizeEmail(email);
+        if (normalized is null)
+            return false;
+        await using var db = await dbFactory.CreateDbContextAsync(ct);
+        return await db.Orders.AnyAsync(o => o.BuyerEmail == normalized && o.Status == OrderStatus.Paid, ct);
+    }
+
+    // ------------------------------------------------------------------ access codes
+
+    public async Task<List<TicketOrder>> AccessCodesAsync(int streamId, CancellationToken ct = default)
+    {
+        await using var db = await dbFactory.CreateDbContextAsync(ct);
+        return await db.Orders.AsNoTracking()
+            .Where(o => o.StreamId == streamId && o.Provider == PaymentProvider.Manual)
+            .OrderByDescending(o => o.CreatedAt).Take(500).ToListAsync(ct);
+    }
+
+    /// <summary>Creates free access codes; each one gives access for its period from the moment it is first used.</summary>
+    public async Task<List<TicketOrder>> CreateAccessCodesAsync(ClaimsPrincipal user, int streamId, AccessCodeInput input, CancellationToken ct = default)
+    {
+        await using var db = await dbFactory.CreateDbContextAsync(ct);
+        if (await ManagedStreamAsync(db, user, streamId, ct) is null)
+            return [];
+        var label = string.IsNullOrWhiteSpace(input.Label) ? "Access code" : input.Label.Trim();
+        var redeemBefore = input.RedeemBefore is { } d ? DateTime.SpecifyKind(d.Date.AddDays(1), DateTimeKind.Local).ToUniversalTime() : (DateTime?)null;
+        var codes = Enumerable.Range(0, Math.Clamp(input.Count, 1, 500)).Select(_ => new TicketOrder
+        {
+            StreamId = streamId,
+            OfferName = label,
+            Currency = "EUR",
+            AccessHours = input.AccessHours,
+            Provider = PaymentProvider.Manual,
+            Status = OrderStatus.Paid,
+            AccessToken = CredentialGenerator.Password(32),
+            Code = TicketCode.New(),
+            RedeemBefore = redeemBefore,
+        }).ToList();
+        db.Orders.AddRange(codes);
+        await db.SaveChangesAsync(ct);
+        logger.LogInformation("{Count} access codes created for stream {Stream}", codes.Count, streamId);
+        return codes;
+    }
+
+    /// <summary>Stops an access code (or a ticket made from one) from working.</summary>
+    public async Task<bool> RevokeAccessCodeAsync(ClaimsPrincipal user, int streamId, Guid orderId, CancellationToken ct = default)
+    {
+        await using var db = await dbFactory.CreateDbContextAsync(ct);
+        if (await ManagedStreamAsync(db, user, streamId, ct) is null)
+            return false;
+        var order = await db.Orders.FirstOrDefaultAsync(o => o.Id == orderId && o.StreamId == streamId && o.Provider == PaymentProvider.Manual, ct);
+        if (order is null)
+            return false;
+        order.Status = OrderStatus.Canceled;
+        await db.SaveChangesAsync(ct);
+        return true;
+    }
+
+    public static string? NormalizeEmail(string? email)
+    {
+        email = email?.Trim().ToLowerInvariant();
+        return !string.IsNullOrEmpty(email) && email.Length <= 256 && new EmailAddressAttribute().IsValid(email) && email.Contains('.')
+            ? email
+            : null;
     }
 
     private IPaymentGateway Gateway(PaymentProvider provider) =>

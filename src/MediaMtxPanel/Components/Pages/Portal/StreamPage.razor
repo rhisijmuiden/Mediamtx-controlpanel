@@ -5,6 +5,7 @@
 @inject PaywallService Paywall
 @inject StreamEndpointBuilder Endpoints
 @inject NavigationManager Nav
+@inject IJSRuntime JS
 
 <AppPageTitle Text="@(stream?.DisplayName ?? L["Stream"])" />
 
@@ -41,6 +42,7 @@ else
             <p class="page-subtitle">@stream.Server!.PublicHost · <code>@stream.Name</code></p>
         </div>
         <div class="page-actions">
+            <a class="btn btn-outline-secondary" href="portal/streams/@stream.Id/embed" title="@L["Design a player to put on your own website"]"><i class="bi bi-code-square"></i> @L["Embed player"]</a>
             <a class="btn btn-outline-primary" href="@WatchUrl" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right"></i> @L["Open watch page"]</a>
         </div>
     </div>
@@ -170,6 +172,10 @@ else
                         <CopyField Value="@WatchUrl" />
                         <a class="btn btn-sm btn-outline-primary mb-3" href="@WatchUrl" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right"></i> @L["Open watch page"]</a>
                         <hr />
+                        <h6><i class="bi bi-code-square me-1 text-primary"></i> @L["On your own website"]</h6>
+                        <p class="small text-secondary mb-2">@L["Design a player in your own colours with your logo, and paste a piece of code on your website."]</p>
+                        <a class="btn btn-sm btn-primary mb-3" href="portal/streams/@stream.Id/embed"><i class="bi bi-palette"></i> @L["Open the embed designer"]</a>
+                        <hr />
                         <h6><i class="bi bi-key me-1 text-primary"></i> @L["Viewing credentials"]</h6>
                         <p class="small text-secondary mb-2">@L["For your own use or regular viewers, separate from the paywall."]</p>
                         <CopyField Label="@L["Username"]" Value="@stream.ReadUser" />
@@ -266,6 +272,75 @@ else
                             </EditForm>
                         }
 
+                        <h6 class="mt-4"><i class="bi bi-upc-scan me-1 text-primary"></i> @L["Access codes"]</h6>
+                        <p class="small text-secondary">@L["Hand out free codes, for example to the press, sponsors or a guest list. A code gives access for the chosen time from the moment it is first used."]</p>
+                        @if (codeInput is null)
+                        {
+                            <button class="btn btn-sm btn-outline-primary" @onclick="() => { codeInput = new AccessCodeInput(); newCodes = null; }"><i class="bi bi-plus-lg"></i> @L["Create codes"]</button>
+                        }
+                        else
+                        {
+                            <EditForm Model="codeInput" OnValidSubmit="CreateCodes" FormName="codes" class="offer-card mb-2">
+                                <LocalizedValidator />
+                                <div class="row g-2 mb-2">
+                                    <div class="col-6">
+                                        <label class="form-label small" for="code-count">@L["Number of codes"]</label>
+                                        <InputNumber id="code-count" class="form-control form-control-sm" @bind-Value="codeInput.Count" />
+                                        <ValidationMessage For="() => codeInput.Count" />
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label small" for="code-hours">@L["Access (hours)"]</label>
+                                        <InputNumber id="code-hours" class="form-control form-control-sm" @bind-Value="codeInput.AccessHours" />
+                                        <ValidationMessage For="() => codeInput.AccessHours" />
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label small" for="code-until">@L["Use before (optional)"]</label>
+                                        <InputDate id="code-until" class="form-control form-control-sm" @bind-Value="codeInput.RedeemBefore" />
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label small" for="code-label">@L["Label (optional)"]</label>
+                                        <InputText id="code-label" class="form-control form-control-sm" @bind-Value="codeInput.Label" placeholder="@L["Press, sponsor…"]" />
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-magic"></i> @L["Create"]</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => codeInput = null"><i class="bi bi-x-lg"></i> @L["Cancel"]</button>
+                                </div>
+                            </EditForm>
+                        }
+                        @if (newCodes is { Count: > 0 })
+                        {
+                            <div class="mt-2">
+                                <label class="form-label small text-success"><i class="bi bi-check-circle me-1"></i>@L["{0} new codes, ready to hand out:", newCodes.Count]</label>
+                                <textarea class="form-control form-control-sm ticket-code" rows="@Math.Min(newCodes.Count, 6)" readonly>@string.Join("\n", newCodes.Select(c => TicketCode.Display(c.Code)))</textarea>
+                                <button class="btn btn-sm btn-outline-primary mt-1" @onclick="CopyCodes"><i class="bi bi-clipboard"></i> @L["Copy all"]</button>
+                            </div>
+                        }
+                        @if (accessCodes.Count > 0)
+                        {
+                            <table class="table table-sm small mt-2 mb-0 align-middle">
+                                <tbody>
+                                    @foreach (var c in accessCodes.Take(showAllCodes ? accessCodes.Count : 8))
+                                    {
+                                        <tr class="@(c.Status == OrderStatus.Canceled ? "opacity-50" : "")">
+                                            <td><span class="ticket-code">@TicketCode.Display(c.Code)</span><div class="text-secondary">@c.OfferName · @Hours(c.AccessHours)</div></td>
+                                            <td>@CodeState(c)</td>
+                                            <td class="text-end">
+                                                @if (c.Status != OrderStatus.Canceled)
+                                                {
+                                                    <button class="btn btn-sm btn-outline-danger btn-icon" title="@L["Revoke"]" @onclick="() => RevokeCode(c)"><i class="bi bi-slash-circle"></i></button>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                            @if (accessCodes.Count > 8 && !showAllCodes)
+                            {
+                                <button class="btn btn-sm btn-link px-0" @onclick="() => showAllCodes = true">@L["Show all {0} codes", accessCodes.Count]</button>
+                            }
+                        }
+
                         <h6 class="mt-4"><i class="bi bi-graph-up me-1 text-primary"></i> @L["Sales"]</h6>
                         @if (sales is not null)
                         {
@@ -322,6 +397,10 @@ else
     private OfferInput? offerInput;
     private int? editingOfferId;
     private string? paywallMessage;
+    private List<TicketOrder> accessCodes = [];
+    private AccessCodeInput? codeInput;
+    private List<TicketOrder>? newCodes;
+    private bool showAllCodes;
     private bool paywallMessageIsError;
 
     private string WatchUrl => Nav.ToAbsoluteUri($"watch/{stream!.WatchSlug}").ToString();
@@ -355,6 +434,36 @@ else
         offers = await Paywall.OffersAsync(stream!.Id, activeOnly: false);
         providers = await Paywall.ProvidersForOwnerAsync(stream.OwnerId);
         sales = await Paywall.SalesAsync(stream.Id);
+        accessCodes = await Paywall.AccessCodesAsync(stream.Id);
+    }
+
+    private async Task CreateCodes()
+    {
+        newCodes = await Paywall.CreateAccessCodesAsync((await AuthState).User, stream!.Id, codeInput!);
+        codeInput = null;
+        await LoadPaywallAsync();
+        if (newCodes.Count == 0)
+            ShowPaywall(L["Saving failed."], true);
+    }
+
+    private async Task RevokeCode(TicketOrder code)
+    {
+        var ok = await Paywall.RevokeAccessCodeAsync((await AuthState).User, stream!.Id, code.Id);
+        await LoadPaywallAsync();
+        ShowPaywall(ok ? L["Code revoked. It no longer gives access."] : L["Saving failed."], !ok);
+    }
+
+    private Task CopyCodes() =>
+        JS.InvokeVoidAsync("panel.copy", string.Join("\n", newCodes!.Select(c => TicketCode.Display(c.Code)))).AsTask();
+
+    private string CodeState(TicketOrder c)
+    {
+        var now = DateTime.UtcNow;
+        if (c.Status == OrderStatus.Canceled)
+            return L["Revoked"];
+        if (c.AccessExpiresAt is null)
+            return c.RedeemBefore < now ? L["Expired unused"] : L["Not used yet"];
+        return c.AccessExpiresAt > now ? L["In use until {0}", c.AccessExpiresAt.Value.ToLocalTime().ToString("g")] : L["Expired"];
     }
 
     private void OnLive(MtxPath? path) => live = path;
