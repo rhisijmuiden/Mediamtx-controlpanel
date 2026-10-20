@@ -292,6 +292,15 @@ server {
 
 **Nginx Proxy Manager**: add a *Proxy Host* for `stream.example.com`, scheme `http`, forward to the panel's IP and port `8080`, switch on *Websockets Support* and *Block Common Exploits*, and request a certificate on the *SSL* tab (*Force SSL*, *HTTP/2 Support*). On the *Advanced* tab add `proxy_buffering off;`.
 
+**Zoraxy**
+
+1. *HTTP Proxy* → *Create Proxy Rules*: proxy type *Host* (a domain), matching keyword/domain `stream.example.com`, target `10.0.0.10:8080` (the panel's IP and port). Leave *Proxy Target require TLS Connection* off: the panel itself speaks plain HTTP. Create the rule.
+2. *TLS / SSL certificates* → *ACME* (Let's Encrypt): request a certificate for `stream.example.com`. On the *Status* page, make sure Zoraxy listens on 443 with TLS and switch on *Force HTTPS redirect* (port 80 → 443).
+3. Nothing else is needed for the panel: Zoraxy forwards WebSockets automatically and sends `X-Forwarded-For` and `X-Forwarded-Proto` to the panel.
+4. For WebRTC media add a rule under *Stream Proxy* (TCP/UDP): listen on `:8189`, target `10.0.0.21:8189` (the MediaMTX machine), with *UDP* switched on (and *TCP* if you use `webrtcLocalTCPAddress`). This replaces the router port forward to MediaMTX described in [WebRTC and port 8189 (UDP)](#webrtc-and-port-8189-udp); the router then forwards UDP 8189 to Zoraxy instead. Keep `webrtcAdditionalHosts` set to the public host name.
+
+Then switch on **Settings → Web server → The panel is behind a reverse proxy** in the panel with `https://stream.example.com`, and optionally put Zoraxy's IP address in *Trusted proxies*.
+
 ### WebRTC and port 8189 (UDP)
 
 WebRTC has two parts. The **signalling** (the browser's offer and MediaMTX's answer, `reader.js`, WHEP/WHIP) is ordinary HTTPS and goes through your reverse proxy and the panel. The **video and audio** do not: after the signalling, the viewer's browser sends and receives media packets directly to MediaMTX on **port 8189**, by default over **UDP**. An HTTP reverse proxy (Nginx Proxy Manager, Caddy, nginx, Traefik) cannot carry that traffic, so it needs its own port forward.
