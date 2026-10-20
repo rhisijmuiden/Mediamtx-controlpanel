@@ -196,6 +196,8 @@ if (app.Configuration["Panel:ServiceToken"] is { Length: > 0 and < ServiceTokenA
     app.Logger.LogWarning("Panel:ServiceToken is shorter than {Length} characters and is ignored", ServiceTokenAuthenticationHandler.MinimumLength);
 
 app.UseForwardedHeaders();
+// Behind Cloudflare the viewer address is in CF-Connecting-IP (only believed from Cloudflare addresses).
+app.UseCloudflareClientIp();
 
 // Panel:PathBase (e.g. /channel1): pages, assets, APIs, redirects and cookies live under it. The proxy
 // forwards the full path. Requests outside it (/healthz, the MediaMTX auth hook on 127.0.0.1) still work.

@@ -301,6 +301,33 @@ server {
 
 Then switch on **Settings → Web server → The panel is behind a reverse proxy** in the panel with `https://stream.example.com`, and optionally put Zoraxy's IP address in *Trusted proxies*.
 
+### Cloudflare
+
+The panel and its web players work behind Cloudflare's proxy (orange cloud), with or without another proxy such as Zoraxy or Nginx Proxy Manager behind it. Cloudflare only carries HTTP(S) and WebSockets, so some traffic needs a second host name that is **not** proxied:
+
+| Traffic | Through Cloudflare (orange) | Needs DNS only (grey) |
+|---|---|---|
+| Panel, watch pages, embeds, portal | ✓ | |
+| HLS and WebRTC signalling (`/media/...`) | ✓ | |
+| WebRTC video (UDP/TCP 8189) | | ✓ |
+| RTSP 8554, RTMP 1935, SRT 8890 (OBS, VLC) | | ✓ |
+
+Set it up like this, for example with `stream.example.com` (orange) and `media.example.com` (grey, A record to your public IP):
+
+1. **Panel**: Settings → Web server → *The panel is behind a reverse proxy*, public address `https://stream.example.com`.
+2. **Server** (Servers → Settings): *Host or IP* = `media.example.com`. The server page warns when this host points to Cloudflare. RTSP/RTMP/SRT links and the OBS settings then use the grey host.
+3. **mediamtx.yml**: `webrtcAdditionalHosts: [media.example.com]` (or the public IP), and forward UDP 8189 to MediaMTX as described below. If `webrtcAdditionalHosts` points to an orange host, browsers try to send WebRTC video to Cloudflare, which drops it.
+4. **Cloudflare dashboard** for `stream.example.com`:
+   - *SSL/TLS*: **Full (strict)** when your proxy has a valid certificate (Full otherwise). Avoid Flexible together with a proxy that redirects to https: that loops.
+   - *Network*: **WebSockets** on (the admin pages use them).
+   - *Speed → Optimization*: **Rocket Loader off** (it rewrites the panel's scripts and breaks the player and the admin pages).
+   - Do not use *Cache Everything* for `/media/*`. The panel sends `Cache-Control: private, no-store` on all video so Cloudflare never caches it: every request is checked against tickets and viewer credentials.
+   - *Security*: *I'm Under Attack* mode and bot challenges block players and embeds; leave them off for this host, or skip them for `/media/*` and `/embed/*`.
+
+The panel takes the viewer's real address from the `CF-Connecting-IP` header when the request arrives from a Cloudflare address (directly or as the last hop of your own proxy), so viewer statistics and unique viewers stay correct. Requests from other addresses cannot set it.
+
+Without the grey host for 8189, WebRTC cannot connect through Cloudflare. The web player then switches to HLS after about 12 seconds and remembers that for 30 minutes, so later visits start on HLS right away. HLS through Cloudflare works but has a few seconds more delay than WebRTC.
+
 ### WebRTC and port 8189 (UDP)
 
 WebRTC has two parts. The **signalling** (the browser's offer and MediaMTX's answer, `reader.js`, WHEP/WHIP) is ordinary HTTPS and goes through your reverse proxy and the panel. The **video and audio** do not: after the signalling, the viewer's browser sends and receives media packets directly to MediaMTX on **port 8189**, by default over **UDP**. An HTTP reverse proxy (Nginx Proxy Manager, Caddy, nginx, Traefik) cannot carry that traffic, so it needs its own port forward.
