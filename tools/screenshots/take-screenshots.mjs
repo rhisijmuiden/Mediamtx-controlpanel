@@ -132,6 +132,8 @@ await go("/settings/sso");
 await shot("settings-sso");
 await go("/settings/alerts");
 await shot("settings-alerts");
+await go("/settings/backup");
+await shot("settings-backup");
 
 await go("/");
 await page.click(".sidebar-footer button:has-text('Info')");

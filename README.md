@@ -129,6 +129,14 @@ Only administrators see *Settings*. The settings are stored in `panel-settings.j
 
   ![Alert settings](docs/screenshots/settings-alerts.png)
 
+- **Backup & restore**: backups of the database, the settings and the encryption keys to another machine over **SFTP**, **SCP**, **FTPS** (explicit or implicit), **FTP** or a local folder (such as a mounted NAS share). *Test connection* checks the login and that the folder is writable.
+  - **Full and incremental**: a full backup holds everything; an incremental backup only holds the 64 KB pieces that changed since the previous backup of the same full backup. The schedule makes a backup every day at a chosen time, a full one on a chosen weekday (or every day) and incremental ones on the other days, keeps the last *n* full backups with their incremental ones, and can mail the administrators when a scheduled backup fails.
+  - **Encryption**: with a passphrase every archive is encrypted with AES-256-GCM (key from PBKDF2-SHA256) before it leaves the machine. Keep the passphrase outside the panel: without it the backups cannot be restored. Passwords, keys and the passphrase are stored encrypted in `panel-settings.json`. An SSH host key is trusted at the first connection and checked after that.
+  - **Restore**: the page lists the backups at the remote location. *Restore* downloads the backup with the archives it builds on, checks every checksum and the database, and restarts the panel, which puts the data in place before it opens the database. The previous data is kept in `pre-restore/` next to the database. The backup location, schedule and web port of the running installation stay as they are, so a fresh installation can restore from the same location. A backup made by a newer version is refused until the panel is updated.
+  - Archives are named `mediamtx-panel_<time>_full.tar` and `mediamtx-panel_<time>_incr_<time of its full backup>.tar`; an unencrypted archive is a plain tar file with a `manifest.json`.
+
+  ![Backup settings](docs/screenshots/settings-backup.png)
+
 ### Languages
 
 The panel is available in English, Dutch, German and French. English is the default; administrators choose another default under *Settings → General*, and everyone can pick their own language in the menu at the bottom left (stored in a cookie). The public watch pages have the same language menu.

@@ -1,0 +1,726 @@
+@page "/settings/backup"
+@attribute [Authorize(Roles = Roles.Admin)]
+@rendermode InteractiveServer
+@implements IDisposable
+@using System.Globalization
+@using MediaMtxPanel.Services.Backup
+@inject BackupService Backups
+@inject PanelSettingsStore Store
+@inject IHostApplicationLifetime Lifetime
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<AppPageTitle Text="@L["Backup & restore"]" />
+
+<div class="page-header">
+    <div>
+        <h1><i class="bi bi-cloud-arrow-up text-primary"></i> @L["Backup & restore"]</h1>
+        <p class="page-subtitle">@L["Backs up the database, the settings and the encryption keys to another machine over SFTP, SCP, FTPS or FTP. A full backup holds everything; an incremental backup only what changed since the previous one."]</p>
+    </div>
+    <div class="page-actions">
+        <button class="btn btn-outline-primary" @onclick="() => RunBackup(BackupKind.Incremental)" disabled="@(Busy || !saved.IsConfigured)">
+            <i class="bi bi-plus-slash-minus"></i> @L["Incremental backup"]
+        </button>
+        <button class="btn btn-primary" @onclick="() => RunBackup(BackupKind.Full)" disabled="@(Busy || !saved.IsConfigured)">
+            <i class="bi bi-cloud-arrow-up"></i> @L["Full backup now"]
+        </button>
+    </div>
+</div>
+
+@if (message is not null)
+{
+    <div class="alert alert-@(isError ? "danger" : "success") d-flex align-items-center gap-2">
+        <i class="bi @(isError ? "bi-exclamation-octagon" : "bi-check-circle")"></i> <span class="text-break">@message</span>
+    </div>
+}
+
+@if (restarting)
+{
+    <div class="alert alert-info d-flex align-items-center gap-3">
+        <span class="spinner-border spinner-border-sm"></span>
+        <div>
+            <div class="fw-semibold">@L["The panel is restarting to finish the restore…"]</div>
+            <div class="small">@L["This page reloads by itself once the panel is back. You may have to log in again."]</div>
+        </div>
+    </div>
+}
+else if (Backups.RestorePending)
+{
+    <div class="alert alert-warning d-flex flex-wrap align-items-center gap-3">
+        <i class="bi bi-hourglass-split fs-4"></i>
+        <div class="flex-grow-1">
+            <div class="fw-semibold">@L["A restore is ready"]</div>
+            <div class="small">@L["The downloaded backup replaces the current data when the panel restarts."]</div>
+        </div>
+        <button class="btn btn-sm btn-outline-secondary" @onclick="CancelRestore">@L["Cancel restore"]</button>
+        <button class="btn btn-sm btn-warning" @onclick="Restart"><i class="bi bi-arrow-repeat"></i> @L["Restart now"]</button>
+    </div>
+}
+
+<div class="row g-3 mb-3">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="small text-secondary mb-1">@L["Last backup"]</div>
+                @if (state.LastRun is { } last)
+                {
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        @if (state.LastSucceeded == true)
+                        {
+                            <span class="badge bg-success-subtle text-success-emphasis badge-dot">@L["Succeeded"]</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger-subtle text-danger-emphasis badge-dot">@L["Failed"]</span>
+                        }
+                        <strong>@last.ToLocalTime().ToString("g")</strong>
+                    </div>
+                    @if (state.LastSucceeded == true && state.LastSize is { } size)
+                    {
+                        <div class="small text-secondary text-break">@state.LastArchive · @Format.Bytes((ulong)size)</div>
+                    }
+                    else if (state.LastError is { } error)
+                    {
+                        <div class="small text-danger text-break">@error</div>
+                    }
+                }
+                else
+                {
+                    <strong>@L["Never"]</strong>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="small text-secondary mb-1">@L["Schedule"]</div>
+                @if (saved.ScheduleEnabled)
+                {
+                    <strong>@L["Every day at {0}", saved.TimeOfDay.ToString("HH:mm")]</strong>
+                    <div class="small text-secondary">
+                        @(saved.FullBackupDay is { } day
+                            ? L["Full backup on {0}, incremental on the other days", DayName(day)]
+                            : L["A full backup every day"])
+                    </div>
+                }
+                else
+                {
+                    <strong>@L["Off"]</strong>
+                    <div class="small text-secondary">@L["Only backups you start yourself."]</div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="small text-secondary mb-1">@L["Location"]</div>
+                @if (saved.IsConfigured)
+                {
+                    <strong class="font-monospace small text-break">@Where(saved.Target)</strong>
+                    <div class="small text-secondary">
+                        @(string.IsNullOrEmpty(saved.PassphraseProtected) ? L["Not encrypted"] : L["Encrypted with a passphrase (AES-256)"])
+                    </div>
+                }
+                else
+                {
+                    <strong>@L["Not set up"]</strong>
+                    <div class="small text-secondary">@L["Choose a location below."]</div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Backups.Activity is not null || log.Count > 0)
+{
+    <div class="card mb-3">
+        <div class="card-header d-flex align-items-center gap-2">
+            @if (Backups.Activity is { } activity)
+            {
+                <span class="spinner-border spinner-border-sm text-primary"></span> @L[activity]
+            }
+            else
+            {
+                <i class="bi bi-journal-text"></i> @L["Log"]
+            }
+        </div>
+        <div class="card-body"><pre class="cmd small mb-0">@string.Join("\n", log)</pre></div>
+    </div>
+}
+
+<div class="card mb-3">
+    <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-archive"></i> @L["Backups at the remote location"]
+        <button class="btn btn-sm btn-outline-secondary ms-auto" @onclick="LoadBackups" disabled="@(loadingList || !saved.IsConfigured)">
+            <i class="bi bi-arrow-clockwise"></i> @L["Refresh"]
+        </button>
+    </div>
+    @if (!saved.IsConfigured)
+    {
+        <div class="card-body text-secondary">@L["Save a backup location to see its backups here."]</div>
+    }
+    else if (loadingList)
+    {
+        <div class="card-body text-secondary"><span class="spinner-border spinner-border-sm me-2"></span>@L["Loading…"]</div>
+    }
+    else if (listError is not null)
+    {
+        <div class="card-body text-danger">@listError</div>
+    }
+    else if (entries is { Count: 0 })
+    {
+        <div class="card-body">
+            <div class="empty-state">
+                <i class="bi bi-archive"></i>
+                <p class="mb-0">@L["There are no backups at this location yet."]</p>
+            </div>
+        </div>
+    }
+    else if (entries is not null)
+    {
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>@L["Made on"]</th>
+                        <th>@L["Type"]</th>
+                        <th>@L["Size"]</th>
+                        <th>@L["Restore downloads"]</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var e in entries)
+                    {
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">@e.Name.Created.ToLocalTime().ToString("g")</div>
+                                <div class="small text-secondary font-monospace text-break">@e.File.Name</div>
+                            </td>
+                            <td>
+                                @if (e.Name.Kind == BackupKind.Full)
+                                {
+                                    <span class="badge bg-primary-subtle text-primary-emphasis">@L["Full"]</span>
+                                }
+                                else
+                                {
+                                    <span class="badge text-bg-light border">@L["Incremental"]</span>
+                                }
+                            </td>
+                            <td>@Format.Bytes((ulong)e.File.Size)</td>
+                            <td>
+                                @if (e.Complete)
+                                {
+                                    <span class="small">@L["{0} archive(s), {1}", e.Needs.Count, Format.Bytes((ulong)e.RestoreSize)]</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger-subtle text-danger-emphasis" title="@L["The full backup this one builds on is missing."]">@L["Incomplete"]</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-primary" @onclick="() => AskRestore(e)" disabled="@(Busy || !e.Complete)">
+                                    <i class="bi bi-arrow-counterclockwise"></i> @L["Restore"]
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <section class="form-section">
+            <header>
+                <h2>@L["Remote location"]</h2>
+                <p>@L["Where the backups go. Use a machine other than this one, so a backup survives when this server is lost."]</p>
+            </header>
+            <div class="row g-3">
+                <div class="col-12">
+                    <div class="row g-2">
+                        @foreach (var (value, title, text) in ProtocolChoices)
+                        {
+                            <div class="col-sm-6 col-xl-4">
+                                <label class="action-card p-3 h-100 @(protocol == value ? "border-primary" : null)" style="cursor:pointer">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <input class="form-check-input mt-0" type="radio" name="protocol" checked="@(protocol == value)" @onchange="() => PickProtocol(value)" />
+                                        <strong>@L[title]</strong>
+                                    </div>
+                                    <small class="text-secondary">@L[text]</small>
+                                </label>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                @if (protocol != BackupProtocol.Local)
+                {
+                    <div class="col-md-8">
+                        <label class="form-label" for="bk-host">@L["Server"]</label>
+                        <input id="bk-host" class="form-control" @bind="host" placeholder="backup.example.com" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="bk-port">@L["Port"]</label>
+                        <input id="bk-port" type="number" min="1" max="65535" class="form-control" @bind="port" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="bk-user">@L["User name"]</label>
+                        <input id="bk-user" class="form-control" @bind="userName" autocomplete="off" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="bk-pass">@L["Password"]</label>
+                        <input id="bk-pass" type="password" class="form-control" @bind="password" autocomplete="new-password"
+                               placeholder="@(hasPassword ? L["Unchanged (stored encrypted)"] : "")" />
+                    </div>
+                }
+                <div class="col-12">
+                    <label class="form-label" for="bk-folder">@(protocol == BackupProtocol.Local ? L["Folder on this machine"] : L["Folder on the server"])</label>
+                    <input id="bk-folder" class="form-control font-monospace" @bind="folder" placeholder="@(protocol == BackupProtocol.Local ? "/mnt/backup/mediamtx-panel" : "mediamtx-panel-backups")" />
+                    <div class="form-text">
+                        @(protocol == BackupProtocol.Local
+                            ? L["For example a mounted NAS share. The folder is created when it does not exist."]
+                            : L["A relative folder starts in the home folder of the user. It is created when it does not exist."])
+                    </div>
+                </div>
+
+                @if (protocol is BackupProtocol.Scp or BackupProtocol.Sftp)
+                {
+                    <div class="col-12">
+                        <label class="form-label" for="bk-key">@L["Private key (optional)"]</label>
+                        <textarea id="bk-key" class="form-control font-monospace small" rows="4" @bind="privateKey"
+                                  placeholder="@(hasKey ? L["Unchanged (stored encrypted)"] : "-----BEGIN OPENSSH PRIVATE KEY-----")"></textarea>
+                        <div class="form-text">
+                            @L["Instead of or next to the password. Put the matching public key in ~/.ssh/authorized_keys on the server."]
+                            @if (hasKey)
+                            {
+                                <button type="button" class="btn btn-link btn-sm p-0 ms-1 align-baseline" @onclick="() => { hasKey = false; removeKey = true; }">@L["Remove the stored key"]</button>
+                            }
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="bk-keypass">@L["Key passphrase"]</label>
+                        <input id="bk-keypass" type="password" class="form-control" @bind="keyPassphrase" autocomplete="new-password"
+                               placeholder="@(hasKeyPassphrase ? L["Unchanged (stored encrypted)"] : L["Only when the key has one"])" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">@L["Host key"]</label>
+                        @if (hostKey is not null)
+                        {
+                            <div class="d-flex align-items-center gap-2">
+                                <code class="small text-break">@hostKey</code>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => hostKey = null">@L["Forget"]</button>
+                            </div>
+                            <div class="form-text">@L["The panel refuses to connect when the server shows another key."]</div>
+                        }
+                        else
+                        {
+                            <div class="form-text mt-0">@L["Trusted at the first connection and checked every time after that."]</div>
+                        }
+                    </div>
+                }
+
+                @if (protocol is BackupProtocol.Ftps or BackupProtocol.FtpsImplicit)
+                {
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="bk-invalid-cert" @bind="allowInvalidCertificate" />
+                            <label class="form-check-label" for="bk-invalid-cert">@L["Accept a self-signed or invalid certificate"]</label>
+                        </div>
+                        <div class="form-text">@L["Only for your own server on a trusted network."]</div>
+                    </div>
+                }
+                @if (protocol == BackupProtocol.Ftp)
+                {
+                    <div class="col-12">
+                        <div class="alert alert-warning small mb-0"><i class="bi bi-exclamation-triangle"></i> @L["FTP sends the password and the data unencrypted. Use FTPS or SFTP when the server supports it, and set a backup passphrase."]</div>
+                    </div>
+                }
+                <div class="col-12">
+                    <button class="btn btn-outline-primary" @onclick="TestConnection" disabled="@testing">
+                        @if (testing)
+                        {
+                            <span class="spinner-border spinner-border-sm"></span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-plug"></i>
+                        }
+                        @L["Test connection"]
+                    </button>
+                    @if (testResult is not null)
+                    {
+                        <span class="ms-2 small @(testResult.Success ? "text-success" : "text-danger")">
+                            <i class="bi @(testResult.Success ? "bi-check-circle" : "bi-x-circle")"></i> @testResult.Message
+                        </span>
+                    }
+                </div>
+            </div>
+        </section>
+
+        <section class="form-section">
+            <header>
+                <h2>@L["Encryption"]</h2>
+                <p>@L["With a passphrase, every backup is encrypted with AES-256-GCM before it leaves this machine. The backups contain stream passwords and other secrets, so this is recommended."]</p>
+            </header>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label" for="bk-phrase">@L["Backup passphrase"]</label>
+                    <input id="bk-phrase" type="password" class="form-control" @bind="passphrase" autocomplete="new-password"
+                           placeholder="@(hasPassphrase ? L["Unchanged (stored encrypted)"] : L["No encryption"])" />
+                    @if (hasPassphrase)
+                    {
+                        <button type="button" class="btn btn-link btn-sm p-0" @onclick="() => { hasPassphrase = false; removePassphrase = true; }">@L["Stop encrypting new backups"]</button>
+                    }
+                </div>
+                <div class="col-md-6">
+                    <div class="alert alert-warning small mb-0">
+                        <i class="bi bi-key"></i> @L["Keep the passphrase somewhere safe, outside this panel. Without it, nobody can restore the backups, not even after reinstalling."]
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="form-section">
+            <header>
+                <h2>@L["Schedule"]</h2>
+                <p>@L["Automatic backups once a day. Old full backups are removed together with their incremental backups."]</p>
+            </header>
+            <div class="row g-3">
+                <div class="col-12">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="bk-schedule" @bind="scheduleEnabled" />
+                        <label class="form-check-label" for="bk-schedule">@L["Make a backup every day"]</label>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <label class="form-label" for="bk-time">@L["Time"]</label>
+                    <input id="bk-time" type="time" class="form-control" @bind="time" disabled="@(!scheduleEnabled)" />
+                </div>
+                <div class="col-sm-6 col-lg-5">
+                    <label class="form-label" for="bk-fullday">@L["Full backup"]</label>
+                    <select id="bk-fullday" class="form-select" @bind="fullDay" disabled="@(!scheduleEnabled)">
+                        <option value="">@L["Every day (no incremental backups)"]</option>
+                        @foreach (var day in Week)
+                        {
+                            <option value="@day">@L["On {0}, incremental on other days", DayName(day)]</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-sm-6 col-lg-2">
+                    <label class="form-label" for="bk-keep">@L["Keep full backups"]</label>
+                    <input id="bk-keep" type="number" min="1" max="365" class="form-control" @bind="keep" />
+                </div>
+                <div class="col-12">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="bk-mail" @bind="mailOnFailure" />
+                        <label class="form-check-label" for="bk-mail">@L["Mail the administrators when a scheduled backup fails"]</label>
+                    </div>
+                    <div class="form-text">@L["Uses the mail server under Settings → Mail."]</div>
+                </div>
+            </div>
+        </section>
+
+        @if (!Backups.KeysIncluded)
+        {
+            <div class="alert alert-warning small mb-0">
+                <i class="bi bi-exclamation-triangle"></i> @L["The panel's encryption keys are not kept in a folder, so they are not in the backup. After a restore on another machine, enter the mail password again."]
+            </div>
+        }
+    </div>
+    <div class="card-footer bg-transparent d-flex gap-2 py-3">
+        <button class="btn btn-primary" @onclick="Save"><i class="bi bi-check-lg"></i> @L["Save settings"]</button>
+    </div>
+</div>
+
+@if (restoreCandidate is { } candidate)
+{
+    <div class="app-modal-backdrop" @onclick="() => restoreCandidate = null">
+        <div class="app-modal" role="dialog" aria-modal="true" aria-labelledby="restore-title" @onclick:stopPropagation="true">
+            <header>
+                <span class="avatar"><i class="bi bi-arrow-counterclockwise"></i></span>
+                <div class="flex-grow-1">
+                    <h2 id="restore-title">@L["Restore this backup?"]</h2>
+                    <div class="small text-secondary">@candidate.Name.Created.ToLocalTime().ToString("F")</div>
+                </div>
+                <button type="button" class="btn-close" @onclick="() => restoreCandidate = null" aria-label="@L["Close"]"></button>
+            </header>
+            <div class="body">
+                <p>@L["All streams, servers, users and settings are replaced by the ones in this backup. The location and schedule of the backups stay as they are."]</p>
+                <p class="small text-secondary">@L["The panel downloads and checks the backup first, then restarts. The current data is kept in {0}.", Backups.Paths.PreRestoreDir]</p>
+                <label class="form-label" for="restore-phrase">@L["Passphrase"]</label>
+                <input id="restore-phrase" type="password" class="form-control mb-1" @bind="restorePassphrase" autocomplete="off"
+                       placeholder="@(hasPassphrase ? L["The saved passphrase"] : L["Only for an encrypted backup"])" />
+                <div class="form-text mb-3">@L["Only needed when the backup was made with another passphrase."]</div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="restore-confirm" @bind="restoreConfirmed" />
+                    <label class="form-check-label" for="restore-confirm">@L["I understand that the current data is replaced"]</label>
+                </div>
+            </div>
+            <footer>
+                <button class="btn btn-outline-secondary" @onclick="() => restoreCandidate = null">@L["Cancel"]</button>
+                <button class="btn btn-danger" @onclick="Restore" disabled="@(!restoreConfirmed || Busy)"><i class="bi bi-arrow-counterclockwise"></i> @L["Restore"]</button>
+            </footer>
+        </div>
+    </div>
+}
+
+@code {
+    private static readonly (BackupProtocol Value, string Title, string Text)[] ProtocolChoices =
+    [
+        (BackupProtocol.Sftp, "SFTP", "File transfer over SSH. Encrypted and supported by almost every Linux server and NAS. Recommended."),
+        (BackupProtocol.Scp, "SCP", "Copy over SSH. Needs a normal shell on the server for listing and removing backups."),
+        (BackupProtocol.Ftps, "FTPS (explicit)", "FTP secured with TLS through AUTH TLS, usually port 21."),
+        (BackupProtocol.FtpsImplicit, "FTPS (implicit)", "FTP with TLS from the first byte, usually port 990."),
+        (BackupProtocol.Ftp, "FTP", "Unencrypted FTP. Only on a trusted network."),
+        (BackupProtocol.Local, "Local folder", "A folder on this machine, such as a mounted network share."),
+    ];
+
+    private static readonly DayOfWeek[] Week =
+        [DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday];
+
+    private BackupSettings saved = new();
+    private BackupState state = new();
+    private List<string> log = [];
+
+    private BackupProtocol protocol;
+    private string host = "";
+    private int port;
+    private string? userName;
+    private string? password;
+    private bool hasPassword;
+    private string folder = "";
+    private string? privateKey;
+    private bool hasKey;
+    private bool removeKey;
+    private string? keyPassphrase;
+    private bool hasKeyPassphrase;
+    private string? hostKey;
+    private bool allowInvalidCertificate;
+    private string? passphrase;
+    private bool hasPassphrase;
+    private bool removePassphrase;
+    private bool scheduleEnabled;
+    private TimeOnly time;
+    private string fullDay = "";
+    private int keep;
+    private bool mailOnFailure;
+
+    private bool testing;
+    private BackupResult? testResult;
+    private string? message;
+    private bool isError;
+
+    private IReadOnlyList<BackupEntry>? entries;
+    private bool loadingList;
+    private string? listError;
+
+    private BackupEntry? restoreCandidate;
+    private string? restorePassphrase;
+    private bool restoreConfirmed;
+    private bool restarting;
+
+    private bool Busy => Backups.Activity is not null || restarting;
+
+    protected override void OnInitialized()
+    {
+        Load();
+        Backups.Changed += OnBackupsChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && saved.IsConfigured)
+            await LoadBackups();
+    }
+
+    private void Load()
+    {
+        saved = Backups.Settings;
+        state = Backups.State;
+        log = Backups.Log.ToList();
+        var t = saved.Target;
+        (protocol, host, port, userName, folder) = (t.Protocol, t.Host, t.Port, t.UserName, t.Folder);
+        (hostKey, allowInvalidCertificate) = (t.HostKeyFingerprint, t.AllowInvalidCertificate);
+        hasPassword = !string.IsNullOrEmpty(t.PasswordProtected);
+        hasKey = !string.IsNullOrEmpty(t.PrivateKeyProtected);
+        hasKeyPassphrase = !string.IsNullOrEmpty(t.KeyPassphraseProtected);
+        hasPassphrase = !string.IsNullOrEmpty(saved.PassphraseProtected);
+        (scheduleEnabled, time, keep, mailOnFailure) = (saved.ScheduleEnabled, saved.TimeOfDay, saved.KeepFullBackups, saved.MailOnFailure);
+        fullDay = saved.FullBackupDay?.ToString() ?? "";
+        (password, privateKey, keyPassphrase, passphrase) = (null, null, null, null);
+        (removeKey, removePassphrase) = (false, false);
+    }
+
+    private void OnBackupsChanged() => InvokeAsync(() =>
+    {
+        log = Backups.Log.ToList();
+        StateHasChanged();
+    });
+
+    private static string DayName(DayOfWeek day) => CultureInfo.CurrentUICulture.DateTimeFormat.GetDayName(day);
+
+    private static string Where(BackupTarget t) => t.Protocol == BackupProtocol.Local
+        ? t.Folder
+        : $"{t.Protocol.ToString().ToLowerInvariant()}://{t.Host}:{t.Port}/{t.Folder.TrimStart('/')}";
+
+    private void PickProtocol(BackupProtocol value)
+    {
+        // Follow the usual port, unless a non-standard port was typed.
+        if (port is 0 or 21 or 22 or 990 || port == BackupTarget.DefaultPort(protocol))
+            port = BackupTarget.DefaultPort(value);
+        protocol = value;
+        testResult = null;
+    }
+
+    /// <summary>The target as typed, with secrets from the form or else the stored ones.</summary>
+    private BackupTarget BuildTarget()
+    {
+        var old = saved.Target;
+        var sameServer = string.Equals(old.Host.Trim(), host.Trim(), StringComparison.OrdinalIgnoreCase) && old.Port == port;
+        return new BackupTarget
+        {
+            Protocol = protocol,
+            Host = host.Trim(),
+            Port = port,
+            UserName = string.IsNullOrWhiteSpace(userName) ? null : userName.Trim(),
+            PasswordProtected = string.IsNullOrEmpty(password) ? old.PasswordProtected : Backups.Protect(password),
+            PrivateKeyProtected = !string.IsNullOrWhiteSpace(privateKey) ? Backups.Protect(privateKey) : removeKey ? null : old.PrivateKeyProtected,
+            KeyPassphraseProtected = !string.IsNullOrEmpty(keyPassphrase) ? Backups.Protect(keyPassphrase) : removeKey ? null : old.KeyPassphraseProtected,
+            Folder = folder.Trim(),
+            AllowInvalidCertificate = allowInvalidCertificate,
+            // A key seen for another server is no proof of anything.
+            HostKeyFingerprint = sameServer || hostKey != old.HostKeyFingerprint ? hostKey : null,
+        };
+    }
+
+    private string? Validate()
+    {
+        if (protocol == BackupProtocol.Local)
+            return string.IsNullOrWhiteSpace(folder) || !Path.IsPathRooted(folder.Trim()) ? L["Enter the full path of a folder, such as /mnt/backup."] : null;
+        if (string.IsNullOrWhiteSpace(host)) return L["Enter the server."];
+        if (port is < 1 or > 65535) return L["Enter a port between 1 and 65535."];
+        if (scheduleEnabled && keep < 1) return L["Keep at least one full backup."];
+        return null;
+    }
+
+    private async Task TestConnection()
+    {
+        testResult = null;
+        if (Validate() is { } problem)
+        {
+            testResult = new(false, problem);
+            return;
+        }
+        testing = true;
+        try
+        {
+            var target = BuildTarget();
+            var (result, seen) = await Backups.TestAsync(Backups.LoginFor(target));
+            testResult = result;
+            if (seen is not null && result.Success)
+                hostKey = seen;
+        }
+        finally
+        {
+            testing = false;
+        }
+    }
+
+    private async Task Save()
+    {
+        if (Validate() is { } problem)
+        {
+            (message, isError) = (problem, true);
+            return;
+        }
+        var settings = new BackupSettings
+        {
+            Target = BuildTarget(),
+            PassphraseProtected = !string.IsNullOrEmpty(passphrase) ? Backups.Protect(passphrase) : removePassphrase ? null : saved.PassphraseProtected,
+            ScheduleEnabled = scheduleEnabled,
+            Time = time.ToString("HH:mm", CultureInfo.InvariantCulture),
+            FullBackupDay = Enum.TryParse<DayOfWeek>(fullDay, out var day) ? day : null,
+            KeepFullBackups = Math.Clamp(keep, 1, 365),
+            MailOnFailure = mailOnFailure,
+        };
+        Store.Save(Store.Current with { Backup = settings });
+        Load();
+        (message, isError) = (L["Settings saved."], false);
+        await LoadBackups();
+    }
+
+    private async Task LoadBackups()
+    {
+        if (!saved.IsConfigured)
+            return;
+        loadingList = true;
+        listError = null;
+        StateHasChanged();
+        try
+        {
+            entries = await Backups.ListAsync();
+        }
+        catch (Exception ex)
+        {
+            listError = L["The backups cannot be listed: {0}", ex.InnerException?.Message ?? ex.Message];
+        }
+        finally
+        {
+            loadingList = false;
+            saved = Backups.Settings;
+            hostKey ??= saved.Target.HostKeyFingerprint;
+            // Also called from OnAfterRenderAsync, which does not render again by itself.
+            StateHasChanged();
+        }
+    }
+
+    private async Task RunBackup(BackupKind kind)
+    {
+        message = null;
+        var result = await Backups.BackupAsync(kind);
+        (message, isError) = (result.Message, !result.Success);
+        state = Backups.State;
+        await LoadBackups();
+    }
+
+    private void AskRestore(BackupEntry entry)
+    {
+        restoreCandidate = entry;
+        restorePassphrase = null;
+        restoreConfirmed = false;
+    }
+
+    private async Task Restore()
+    {
+        var entry = restoreCandidate!;
+        restoreCandidate = null;
+        message = null;
+        var result = await Backups.PrepareRestoreAsync(entry.File.Name, restorePassphrase);
+        restorePassphrase = null;
+        (message, isError) = (result.Message, !result.Success);
+        if (result.Success)
+            await Restart();
+    }
+
+    private void CancelRestore()
+    {
+        Backups.CancelPendingRestore();
+        (message, isError) = (L["The restore was cancelled."], false);
+    }
+
+    private async Task Restart()
+    {
+        restarting = true;
+        StateHasChanged();
+        await JS.InvokeVoidAsync("panel.goWhenUp", Nav.Uri);
+        // Let this response reach the browser, then stop; the service manager starts the panel again.
+        _ = Task.Delay(TimeSpan.FromSeconds(1)).ContinueWith(_ => Lifetime.StopApplication());
+    }
+
+    public void Dispose() => Backups.Changed -= OnBackupsChanged;
+}
