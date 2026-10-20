@@ -140,6 +140,9 @@ await page.click(".sidebar-footer button:has-text('Info')");
 await page.waitForSelector(".app-modal");
 await page.waitForTimeout(400);
 await shot("info");
+await page.click(".app-modal-tabs button:has-text('Changelog')");
+await page.waitForTimeout(400);
+await shot("changelog");
 await page.keyboard.press("Escape");
 
 await go("/portal");

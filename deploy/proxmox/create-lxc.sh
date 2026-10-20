@@ -141,7 +141,9 @@ push_and_install() {
   local id="$1"; shift
   local tarball
   tarball="$(mktemp --suffix=.tar.gz)"
-  tar -C "$PROJECT_DIR" --exclude='bin' --exclude='obj' --exclude='*.db' -czf "$tarball" src deploy
+  local parts=(src deploy)
+  [[ -f "$PROJECT_DIR/CHANGELOG.md" ]] && parts+=(CHANGELOG.md)   # shown under Info → Changelog
+  tar -C "$PROJECT_DIR" --exclude='bin' --exclude='obj' --exclude='*.db' -czf "$tarball" "${parts[@]}"
   pct exec "$id" -- mkdir -p /tmp/mediamtx-panel-install
   pct push "$id" "$tarball" /tmp/mediamtx-panel-install/source.tar.gz
   pct push "$id" "$SCRIPT_DIR/install-in-lxc.sh" /tmp/mediamtx-panel-install/install-in-lxc.sh --perms 0755

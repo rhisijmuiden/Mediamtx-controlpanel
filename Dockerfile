@@ -3,6 +3,7 @@ WORKDIR /src
 COPY src/MediaMtxPanel/MediaMtxPanel.csproj src/MediaMtxPanel/
 RUN dotnet restore src/MediaMtxPanel/MediaMtxPanel.csproj
 COPY src/ src/
+COPY CHANGELOG.md ./
 # Commit shown under Info and used by the update check: docker compose build --build-arg GIT_COMMIT=$(git rev-parse HEAD)
 ARG GIT_COMMIT=""
 RUN dotnet publish src/MediaMtxPanel/MediaMtxPanel.csproj -c Release -o /app --no-restore -p:SourceRevisionId="$GIT_COMMIT"

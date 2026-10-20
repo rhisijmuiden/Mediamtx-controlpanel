@@ -15,7 +15,7 @@ A control panel for [MediaMTX](https://github.com/bluenviron/mediamtx), written 
 - **Customer portal and paywall**: customers see their own streams with a live preview and statistics, and sell tickets with iDEAL (Mollie) or PayPal.
 - **Settings**: application name, default language, web interface port and outgoing mail (any SMTP server).
 - **Languages**: English (default), Dutch, German and French; everyone can pick their own language.
-- **Info and updates**: the current version and build, with an update check against GitHub every 24 hours and on demand, on a **Stable** or **Test** release channel.
+- **Info and updates**: the current version and build, a changelog of every version, with an update check against GitHub every 24 hours and on demand, on a **Stable** or **Test** release channel.
 - **Proxmox**: create an LXC container with the panel and MediaMTX using a single command in the Proxmox shell (see [Proxmox LXC](#proxmox-lxc)).
 
 **Install on Proxmox VE** by pasting this into the Proxmox host shell (details in [Proxmox LXC](#proxmox-lxc)):
@@ -159,6 +159,12 @@ The panel is available in English, Dutch, German and French. English is the defa
 ![Info](docs/screenshots/info.png)
 
 The **Info** button at the bottom left shows the version, the build (git commit) and the build date. The panel checks GitHub for a newer version when it starts and then every 24 hours (switch this off under *Settings → General*); administrators can also check by hand with *Check for updates*. The check follows the [release channel](#release-channels); while that channel has no release yet, the panel compares its build with the newest commit on `main`, which is what the installers then build. A dot on the Info button means an update is available; the panel shows how to install it. Nothing is installed automatically.
+
+The **Changelog** tab shows every version with what was added, changed and fixed, as a timeline. When an update is available, the Info window also lists what the newer version brings (read from `CHANGELOG.md` of that release on GitHub), and the Changelog tab shows those versions on top.
+
+![Changelog](docs/screenshots/changelog.png)
+
+The changelog lives in [`CHANGELOG.md`](CHANGELOG.md) ([Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format) and is built into the panel. Add each change under *Unreleased*; when you raise `<Version>` in `MediaMtxPanel.csproj`, rename *Unreleased* to that version (a test fails when the version has no section). The Release workflow uses the version's section as the release notes.
 
 ### Release channels
 
