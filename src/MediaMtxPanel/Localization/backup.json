@@ -1,0 +1,577 @@
+{
+  "Backup & restore": {
+    "nl": "Back-up en herstel",
+    "de": "Sicherung & Wiederherstellung",
+    "fr": "Sauvegarde et restauration"
+  },
+  "Backs up the database, the settings and the encryption keys to another machine over SFTP, SCP, FTPS or FTP. A full backup holds everything; an incremental backup only what changed since the previous one.": {
+    "nl": "Maakt een back-up van de database, de instellingen en de versleutelingssleutels naar een andere machine via SFTP, SCP, FTPS of FTP. Een volledige back-up bevat alles; een incrementele back-up alleen wat er sinds de vorige is veranderd.",
+    "de": "Sichert die Datenbank, die Einstellungen und die Verschlüsselungsschlüssel per SFTP, SCP, FTPS oder FTP auf einen anderen Rechner. Eine Vollsicherung enthält alles, eine inkrementelle Sicherung nur das, was sich seit der vorherigen geändert hat.",
+    "fr": "Sauvegarde la base de données, les paramètres et les clés de chiffrement sur une autre machine via SFTP, SCP, FTPS ou FTP. Une sauvegarde complète contient tout ; une sauvegarde incrémentielle uniquement ce qui a changé depuis la précédente."
+  },
+  "Incremental backup": {
+    "nl": "Incrementele back-up",
+    "de": "Inkrementelle Sicherung",
+    "fr": "Sauvegarde incrémentielle"
+  },
+  "Full backup now": {
+    "nl": "Nu volledige back-up",
+    "de": "Jetzt vollständig sichern",
+    "fr": "Sauvegarde complète maintenant"
+  },
+  "The panel is restarting to finish the restore…": {
+    "nl": "Het paneel herstart om het herstel af te ronden…",
+    "de": "Das Panel startet neu, um die Wiederherstellung abzuschließen…",
+    "fr": "Le panneau redémarre pour terminer la restauration…"
+  },
+  "This page reloads by itself once the panel is back. You may have to log in again.": {
+    "nl": "Deze pagina laadt vanzelf opnieuw zodra het paneel terug is. Mogelijk moet je opnieuw inloggen.",
+    "de": "Diese Seite lädt sich neu, sobald das Panel wieder läuft. Eventuell müssen Sie sich erneut anmelden.",
+    "fr": "Cette page se recharge d'elle-même dès que le panneau est de retour. Vous devrez peut-être vous reconnecter."
+  },
+  "A restore is ready": {
+    "nl": "Een herstel staat klaar",
+    "de": "Eine Wiederherstellung ist bereit",
+    "fr": "Une restauration est prête"
+  },
+  "The downloaded backup replaces the current data when the panel restarts.": {
+    "nl": "De gedownloade back-up vervangt de huidige gegevens zodra het paneel herstart.",
+    "de": "Die heruntergeladene Sicherung ersetzt die aktuellen Daten beim Neustart des Panels.",
+    "fr": "La sauvegarde téléchargée remplace les données actuelles au redémarrage du panneau."
+  },
+  "Cancel restore": {
+    "nl": "Herstel annuleren",
+    "de": "Wiederherstellung abbrechen",
+    "fr": "Annuler la restauration"
+  },
+  "Restart now": {
+    "nl": "Nu herstarten",
+    "de": "Jetzt neu starten",
+    "fr": "Redémarrer maintenant"
+  },
+  "Last backup": {
+    "nl": "Laatste back-up",
+    "de": "Letzte Sicherung",
+    "fr": "Dernière sauvegarde"
+  },
+  "Succeeded": {
+    "nl": "Gelukt",
+    "de": "Erfolgreich",
+    "fr": "Réussie"
+  },
+  "Failed": {
+    "nl": "Mislukt",
+    "de": "Fehlgeschlagen",
+    "fr": "Échouée"
+  },
+  "Never": {
+    "nl": "Nooit",
+    "de": "Nie",
+    "fr": "Jamais"
+  },
+  "Schedule": {
+    "nl": "Planning",
+    "de": "Zeitplan",
+    "fr": "Planification"
+  },
+  "Every day at {0}": {
+    "nl": "Elke dag om {0}",
+    "de": "Täglich um {0}",
+    "fr": "Tous les jours à {0}"
+  },
+  "Full backup on {0}, incremental on the other days": {
+    "nl": "Volledige back-up op {0}, incrementeel op de andere dagen",
+    "de": "Vollsicherung am {0}, inkrementell an den anderen Tagen",
+    "fr": "Sauvegarde complète le {0}, incrémentielle les autres jours"
+  },
+  "A full backup every day": {
+    "nl": "Elke dag een volledige back-up",
+    "de": "Jeden Tag eine Vollsicherung",
+    "fr": "Une sauvegarde complète chaque jour"
+  },
+  "Only backups you start yourself.": {
+    "nl": "Alleen back-ups die je zelf start.",
+    "de": "Nur Sicherungen, die Sie selbst starten.",
+    "fr": "Uniquement les sauvegardes que vous lancez vous-même."
+  },
+  "Location": {
+    "nl": "Locatie",
+    "de": "Speicherort",
+    "fr": "Emplacement"
+  },
+  "Not encrypted": {
+    "nl": "Niet versleuteld",
+    "de": "Nicht verschlüsselt",
+    "fr": "Non chiffrée"
+  },
+  "Encrypted with a passphrase (AES-256)": {
+    "nl": "Versleuteld met een wachtzin (AES-256)",
+    "de": "Mit einer Passphrase verschlüsselt (AES-256)",
+    "fr": "Chiffrée avec une phrase secrète (AES-256)"
+  },
+  "Not set up": {
+    "nl": "Niet ingesteld",
+    "de": "Nicht eingerichtet",
+    "fr": "Non configurée"
+  },
+  "Choose a location below.": {
+    "nl": "Kies hieronder een locatie.",
+    "de": "Wählen Sie unten einen Speicherort.",
+    "fr": "Choisissez un emplacement ci-dessous."
+  },
+  "Log": {
+    "nl": "Logboek",
+    "de": "Protokoll",
+    "fr": "Journal"
+  },
+  "Backups at the remote location": {
+    "nl": "Back-ups op de externe locatie",
+    "de": "Sicherungen am entfernten Speicherort",
+    "fr": "Sauvegardes sur l'emplacement distant"
+  },
+  "Refresh": {
+    "nl": "Vernieuwen",
+    "de": "Aktualisieren",
+    "fr": "Actualiser"
+  },
+  "Save a backup location to see its backups here.": {
+    "nl": "Sla een back-uplocatie op om de back-ups hier te zien.",
+    "de": "Speichern Sie einen Speicherort, um seine Sicherungen hier zu sehen.",
+    "fr": "Enregistrez un emplacement de sauvegarde pour voir ses sauvegardes ici."
+  },
+  "There are no backups at this location yet.": {
+    "nl": "Er staan nog geen back-ups op deze locatie.",
+    "de": "An diesem Speicherort gibt es noch keine Sicherungen.",
+    "fr": "Il n'y a pas encore de sauvegarde à cet emplacement."
+  },
+  "Made on": {
+    "nl": "Gemaakt op",
+    "de": "Erstellt am",
+    "fr": "Créée le"
+  },
+  "Size": {
+    "nl": "Grootte",
+    "de": "Größe",
+    "fr": "Taille"
+  },
+  "Restore downloads": {
+    "nl": "Herstel downloadt",
+    "de": "Wiederherstellung lädt",
+    "fr": "La restauration télécharge"
+  },
+  "Full": {
+    "nl": "Volledig",
+    "de": "Voll",
+    "fr": "Complète"
+  },
+  "Incremental": {
+    "nl": "Incrementeel",
+    "de": "Inkrementell",
+    "fr": "Incrémentielle"
+  },
+  "{0} archive(s), {1}": {
+    "nl": "{0} archief/archieven, {1}",
+    "de": "{0} Archiv(e), {1}",
+    "fr": "{0} archive(s), {1}"
+  },
+  "The full backup this one builds on is missing.": {
+    "nl": "De volledige back-up waarop deze voortbouwt ontbreekt.",
+    "de": "Die Vollsicherung, auf der diese aufbaut, fehlt.",
+    "fr": "La sauvegarde complète sur laquelle celle-ci repose est manquante."
+  },
+  "Incomplete": {
+    "nl": "Onvolledig",
+    "de": "Unvollständig",
+    "fr": "Incomplète"
+  },
+  "Restore": {
+    "nl": "Herstellen",
+    "de": "Wiederherstellen",
+    "fr": "Restaurer"
+  },
+  "Remote location": {
+    "nl": "Externe locatie",
+    "de": "Entfernter Speicherort",
+    "fr": "Emplacement distant"
+  },
+  "Where the backups go. Use a machine other than this one, so a backup survives when this server is lost.": {
+    "nl": "Waar de back-ups naartoe gaan. Gebruik een andere machine dan deze, zodat een back-up blijft bestaan als deze server verloren gaat.",
+    "de": "Wohin die Sicherungen gehen. Nutzen Sie einen anderen Rechner als diesen, damit eine Sicherung den Verlust dieses Servers übersteht.",
+    "fr": "Où vont les sauvegardes. Utilisez une autre machine que celle-ci, pour qu'une sauvegarde survive à la perte de ce serveur."
+  },
+  "Folder on this machine": {
+    "nl": "Map op deze machine",
+    "de": "Ordner auf diesem Rechner",
+    "fr": "Dossier sur cette machine"
+  },
+  "Folder on the server": {
+    "nl": "Map op de server",
+    "de": "Ordner auf dem Server",
+    "fr": "Dossier sur le serveur"
+  },
+  "For example a mounted NAS share. The folder is created when it does not exist.": {
+    "nl": "Bijvoorbeeld een gekoppelde NAS-share. De map wordt aangemaakt als die niet bestaat.",
+    "de": "Zum Beispiel eine eingebundene NAS-Freigabe. Der Ordner wird angelegt, wenn er nicht existiert.",
+    "fr": "Par exemple un partage NAS monté. Le dossier est créé s'il n'existe pas."
+  },
+  "A relative folder starts in the home folder of the user. It is created when it does not exist.": {
+    "nl": "Een relatieve map begint in de thuismap van de gebruiker. De map wordt aangemaakt als die niet bestaat.",
+    "de": "Ein relativer Ordner beginnt im Home-Ordner des Benutzers. Er wird angelegt, wenn er nicht existiert.",
+    "fr": "Un dossier relatif part du dossier personnel de l'utilisateur. Il est créé s'il n'existe pas."
+  },
+  "Private key (optional)": {
+    "nl": "Privésleutel (optioneel)",
+    "de": "Privater Schlüssel (optional)",
+    "fr": "Clé privée (facultative)"
+  },
+  "Instead of or next to the password. Put the matching public key in ~/.ssh/authorized_keys on the server.": {
+    "nl": "In plaats van of naast het wachtwoord. Zet de bijbehorende publieke sleutel in ~/.ssh/authorized_keys op de server.",
+    "de": "Statt oder neben dem Passwort. Legen Sie den passenden öffentlichen Schlüssel in ~/.ssh/authorized_keys auf dem Server ab.",
+    "fr": "À la place du mot de passe ou en plus. Placez la clé publique correspondante dans ~/.ssh/authorized_keys sur le serveur."
+  },
+  "Remove the stored key": {
+    "nl": "Opgeslagen sleutel verwijderen",
+    "de": "Gespeicherten Schlüssel entfernen",
+    "fr": "Supprimer la clé enregistrée"
+  },
+  "Key passphrase": {
+    "nl": "Wachtzin van de sleutel",
+    "de": "Passphrase des Schlüssels",
+    "fr": "Phrase secrète de la clé"
+  },
+  "Only when the key has one": {
+    "nl": "Alleen als de sleutel er een heeft",
+    "de": "Nur wenn der Schlüssel eine hat",
+    "fr": "Uniquement si la clé en a une"
+  },
+  "Host key": {
+    "nl": "Hostsleutel",
+    "de": "Host-Schlüssel",
+    "fr": "Clé d'hôte"
+  },
+  "Forget": {
+    "nl": "Vergeten",
+    "de": "Vergessen",
+    "fr": "Oublier"
+  },
+  "The panel refuses to connect when the server shows another key.": {
+    "nl": "Het paneel weigert te verbinden als de server een andere sleutel toont.",
+    "de": "Das Panel verweigert die Verbindung, wenn der Server einen anderen Schlüssel zeigt.",
+    "fr": "Le panneau refuse de se connecter si le serveur présente une autre clé."
+  },
+  "Trusted at the first connection and checked every time after that.": {
+    "nl": "Vertrouwd bij de eerste verbinding en daarna elke keer gecontroleerd.",
+    "de": "Bei der ersten Verbindung als vertrauenswürdig gespeichert und danach jedes Mal geprüft.",
+    "fr": "Approuvée à la première connexion, puis vérifiée à chaque fois."
+  },
+  "Only for your own server on a trusted network.": {
+    "nl": "Alleen voor je eigen server op een vertrouwd netwerk.",
+    "de": "Nur für Ihren eigenen Server in einem vertrauenswürdigen Netzwerk.",
+    "fr": "Uniquement pour votre propre serveur sur un réseau de confiance."
+  },
+  "FTP sends the password and the data unencrypted. Use FTPS or SFTP when the server supports it, and set a backup passphrase.": {
+    "nl": "FTP verstuurt het wachtwoord en de gegevens onversleuteld. Gebruik FTPS of SFTP als de server dat ondersteunt, en stel een back-upwachtzin in.",
+    "de": "FTP überträgt Passwort und Daten unverschlüsselt. Nutzen Sie FTPS oder SFTP, wenn der Server es unterstützt, und legen Sie eine Sicherungs-Passphrase fest.",
+    "fr": "FTP envoie le mot de passe et les données en clair. Utilisez FTPS ou SFTP si le serveur le permet, et définissez une phrase secrète de sauvegarde."
+  },
+  "With a passphrase, every backup is encrypted with AES-256-GCM before it leaves this machine. The backups contain stream passwords and other secrets, so this is recommended.": {
+    "nl": "Met een wachtzin wordt elke back-up met AES-256-GCM versleuteld voordat die deze machine verlaat. De back-ups bevatten streamwachtwoorden en andere geheimen, dus dit is aan te raden.",
+    "de": "Mit einer Passphrase wird jede Sicherung mit AES-256-GCM verschlüsselt, bevor sie diesen Rechner verlässt. Die Sicherungen enthalten Stream-Passwörter und andere Geheimnisse, daher wird dies empfohlen.",
+    "fr": "Avec une phrase secrète, chaque sauvegarde est chiffrée en AES-256-GCM avant de quitter cette machine. Les sauvegardes contiennent les mots de passe des flux et d'autres secrets, c'est donc recommandé."
+  },
+  "Backup passphrase": {
+    "nl": "Back-upwachtzin",
+    "de": "Sicherungs-Passphrase",
+    "fr": "Phrase secrète de sauvegarde"
+  },
+  "No encryption": {
+    "nl": "Geen versleuteling",
+    "de": "Keine Verschlüsselung",
+    "fr": "Pas de chiffrement"
+  },
+  "Stop encrypting new backups": {
+    "nl": "Nieuwe back-ups niet meer versleutelen",
+    "de": "Neue Sicherungen nicht mehr verschlüsseln",
+    "fr": "Ne plus chiffrer les nouvelles sauvegardes"
+  },
+  "Keep the passphrase somewhere safe, outside this panel. Without it, nobody can restore the backups, not even after reinstalling.": {
+    "nl": "Bewaar de wachtzin op een veilige plek, buiten dit paneel. Zonder wachtzin kan niemand de back-ups herstellen, ook niet na een herinstallatie.",
+    "de": "Bewahren Sie die Passphrase sicher außerhalb dieses Panels auf. Ohne sie kann niemand die Sicherungen wiederherstellen, auch nicht nach einer Neuinstallation.",
+    "fr": "Conservez la phrase secrète en lieu sûr, en dehors de ce panneau. Sans elle, personne ne peut restaurer les sauvegardes, même après une réinstallation."
+  },
+  "Automatic backups once a day. Old full backups are removed together with their incremental backups.": {
+    "nl": "Automatische back-ups eens per dag. Oude volledige back-ups worden samen met hun incrementele back-ups verwijderd.",
+    "de": "Automatische Sicherungen einmal täglich. Alte Vollsicherungen werden mit ihren inkrementellen Sicherungen entfernt.",
+    "fr": "Sauvegardes automatiques une fois par jour. Les anciennes sauvegardes complètes sont supprimées avec leurs sauvegardes incrémentielles."
+  },
+  "Make a backup every day": {
+    "nl": "Elke dag een back-up maken",
+    "de": "Täglich eine Sicherung erstellen",
+    "fr": "Faire une sauvegarde chaque jour"
+  },
+  "Time": {
+    "nl": "Tijd",
+    "de": "Uhrzeit",
+    "fr": "Heure"
+  },
+  "Full backup": {
+    "nl": "Volledige back-up",
+    "de": "Vollsicherung",
+    "fr": "Sauvegarde complète"
+  },
+  "Every day (no incremental backups)": {
+    "nl": "Elke dag (geen incrementele back-ups)",
+    "de": "Jeden Tag (keine inkrementellen Sicherungen)",
+    "fr": "Chaque jour (pas de sauvegarde incrémentielle)"
+  },
+  "On {0}, incremental on other days": {
+    "nl": "Op {0}, incrementeel op andere dagen",
+    "de": "Am {0}, an anderen Tagen inkrementell",
+    "fr": "Le {0}, incrémentielle les autres jours"
+  },
+  "Keep full backups": {
+    "nl": "Volledige back-ups bewaren",
+    "de": "Vollsicherungen behalten",
+    "fr": "Sauvegardes complètes à conserver"
+  },
+  "Mail the administrators when a scheduled backup fails": {
+    "nl": "Mail de beheerders als een geplande back-up mislukt",
+    "de": "Administratoren per E-Mail benachrichtigen, wenn eine geplante Sicherung fehlschlägt",
+    "fr": "Envoyer un e-mail aux administrateurs si une sauvegarde planifiée échoue"
+  },
+  "Uses the mail server under Settings → Mail.": {
+    "nl": "Gebruikt de mailserver onder Instellingen → Mail.",
+    "de": "Nutzt den Mailserver unter Einstellungen → E-Mail.",
+    "fr": "Utilise le serveur de messagerie sous Paramètres → E-mail."
+  },
+  "The panel's encryption keys are not kept in a folder, so they are not in the backup. After a restore on another machine, enter the mail password again.": {
+    "nl": "De versleutelingssleutels van het paneel staan niet in een map en zitten dus niet in de back-up. Vul na een herstel op een andere machine het mailwachtwoord opnieuw in.",
+    "de": "Die Verschlüsselungsschlüssel des Panels liegen nicht in einem Ordner und sind daher nicht in der Sicherung. Geben Sie nach einer Wiederherstellung auf einem anderen Rechner das Mail-Passwort erneut ein.",
+    "fr": "Les clés de chiffrement du panneau ne sont pas conservées dans un dossier, elles ne sont donc pas dans la sauvegarde. Après une restauration sur une autre machine, saisissez à nouveau le mot de passe de messagerie."
+  },
+  "Restore this backup?": {
+    "nl": "Deze back-up herstellen?",
+    "de": "Diese Sicherung wiederherstellen?",
+    "fr": "Restaurer cette sauvegarde ?"
+  },
+  "All streams, servers, users and settings are replaced by the ones in this backup. The location and schedule of the backups stay as they are.": {
+    "nl": "Alle streams, servers, gebruikers en instellingen worden vervangen door die uit deze back-up. De locatie en planning van de back-ups blijven zoals ze zijn.",
+    "de": "Alle Streams, Server, Benutzer und Einstellungen werden durch die aus dieser Sicherung ersetzt. Speicherort und Zeitplan der Sicherungen bleiben unverändert.",
+    "fr": "Tous les flux, serveurs, utilisateurs et paramètres sont remplacés par ceux de cette sauvegarde. L'emplacement et la planification des sauvegardes restent inchangés."
+  },
+  "The panel downloads and checks the backup first, then restarts. The current data is kept in {0}.": {
+    "nl": "Het paneel downloadt en controleert de back-up eerst en herstart daarna. De huidige gegevens worden bewaard in {0}.",
+    "de": "Das Panel lädt die Sicherung zuerst herunter, prüft sie und startet dann neu. Die aktuellen Daten werden in {0} aufbewahrt.",
+    "fr": "Le panneau télécharge et vérifie d'abord la sauvegarde, puis redémarre. Les données actuelles sont conservées dans {0}."
+  },
+  "Passphrase": {
+    "nl": "Wachtzin",
+    "de": "Passphrase",
+    "fr": "Phrase secrète"
+  },
+  "The saved passphrase": {
+    "nl": "De opgeslagen wachtzin",
+    "de": "Die gespeicherte Passphrase",
+    "fr": "La phrase secrète enregistrée"
+  },
+  "Only for an encrypted backup": {
+    "nl": "Alleen voor een versleutelde back-up",
+    "de": "Nur für eine verschlüsselte Sicherung",
+    "fr": "Uniquement pour une sauvegarde chiffrée"
+  },
+  "Only needed when the backup was made with another passphrase.": {
+    "nl": "Alleen nodig als de back-up met een andere wachtzin is gemaakt.",
+    "de": "Nur nötig, wenn die Sicherung mit einer anderen Passphrase erstellt wurde.",
+    "fr": "Nécessaire uniquement si la sauvegarde a été faite avec une autre phrase secrète."
+  },
+  "I understand that the current data is replaced": {
+    "nl": "Ik begrijp dat de huidige gegevens worden vervangen",
+    "de": "Ich verstehe, dass die aktuellen Daten ersetzt werden",
+    "fr": "Je comprends que les données actuelles seront remplacées"
+  },
+  "Enter the full path of a folder, such as /mnt/backup.": {
+    "nl": "Vul het volledige pad van een map in, zoals /mnt/backup.",
+    "de": "Geben Sie den vollständigen Pfad eines Ordners ein, etwa /mnt/backup.",
+    "fr": "Saisissez le chemin complet d'un dossier, par exemple /mnt/backup."
+  },
+  "Enter the server.": {
+    "nl": "Vul de server in.",
+    "de": "Geben Sie den Server ein.",
+    "fr": "Saisissez le serveur."
+  },
+  "Keep at least one full backup.": {
+    "nl": "Bewaar minstens één volledige back-up.",
+    "de": "Behalten Sie mindestens eine Vollsicherung.",
+    "fr": "Conservez au moins une sauvegarde complète."
+  },
+  "The backups cannot be listed: {0}": {
+    "nl": "De back-ups kunnen niet worden opgehaald: {0}",
+    "de": "Die Sicherungen können nicht aufgelistet werden: {0}",
+    "fr": "Impossible de lister les sauvegardes : {0}"
+  },
+  "The restore was cancelled.": {
+    "nl": "Het herstel is geannuleerd.",
+    "de": "Die Wiederherstellung wurde abgebrochen.",
+    "fr": "La restauration a été annulée."
+  },
+  "Connected. The folder is writable and holds {0} backup(s).": {
+    "nl": "Verbonden. De map is beschrijfbaar en bevat {0} back-up(s).",
+    "de": "Verbunden. Der Ordner ist beschreibbar und enthält {0} Sicherung(en).",
+    "fr": "Connecté. Le dossier est accessible en écriture et contient {0} sauvegarde(s)."
+  },
+  "Another backup or restore is running.": {
+    "nl": "Er loopt al een andere back-up of herstel.",
+    "de": "Es läuft bereits eine andere Sicherung oder Wiederherstellung.",
+    "fr": "Une autre sauvegarde ou restauration est en cours."
+  },
+  "Set up a backup location first.": {
+    "nl": "Stel eerst een back-uplocatie in.",
+    "de": "Richten Sie zuerst einen Speicherort ein.",
+    "fr": "Configurez d'abord un emplacement de sauvegarde."
+  },
+  "The backup passphrase cannot be decrypted. Enter it again under Backup.": {
+    "nl": "De back-upwachtzin kan niet worden ontsleuteld. Vul hem opnieuw in onder Back-up.",
+    "de": "Die Sicherungs-Passphrase kann nicht entschlüsselt werden. Geben Sie sie unter Sicherung erneut ein.",
+    "fr": "La phrase secrète de sauvegarde ne peut pas être déchiffrée. Saisissez-la à nouveau sous Sauvegarde."
+  },
+  "Backup {0} uploaded ({1}).": {
+    "nl": "Back-up {0} geüpload ({1}).",
+    "de": "Sicherung {0} hochgeladen ({1}).",
+    "fr": "Sauvegarde {0} envoyée ({1})."
+  },
+  "There was no full backup to build on, so a full backup was made: {0} ({1}).": {
+    "nl": "Er was geen volledige back-up om op voort te bouwen, dus er is een volledige back-up gemaakt: {0} ({1}).",
+    "de": "Es gab keine Vollsicherung als Grundlage, daher wurde eine Vollsicherung erstellt: {0} ({1}).",
+    "fr": "Il n'y avait pas de sauvegarde complète sur laquelle s'appuyer, une sauvegarde complète a donc été faite : {0} ({1})."
+  },
+  "'{0}' is not a panel backup.": {
+    "nl": "'{0}' is geen back-up van het paneel.",
+    "de": "'{0}' ist keine Sicherung des Panels.",
+    "fr": "« {0} » n'est pas une sauvegarde du panneau."
+  },
+  "Backup {0} is no longer at the remote location.": {
+    "nl": "Back-up {0} staat niet meer op de externe locatie.",
+    "de": "Sicherung {0} ist nicht mehr am entfernten Speicherort.",
+    "fr": "La sauvegarde {0} n'est plus sur l'emplacement distant."
+  },
+  "This backup was made by version {0}. Update the panel to that version or newer before restoring it.": {
+    "nl": "Deze back-up is gemaakt door versie {0}. Werk het paneel bij naar die versie of nieuwer voordat je hem herstelt.",
+    "de": "Diese Sicherung wurde mit Version {0} erstellt. Aktualisieren Sie das Panel auf diese oder eine neuere Version, bevor Sie sie wiederherstellen.",
+    "fr": "Cette sauvegarde a été faite par la version {0}. Mettez le panneau à jour vers cette version ou une plus récente avant de la restaurer."
+  },
+  "This backup builds on {0}, which is missing at the remote location.": {
+    "nl": "Deze back-up bouwt voort op {0}, dat ontbreekt op de externe locatie.",
+    "de": "Diese Sicherung baut auf {0} auf, das am entfernten Speicherort fehlt.",
+    "fr": "Cette sauvegarde repose sur {0}, qui manque sur l'emplacement distant."
+  },
+  "Backup {0} is downloaded and checked. The panel restarts to finish the restore.": {
+    "nl": "Back-up {0} is gedownload en gecontroleerd. Het paneel herstart om het herstel af te ronden.",
+    "de": "Sicherung {0} wurde heruntergeladen und geprüft. Das Panel startet neu, um die Wiederherstellung abzuschließen.",
+    "fr": "La sauvegarde {0} est téléchargée et vérifiée. Le panneau redémarre pour terminer la restauration."
+  },
+  "The host key of {0} changed to {1}. If the server was reinstalled, forget the old key under Backup and connect again.": {
+    "nl": "De hostsleutel van {0} is veranderd in {1}. Als de server opnieuw is geïnstalleerd, vergeet dan de oude sleutel onder Back-up en verbind opnieuw.",
+    "de": "Der Host-Schlüssel von {0} hat sich in {1} geändert. Wurde der Server neu installiert, vergessen Sie den alten Schlüssel unter Sicherung und verbinden Sie sich erneut.",
+    "fr": "La clé d'hôte de {0} est devenue {1}. Si le serveur a été réinstallé, oubliez l'ancienne clé sous Sauvegarde et reconnectez-vous."
+  },
+  "The server refused the login for '{0}'. Check the user, password or key.": {
+    "nl": "De server weigerde het inloggen voor '{0}'. Controleer de gebruiker, het wachtwoord of de sleutel.",
+    "de": "Der Server hat die Anmeldung für '{0}' abgelehnt. Prüfen Sie Benutzer, Passwort oder Schlüssel.",
+    "fr": "Le serveur a refusé la connexion de « {0} ». Vérifiez l'utilisateur, le mot de passe ou la clé."
+  },
+  "Cannot reach {0}: {1}": {
+    "nl": "Kan {0} niet bereiken: {1}",
+    "de": "{0} ist nicht erreichbar: {1}",
+    "fr": "Impossible de joindre {0} : {1}"
+  },
+  "The TLS certificate of {0} is not trusted: {1}": {
+    "nl": "Het TLS-certificaat van {0} wordt niet vertrouwd: {1}",
+    "de": "Das TLS-Zertifikat von {0} ist nicht vertrauenswürdig: {1}",
+    "fr": "Le certificat TLS de {0} n'est pas approuvé : {1}"
+  },
+  "The backup location reported an error: {0}": {
+    "nl": "De back-uplocatie meldde een fout: {0}",
+    "de": "Der Speicherort meldete einen Fehler: {0}",
+    "fr": "L'emplacement de sauvegarde a signalé une erreur : {0}"
+  },
+  "SFTP": {
+    "nl": "SFTP",
+    "de": "SFTP",
+    "fr": "SFTP"
+  },
+  "SCP": {
+    "nl": "SCP",
+    "de": "SCP",
+    "fr": "SCP"
+  },
+  "FTPS (explicit)": {
+    "nl": "FTPS (expliciet)",
+    "de": "FTPS (explizit)",
+    "fr": "FTPS (explicite)"
+  },
+  "FTPS (implicit)": {
+    "nl": "FTPS (impliciet)",
+    "de": "FTPS (implizit)",
+    "fr": "FTPS (implicite)"
+  },
+  "FTP": {
+    "nl": "FTP",
+    "de": "FTP",
+    "fr": "FTP"
+  },
+  "Local folder": {
+    "nl": "Lokale map",
+    "de": "Lokaler Ordner",
+    "fr": "Dossier local"
+  },
+  "File transfer over SSH. Encrypted and supported by almost every Linux server and NAS. Recommended.": {
+    "nl": "Bestandsoverdracht via SSH. Versleuteld en ondersteund door bijna elke Linux-server en NAS. Aanbevolen.",
+    "de": "Dateiübertragung über SSH. Verschlüsselt und von fast jedem Linux-Server und NAS unterstützt. Empfohlen.",
+    "fr": "Transfert de fichiers via SSH. Chiffré et pris en charge par presque tous les serveurs Linux et NAS. Recommandé."
+  },
+  "Copy over SSH. Needs a normal shell on the server for listing and removing backups.": {
+    "nl": "Kopiëren via SSH. Vereist een normale shell op de server om back-ups te tonen en te verwijderen.",
+    "de": "Kopieren über SSH. Benötigt eine normale Shell auf dem Server, um Sicherungen aufzulisten und zu entfernen.",
+    "fr": "Copie via SSH. Nécessite un shell normal sur le serveur pour lister et supprimer les sauvegardes."
+  },
+  "FTP secured with TLS through AUTH TLS, usually port 21.": {
+    "nl": "FTP beveiligd met TLS via AUTH TLS, meestal poort 21.",
+    "de": "FTP mit TLS über AUTH TLS abgesichert, meist Port 21.",
+    "fr": "FTP sécurisé par TLS via AUTH TLS, généralement le port 21."
+  },
+  "FTP with TLS from the first byte, usually port 990.": {
+    "nl": "FTP met TLS vanaf de eerste byte, meestal poort 990.",
+    "de": "FTP mit TLS ab dem ersten Byte, meist Port 990.",
+    "fr": "FTP avec TLS dès le premier octet, généralement le port 990."
+  },
+  "Unencrypted FTP. Only on a trusted network.": {
+    "nl": "Onversleutelde FTP. Alleen op een vertrouwd netwerk.",
+    "de": "Unverschlüsseltes FTP. Nur in einem vertrauenswürdigen Netzwerk.",
+    "fr": "FTP non chiffré. Uniquement sur un réseau de confiance."
+  },
+  "A folder on this machine, such as a mounted network share.": {
+    "nl": "Een map op deze machine, zoals een gekoppelde netwerkshare.",
+    "de": "Ein Ordner auf diesem Rechner, etwa eine eingebundene Netzwerkfreigabe.",
+    "fr": "Un dossier sur cette machine, comme un partage réseau monté."
+  },
+  "This backup is encrypted; enter its passphrase.": {
+    "nl": "Deze back-up is versleuteld; vul de wachtzin in.",
+    "de": "Diese Sicherung ist verschlüsselt; geben Sie ihre Passphrase ein.",
+    "fr": "Cette sauvegarde est chiffrée ; saisissez sa phrase secrète."
+  },
+  "The passphrase does not match this backup.": {
+    "nl": "De wachtzin past niet bij deze back-up.",
+    "de": "Die Passphrase passt nicht zu dieser Sicherung.",
+    "fr": "La phrase secrète ne correspond pas à cette sauvegarde."
+  },
+  "Backup of {0} failed": {
+    "nl": "Back-up van {0} mislukt",
+    "de": "Sicherung von {0} fehlgeschlagen",
+    "fr": "Échec de la sauvegarde de {0}"
+  },
+  "The scheduled backup of {0} failed:": {
+    "nl": "De geplande back-up van {0} is mislukt:",
+    "de": "Die geplante Sicherung von {0} ist fehlgeschlagen:",
+    "fr": "La sauvegarde planifiée de {0} a échoué :"
+  }
+}
