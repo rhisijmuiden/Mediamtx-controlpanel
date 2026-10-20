@@ -10,6 +10,10 @@ Added, Changed, Deprecated, Removed, Fixed or Security, and rename Unreleased to
 
 ## [Unreleased]
 
+### Fixed
+
+- The release workflow read the version from a comment in the project file as well, so publishing a release failed.
+
 ## [1.4.0] - 2026-10-20
 
 ### Added
