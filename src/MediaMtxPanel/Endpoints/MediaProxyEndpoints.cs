@@ -83,6 +83,10 @@ public static class MediaProxyEndpoints
             var location = http.Response.Headers.Location.ToString();
             if (location.StartsWith('/') && !location.StartsWith("//", StringComparison.Ordinal))
                 http.Response.Headers.Location = prefix + location;
+            // Every request is authorised by MediaMTX per viewer (tickets, read credentials), so a CDN such as
+            // Cloudflare must never cache and hand out playlists or segments; and proxies must not buffer live video.
+            http.Response.Headers.CacheControl = "private, no-store";
+            http.Response.Headers["X-Accel-Buffering"] = "no";
             return result;
         }
     }

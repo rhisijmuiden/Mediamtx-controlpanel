@@ -112,6 +112,42 @@ public class ReverseProxyTests
         Assert.Equal("", await denied.Content.ReadAsStringAsync());
     }
 
+    [Theory]
+    [InlineData("203.0.113.5, 104.16.0.1", "198.51.100.7")] // last hop is Cloudflare: believe CF-Connecting-IP
+    [InlineData("203.0.113.5, 10.0.0.9", "10.0.0.9")]       // not from Cloudflare: the header is ignored
+    public async Task Behind_cloudflare_the_viewer_address_comes_from_cf_connecting_ip_and_nothing_is_cached(
+        string forwardedFor, string expectedViewer)
+    {
+        using var mediamtx = new FakeMediaMtx(_ =>
+            "HTTP/1.1 200 OK\r\nCache-Control: max-age=3600\r\nContent-Type: application/vnd.apple.mpegurl\r\nContent-Length: 7\r\n\r\n#EXTM3U");
+        using var factory = new PanelFactory();
+        var server = await UpdateServerAsync(factory, s =>
+        {
+            s.ApiUrl = "http://127.0.0.1:9997";
+            s.HlsPort = mediamtx.Port;
+            s.ViewerRoute = ViewerRoute.Panel;
+        });
+
+        var request = new HttpRequestMessage(HttpMethod.Get, $"/media/{server.Id}/hls/cam/index.m3u8");
+        request.Headers.Add("X-Forwarded-For", forwardedFor);
+        request.Headers.Add("CF-Connecting-IP", "198.51.100.7");
+        var response = await factory.Client().SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains($"X-Forwarded-For: {expectedViewer}\r\n", Assert.Single(mediamtx.Requests).Head);
+        Assert.True(response.Headers.CacheControl?.NoStore);
+        Assert.True(response.Headers.CacheControl?.Private);
+    }
+
+    [Fact]
+    public void Cloudflare_addresses_are_recognised()
+    {
+        Assert.True(Cloudflare.IsCloudflare(IPAddress.Parse("104.16.132.229")));
+        Assert.True(Cloudflare.IsCloudflare(IPAddress.Parse("2606:4700::6810:84e5")));
+        Assert.True(Cloudflare.IsCloudflare(IPAddress.Parse("::ffff:172.67.1.1")));
+        Assert.False(Cloudflare.IsCloudflare(IPAddress.Parse("82.94.1.1")));
+    }
+
     [Fact]
     public async Task Servers_that_do_not_route_through_the_panel_are_not_forwarded()
     {

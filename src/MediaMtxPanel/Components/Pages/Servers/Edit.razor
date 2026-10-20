@@ -164,7 +164,7 @@ else
                             <div class="row g-3">
                                 <div class="col-md-7">
                                     <label class="form-label" for="host">@L["Host or IP"]</label>
-                                    <InputText id="host" class="form-control font-monospace" @bind-Value="input.PublicHost" placeholder="stream1.example.com" />
+                                    <InputText id="host" class="form-control font-monospace" @bind-Value="input.PublicHost" @bind-Value:after="CheckCloudflareAsync" placeholder="stream1.example.com" />
                                 </div>
                                 <div class="col-md-5 d-flex align-items-end">
                                     <div class="form-check form-switch mb-2">
@@ -172,6 +172,15 @@ else
                                         <label class="form-check-label" for="https">@L["https:// for HLS and WebRTC"]</label>
                                     </div>
                                 </div>
+                                @if (hostOnCloudflare)
+                                {
+                                    <div class="col-12">
+                                        <div class="alert alert-warning small mb-0">
+                                            <i class="bi bi-cloud-slash"></i>
+                                            @L["{0} points to Cloudflare's proxy (orange cloud). Cloudflare only passes web traffic, so RTSP, RTMP, SRT and WebRTC video (UDP 8189) cannot reach MediaMTX through it. Use a host name with DNS only (grey cloud), for example media.example.com, or the public IP address here and in webrtcAdditionalHosts. Viewers in the browser can keep using the Cloudflare address through the panel.", input.PublicHost]
+                                        </div>
+                                    </div>
+                                }
                                 <div class="col-6 col-md"><label class="form-label small" for="rtsp">RTSP</label><InputNumber id="rtsp" class="form-control" @bind-Value="input.RtspPort" /></div>
                                 <div class="col-6 col-md"><label class="form-label small" for="rtmp">RTMP</label><InputNumber id="rtmp" class="form-control" @bind-Value="input.RtmpPort" /></div>
                                 <div class="col-6 col-md"><label class="form-label small" for="srt">SRT</label><InputNumber id="srt" class="form-control" @bind-Value="input.SrtPort" /></div>
@@ -434,6 +443,23 @@ else
         input = ServerInput.From(server);
         if (string.IsNullOrEmpty(ssh.Host) && Uri.TryCreate(server.ApiUrl, UriKind.Absolute, out var api))
             ssh.Host = api.Host;
+        await CheckCloudflareAsync();
+    }
+
+    // Host name behind Cloudflare's proxy: only HTTP(S) passes there, so publishers and WebRTC media cannot reach MediaMTX.
+    private bool hostOnCloudflare;
+
+    private async Task CheckCloudflareAsync()
+    {
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        try
+        {
+            hostOnCloudflare = (await Cloudflare.ProxiedAddressesAsync(input?.PublicHost, cts.Token)).Count > 0;
+        }
+        catch (OperationCanceledException)
+        {
+            hostOnCloudflare = false;
+        }
     }
 
     private async Task Save()

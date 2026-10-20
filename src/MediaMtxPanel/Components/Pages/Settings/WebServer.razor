@@ -173,6 +173,7 @@ else
                     <div class="small fw-semibold mb-1">nginx</div>
                     <pre class="cmd">@NginxSnippet</pre>
                     <div class="small text-secondary">@L["Nginx Proxy Manager: add a proxy host for the domain to http://{0}:{1}, turn on Websockets Support and request an SSL certificate. In the Advanced tab add: proxy_buffering off;", PanelHost, Port.ActivePort]</div>
+                    <div class="small text-secondary mt-2"><i class="bi bi-cloud me-1"></i>@L["Cloudflare (orange cloud): the panel and the web players work through it. The panel reads the viewer's address from CF-Connecting-IP and forbids Cloudflare to cache video. Cloudflare does not pass RTSP, RTMP, SRT or WebRTC video (UDP 8189): give MediaMTX a separate host name with DNS only (grey cloud), set it as the server's public host and in webrtcAdditionalHosts. Turn off Rocket Loader for this domain."]</div>
                     <div class="small text-secondary mt-2">@L["Zoraxy: under HTTP Proxy create a proxy rule for the domain with target {0}:{1} (without TLS to the target) and request a certificate with ACME. WebSockets work automatically. For WebRTC add a Stream Proxy rule for UDP port 8189 to MediaMTX.", PanelHost, Port.ActivePort]</div>
                 </div>
             </section>

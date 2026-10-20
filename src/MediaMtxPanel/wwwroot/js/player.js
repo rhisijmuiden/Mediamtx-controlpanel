@@ -52,8 +52,35 @@
     // WebRTC media needs UDP/TCP 8189 to MediaMTX, which a reverse proxy does not carry. When signalling works
     // but no picture arrives, or reader.js cannot be loaded at all, switch to HLS, which runs over https only.
     const WEBRTC_FALLBACK_MS = 12000;
+    // After such a fallback, later visits start with HLS for a while instead of waiting again (e.g. behind
+    // Cloudflare, which never passes WebRTC media). Choosing WebRTC again on the same player still tries it.
+    const WEBRTC_FAILED_FOR_MS = 30 * 60 * 1000;
+    const startedBefore = new WeakSet();
+
+    function failureKey(o) {
+        try { return "panelPlayer.webrtcFailed:" + new URL(o.whepUrl, location.href).origin; } catch { return null; }
+    }
+
+    function webRtcFailedRecently(o) {
+        try {
+            const at = Number(localStorage.getItem(failureKey(o)) || 0);
+            return Date.now() - at < WEBRTC_FAILED_FOR_MS;
+        } catch {
+            return false;
+        }
+    }
+
+    function rememberWebRtcFailure(o, failed) {
+        try {
+            const key = failureKey(o);
+            if (!key) return;
+            if (failed) localStorage.setItem(key, String(Date.now()));
+            else localStorage.removeItem(key);
+        } catch { /* storage blocked: just try WebRTC next time */ }
+    }
 
     function fallBackToHls(video, o) {
+        rememberWebRtcFailure(o, true);
         stop(video);
         setStatus(video, "WebRTC could not connect; switching to HLS…", "wait");
         startHls(video, o).catch((e) => setStatus(video, tr(video, "Player could not start:") + " " + e.message, "error"));
@@ -89,6 +116,7 @@
                     : tr(video, "No picture yet:") + " " + err, "error");
             },
             onTrack: (evt) => {
+                if (!gotTrack) rememberWebRtcFailure(o, false);
                 gotTrack = true;
                 if (video.srcObject !== evt.streams[0]) {
                     video.srcObject = evt.streams[0];
@@ -141,8 +169,10 @@
         // The embedded player passes muted: false after a click, when sound is allowed.
         video.muted = options.muted !== false;
         video.autoplay = true;
+        const firstStart = !startedBefore.has(video);
+        startedBefore.add(video);
         try {
-            if (options.mode === "hls") {
+            if (options.mode === "hls" || (firstStart && options.hlsUrl && webRtcFailedRecently(options))) {
                 await startHls(video, options);
             } else {
                 await startWebRtc(video, options);
