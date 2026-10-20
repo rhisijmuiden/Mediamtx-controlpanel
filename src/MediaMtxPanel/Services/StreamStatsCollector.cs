@@ -18,7 +18,7 @@ public class StreamStatsCollector(
     IOptions<MediaMtxOptions> options,
     ILogger<StreamStatsCollector> logger) : BackgroundService
 {
-    private record Counters(long Timestamp, ulong In, ulong Out);
+    private record Counters(long Timestamp, ulong In, ulong Out, HashSet<string> Readers);
 
     private readonly Dictionary<int, Counters> _previous = [];
     private DateTime _lastCleanup = DateTime.MinValue;
@@ -92,6 +92,10 @@ public class StreamStatsCollector(
             PlatformViewers = platformViewers.GetTotal(streamId),
         };
 
+        // A reader (MediaMTX session) that was not there in the previous round is someone who started watching.
+        var readers = path.Readers.Select(r => $"{r.Type}:{r.Id}").ToHashSet();
+        sample.NewViewers = readers.Count;
+
         // Only count traffic against a recent previous round; after a gap (panel or server down) the
         // counters cannot be split over the missing time. Lower counters mean the path restarted.
         if (_previous.TryGetValue(streamId, out var prev) && now > prev.Timestamp && now - prev.Timestamp <= 3 * interval)
@@ -99,8 +103,9 @@ public class StreamStatsCollector(
             sample.Seconds = (int)(now - prev.Timestamp);
             sample.BytesIn = (long)(path.Received >= prev.In ? path.Received - prev.In : path.Received);
             sample.BytesOut = (long)(path.Sent >= prev.Out ? path.Sent - prev.Out : path.Sent);
+            sample.NewViewers = readers.Count(r => !prev.Readers.Contains(r));
         }
-        _previous[streamId] = new Counters(now, path.Received, path.Sent);
+        _previous[streamId] = new Counters(now, path.Received, path.Sent, readers);
         return sample;
     }
 

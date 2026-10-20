@@ -125,6 +125,8 @@ builder.Services.AddHostedService(sp => sp.GetRequiredService<MediaMtxSyncServic
 builder.Services.AddSingleton<StreamStatsService>();
 builder.Services.AddSingleton<StreamStatsCollector>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<StreamStatsCollector>());
+builder.Services.AddSingleton<ViewerReportService>();
+builder.Services.AddHostedService<ViewerReportRollup>();
 builder.Services.AddHttpClient("alerts", c => c.Timeout = TimeSpan.FromSeconds(15));
 builder.Services.AddSingleton<AlertMonitor>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<AlertMonitor>());
@@ -252,6 +254,7 @@ app.MapPaymentEndpoints();
 app.MapEmbedEndpoints();
 app.MapViewerEndpoints();
 app.MapStatisticsEndpoints();
+app.MapReportEndpoints();
 app.MapRecordingEndpoints();
 app.MapLanguageEndpoint();
 

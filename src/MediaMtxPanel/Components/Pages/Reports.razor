@@ -1,0 +1,323 @@
+@page "/reports"
+@attribute [Authorize(Roles = Roles.Admin)]
+@rendermode InteractiveServer
+@using System.Globalization
+@using MediaMtxPanel.Services.Reports
+@inject ViewerReportService ReportService
+
+<AppPageTitle Text="@L["Viewer report"]" />
+
+<div class="page-header">
+    <div>
+        <h1><i class="bi bi-file-earmark-bar-graph text-primary"></i> @L["Viewer report"]</h1>
+        <p class="page-subtitle">@L["How many people watched your streams, per day, week or month. The history is kept after the detailed statistics are deleted."]</p>
+    </div>
+    <div class="page-actions">
+        <details class="export-menu">
+                <summary class="btn btn-primary"><i class="bi bi-download"></i> @L["Export"]</summary>
+                <div class="menu">
+                    <a href="@ExportUrl("pdf")" download data-enhance-nav="false"><i class="bi bi-file-earmark-pdf"></i> @L["PDF report"]</a>
+                    <a href="@ExportUrl("csv")" download data-enhance-nav="false"><i class="bi bi-filetype-csv"></i> @L["CSV per period"]</a>
+                    @if (streamId is null)
+                    {
+                        <a href="@(ExportUrl("csv") + "&part=streams")" download data-enhance-nav="false"><i class="bi bi-filetype-csv"></i> @L["CSV per stream"]</a>
+                    }
+                </div>
+            </details>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body d-flex flex-wrap align-items-end gap-3">
+        <div>
+            <label class="form-label small text-secondary mb-1">@L["Period"]</label>
+            <select class="form-select" value="@preset" @onchange="PresetChangedAsync" aria-label="@L["Period"]">
+                @foreach (var (key, label) in Presets)
+                {
+                    <option value="@key">@L[label]</option>
+                }
+                <option value="custom">@L["Custom"]</option>
+            </select>
+        </div>
+        <div>
+            <label class="form-label small text-secondary mb-1">@L["From"]</label>
+            <input type="date" class="form-control" value="@from.ToString("yyyy-MM-dd")" max="@to.ToString("yyyy-MM-dd")" @onchange="e => DateChangedAsync(e, true)" />
+        </div>
+        <div>
+            <label class="form-label small text-secondary mb-1">@L["To"]</label>
+            <input type="date" class="form-control" value="@to.ToString("yyyy-MM-dd")" min="@from.ToString("yyyy-MM-dd")" @onchange="e => DateChangedAsync(e, false)" />
+        </div>
+        <div>
+            <label class="form-label small text-secondary mb-1">@L["Group by"]</label>
+            <div class="btn-group d-flex" role="group">
+                @foreach (var (g, label) in Groupings)
+                {
+                    <button type="button" class="btn @(g == grouping ? "btn-primary" : "btn-outline-primary")" @onclick="() => GroupAsync(g)">@L[label]</button>
+                }
+            </div>
+        </div>
+        <div class="flex-grow-1" style="min-width: 14rem; max-width: 24rem">
+            <label class="form-label small text-secondary mb-1">@L["Stream"]</label>
+            <select class="form-select" value="@(streamId?.ToString(CultureInfo.InvariantCulture) ?? "")" @onchange="StreamChangedAsync" aria-label="@L["Stream"]">
+                <option value="">@L["All streams"]</option>
+                @foreach (var s in streams)
+                {
+                    <option value="@s.Id">@(s.Exists ? s.Name : $"{s.Name} ({L["deleted"]})")</option>
+                }
+            </select>
+        </div>
+        @if (loading)
+        {
+            <span class="spinner-border spinner-border-sm text-secondary mb-2"></span>
+        }
+    </div>
+</div>
+
+@if (report is null)
+{
+    <p class="text-secondary"><span class="spinner-border spinner-border-sm me-2"></span>@L["Loading…"]</p>
+}
+else
+{
+    var t = report.Totals;
+    <div class="row g-3 mb-4">
+        @Figure("bi-people", "info", L["Peak viewers"], t.PeakViewers.ToString("N0", CultureInfo.CurrentCulture), L["Most viewers at the same time"])
+        @Figure("bi-person-check", "success", L["Unique viewers"], t.UniqueViewers.ToString("N0", CultureInfo.CurrentCulture), L["Different people who watched"])
+        @Figure("bi-play-circle", "", L["Views"], t.Sessions.ToString("N0", CultureInfo.CurrentCulture), L["Times someone started watching"])
+        @Figure("bi-hourglass-split", "warning", L["Watch time"], ReportChart.Hours(t.WatchHours), L["All viewers together"])
+        @Figure("bi-stopwatch", "info", L["Average view duration"], t.Sessions > 0 ? Format.Duration(t.AvgViewDuration) : "–", L["Watch time per view"])
+        @Figure("bi-cloud-arrow-up", "success", L["Data sent to viewers"], Format.Bytes((ulong)t.BytesOut), L["{0} live", ReportChart.Hours(t.LiveHours)])
+    </div>
+
+    @if (report.IsEmpty)
+    {
+        <div class="alert alert-light border d-flex gap-2">
+            <i class="bi bi-info-circle"></i>
+            <span>@L["No viewers were recorded in this period."]</span>
+        </div>
+    }
+
+    @if (report.Periods.Count > 1)
+    {
+        <div class="card mb-4">
+            <div class="card-header"><i class="bi bi-bar-chart"></i> @L["Viewers"] · @ViewerReportPdf.GroupingLabel(grouping, L)</div>
+            <div class="card-body">
+                <ReportChart Report="report" />
+            </div>
+        </div>
+    }
+
+    <div class="row g-4">
+        <div class="@(streamId is null ? "col-xxl-6" : "col-12")">
+            <div class="card">
+                <div class="card-header"><i class="bi bi-calendar3"></i> @L["Per period"]</div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>@L["Period"]</th>
+                                <th class="text-end">@L["Peak"]</th>
+                                <th class="text-end">@L["Unique"]</th>
+                                <th class="text-end">@L["Views"]</th>
+                                <th class="text-end">@L["Watch time"]</th>
+                                <th class="text-end">@L["Avg. per view"]</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var p in report.Periods.AsEnumerable().Reverse())
+                            {
+                                <tr class="@(p.Totals.LiveSeconds == 0 && p.Totals.UniqueViewers == 0 ? "text-secondary" : null)">
+                                    <td class="text-nowrap">@ViewerReportService.PeriodLabel(p, grouping, L)</td>
+                                    @Cells(p.Totals)
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr class="fw-semibold">
+                                <td>@L["Total"]</td>
+                                @Cells(t)
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        @if (streamId is null)
+        {
+            <div class="col-xxl-6">
+                <div class="card">
+                    <div class="card-header"><i class="bi bi-list-ol"></i> @L["Per stream"]</div>
+                    @if (report.Streams.Count == 0)
+                    {
+                        <div class="card-body text-secondary">@L["No viewers were recorded in this period."]</div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>@L["Stream"]</th>
+                                        <th class="text-end">@L["Peak"]</th>
+                                        <th class="text-end">@L["Unique"]</th>
+                                        <th class="text-end">@L["Views"]</th>
+                                        <th class="text-end">@L["Watch time"]</th>
+                                        <th class="text-end">@L["Avg. per view"]</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var s in report.Streams)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <a href="" class="fw-semibold" @onclick="() => SelectStreamAsync(s.StreamId)" @onclick:preventDefault>@s.Name</a>
+                                                @if (!s.Exists)
+                                                {
+                                                    <span class="badge text-bg-light border ms-1">@L["deleted"]</span>
+                                                }
+                                            </td>
+                                            @Cells(s.Totals)
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <p class="small text-secondary mt-3">
+        <i class="bi bi-info-circle"></i>
+        @L["Unique viewers are counted by IP address, or by ticket for paid streams, without storing the address. Viewers behind the same address (or a proxy) count as one; HLS viewers are counted as unique viewers but not as separate views."]
+    </p>
+}
+
+@code {
+    private static readonly (string Key, string Label)[] Presets =
+    [
+        ("7d", "Last 7 days"),
+        ("30d", "Last 30 days"),
+        ("month", "This month"),
+        ("lastmonth", "Last month"),
+        ("12m", "Last 12 months"),
+        ("year", "This year"),
+    ];
+
+    private static readonly (ReportGrouping Grouping, string Label)[] Groupings =
+    [
+        (ReportGrouping.Day, "Day"),
+        (ReportGrouping.Week, "Week"),
+        (ReportGrouping.Month, "Month"),
+    ];
+
+    private string preset = "30d";
+    private DateOnly from, to;
+    private ReportGrouping grouping = ReportGrouping.Day;
+    private int? streamId;
+    private List<(int Id, string Name, bool Exists)> streams = [];
+    private ViewerReport? report;
+    private bool loading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ApplyPreset(preset);
+        streams = await ReportService.ListHistoryStreamsAsync();
+        await LoadAsync();
+    }
+
+    private void ApplyPreset(string key)
+    {
+        var today = ReportService.Today;
+        (from, to, grouping) = key switch
+        {
+            "7d" => (today.AddDays(-6), today, ReportGrouping.Day),
+            "month" => (new DateOnly(today.Year, today.Month, 1), today, ReportGrouping.Day),
+            "lastmonth" => (new DateOnly(today.Year, today.Month, 1).AddMonths(-1), new DateOnly(today.Year, today.Month, 1).AddDays(-1), ReportGrouping.Day),
+            "12m" => (new DateOnly(today.Year, today.Month, 1).AddMonths(-11), today, ReportGrouping.Month),
+            "year" => (new DateOnly(today.Year, 1, 1), today, ReportGrouping.Month),
+            _ => (today.AddDays(-29), today, ReportGrouping.Day),
+        };
+    }
+
+    private async Task PresetChangedAsync(ChangeEventArgs e)
+    {
+        preset = e.Value?.ToString() ?? "30d";
+        if (preset == "custom")
+            return;
+        ApplyPreset(preset);
+        await LoadAsync();
+    }
+
+    private async Task DateChangedAsync(ChangeEventArgs e, bool isFrom)
+    {
+        if (!DateOnly.TryParseExact(e.Value?.ToString(), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var day))
+            return;
+        if (isFrom) from = day; else to = day;
+        if (to < from) (from, to) = (to, from);
+        preset = "custom";
+        // More than ~3 months of days is hard to read; switch to weeks or months.
+        var days = to.DayNumber - from.DayNumber + 1;
+        if (grouping == ReportGrouping.Day && days > 92)
+            grouping = days > 366 ? ReportGrouping.Month : ReportGrouping.Week;
+        await LoadAsync();
+    }
+
+    private async Task GroupAsync(ReportGrouping g)
+    {
+        grouping = g;
+        await LoadAsync();
+    }
+
+    private async Task StreamChangedAsync(ChangeEventArgs e)
+    {
+        streamId = int.TryParse(e.Value?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var id) ? id : null;
+        await LoadAsync();
+    }
+
+    private async Task SelectStreamAsync(int id)
+    {
+        streamId = id;
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        loading = true;
+        try
+        {
+            report = await ReportService.GetReportAsync(from, to, grouping, streamId);
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private string ExportUrl(string extension) =>
+        $"api/reports/viewers.{extension}?from={from:yyyy-MM-dd}&to={to:yyyy-MM-dd}&group={grouping.ToString().ToLowerInvariant()}"
+        + (streamId is null ? "" : $"&stream={streamId}");
+
+    private RenderFragment Figure(string icon, string tone, string label, string value, string hint) =>
+        @<div class="col-sm-6 col-xl-4">
+            <div class="card stat-card h-100"><div class="card-body">
+                <div class="stat-icon @tone"><i class="bi @icon"></i></div>
+                <div class="min-w-0">
+                    <div class="label">@label</div>
+                    <div class="value">@value</div>
+                    <div class="small text-secondary text-truncate">@hint</div>
+                </div>
+            </div></div>
+        </div>;
+
+    private RenderFragment Cells(ViewerTotals t) =>
+        @<text>
+            <td class="text-end">@t.PeakViewers.ToString("N0", CultureInfo.CurrentCulture)</td>
+            <td class="text-end">@t.UniqueViewers.ToString("N0", CultureInfo.CurrentCulture)</td>
+            <td class="text-end">@t.Sessions.ToString("N0", CultureInfo.CurrentCulture)</td>
+            <td class="text-end">@ReportChart.Hours(t.WatchHours)</td>
+            <td class="text-end">@(t.Sessions > 0 ? Format.Duration(t.AvgViewDuration) : "–")</td>
+        </text>;
+}

@@ -1,0 +1,212 @@
+{
+  "Reports": {
+    "nl": "Rapportages",
+    "de": "Berichte",
+    "fr": "Rapports"
+  },
+  "Viewer report": {
+    "nl": "Kijkersrapportage",
+    "de": "Zuschauerbericht",
+    "fr": "Rapport d'audience"
+  },
+  "How many people watched your streams, per day, week or month. The history is kept after the detailed statistics are deleted.": {
+    "nl": "Hoeveel mensen naar je streams hebben gekeken, per dag, week of maand. De historie blijft bewaard nadat de gedetailleerde statistieken zijn verwijderd.",
+    "de": "Wie viele Menschen deine Streams gesehen haben, pro Tag, Woche oder Monat. Der Verlauf bleibt erhalten, nachdem die detaillierten Statistiken gelöscht wurden.",
+    "fr": "Combien de personnes ont regardé vos flux, par jour, semaine ou mois. L'historique est conservé après la suppression des statistiques détaillées."
+  },
+  "Export": {
+    "nl": "Exporteren",
+    "de": "Exportieren",
+    "fr": "Exporter"
+  },
+  "PDF report": {
+    "nl": "PDF-rapport",
+    "de": "PDF-Bericht",
+    "fr": "Rapport PDF"
+  },
+  "CSV per period": {
+    "nl": "CSV per periode",
+    "de": "CSV pro Zeitraum",
+    "fr": "CSV par période"
+  },
+  "CSV per stream": {
+    "nl": "CSV per stream",
+    "de": "CSV pro Stream",
+    "fr": "CSV par flux"
+  },
+  "Custom": {
+    "nl": "Aangepast",
+    "de": "Benutzerdefiniert",
+    "fr": "Personnalisé"
+  },
+  "From": {
+    "nl": "Van",
+    "de": "Von",
+    "fr": "Du"
+  },
+  "To": {
+    "nl": "Tot en met",
+    "de": "Bis",
+    "fr": "Au"
+  },
+  "Group by": {
+    "nl": "Groeperen per",
+    "de": "Gruppieren nach",
+    "fr": "Regrouper par"
+  },
+  "Day": {
+    "nl": "Dag",
+    "de": "Tag",
+    "fr": "Jour"
+  },
+  "Week": {
+    "nl": "Week",
+    "de": "Woche",
+    "fr": "Semaine"
+  },
+  "Month": {
+    "nl": "Maand",
+    "de": "Monat",
+    "fr": "Mois"
+  },
+  "per day": {
+    "nl": "per dag",
+    "de": "pro Tag",
+    "fr": "par jour"
+  },
+  "per week": {
+    "nl": "per week",
+    "de": "pro Woche",
+    "fr": "par semaine"
+  },
+  "per month": {
+    "nl": "per maand",
+    "de": "pro Monat",
+    "fr": "par mois"
+  },
+  "This month": {
+    "nl": "Deze maand",
+    "de": "Dieser Monat",
+    "fr": "Ce mois-ci"
+  },
+  "Last month": {
+    "nl": "Vorige maand",
+    "de": "Letzter Monat",
+    "fr": "Mois dernier"
+  },
+  "Last 12 months": {
+    "nl": "Afgelopen 12 maanden",
+    "de": "Letzte 12 Monate",
+    "fr": "12 derniers mois"
+  },
+  "This year": {
+    "nl": "Dit jaar",
+    "de": "Dieses Jahr",
+    "fr": "Cette année"
+  },
+  "deleted": {
+    "nl": "verwijderd",
+    "de": "gelöscht",
+    "fr": "supprimé"
+  },
+  "Most viewers at the same time": {
+    "nl": "Meeste kijkers tegelijk",
+    "de": "Die meisten Zuschauer gleichzeitig",
+    "fr": "Le plus de spectateurs en même temps"
+  },
+  "Unique viewers": {
+    "nl": "Unieke kijkers",
+    "de": "Eindeutige Zuschauer",
+    "fr": "Spectateurs uniques"
+  },
+  "Different people who watched": {
+    "nl": "Verschillende mensen die keken",
+    "de": "Verschiedene Personen, die zugesehen haben",
+    "fr": "Personnes différentes ayant regardé"
+  },
+  "Views": {
+    "nl": "Weergaven",
+    "de": "Aufrufe",
+    "fr": "Vues"
+  },
+  "Times someone started watching": {
+    "nl": "Keren dat iemand begon te kijken",
+    "de": "Wie oft jemand mit dem Zusehen begonnen hat",
+    "fr": "Nombre de fois où quelqu'un a commencé à regarder"
+  },
+  "Watch time": {
+    "nl": "Kijktijd",
+    "de": "Wiedergabezeit",
+    "fr": "Temps de visionnage"
+  },
+  "All viewers together": {
+    "nl": "Alle kijkers samen",
+    "de": "Alle Zuschauer zusammen",
+    "fr": "Tous les spectateurs ensemble"
+  },
+  "Average view duration": {
+    "nl": "Gemiddelde kijkduur",
+    "de": "Durchschnittliche Wiedergabedauer",
+    "fr": "Durée moyenne de visionnage"
+  },
+  "Watch time per view": {
+    "nl": "Kijktijd per weergave",
+    "de": "Wiedergabezeit pro Aufruf",
+    "fr": "Temps de visionnage par vue"
+  },
+  "No viewers were recorded in this period.": {
+    "nl": "In deze periode zijn geen kijkers geregistreerd.",
+    "de": "In diesem Zeitraum wurden keine Zuschauer erfasst.",
+    "fr": "Aucun spectateur n'a été enregistré pendant cette période."
+  },
+  "Per period": {
+    "nl": "Per periode",
+    "de": "Pro Zeitraum",
+    "fr": "Par période"
+  },
+  "Peak": {
+    "nl": "Piek",
+    "de": "Spitze",
+    "fr": "Pic"
+  },
+  "Unique": {
+    "nl": "Uniek",
+    "de": "Eindeutig",
+    "fr": "Uniques"
+  },
+  "Avg. per view": {
+    "nl": "Gem. per weergave",
+    "de": "Ø pro Aufruf",
+    "fr": "Moy. par vue"
+  },
+  "Total": {
+    "nl": "Totaal",
+    "de": "Gesamt",
+    "fr": "Total"
+  },
+  "Unique viewers are counted by IP address, or by ticket for paid streams, without storing the address. Viewers behind the same address (or a proxy) count as one; HLS viewers are counted as unique viewers but not as separate views.": {
+    "nl": "Unieke kijkers worden geteld op IP-adres, of op ticket bij betaalde streams, zonder het adres op te slaan. Kijkers achter hetzelfde adres (of een proxy) tellen als één; HLS-kijkers tellen mee als unieke kijkers, maar niet als aparte weergaven.",
+    "de": "Eindeutige Zuschauer werden anhand der IP-Adresse gezählt, bei kostenpflichtigen Streams anhand des Tickets, ohne die Adresse zu speichern. Zuschauer hinter derselben Adresse (oder einem Proxy) zählen als einer; HLS-Zuschauer zählen als eindeutige Zuschauer, aber nicht als separate Aufrufe.",
+    "fr": "Les spectateurs uniques sont comptés par adresse IP, ou par ticket pour les flux payants, sans enregistrer l'adresse. Les spectateurs derrière la même adresse (ou un proxy) comptent pour un ; les spectateurs HLS comptent comme spectateurs uniques, mais pas comme des vues séparées."
+  },
+  "Wk {0}": {
+    "nl": "Wk {0}",
+    "de": "KW {0}",
+    "fr": "S{0}"
+  },
+  "Week {0}, {1}": {
+    "nl": "Week {0}, {1}",
+    "de": "KW {0}, {1}",
+    "fr": "Semaine {0}, {1}"
+  },
+  "Generated {0}": {
+    "nl": "Gemaakt op {0}",
+    "de": "Erstellt am {0}",
+    "fr": "Généré le {0}"
+  },
+  "Page {0} of {1}": {
+    "nl": "Pagina {0} van {1}",
+    "de": "Seite {0} von {1}",
+    "fr": "Page {0} sur {1}"
+  }
+}

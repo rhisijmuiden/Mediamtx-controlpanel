@@ -22,6 +22,11 @@
                     <NavLink class="side-link" href="statistics">
                         <i class="bi bi-bar-chart-line"></i> @L["Statistics"]
                     </NavLink>
+                    <AuthorizeView Roles="@Roles.Admin" Context="reportContext">
+                        <NavLink class="side-link" href="reports">
+                            <i class="bi bi-file-earmark-bar-graph"></i> @L["Reports"]
+                        </NavLink>
+                    </AuthorizeView>
 
                     <details class="nav-group @Active("streams", "recordings")" open="@IsIn("streams", "recordings")">
                         <summary><i class="bi bi-camera-video"></i> @L["Streams"] <i class="bi bi-chevron-right chevron"></i></summary>
