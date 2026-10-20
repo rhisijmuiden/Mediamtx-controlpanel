@@ -13,6 +13,8 @@ A control panel for [MediaMTX](https://github.com/bluenviron/mediamtx), written 
 - **Server setup over SSH**: when adding a server, the administrator can enter its SSH login. The panel then logs in, installs MediaMTX if it is missing, points it at the panel, restarts it and adds the server as soon as the connection works (see [Adding a MediaMTX server](#adding-a-mediamtx-server)).
 - **Users**: administrators create accounts (no open registration). Roles: *Administrator*, *User* (own streams only) and *Customer* (customer portal only).
 - **Customer portal and paywall**: customers see their own streams with a live preview and statistics, and sell tickets with iDEAL (Mollie) or PayPal.
+- **Embeddable player**: design a player per stream (colours, logo, poster, controls, shape) with a live preview, and paste one line of code on any website. Paywalled streams show a ticket screen in the player.
+- **Tickets for viewers**: every ticket has a short code (`K7QM-4XPA-9TRC`), owners hand out free access codes, and viewers sign in to **My tickets** with a code by email (no password).
 - **Settings**: application name, default language, web interface port and outgoing mail (any SMTP server).
 - **Languages**: English (default), Dutch, German and French; everyone can pick their own language.
 - **Info and updates**: the current version and build, with an update check against GitHub every 24 hours and on demand, on a **Stable** or **Test** release channel.
@@ -440,7 +442,8 @@ Under **Users**, create an account with the *Customer* role and select that cust
 - **Statistics bar**: CPU, RAM, load and network traffic of the server, plus bitrate in/out, viewers, codecs and how long the stream has been live. If MediaMTX runs on the same machine as the panel (API URL on `127.0.0.1`), the panel reads this itself. For other servers, install `prometheus-node-exporter` on that server and fill in the *Statistics URL* under **Servers** (e.g. `http://10.0.0.21:9100/metrics`).
 - **Connect tab**: OBS server and stream key, username and password, and the URLs for RTSP, RTMP, SRT and WHIP.
 - **Share tab**: the public watch page `/watch/<code>` and the viewing credentials.
-- **Paywall tab**: manage offers (name, price, access duration, such as "Day ticket HD" or "Week pass"), turn the paywall on and off, and view sales and revenue.
+- **Paywall tab**: manage offers (name, price, access duration, such as "Day ticket HD" or "Week pass"), create free access codes, turn the paywall on and off, and view sales and revenue.
+- **Embed player**: the designer described under [Embedding the player](#embedding-the-player).
 
 ### Payments
 
@@ -456,6 +459,30 @@ The viewer opens the watch page, picks an offer and pays. The provider then send
 For payments, the panel must be reachable at a public address. Set that address in `Panel__PublicUrl` (e.g. `https://panel.example.com`); the payment providers use it to send the viewer back, and Mollie sends the payment status there (`/api/payments/mollie/webhook`).
 
 With `Panel__EnableTestPayments=true` a *Test payment* button appears that lets you go through the whole flow without real money. Turn it off in production.
+
+### Ticket codes and access codes
+
+Every ticket gets a short code such as `K7QM-4XPA-9TRC`. Viewers type it on the watch page, under **My tickets** or in the embedded player, on any device. Under **Paywall → Access codes** an owner creates free codes (for the press, sponsors or a guest list): choose how many, how many hours of access each gives, an optional label and an optional *use before* date. The access time starts at the first use. Codes can be revoked at any time. Access codes alone are enough to turn the paywall on; offers and a payment account are only needed to sell tickets.
+
+### My tickets (viewer sign-in)
+
+Viewers enter their email address when they buy a ticket. At `/tickets` (**My tickets** in the top bar of the watch page) they sign in without a password: the panel mails a 6-digit code (valid for 15 minutes) to the address they paid with, and then shows every stream they have a valid ticket for, with the ticket codes and a *Watch* button. On the watch page a signed-in viewer is let in without the ticket link. Viewer accounts are separate from panel accounts (own cookie, 30 days) and never get access to the panel. Sign-in needs a working mail server under **Settings → Mail**; codes are only sent to addresses that have tickets.
+
+## Embedding the player
+
+![Embed designer](docs/screenshots/embed-designer.png)
+
+Open a stream and click **Embed player** (also in the customer portal). The designer shows a live preview of the player next to its settings:
+
+- **Appearance**: accent colour, background, rounded corners, shape (16:9, 4:3, 21:9, 1:1, 9:16) and a responsive or fixed size.
+- **Playback**: start automatically (browsers only allow that without sound, so viewers get a *Tap to unmute* button), start without sound, show controls, WebRTC (lowest delay) or HLS.
+- **On the video**: title, LIVE badge, picture-in-picture and full-screen buttons, and the text shown while the stream is not live.
+- **Branding**: a logo (position, size, opacity, optional link) and a poster image for before the start and while offline. Images are stored in the database, so they are part of backups.
+- **Where the player may appear**: limit the websites that may show the player (`frame-ancestors`); empty allows every website.
+
+Copy the code as an **iframe**, as a **script** (`js/embed-loader.js` builds a responsive iframe, for site builders that don't accept iframes) or as a direct **link** (`/embed/<code>`). Changes to the look apply everywhere after saving; only a new shape or size needs the code to be pasted again.
+
+For a paywalled stream the player shows a ticket screen: **Buy a ticket** and **Sign in** open the watch page or My tickets in a small window that hands the ticket back to the player, or the viewer types a ticket code. The player remembers the ticket on that website. Private streams (not public, no paywall) only show a message, so no credentials end up on other websites. Set `Panel__PublicUrl` so the code contains the public address of the panel.
 
 ## Local development
 

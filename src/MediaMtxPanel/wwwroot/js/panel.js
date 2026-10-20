@@ -16,6 +16,11 @@ window.panel = {
         document.body.removeChild(ta);
     },
 
+    // Embed designer: send unsaved look settings to the preview iframe (embed/embed.js applies them live).
+    pushEmbedLook: function (frame, look) {
+        frame?.contentWindow?.postMessage({ type: "mediamtx-embed-look", look }, location.origin);
+    },
+
     // After a port change: wait until the panel answers at the new address, then go there.
     goWhenUp: function (url) {
         const started = Date.now();

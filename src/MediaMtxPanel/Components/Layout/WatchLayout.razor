@@ -8,7 +8,10 @@
         <div class="container d-flex align-items-center gap-2 py-2">
             <span class="brand-logo"><i class="bi bi-broadcast"></i></span>
             <strong class="text-truncate">@Settings.Current.AppName</strong>
-            <details class="lang-menu ms-auto" style="flex: 0 0 auto">
+            <a class="btn btn-sm btn-outline-primary ms-auto" href="tickets" title="@L["My tickets"]">
+                <i class="bi bi-ticket-perforated"></i> <span class="d-none d-sm-inline">@L["My tickets"]</span>
+            </a>
+            <details class="lang-menu" style="flex: 0 0 auto">
                 <summary class="btn btn-sm btn-outline-secondary" title="@L["Language"]">
                     <i class="bi bi-translate"></i> <span class="d-none d-sm-inline">@CurrentLanguage.Name</span>
                 </summary>

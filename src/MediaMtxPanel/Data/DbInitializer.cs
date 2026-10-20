@@ -17,6 +17,15 @@ public static class DbInitializer
         var db = sp.GetRequiredService<ApplicationDbContext>();
         await db.Database.MigrateAsync();
 
+        // Tickets from before ticket codes existed get one, so viewers can type it in.
+        var withoutCode = await db.Orders.Where(o => o.Code == null).ToListAsync();
+        if (withoutCode.Count > 0)
+        {
+            foreach (var order in withoutCode)
+                order.Code = TicketCode.New();
+            await db.SaveChangesAsync();
+        }
+
         var roleManager = sp.GetRequiredService<RoleManager<IdentityRole>>();
         foreach (var role in Roles.All)
         {

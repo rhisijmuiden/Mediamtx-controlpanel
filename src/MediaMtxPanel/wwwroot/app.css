@@ -597,3 +597,57 @@ pre.cmd {
 .platform-icon.youtube { background: #ff0033; }
 .platform-icon.twitch { background: #9146ff; }
 .platform-icon.facebook { background: #0866ff; }
+
+/* ---------------------------------------------------------------- embed designer */
+.swatch {
+    width: 1.5rem; height: 1.5rem; border-radius: 50%;
+    border: 2px solid #fff; box-shadow: 0 0 0 1px var(--app-border);
+    padding: 0; cursor: pointer;
+}
+.swatch.active { box-shadow: 0 0 0 2px var(--app-accent); }
+.image-drop {
+    height: 6.5rem; border: 1px dashed var(--app-border); border-radius: var(--bs-border-radius);
+    display: grid; place-items: center; overflow: hidden;
+    background: repeating-conic-gradient(#f1f3f8 0% 25%, #fff 0% 50%) 50% / 16px 16px;
+}
+.image-drop img { max-width: 100%; max-height: 100%; width: 100%; height: 100%; object-fit: contain; }
+.logo-positions {
+    position: relative; width: 8rem; aspect-ratio: 16 / 9;
+    border-radius: .5rem; background: #0f172a;
+}
+.logo-positions button {
+    position: absolute; width: 1.6rem; height: 1rem; border-radius: .25rem;
+    border: 1px solid rgba(255, 255, 255, .35); background: rgba(255, 255, 255, .12); cursor: pointer; padding: 0;
+}
+.logo-positions button.active { background: var(--app-accent-2); border-color: var(--app-accent-2); }
+.logo-positions .top-left { top: .4rem; left: .4rem; }
+.logo-positions .top-right { top: .4rem; right: .4rem; }
+.logo-positions .bottom-left { bottom: .4rem; left: .4rem; }
+.logo-positions .bottom-right { bottom: .4rem; right: .4rem; }
+@media (min-width: 1200px) {
+    .designer-sticky { position: sticky; top: 1rem; }
+}
+.preview-stage {
+    display: grid; place-items: center;
+    background: repeating-conic-gradient(#eef1f7 0% 25%, #f8f9fc 0% 50%) 50% / 20px 20px;
+    border-bottom-left-radius: var(--app-radius); border-bottom-right-radius: var(--app-radius);
+    min-height: 14rem;
+}
+.preview-frame { overflow: hidden; box-shadow: var(--app-shadow-lg); transition: width .25s; max-width: 100%; }
+.preview-frame iframe { display: block; width: 100%; height: 100%; border: 0; }
+pre.embed-code {
+    background: #0f172a; color: #e2e8f0; border-radius: var(--bs-border-radius);
+    padding: .9rem 1rem; font-size: .8rem; white-space: pre-wrap; word-break: break-all; margin-bottom: .75rem;
+}
+pre.embed-code code { color: inherit; }
+.ticket-code { font-family: var(--bs-font-monospace); font-weight: 700; letter-spacing: .08em; }
+
+/* ---------------------------------------------------------------- viewer pages */
+.viewer-icon {
+    width: 3.5rem; height: 3.5rem; margin: 0 auto; border-radius: 1rem;
+    display: grid; place-items: center; font-size: 1.6rem; color: #fff;
+    background: linear-gradient(135deg, var(--app-accent), var(--app-accent-2));
+    box-shadow: 0 10px 24px rgba(79, 70, 229, .3);
+}
+.otp-input { letter-spacing: .5em; font-weight: 700; font-family: var(--bs-font-monospace); }
+.ticket-card { border-top: 3px solid var(--app-accent-2); }
