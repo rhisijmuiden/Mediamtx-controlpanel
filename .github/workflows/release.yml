@@ -91,7 +91,20 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.tag.outputs.tag }}
           PRERELEASE: ${{ steps.tag.outputs.prerelease }}
+          VERSION: ${{ steps.tag.outputs.version }}
         run: |
-          flags=(--title "$TAG" --generate-notes --target "$GITHUB_SHA")
+          # Release notes: the CHANGELOG.md section of this version (a test version without its own
+          # section takes Unreleased), followed by GitHub's list of merged pull requests.
+          section() {
+            awk -v want="$1" '
+              /^## / { name = $2; gsub(/[\[\]]/, "", name); sub(/^v/, "", name); on = (tolower(name) == tolower(want)); next }
+              /^\[[^]]+\]: / { on = 0 }
+              on { print }
+            ' CHANGELOG.md | sed -e '/./,$!d'
+          }
+          notes="$(section "$VERSION")"
+          [[ -z "${notes//[[:space:]]/}" ]] && notes="$(section Unreleased)"
+          printf '%s\n' "$notes" >release-notes.md
+          flags=(--title "$TAG" --generate-notes --notes-file release-notes.md --target "$GITHUB_SHA")
           [[ "$PRERELEASE" == "true" ]] && flags+=(--prerelease) || flags+=(--latest)
           gh release create "$TAG" "${flags[@]}"

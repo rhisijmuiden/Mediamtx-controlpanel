@@ -396,6 +396,52 @@ a:hover { text-decoration: underline; }
 .info-list dd { margin: 0; }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 
+/* Info window: tabs with a scrolling body, so header, tabs and buttons stay in view. */
+.app-modal-wide { max-width: 42rem; display: flex; flex-direction: column; overflow: hidden; height: min(46rem, calc(100vh - 2rem)); }
+.app-modal-wide .body { flex: 1 1 auto; overflow-y: auto; }
+.app-modal-tabs { display: flex; gap: .25rem; padding: 0 1.5rem; border-bottom: 1px solid var(--app-border); }
+.app-modal-tabs button {
+    display: inline-flex; align-items: center; gap: .4rem; border: 0; background: none; padding: .7rem .2rem; margin-right: 1rem;
+    font-size: .9rem; font-weight: 500; color: var(--app-muted); border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.app-modal-tabs button:hover { color: var(--app-text); }
+.app-modal-tabs button.active { color: var(--app-accent); border-bottom-color: var(--app-accent); }
+.app-modal-tabs .badge { font-size: .65rem; font-weight: 600; }
+
+.whats-new { background: #f8f9ff; border: 1px solid #e0e7ff; border-radius: .7rem; padding: .75rem 1rem; font-size: .875rem; }
+.whats-new ul { margin: 0; padding-left: 1.1rem; }
+.whats-new li + li { margin-top: .2rem; }
+
+/* Changelog timeline (Info → Changelog). */
+.changelog { list-style: none; margin: 0; padding: 0; position: relative; }
+.changelog-release { position: relative; padding: 0 0 1.5rem 2.6rem; }
+.changelog-release::before { content: ""; position: absolute; left: .95rem; top: 2rem; bottom: .25rem; width: 2px; background: var(--app-border); border-radius: 1px; }
+.changelog-release:last-child { padding-bottom: .5rem; }
+.changelog-release:last-child::before { display: none; }
+.changelog-dot {
+    position: absolute; left: 0; top: 0; width: 2rem; height: 2rem; border-radius: 50%; display: grid; place-items: center;
+    background: #f1f3f9; color: var(--app-muted); border: 1px solid var(--app-border); font-size: .85rem;
+}
+.changelog-release.current .changelog-dot { background: #dcfce7; color: #15803d; border-color: #bbf7d0; box-shadow: 0 0 0 4px rgba(34, 197, 94, .12); }
+.changelog-release.upcoming .changelog-dot { background: linear-gradient(135deg, var(--app-accent), var(--app-accent-2)); color: #fff; border-color: transparent; box-shadow: 0 0 0 4px rgba(99, 102, 241, .15); }
+.changelog-release.upcoming::before { background: linear-gradient(var(--app-accent-2), var(--app-border)); }
+.changelog-head { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; min-height: 2rem; margin-bottom: .5rem; }
+.changelog-version { font-weight: 700; font-size: 1.05rem; letter-spacing: -.01em; }
+.changelog-date { margin-left: auto; color: var(--app-muted); font-size: .8rem; }
+.changelog-section { background: var(--app-surface); border: 1px solid var(--app-border); border-radius: .7rem; padding: .7rem .9rem; margin-bottom: .5rem; }
+.changelog-section ul { margin: .45rem 0 0; padding-left: 1.1rem; font-size: .875rem; }
+.changelog-section li { margin-top: .3rem; line-height: 1.45; }
+.changelog-section li::marker { color: #c4cad8; }
+.changelog-section code { font-size: .8em; background: #f1f3f9; color: #4338ca; padding: .05rem .3rem; border-radius: .3rem; }
+.changelog-kind { display: inline-flex; align-items: center; gap: .3rem; font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; padding: .2rem .55rem; border-radius: 999px; background: #f1f3f9; color: #4b5563; }
+.changelog-kind.kind-added { background: #dcfce7; color: #166534; }
+.changelog-kind.kind-changed { background: #e0e7ff; color: #3730a3; }
+.changelog-kind.kind-fixed { background: #fef3c7; color: #92400e; }
+.changelog-kind.kind-security { background: #fee2e2; color: #991b1b; }
+.changelog-kind.kind-removed, .changelog-kind.kind-deprecated { background: #f3f4f6; color: #4b5563; }
+.changelog-pr { font-size: .8em; font-weight: 500; color: var(--app-muted); background: #f3f4f8; padding: .05rem .35rem; border-radius: .3rem; text-decoration: none; white-space: nowrap; }
+.changelog-pr:hover { color: var(--app-accent); background: #eef2ff; text-decoration: none; }
+
 @media (max-width: 991.98px) {
     .app-shell { flex-direction: column; }
     .sidebar { width: 100%; height: auto; position: sticky; top: 0; }

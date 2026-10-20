@@ -1,0 +1,110 @@
+@* The changelog as a timeline: versions available on GitHub on top, then the versions of this build (CHANGELOG.md). *@
+
+@if (Upcoming.Count == 0 && Releases.Count == 0)
+{
+    <div class="text-center text-secondary py-4">
+        <i class="bi bi-journal-x fs-3 d-block mb-2"></i>@L["This build has no changelog."]
+    </div>
+}
+else
+{
+    <ol class="changelog">
+        @foreach (var release in Upcoming)
+        {
+            @Entry(release, upcoming: true)
+        }
+        @foreach (var release in Visible)
+        {
+            @Entry(release, upcoming: false)
+        }
+    </ol>
+    @if (Hidden > 0)
+    {
+        <div class="text-center">
+            <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="() => showAll = true">
+                <i class="bi bi-chevron-down"></i> @L["Show {0} older version(s)", Hidden]
+            </button>
+        </div>
+    }
+}
+
+@code {
+    private const int InitiallyShown = 3;
+    private bool showAll;
+
+    /// <summary>Newer versions that are not installed yet (from the update check).</summary>
+    [Parameter] public IReadOnlyList<ChangelogRelease> Upcoming { get; set; } = [];
+
+    /// <summary>The changelog of the running build.</summary>
+    [Parameter] public IReadOnlyList<ChangelogRelease> Releases { get; set; } = [];
+
+    /// <summary>owner/name on GitHub, used to link pull request numbers.</summary>
+    [Parameter] public string? Repository { get; set; }
+
+    // An empty Unreleased section is left out; a filled one (a build from main) stays on top.
+    private IEnumerable<ChangelogRelease> Installed => Releases.Where(r => !r.IsEmpty);
+    private IEnumerable<ChangelogRelease> Visible => showAll ? Installed : Installed.Take(InitiallyShown);
+    private int Hidden => showAll ? 0 : Math.Max(0, Installed.Count() - InitiallyShown);
+
+    private RenderFragment Entry(ChangelogRelease release, bool upcoming) => __builder =>
+    {
+        var current = !upcoming && release.Version is { } v && ReleaseVersion.Compare(v, BuildInfo.Version) == 0;
+        <li class="changelog-release @(upcoming ? "upcoming" : current ? "current" : null)">
+            <span class="changelog-dot">
+                <i class="bi @(upcoming ? "bi-arrow-up" : current ? "bi-check-lg" : "bi-tag")"></i>
+            </span>
+            <div class="changelog-head">
+                <span class="changelog-version">@(release.Version is { } version ? "v" + version : L["Unreleased"])</span>
+                @if (upcoming)
+                {
+                    <span class="badge bg-primary-subtle text-primary-emphasis">@L["Available"]</span>
+                }
+                else if (current)
+                {
+                    <span class="badge bg-success-subtle text-success-emphasis">@L["Installed"]</span>
+                }
+                @if (release.Date is { } date)
+                {
+                    <span class="changelog-date">@date.ToString("d MMM yyyy")</span>
+                }
+            </div>
+            @foreach (var group in release.Sections)
+            {
+                <div class="changelog-section">
+                    <span class="changelog-kind kind-@group.Title.ToLowerInvariant()">
+                        <i class="bi @Icon(group.Title)"></i> @SectionName(group.Title)
+                    </span>
+                    <ul>
+                        @foreach (var item in group.Items)
+                        {
+                            <li>@((MarkupString)Changelog.ToHtml(item, Repository))</li>
+                        }
+                    </ul>
+                </div>
+            }
+        </li>
+    };
+
+    private static string Icon(string section) => section.ToLowerInvariant() switch
+    {
+        "added" => "bi-plus-circle",
+        "changed" => "bi-arrow-repeat",
+        "fixed" => "bi-wrench-adjustable",
+        "security" => "bi-shield-check",
+        "removed" => "bi-dash-circle",
+        "deprecated" => "bi-hourglass-split",
+        _ => "bi-dot",
+    };
+
+    // Written out so tools/check-translations.py sees every key.
+    private string SectionName(string section) => section.ToLowerInvariant() switch
+    {
+        "added" => L["Added"],
+        "changed" => L["Changed"],
+        "fixed" => L["Fixed"],
+        "security" => L["Security"],
+        "removed" => L["Removed"],
+        "deprecated" => L["Deprecated"],
+        _ => section,
+    };
+}

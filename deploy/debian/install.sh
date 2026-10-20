@@ -173,7 +173,9 @@ run_installer() {
   rm -rf "$WORK"
   mkdir -p "$WORK"
   chmod 0700 "$WORK"
-  tar -C "$PROJECT_DIR" --exclude='bin' --exclude='obj' --exclude='*.db' -czf "$WORK/source.tar.gz" src deploy
+  local parts=(src deploy)
+  [[ -f "$PROJECT_DIR/CHANGELOG.md" ]] && parts+=(CHANGELOG.md)   # shown under Info → Changelog
+  tar -C "$PROJECT_DIR" --exclude='bin' --exclude='obj' --exclude='*.db' -czf "$WORK/source.tar.gz" "${parts[@]}"
   # SET_LOCALE=no: unlike in a fresh container, this machine's language is the owner's choice.
   env "$@" SET_LOCALE=no LOG_TAG=install SOURCE_COMMIT="${SOURCE_COMMIT:-}" PANEL_VERSION="${PANEL_VERSION:-}" \
     RELEASE_CHANNEL="${RELEASE_CHANNEL:-stable}" bash "$installer"

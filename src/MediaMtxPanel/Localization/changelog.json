@@ -1,0 +1,17 @@
+{
+  "About": { "nl": "Over", "de": "Über", "fr": "À propos" },
+  "Changelog": { "nl": "Wijzigingen", "de": "Änderungsprotokoll", "fr": "Journal des modifications" },
+  "New": { "nl": "Nieuw", "de": "Neu", "fr": "Nouveau" },
+  "Full changelog": { "nl": "Alle wijzigingen", "de": "Alle Änderungen", "fr": "Toutes les modifications" },
+  "This build has no changelog.": { "nl": "Deze build heeft geen changelog.", "de": "Dieser Build hat kein Änderungsprotokoll.", "fr": "Cette version n'a pas de journal des modifications." },
+  "Show {0} older version(s)": { "nl": "{0} oudere versie(s) tonen", "de": "{0} ältere Version(en) anzeigen", "fr": "Afficher {0} version(s) plus ancienne(s)" },
+  "Unreleased": { "nl": "Nog niet uitgebracht", "de": "Noch nicht veröffentlicht", "fr": "Non publiée" },
+  "Available": { "nl": "Beschikbaar", "de": "Verfügbar", "fr": "Disponible" },
+  "Installed": { "nl": "Geïnstalleerd", "de": "Installiert", "fr": "Installée" },
+  "Added": { "nl": "Toegevoegd", "de": "Neu", "fr": "Ajouté" },
+  "Changed": { "nl": "Gewijzigd", "de": "Geändert", "fr": "Modifié" },
+  "Fixed": { "nl": "Opgelost", "de": "Behoben", "fr": "Corrigé" },
+  "Security": { "nl": "Beveiliging", "de": "Sicherheit", "fr": "Sécurité" },
+  "Removed": { "nl": "Verwijderd", "de": "Entfernt", "fr": "Supprimé" },
+  "Deprecated": { "nl": "Verouderd", "de": "Veraltet", "fr": "Obsolète" }
+}
