@@ -48,7 +48,7 @@ jobs:
           if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
             tag="$GITHUB_REF_NAME"
           else
-            version="$(grep -oP '(?<=<Version>)[^<]+' src/MediaMtxPanel/MediaMtxPanel.csproj)"
+            version="$(grep -oP '(?<=<Version>)[0-9][^<]*' src/MediaMtxPanel/MediaMtxPanel.csproj)"
             if [[ "$CHANNEL" == "stable" ]]; then
               tag="v$version"
               if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
