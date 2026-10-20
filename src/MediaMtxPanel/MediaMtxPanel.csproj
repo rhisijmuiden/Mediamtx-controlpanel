@@ -8,7 +8,7 @@
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
     <!-- Shown under Info in the panel. Bump when publishing a GitHub release (tag v<Version>)
          and give the version its own section in CHANGELOG.md (a test checks this). -->
-    <Version>1.3.0</Version>
+    <Version>1.4.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

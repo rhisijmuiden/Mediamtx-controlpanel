@@ -10,6 +10,8 @@ Added, Changed, Deprecated, Removed, Fixed or Security, and rename Unreleased to
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-10-20
+
 ### Added
 
 - **Update now** in the Info window: administrators install an available update from the web interface. A backup to the backup location (optional), a local copy of the installation and an automatic roll-back when the new version does not start; steps and log are shown while it runs. Works on installations made with the Proxmox and Debian installers (they set up the updater with their next update), not in Docker.
@@ -89,7 +91,8 @@ Added, Changed, Deprecated, Removed, Fixed or Security, and rename Unreleased to
 - The Proxmox script picks the Debian template that matches the host's processor, so the container starts on x86 hosts. (#4)
 - The installer runs in a clean environment inside the container with an English locale, so the .NET build no longer stops. (#5)
 
-[Unreleased]: https://github.com/rhisijmuiden/Mediamtx-controlpanel/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/rhisijmuiden/Mediamtx-controlpanel/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/rhisijmuiden/Mediamtx-controlpanel/releases/tag/v1.4.0
 [1.3.0]: https://github.com/rhisijmuiden/Mediamtx-controlpanel/commits/main
 [1.2.0]: https://github.com/rhisijmuiden/Mediamtx-controlpanel/pull/12
 [1.1.0]: https://github.com/rhisijmuiden/Mediamtx-controlpanel/pull/10
