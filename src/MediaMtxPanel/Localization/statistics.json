@@ -1,0 +1,112 @@
+{
+  "Viewers and bandwidth of all your streams over time. Open a stream to see its own statistics.": {
+    "nl": "Kijkers en bandbreedte van al je streams door de tijd. Open een stream om de statistieken van die stream te zien.",
+    "de": "Zuschauer und Bandbreite all deiner Streams im Zeitverlauf. Öffne einen Stream, um seine eigenen Statistiken zu sehen.",
+    "fr": "Spectateurs et bande passante de tous vos flux dans le temps. Ouvrez un flux pour voir ses propres statistiques."
+  },
+  "There are no streams yet, so there are no statistics either.": {
+    "nl": "Er zijn nog geen streams, dus ook nog geen statistieken.",
+    "de": "Es gibt noch keine Streams und daher auch keine Statistiken.",
+    "fr": "Il n'y a pas encore de flux, donc pas encore de statistiques."
+  },
+  "Period": {
+    "nl": "Periode",
+    "de": "Zeitraum",
+    "fr": "Période"
+  },
+  "Last hour": {
+    "nl": "Afgelopen uur",
+    "de": "Letzte Stunde",
+    "fr": "Dernière heure"
+  },
+  "Last 24 hours": {
+    "nl": "Afgelopen 24 uur",
+    "de": "Letzte 24 Stunden",
+    "fr": "Dernières 24 heures"
+  },
+  "Last 7 days": {
+    "nl": "Afgelopen 7 dagen",
+    "de": "Letzte 7 Tage",
+    "fr": "7 derniers jours"
+  },
+  "Last 30 days": {
+    "nl": "Afgelopen 30 dagen",
+    "de": "Letzte 30 Tage",
+    "fr": "30 derniers jours"
+  },
+  "Last 90 days": {
+    "nl": "Afgelopen 90 dagen",
+    "de": "Letzte 90 Tage",
+    "fr": "90 derniers jours"
+  },
+  "Download the chart data as a CSV file": {
+    "nl": "Download de grafiekgegevens als CSV-bestand",
+    "de": "Diagrammdaten als CSV-Datei herunterladen",
+    "fr": "Télécharger les données du graphique au format CSV"
+  },
+  "Peak viewers": {
+    "nl": "Piek kijkers",
+    "de": "Zuschauer-Spitze",
+    "fr": "Pic de spectateurs"
+  },
+  "Average viewers": {
+    "nl": "Gemiddeld aantal kijkers",
+    "de": "Durchschnittliche Zuschauer",
+    "fr": "Spectateurs en moyenne"
+  },
+  "Viewing hours": {
+    "nl": "Kijkuren",
+    "de": "Zuschauerstunden",
+    "fr": "Heures de visionnage"
+  },
+  "Data sent to viewers": {
+    "nl": "Data naar kijkers",
+    "de": "An Zuschauer gesendete Daten",
+    "fr": "Données envoyées aux spectateurs"
+  },
+  "Peak bandwidth": {
+    "nl": "Piek bandbreedte",
+    "de": "Bandbreiten-Spitze",
+    "fr": "Pic de bande passante"
+  },
+  "No statistics for this period yet. The panel records viewers and bandwidth every minute while a stream is live.": {
+    "nl": "Nog geen statistieken voor deze periode. Het paneel legt elke minuut kijkers en bandbreedte vast zolang een stream live is.",
+    "de": "Für diesen Zeitraum gibt es noch keine Statistiken. Das Panel erfasst jede Minute Zuschauer und Bandbreite, solange ein Stream live ist.",
+    "fr": "Pas encore de statistiques pour cette période. Le panneau enregistre chaque minute les spectateurs et la bande passante tant qu'un flux est en direct."
+  },
+  "Bandwidth": {
+    "nl": "Bandbreedte",
+    "de": "Bandbreite",
+    "fr": "Bande passante"
+  },
+  "Per stream": {
+    "nl": "Per stream",
+    "de": "Pro Stream",
+    "fr": "Par flux"
+  },
+  "Hours live": {
+    "nl": "Uren live",
+    "de": "Stunden live",
+    "fr": "Heures en direct"
+  },
+  "Data received": {
+    "nl": "Data ontvangen",
+    "de": "Empfangene Daten",
+    "fr": "Données reçues"
+  },
+  "Data sent": {
+    "nl": "Data verzonden",
+    "de": "Gesendete Daten",
+    "fr": "Données envoyées"
+  },
+  "Out (to viewers)": {
+    "nl": "Uit (naar kijkers)",
+    "de": "Aus (an Zuschauer)",
+    "fr": "Sortant (vers les spectateurs)"
+  },
+  "In (from source)": {
+    "nl": "In (van de bron)",
+    "de": "Ein (von der Quelle)",
+    "fr": "Entrant (depuis la source)"
+  }
+}

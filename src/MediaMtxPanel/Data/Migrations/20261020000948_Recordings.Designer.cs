@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MediaMtxPanel.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20261019235222_Recordings")]
+    [Migration("20261020000948_Recordings")]
     partial class Recordings
     {
         /// <inheritdoc />
@@ -360,6 +360,39 @@ namespace MediaMtxPanel.Data.Migrations
                     b.ToTable("Offers");
                 });
 
+            modelBuilder.Entity("MediaMtxPanel.Data.StreamStatSample", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("BytesIn")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("BytesOut")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Seconds")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("StreamId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("Timestamp")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Viewers")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Timestamp");
+
+                    b.HasIndex("StreamId", "Timestamp");
+
+                    b.ToTable("StatSamples");
+                });
+
             modelBuilder.Entity("MediaMtxPanel.Data.TicketOrder", b =>
                 {
                     b.Property<Guid>("Id")
@@ -611,6 +644,17 @@ namespace MediaMtxPanel.Data.Migrations
                 {
                     b.HasOne("MediaMtxPanel.Data.StreamDefinition", "Stream")
                         .WithMany("Offers")
+                        .HasForeignKey("StreamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Stream");
+                });
+
+            modelBuilder.Entity("MediaMtxPanel.Data.StreamStatSample", b =>
+                {
+                    b.HasOne("MediaMtxPanel.Data.StreamDefinition", "Stream")
+                        .WithMany()
                         .HasForeignKey("StreamId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

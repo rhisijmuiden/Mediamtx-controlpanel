@@ -556,3 +556,35 @@ pre.cmd {
 .watch-page .container {
     max-width: 1100px;
 }
+
+/* Statistics chart (Components/Shared/TimeChart.razor): SVG lines with HTML axes and hover tips. */
+.tchart { --chart-1: #4f46e5; --chart-2: #0ea5e9; font-size: .75rem; color: var(--app-muted); }
+.tchart .swatch { display: inline-block; width: .65rem; height: .65rem; border-radius: 50%; margin-right: .35rem; vertical-align: -.05rem; }
+.tchart .swatch.s1 { background: var(--chart-1); }
+.tchart .swatch.s2 { background: var(--chart-2); }
+.tchart-legend { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: .75rem; }
+.tchart-body { display: flex; height: 220px; }
+.tchart-yaxis { position: relative; width: 4.75rem; flex-shrink: 0; }
+.tchart-yaxis span { position: absolute; right: .5rem; transform: translateY(-50%); white-space: nowrap; }
+.tchart-plot { position: relative; flex: 1; min-width: 0; border-bottom: 1px solid var(--app-border); }
+.tchart-grid { position: absolute; left: 0; right: 0; border-top: 1px dashed var(--app-border); }
+.tchart-plot svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.tchart .line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.tchart .area { stroke: none; opacity: .12; }
+.tchart .line.s1 { stroke: var(--chart-1); }
+.tchart .line.s2 { stroke: var(--chart-2); }
+.tchart .area.s1 { fill: var(--chart-1); }
+.tchart .area.s2 { fill: var(--chart-2); }
+.tchart-cols { position: absolute; inset: 0; display: flex; }
+.tchart-cols .col-hit { flex: 1; position: relative; }
+.tchart-cols .col-hit:hover { background: rgba(79, 70, 229, .08); }
+.tchart-cols .tip {
+    display: none; position: absolute; top: .5rem; left: calc(100% + .25rem); z-index: 5;
+    flex-direction: column; gap: .15rem; padding: .5rem .65rem; white-space: nowrap;
+    background: var(--app-surface); color: var(--app-text); border: 1px solid var(--app-border);
+    border-radius: .5rem; box-shadow: var(--app-shadow-lg); pointer-events: none;
+}
+.tchart-cols .tip.left { left: auto; right: calc(100% + .25rem); }
+.tchart-cols .col-hit:hover .tip { display: flex; }
+.tchart-xaxis { position: relative; height: 1.5rem; margin-left: 4.75rem; }
+.tchart-xaxis span { position: absolute; top: .35rem; transform: translateX(-50%); white-space: nowrap; }

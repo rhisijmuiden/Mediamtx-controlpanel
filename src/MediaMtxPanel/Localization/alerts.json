@@ -1,0 +1,292 @@
+{
+  "Alerts": {
+    "nl": "Meldingen",
+    "de": "Benachrichtigungen",
+    "fr": "Alertes"
+  },
+  "The panel watches your MediaMTX servers and streams and sends a mail or webhook when one goes offline, and again when it is back.": {
+    "nl": "Het paneel bewaakt je MediaMTX-servers en streams en stuurt een mail of webhook als er een offline gaat, en opnieuw als die weer terug is.",
+    "de": "Das Panel überwacht Ihre MediaMTX-Server und Streams und sendet eine E-Mail oder einen Webhook, wenn einer offline geht, und erneut, wenn er wieder da ist.",
+    "fr": "Le panneau surveille vos serveurs MediaMTX et vos flux, et envoie un e-mail ou un webhook lorsqu'un élément passe hors ligne, puis à nouveau lorsqu'il est rétabli."
+  },
+  "Monitoring is on": {
+    "nl": "Monitoring staat aan",
+    "de": "Überwachung ist aktiv",
+    "fr": "Surveillance activée"
+  },
+  "Monitoring is off": {
+    "nl": "Monitoring staat uit",
+    "de": "Überwachung ist aus",
+    "fr": "Surveillance désactivée"
+  },
+  "Current status": {
+    "nl": "Huidige status",
+    "de": "Aktueller Status",
+    "fr": "État actuel"
+  },
+  "Last check: {0}": {
+    "nl": "Laatste controle: {0}",
+    "de": "Letzte Prüfung: {0}",
+    "fr": "Dernière vérification : {0}"
+  },
+  "Waiting for the first check…": {
+    "nl": "Wachten op de eerste controle…",
+    "de": "Warte auf die erste Prüfung…",
+    "fr": "En attente de la première vérification…"
+  },
+  "Everything that is watched is online.": {
+    "nl": "Alles wat bewaakt wordt is online.",
+    "de": "Alles, was überwacht wird, ist online.",
+    "fr": "Tout ce qui est surveillé est en ligne."
+  },
+  "Offline for {0}": {
+    "nl": "Offline sinds {0}",
+    "de": "Offline seit {0}",
+    "fr": "Hors ligne depuis {0}"
+  },
+  "alert after the grace time": {
+    "nl": "melding na de wachttijd",
+    "de": "Benachrichtigung nach der Wartezeit",
+    "fr": "alerte après le délai de grâce"
+  },
+  "Monitoring": {
+    "nl": "Monitoring",
+    "de": "Überwachung",
+    "fr": "Surveillance"
+  },
+  "Every enabled server is checked every {0} seconds.": {
+    "nl": "Elke ingeschakelde server wordt elke {0} seconden gecontroleerd.",
+    "de": "Jeder aktivierte Server wird alle {0} Sekunden geprüft.",
+    "fr": "Chaque serveur activé est vérifié toutes les {0} secondes."
+  },
+  "Watch servers and streams and send alerts": {
+    "nl": "Servers en streams bewaken en meldingen sturen",
+    "de": "Server und Streams überwachen und Benachrichtigungen senden",
+    "fr": "Surveiller les serveurs et les flux et envoyer des alertes"
+  },
+  "Alert when a MediaMTX server cannot be reached": {
+    "nl": "Melden als een MediaMTX-server niet bereikbaar is",
+    "de": "Benachrichtigen, wenn ein MediaMTX-Server nicht erreichbar ist",
+    "fr": "Alerter lorsqu'un serveur MediaMTX est injoignable"
+  },
+  "Alert when a live stream stops": {
+    "nl": "Melden als een live stream stopt",
+    "de": "Benachrichtigen, wenn ein Live-Stream stoppt",
+    "fr": "Alerter lorsqu'un flux en direct s'arrête"
+  },
+  "A stream is only watched after it was live once, so streams that are not used yet stay quiet. On-demand pull streams are skipped.": {
+    "nl": "Een stream wordt pas bewaakt nadat hij één keer live is geweest, dus streams die nog niet gebruikt worden blijven stil. On-demand pull-streams worden overgeslagen.",
+    "de": "Ein Stream wird erst überwacht, nachdem er einmal live war; noch nicht genutzte Streams bleiben also still. On-Demand-Pull-Streams werden übersprungen.",
+    "fr": "Un flux n'est surveillé qu'après avoir été en direct une fois ; les flux pas encore utilisés restent donc silencieux. Les flux pull à la demande sont ignorés."
+  },
+  "Send a message when it is back online": {
+    "nl": "Een bericht sturen als het weer online is",
+    "de": "Eine Nachricht senden, wenn es wieder online ist",
+    "fr": "Envoyer un message lorsqu'il est de nouveau en ligne"
+  },
+  "Grace time (seconds)": {
+    "nl": "Wachttijd (seconden)",
+    "de": "Wartezeit (Sekunden)",
+    "fr": "Délai de grâce (secondes)"
+  },
+  "How long something has to stay offline before an alert goes out. Filters short hiccups, such as a publisher that reconnects.": {
+    "nl": "Hoe lang iets offline moet blijven voordat er een melding uitgaat. Filtert korte haperingen, zoals een publisher die opnieuw verbindt.",
+    "de": "Wie lange etwas offline bleiben muss, bevor eine Benachrichtigung gesendet wird. Filtert kurze Aussetzer, etwa einen Publisher, der sich neu verbindet.",
+    "fr": "Durée pendant laquelle un élément doit rester hors ligne avant l'envoi d'une alerte. Filtre les courtes interruptions, comme un diffuseur qui se reconnecte."
+  },
+  "Uses the mail server from Settings → Mail. One address per line.": {
+    "nl": "Gebruikt de mailserver uit Instellingen → Mail. Eén adres per regel.",
+    "de": "Verwendet den Mailserver aus Einstellungen → E-Mail. Eine Adresse pro Zeile.",
+    "fr": "Utilise le serveur de messagerie de Paramètres → E-mail. Une adresse par ligne."
+  },
+  "Outgoing mail is not set up yet.": {
+    "nl": "Uitgaande mail is nog niet ingesteld.",
+    "de": "Ausgehende E-Mail ist noch nicht eingerichtet.",
+    "fr": "L'e-mail sortant n'est pas encore configuré."
+  },
+  "Set up mail": {
+    "nl": "Mail instellen",
+    "de": "E-Mail einrichten",
+    "fr": "Configurer l'e-mail"
+  },
+  "Recipients": {
+    "nl": "Ontvangers",
+    "de": "Empfänger",
+    "fr": "Destinataires"
+  },
+  "Webhook": {
+    "nl": "Webhook",
+    "de": "Webhook",
+    "fr": "Webhook"
+  },
+  "The panel sends a POST request to this URL for every alert. Leave empty for no webhook.": {
+    "nl": "Het paneel stuurt bij elke melding een POST-verzoek naar deze URL. Laat leeg voor geen webhook.",
+    "de": "Das Panel sendet bei jeder Benachrichtigung eine POST-Anfrage an diese URL. Leer lassen für keinen Webhook.",
+    "fr": "Le panneau envoie une requête POST à cette URL pour chaque alerte. Laissez vide pour aucun webhook."
+  },
+  "Format": {
+    "nl": "Formaat",
+    "de": "Format",
+    "fr": "Format"
+  },
+  "Signing secret (optional)": {
+    "nl": "Ondertekeningsgeheim (optioneel)",
+    "de": "Signaturgeheimnis (optional)",
+    "fr": "Secret de signature (facultatif)"
+  },
+  "Adds the header X-Panel-Signature: sha256=<HMAC of the body>, so your receiver can check that the request comes from the panel.": {
+    "nl": "Voegt de header X-Panel-Signature: sha256=<HMAC van de body> toe, zodat je ontvanger kan controleren dat het verzoek van het paneel komt.",
+    "de": "Fügt den Header X-Panel-Signature: sha256=<HMAC des Bodys> hinzu, damit Ihr Empfänger prüfen kann, dass die Anfrage vom Panel stammt.",
+    "fr": "Ajoute l'en-tête X-Panel-Signature: sha256=<HMAC du corps>, pour que votre récepteur puisse vérifier que la requête provient du panneau."
+  },
+  "Remove the stored secret": {
+    "nl": "Het opgeslagen geheim verwijderen",
+    "de": "Das gespeicherte Geheimnis entfernen",
+    "fr": "Supprimer le secret enregistré"
+  },
+  "Muted streams": {
+    "nl": "Gedempte streams",
+    "de": "Stummgeschaltete Streams",
+    "fr": "Flux mis en sourdine"
+  },
+  "Streams you tick here never cause an alert, for example test streams.": {
+    "nl": "Streams die je hier aanvinkt geven nooit een melding, bijvoorbeeld teststreams.",
+    "de": "Streams, die Sie hier ankreuzen, lösen nie eine Benachrichtigung aus, zum Beispiel Test-Streams.",
+    "fr": "Les flux cochés ici ne déclenchent jamais d'alerte, par exemple les flux de test."
+  },
+  "Send test alert": {
+    "nl": "Testmelding sturen",
+    "de": "Testbenachrichtigung senden",
+    "fr": "Envoyer une alerte de test"
+  },
+  "Recent alerts": {
+    "nl": "Recente meldingen",
+    "de": "Letzte Benachrichtigungen",
+    "fr": "Alertes récentes"
+  },
+  "No alerts yet.": {
+    "nl": "Nog geen meldingen.",
+    "de": "Noch keine Benachrichtigungen.",
+    "fr": "Aucune alerte pour l'instant."
+  },
+  "Time": {
+    "nl": "Tijd",
+    "de": "Zeit",
+    "fr": "Heure"
+  },
+  "Alert": {
+    "nl": "Melding",
+    "de": "Benachrichtigung",
+    "fr": "Alerte"
+  },
+  "Sent by": {
+    "nl": "Verstuurd via",
+    "de": "Gesendet per",
+    "fr": "Envoyée par"
+  },
+  "Kept until the panel restarts. Alerts are also written to the log.": {
+    "nl": "Bewaard tot het paneel herstart. Meldingen worden ook in het logboek geschreven.",
+    "de": "Bis zum Neustart des Panels gespeichert. Benachrichtigungen werden auch ins Protokoll geschrieben.",
+    "fr": "Conservées jusqu'au redémarrage du panneau. Les alertes sont aussi écrites dans le journal."
+  },
+  "Enter a grace time between 0 and 3600 seconds.": {
+    "nl": "Vul een wachttijd in tussen 0 en 3600 seconden.",
+    "de": "Geben Sie eine Wartezeit zwischen 0 und 3600 Sekunden ein.",
+    "fr": "Saisissez un délai de grâce entre 0 et 3600 secondes."
+  },
+  "{0} is not a valid mail address.": {
+    "nl": "{0} is geen geldig mailadres.",
+    "de": "{0} ist keine gültige E-Mail-Adresse.",
+    "fr": "{0} n'est pas une adresse e-mail valide."
+  },
+  "Enter a webhook URL that starts with http:// or https://.": {
+    "nl": "Vul een webhook-URL in die begint met http:// of https://.",
+    "de": "Geben Sie eine Webhook-URL ein, die mit http:// oder https:// beginnt.",
+    "fr": "Saisissez une URL de webhook commençant par http:// ou https://."
+  },
+  "Enter at least one mail recipient or a webhook URL.": {
+    "nl": "Vul minstens één mailontvanger of een webhook-URL in.",
+    "de": "Geben Sie mindestens einen E-Mail-Empfänger oder eine Webhook-URL ein.",
+    "fr": "Saisissez au moins un destinataire e-mail ou une URL de webhook."
+  },
+  "Test alert sent.": {
+    "nl": "Testmelding verstuurd.",
+    "de": "Testbenachrichtigung gesendet.",
+    "fr": "Alerte de test envoyée."
+  },
+  "Server {0} is offline": {
+    "nl": "Server {0} is offline",
+    "de": "Server {0} ist offline",
+    "fr": "Le serveur {0} est hors ligne"
+  },
+  "The panel cannot reach MediaMTX server {0} (for {1}). Streams on this server are probably unavailable.": {
+    "nl": "Het paneel kan MediaMTX-server {0} niet bereiken (sinds {1}). Streams op deze server zijn waarschijnlijk niet beschikbaar.",
+    "de": "Das Panel kann den MediaMTX-Server {0} nicht erreichen (seit {1}). Streams auf diesem Server sind wahrscheinlich nicht verfügbar.",
+    "fr": "Le panneau ne peut pas joindre le serveur MediaMTX {0} (depuis {1}). Les flux de ce serveur sont probablement indisponibles."
+  },
+  "Server {0} is back online": {
+    "nl": "Server {0} is weer online",
+    "de": "Server {0} ist wieder online",
+    "fr": "Le serveur {0} est de nouveau en ligne"
+  },
+  "MediaMTX server {0} can be reached again after {1}.": {
+    "nl": "MediaMTX-server {0} is na {1} weer bereikbaar.",
+    "de": "Der MediaMTX-Server {0} ist nach {1} wieder erreichbar.",
+    "fr": "Le serveur MediaMTX {0} est de nouveau joignable après {1}."
+  },
+  "Stream {0} is offline": {
+    "nl": "Stream {0} is offline",
+    "de": "Stream {0} ist offline",
+    "fr": "Le flux {0} est hors ligne"
+  },
+  "Stream {0} on server {1} stopped (for {2}). The publisher or source is no longer sending.": {
+    "nl": "Stream {0} op server {1} is gestopt (sinds {2}). De publisher of bron verstuurt niets meer.",
+    "de": "Stream {0} auf Server {1} ist gestoppt (seit {2}). Der Publisher oder die Quelle sendet nicht mehr.",
+    "fr": "Le flux {0} sur le serveur {1} s'est arrêté (depuis {2}). Le diffuseur ou la source n'envoie plus rien."
+  },
+  "Stream {0} is live again": {
+    "nl": "Stream {0} is weer live",
+    "de": "Stream {0} ist wieder live",
+    "fr": "Le flux {0} est de nouveau en direct"
+  },
+  "Stream {0} on server {1} is live again after {2}.": {
+    "nl": "Stream {0} op server {1} is na {2} weer live.",
+    "de": "Stream {0} auf Server {1} ist nach {2} wieder live.",
+    "fr": "Le flux {0} sur le serveur {1} est de nouveau en direct après {2}."
+  },
+  "Test alert from {0}": {
+    "nl": "Testmelding van {0}",
+    "de": "Testbenachrichtigung von {0}",
+    "fr": "Alerte de test de {0}"
+  },
+  "This is a test alert. When a server or stream goes offline, you get a message like this.": {
+    "nl": "Dit is een testmelding. Als een server of stream offline gaat, krijg je een bericht zoals dit.",
+    "de": "Dies ist eine Testbenachrichtigung. Wenn ein Server oder Stream offline geht, erhalten Sie eine Nachricht wie diese.",
+    "fr": "Ceci est une alerte de test. Lorsqu'un serveur ou un flux passe hors ligne, vous recevez un message comme celui-ci."
+  },
+  "Time: {0} (UTC)": {
+    "nl": "Tijd: {0} (UTC)",
+    "de": "Zeit: {0} (UTC)",
+    "fr": "Heure : {0} (UTC)"
+  },
+  "All event fields, for your own scripts, n8n, Home Assistant or Uptime tools.": {
+    "nl": "Alle velden van de gebeurtenis, voor je eigen scripts, n8n, Home Assistant of uptime-tools.",
+    "de": "Alle Felder des Ereignisses, für eigene Skripte, n8n, Home Assistant oder Uptime-Tools.",
+    "fr": "Tous les champs de l'événement, pour vos scripts, n8n, Home Assistant ou des outils de disponibilité."
+  },
+  "Also Mattermost, Rocket.Chat and Google Chat.": {
+    "nl": "Ook Mattermost, Rocket.Chat en Google Chat.",
+    "de": "Auch Mattermost, Rocket.Chat und Google Chat.",
+    "fr": "Aussi Mattermost, Rocket.Chat et Google Chat."
+  },
+  "A Discord channel webhook.": {
+    "nl": "Een webhook van een Discord-kanaal.",
+    "de": "Ein Webhook eines Discord-Kanals.",
+    "fr": "Un webhook de salon Discord."
+  },
+  "A Teams workflow \"When a Teams webhook request is received\".": {
+    "nl": "Een Teams-workflow \"Wanneer een Teams-webhookverzoek wordt ontvangen\".",
+    "de": "Ein Teams-Workflow \"Wenn eine Teams-Webhookanforderung empfangen wird\".",
+    "fr": "Un workflow Teams « Lorsqu'une demande de webhook Teams est reçue »."
+  }
+}

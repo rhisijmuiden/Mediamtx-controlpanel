@@ -12,6 +12,12 @@ public class MediaMtxOptions
     /// <summary>How often the panel re-applies its stream configuration to every server.</summary>
     public int SyncIntervalSeconds { get; set; } = 30;
 
+    /// <summary>How often viewers and traffic of every live stream are stored for the statistics.</summary>
+    public int StatisticsIntervalSeconds { get; set; } = 60;
+
+    /// <summary>Statistics older than this are deleted.</summary>
+    public int StatisticsRetentionDays { get; set; } = 90;
+
     // --- First server, created on startup when no servers exist ---
 
     public string ServerName { get; set; } = "Default";
