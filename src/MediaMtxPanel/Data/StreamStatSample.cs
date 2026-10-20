@@ -23,6 +23,9 @@ public class StreamStatSample
     /// <summary>Viewers that were not connected in the previous round: people who started watching.</summary>
     public int NewViewers { get; set; }
 
+    /// <summary>Viewers on the restream platforms (YouTube, Twitch, Facebook) at the moment of the sample, where known.</summary>
+    public int PlatformViewers { get; set; }
+
     /// <summary>Bytes received from the source during the period.</summary>
     public long BytesIn { get; set; }
 

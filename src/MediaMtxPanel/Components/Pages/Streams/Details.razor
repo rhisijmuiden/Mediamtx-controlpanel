@@ -55,6 +55,7 @@ else
         </div>
         <div class="page-actions">
             <a class="btn btn-outline-secondary" href="watch/@stream.WatchSlug" target="_blank" rel="noopener" title="@L["Open the public watch page in a new tab"]"><i class="bi bi-box-arrow-up-right"></i> @L["Watch page"]</a>
+            <a class="btn btn-outline-secondary" href="streams/@stream.Id/embed" title="@L["Design a player to put on your own website"]"><i class="bi bi-code-square"></i> @L["Embed player"]</a>
             <a class="btn btn-outline-secondary" href="portal/streams/@stream.Id"><i class="bi bi-ticket-perforated"></i> @L["Preview and paywall"]</a>
             <button class="btn @(stream.Enabled ? "btn-outline-warning" : "btn-outline-success")" @onclick="ToggleEnabled">
                 <i class="bi @(stream.Enabled ? "bi-pause-circle" : "bi-play-circle")"></i> @(stream.Enabled ? L["Disable"] : L["Enable"])

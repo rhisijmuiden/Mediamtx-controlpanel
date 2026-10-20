@@ -3,7 +3,7 @@
 @inject UpdateChecker Updates
 @inject PanelSettingsStore Settings
 
-<button type="button" class="btn btn-sidebar" @onclick="() => open = true" title="@L["Version and updates"]">
+<button type="button" class="btn btn-sidebar" @onclick="() => { open = true; tab = InfoTab.About; }" title="@L["Version and updates"]">
     <i class="bi bi-info-circle"></i> @L["Info"]
     @if (Updates.Status.UpdateAvailable)
     {
@@ -14,7 +14,7 @@
 @if (open)
 {
     <div class="app-modal-backdrop" @onclick="() => open = false">
-        <div class="app-modal" role="dialog" aria-modal="true" aria-labelledby="info-title" @onclick:stopPropagation="true">
+        <div class="app-modal app-modal-wide" role="dialog" aria-modal="true" aria-labelledby="info-title" @onclick:stopPropagation="true">
             <header>
                 <span class="brand-logo"><i class="bi bi-broadcast"></i></span>
                 <div class="flex-grow-1">
@@ -23,6 +23,26 @@
                 </div>
                 <button type="button" class="btn-close" @onclick="() => open = false" aria-label="@L["Close"]"></button>
             </header>
+            <nav class="app-modal-tabs" role="tablist">
+                <button type="button" role="tab" class="@(tab == InfoTab.About ? "active" : null)" aria-selected="@(tab == InfoTab.About)" @onclick="() => tab = InfoTab.About">
+                    <i class="bi bi-info-circle"></i> @L["About"]
+                </button>
+                <button type="button" role="tab" class="@(tab == InfoTab.Changelog ? "active" : null)" aria-selected="@(tab == InfoTab.Changelog)" @onclick="() => tab = InfoTab.Changelog">
+                    <i class="bi bi-journal-text"></i> @L["Changelog"]
+                    @if (Updates.Status.NewChanges.Count > 0)
+                    {
+                        <span class="badge rounded-pill text-bg-primary">@L["New"]</span>
+                    }
+                </button>
+            </nav>
+            @if (tab == InfoTab.Changelog)
+            {
+                <div class="body">
+                    <ChangelogTimeline Upcoming="Updates.Status.NewChanges" Releases="Changelog.Bundled" Repository="@Updates.Repository" />
+                </div>
+            }
+            else
+            {
             <div class="body">
                 <dl class="info-list mb-4">
                     <dt>@L["Version"]</dt>
@@ -99,6 +119,21 @@
                             }
                         </div>
                     </div>
+                    @if (s.NewChanges.Count > 0)
+                    {
+                        <div class="whats-new mb-2">
+                            <div class="d-flex align-items-center mb-1">
+                                <span class="fw-semibold me-auto"><i class="bi bi-stars me-1"></i>@L["What's new"]</span>
+                                <button type="button" class="btn btn-link btn-sm p-0" @onclick="() => tab = InfoTab.Changelog">@L["Full changelog"] <i class="bi bi-arrow-right"></i></button>
+                            </div>
+                            <ul>
+                                @foreach (var item in s.NewChanges.SelectMany(r => r.Sections).SelectMany(x => x.Items).Take(5))
+                                {
+                                    <li>@((MarkupString)Changelog.ToHtml(item, Updates.Repository))</li>
+                                }
+                            </ul>
+                        </div>
+                    }
                     <AuthorizeView Roles="@Roles.Admin">
                         <div class="small text-secondary mb-2">
                             @L["Proxmox: run the installer with update and the container ID on the Proxmox host. Docker: pull the new code and run docker compose up -d --build."]
@@ -125,6 +160,7 @@
                     }
                 </div>
             </div>
+            }
             <footer>
                 <a class="btn btn-outline-secondary btn-sm me-auto" href="https://github.com/@Updates.Repository" target="_blank" rel="noopener"><i class="bi bi-github"></i> GitHub</a>
                 <AuthorizeView Roles="@Roles.Admin">
@@ -139,7 +175,10 @@
 }
 
 @code {
+    private enum InfoTab { About, Changelog }
+
     private bool open;
+    private InfoTab tab;
 
     protected override void OnInitialized() => Updates.Changed += OnChanged;
 

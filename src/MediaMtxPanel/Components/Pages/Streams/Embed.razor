@@ -1,0 +1,9 @@
+@page "/streams/{Id:int}/embed"
+@attribute [Authorize(Roles = Roles.Staff)]
+@rendermode InteractiveServer
+
+<EmbedDesigner StreamId="Id" BackUrl="@($"streams/{Id}")" />
+
+@code {
+    [Parameter] public int Id { get; set; }
+}

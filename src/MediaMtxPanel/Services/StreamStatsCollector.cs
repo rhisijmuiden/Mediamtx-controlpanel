@@ -14,6 +14,7 @@ namespace MediaMtxPanel.Services;
 public class StreamStatsCollector(
     IDbContextFactory<ApplicationDbContext> dbFactory,
     LiveStatusReader liveReader,
+    Restream.PlatformViewerService platformViewers,
     IOptions<MediaMtxOptions> options,
     ILogger<StreamStatsCollector> logger) : BackgroundService
 {
@@ -88,6 +89,7 @@ public class StreamStatsCollector(
             Timestamp = now,
             Seconds = interval,
             Viewers = path.Readers.Count,
+            PlatformViewers = platformViewers.GetTotal(streamId),
         };
 
         // A reader (MediaMTX session) that was not there in the previous round is someone who started watching.

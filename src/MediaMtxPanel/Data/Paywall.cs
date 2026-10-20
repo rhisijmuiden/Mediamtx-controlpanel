@@ -34,6 +34,8 @@ public enum PaymentProvider
 {
     Mollie = 0,
     PayPal = 1,
+    /// <summary>An access code the stream owner handed out (free); its access period starts at first use.</summary>
+    Manual = 8,
     /// <summary>Simulated payments for trying out the flow; only when Panel:EnableTestPayments is on.</summary>
     Test = 9,
 }
@@ -80,11 +82,48 @@ public class TicketOrder
     [MaxLength(64)]
     public string AccessToken { get; set; } = "";
 
+    /// <summary>
+    /// Short ticket code the viewer can type in (on the watch page, in the embedded player or under My tickets),
+    /// stored without dashes, see <see cref="TicketCode"/>.
+    /// </summary>
+    [MaxLength(16)]
+    public string? Code { get; set; }
+
+    /// <summary>Access codes (<see cref="PaymentProvider.Manual"/>) must be used before this moment; null means no deadline.</summary>
+    public DateTime? RedeemBefore { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? PaidAt { get; set; }
     public DateTime? AccessExpiresAt { get; set; }
 
     public bool GivesAccess(DateTime now) => Status == OrderStatus.Paid && AccessExpiresAt > now;
+
+    /// <summary>An access code nobody has used yet.</summary>
+    public bool IsUnusedCode => Provider == PaymentProvider.Manual && Status == OrderStatus.Paid && AccessExpiresAt is null;
+}
+
+/// <summary>Ticket codes like K7QM-4XPA-9TRC: 12 characters without look-alikes (about 59 bits).</summary>
+public static class TicketCode
+{
+    private const string Alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    public const int Length = 12;
+
+    public static string New() => System.Security.Cryptography.RandomNumberGenerator.GetString(Alphabet, Length);
+
+    /// <summary>Uppercase without dashes or spaces; also accepts a pasted link with ?code=.</summary>
+    public static string Normalize(string? input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return "";
+        var text = input.Trim();
+        var at = text.IndexOf("code=", StringComparison.OrdinalIgnoreCase);
+        if (at >= 0)
+            text = text[(at + 5)..].Split('&')[0];
+        return new string(text.ToUpperInvariant().Where(char.IsLetterOrDigit).ToArray());
+    }
+
+    public static string Display(string? code) =>
+        string.IsNullOrEmpty(code) || code.Length != Length ? code ?? "" : $"{code[..4]}-{code[4..8]}-{code[8..]}";
 }
 
 /// <summary>

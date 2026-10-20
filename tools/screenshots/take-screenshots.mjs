@@ -113,6 +113,10 @@ await page.waitForTimeout(1500);
 await shot("stream-details");
 const watchHref = await page.locator("a[href*='watch/']").first().getAttribute("href").catch(() => null);
 
+await go(new URL(demoUrl).pathname + "/embed");
+await page.waitForTimeout(4000); // the preview connects to the stream
+await shot("embed-designer");
+
 await go("/streams/new");
 await shot("stream-new");
 
@@ -140,6 +144,9 @@ await page.click(".sidebar-footer button:has-text('Info')");
 await page.waitForSelector(".app-modal");
 await page.waitForTimeout(400);
 await shot("info");
+await page.click(".app-modal-tabs button:has-text('Changelog')");
+await page.waitForTimeout(400);
+await shot("changelog");
 await page.keyboard.press("Escape");
 
 await go("/portal");

@@ -154,7 +154,9 @@ public class ViewerReportTests
     [Fact]
     public void Collector_counts_viewers_that_started_watching()
     {
-        var collector = new StreamStatsCollector(null!, null!,
+        var platformViewers = new MediaMtxPanel.Services.Restream.PlatformViewerService(null!, null!, null!, null!,
+            NullLogger<MediaMtxPanel.Services.Restream.PlatformViewerService>.Instance);
+        var collector = new StreamStatsCollector(null!, null!, platformViewers,
             Microsoft.Extensions.Options.Options.Create(new MediaMtxOptions { StatisticsIntervalSeconds = 60 }),
             NullLogger<StreamStatsCollector>.Instance);
         MtxPath Path(params string[] ids) => new() { Ready = true, Readers = ids.Select(i => new MtxConnRef("webrtcSession", i)).ToList() };

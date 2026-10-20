@@ -6,14 +6,17 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-MediaMtxPanel-3c598a6e-92ad-4a30-9abf-425b21f6f4d2</UserSecretsId>
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
-    <!-- Shown under Info in the panel. Bump when publishing a GitHub release (tag v<Version>). -->
-    <Version>1.2.0</Version>
+    <!-- Shown under Info in the panel. Bump when publishing a GitHub release (tag v<Version>)
+         and give the version its own section in CHANGELOG.md (a test checks this). -->
+    <Version>1.3.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <!-- Translations are compiled into the assembly; see Services/Localization/TextLocalizer.cs. -->
     <Content Remove="Localization\**" />
     <EmbeddedResource Include="Localization\*.json" LogicalName="i18n.%(Filename)%(Extension)" />
+    <!-- Shown under Info → Changelog; see Services/Changelog.cs. -->
+    <EmbeddedResource Include="..\..\CHANGELOG.md" LogicalName="CHANGELOG.md" Condition="Exists('..\..\CHANGELOG.md')" />
   </ItemGroup>
 
   <ItemGroup>

@@ -88,6 +88,9 @@ public record UpdateStatus
 
     public string? Url { get; init; }
     public string? Error { get; init; }
+
+    /// <summary>What the newer version brings, from CHANGELOG.md at the latest release (or the branch); empty when unknown.</summary>
+    public IReadOnlyList<ChangelogRelease> NewChanges { get; init; } = [];
 }
 
 /// <summary>
@@ -130,7 +133,7 @@ public sealed class UpdateChecker(
         Changed?.Invoke();
         try
         {
-            Status = await QueryAsync(ct);
+            Status = await AddNewChangesAsync(await QueryAsync(ct), ct);
         }
         catch (Exception ex) when (!ct.IsCancellationRequested)
         {
@@ -201,6 +204,33 @@ public sealed class UpdateChecker(
             CheckedAt = now, Channel = channel, Latest = latestSha[..Math.Min(7, latestSha.Length)], Url = branchUrl,
             UpdateAvailable = latestSha != BuildInfo.Commit && BuildInfo.BuildDate is { } built && date > built,
         };
+    }
+
+    // Reads CHANGELOG.md at the release tag (or the branch) for the "What's new" list. An update check
+    // still succeeds when this fails, for example when the newer version has no changelog yet.
+    private async Task<UpdateStatus> AddNewChangesAsync(UpdateStatus status, CancellationToken ct)
+    {
+        if (!status.UpdateAvailable)
+            return status;
+        var fromBranch = status.CommitsBehind is not null || !ReleaseVersion.IsNewer(status.Latest ?? "", BuildInfo.Version);
+        var reference = fromBranch ? Branch : status.Latest!;
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Get,
+                $"repos/{Repository.Trim('/')}/contents/CHANGELOG.md?ref={Uri.EscapeDataString(reference)}");
+            request.Headers.Accept.Clear();
+            request.Headers.Accept.ParseAdd("application/vnd.github.raw+json");
+            using var response = await httpFactory.CreateClient("github").SendAsync(request, ct);
+            if (!response.IsSuccessStatusCode)
+                return status;
+            var changelog = Changelog.Parse(await response.Content.ReadAsStringAsync(ct));
+            return status with { NewChanges = Changelog.NewerThan(changelog, BuildInfo.Version, includeUnreleased: fromBranch) };
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException && !ct.IsCancellationRequested)
+        {
+            logger.LogInformation("Could not read the changelog of {Reference}: {Message}", reference, ex.Message);
+            return status;
+        }
     }
 
     private static async Task<JsonElement> ReadAsync(HttpResponseMessage response, CancellationToken ct)

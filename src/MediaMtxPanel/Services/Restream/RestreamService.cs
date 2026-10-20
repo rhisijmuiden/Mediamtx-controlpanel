@@ -32,6 +32,19 @@ public class RestreamTargetInput : IValidatableObject
     /// <summary>Set by the form when a key is already stored, so an empty key field is allowed.</summary>
     public bool HasStoredKey { get; set; }
 
+    /// <summary>Viewer count: YouTube channel ID, Twitch login or Facebook page ID. Empty = off.</summary>
+    [StringLength(128)]
+    public string? ViewerChannel { get; set; }
+
+    [StringLength(128)]
+    public string? ViewerClientId { get; set; }
+
+    /// <summary>New viewer-count credential (API key, client secret or page token). Empty keeps the stored one.</summary>
+    [StringLength(2048)]
+    public string? ViewerSecret { get; set; }
+
+    public bool HasStoredViewerSecret { get; set; }
+
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         var url = ServerUrl?.Trim();
@@ -45,6 +58,19 @@ public class RestreamTargetInput : IValidatableObject
             yield return new ValidationResult("Enter the stream key from the platform.", [nameof(StreamKey)]);
         if (StreamKey is { } key && key.Trim().Any(char.IsWhiteSpace))
             yield return new ValidationResult("A stream key cannot contain spaces.", [nameof(StreamKey)]);
+
+        if (PlatformViewerService.Supports(Platform) && !string.IsNullOrWhiteSpace(ViewerChannel))
+        {
+            if (!HasStoredViewerSecret && string.IsNullOrWhiteSpace(ViewerSecret))
+                yield return new ValidationResult(Platform switch
+                {
+                    RestreamPlatform.YouTube => "Enter a YouTube Data API key.",
+                    RestreamPlatform.Twitch => "Enter the client secret of your Twitch application.",
+                    _ => "Enter a page access token.",
+                }, [nameof(ViewerSecret)]);
+            if (Platform == RestreamPlatform.Twitch && string.IsNullOrWhiteSpace(ViewerClientId))
+                yield return new ValidationResult("Enter the client ID of your Twitch application.", [nameof(ViewerClientId)]);
+        }
     }
 
     public static RestreamTargetInput From(RestreamTarget t) => new()
@@ -57,6 +83,9 @@ public class RestreamTargetInput : IValidatableObject
         VideoBitrateKbps = t.VideoBitrateKbps,
         AudioBitrateKbps = t.AudioBitrateKbps,
         HasStoredKey = !string.IsNullOrEmpty(t.StreamKeyProtected),
+        ViewerChannel = t.ViewerChannel,
+        ViewerClientId = t.ViewerClientId,
+        HasStoredViewerSecret = !string.IsNullOrEmpty(t.ViewerSecretProtected),
     };
 }
 
@@ -112,6 +141,18 @@ public class RestreamService(
         target.TranscodeVideo = input.TranscodeVideo;
         target.VideoBitrateKbps = input.VideoBitrateKbps;
         target.AudioBitrateKbps = input.AudioBitrateKbps;
+        if (PlatformViewerService.Supports(input.Platform) && !string.IsNullOrWhiteSpace(input.ViewerChannel))
+        {
+            target.ViewerChannel = input.ViewerChannel.Trim();
+            target.ViewerClientId = input.Platform == RestreamPlatform.Twitch ? input.ViewerClientId?.Trim() : null;
+            if (!string.IsNullOrWhiteSpace(input.ViewerSecret))
+                target.ViewerSecretProtected = Protector.Protect(input.ViewerSecret.Trim());
+        }
+        else
+        {
+            // No channel (or a custom server): viewer count off, credentials removed.
+            target.ViewerChannel = target.ViewerClientId = target.ViewerSecretProtected = null;
+        }
         target.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(ct);
         manager.Wake();

@@ -44,19 +44,40 @@ public class RestreamTarget
 
     public int AudioBitrateKbps { get; set; } = 160;
 
+    /// <summary>
+    /// For the live viewer count on the platform: the YouTube channel ID (UC…), the Twitch login name or
+    /// the Facebook page ID. Empty = no viewer count.
+    /// </summary>
+    [MaxLength(128)]
+    public string? ViewerChannel { get; set; }
+
+    /// <summary>Twitch only: the Client ID of a Twitch application.</summary>
+    [MaxLength(128)]
+    public string? ViewerClientId { get; set; }
+
+    /// <summary>
+    /// Encrypted credential for the viewer count: YouTube Data API key, Twitch client secret or Facebook
+    /// page access token.
+    /// </summary>
+    [MaxLength(4096)]
+    public string? ViewerSecretProtected { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }
 
-public record RestreamPlatformInfo(RestreamPlatform Platform, string Label, string Icon, string? DefaultUrl, string? KeyHelpUrl);
+public record RestreamPlatformInfo(RestreamPlatform Platform, string Label, string Icon, string? DefaultUrl, string? KeyHelpUrl, string? ViewerHelpUrl = null);
 
 public static class RestreamPlatforms
 {
     public static readonly IReadOnlyList<RestreamPlatformInfo> All =
     [
-        new(RestreamPlatform.YouTube, "YouTube", "bi-youtube", "rtmps://a.rtmps.youtube.com:443/live2", "https://studio.youtube.com/"),
-        new(RestreamPlatform.Twitch, "Twitch", "bi-twitch", "rtmps://live.twitch.tv:443/app", "https://dashboard.twitch.tv/settings/stream"),
-        new(RestreamPlatform.Facebook, "Facebook", "bi-facebook", "rtmps://live-api-s.facebook.com:443/rtmp", "https://www.facebook.com/live/producer"),
+        new(RestreamPlatform.YouTube, "YouTube", "bi-youtube", "rtmps://a.rtmps.youtube.com:443/live2", "https://studio.youtube.com/",
+            "https://developers.google.com/youtube/v3/getting-started"),
+        new(RestreamPlatform.Twitch, "Twitch", "bi-twitch", "rtmps://live.twitch.tv:443/app", "https://dashboard.twitch.tv/settings/stream",
+            "https://dev.twitch.tv/console/apps"),
+        new(RestreamPlatform.Facebook, "Facebook", "bi-facebook", "rtmps://live-api-s.facebook.com:443/rtmp", "https://www.facebook.com/live/producer",
+            "https://developers.facebook.com/tools/explorer/"),
         new(RestreamPlatform.Custom, "Custom RTMP(S)", "bi-broadcast-pin", null, null),
     ];
 

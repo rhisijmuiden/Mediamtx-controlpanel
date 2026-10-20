@@ -38,7 +38,7 @@ else
 
     @if (!string.IsNullOrEmpty(Error))
     {
-        <div class="alert alert-danger d-flex align-items-center gap-2"><i class="bi bi-exclamation-octagon"></i> <span>@Error</span></div>
+        <div class="alert alert-danger d-flex align-items-center gap-2"><i class="bi bi-exclamation-octagon"></i> <span>@L[Error]</span></div>
     }
 
     @if (player is not null)
@@ -76,7 +76,22 @@ else
                                 <strong>@ticket.OfferName</strong><br />
                                 @L["Valid until {0}.", ticket.AccessExpiresAt!.Value.ToLocalTime().ToString("f")]
                             </p>
+                            @if (!string.IsNullOrEmpty(ticket.Code))
+                            {
+                                <div class="border rounded-3 p-2 mb-2 bg-light d-flex justify-content-between align-items-center gap-2">
+                                    <div>
+                                        <div class="text-secondary" style="font-size: .75rem">@L["Ticket code"]</div>
+                                        <span class="ticket-code fs-6">@TicketCode.Display(ticket.Code)</span>
+                                    </div>
+                                    <i class="bi bi-upc-scan text-primary fs-4"></i>
+                                </div>
+                                <p class="text-secondary">@L["Type this code on any device, or in the player on a website, to watch."]</p>
+                            }
                             <p class="text-secondary"><i class="bi bi-bookmark me-1"></i>@L["Bookmark this page; you can also use the link to watch on another device."]</p>
+                            @if (!string.IsNullOrEmpty(ticket.BuyerEmail))
+                            {
+                                <p class="text-secondary"><i class="bi bi-person-circle me-1"></i>@L["Find all your tickets under"] <a href="tickets">@L["My tickets"]</a>.</p>
+                            }
                             <h6 class="mt-3"><i class="bi bi-tv me-1 text-primary"></i> @L["Watch in VLC or on TV"]</h6>
                             @foreach (var e in ticketUrls)
                             {
@@ -117,7 +132,8 @@ else
                                 <AntiforgeryToken />
                                 <input type="hidden" name="offerId" value="@o.Id" />
                                 <label class="form-label small visually-hidden" for="email-@o.Id">@L["Email"]</label>
-                                <input type="email" id="email-@o.Id" name="email" class="form-control mb-2" placeholder="@L["Email (optional, for your receipt)"]" />
+                                <input type="email" id="email-@o.Id" name="email" class="form-control mb-1" required autocomplete="email" value="@viewerEmail" placeholder="@L["Your email address"]" />
+                                <div class="form-text mt-0 mb-2">@L["With this address you sign in to My tickets later."]</div>
                                 <div class="d-grid gap-2">
                                     @foreach (var p in providers)
                                     {
@@ -139,10 +155,20 @@ else
                 @L["No tickets are on sale right now."]
             </div>
         }
-        <p class="small text-secondary mt-4 d-flex gap-2">
-            <i class="bi bi-info-circle"></i>
-            <span>@L["Already bought a ticket? Open the link you received after payment, or use the same browser you paid with."]</span>
-        </p>
+        <div class="row g-3 mt-2">
+            <div class="col-lg-6">
+                <RedeemCard Action="@($"watch/{stream.WatchSlug}/redeem")" Error="@CodeError" />
+            </div>
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-body p-4">
+                        <h2 class="h6 mb-1"><i class="bi bi-person-circle text-primary me-1"></i> @L["Already bought a ticket?"]</h2>
+                        <p class="small text-secondary">@L["Sign in with the email address you paid with to see all your tickets."]</p>
+                        <a class="btn btn-outline-primary" href="tickets"><i class="bi bi-ticket-perforated"></i> @L["My tickets"]</a>
+                    </div>
+                </div>
+            </div>
+        </div>
     }
     else
     {
@@ -170,6 +196,14 @@ else
                     }
                 }
             } catch { /* storage blocked: the ticket link still works */ }
+            // Opened from an embedded player (to buy a ticket): hand the ticket back to it.
+            const token = @((MarkupString)System.Text.Json.JsonSerializer.Serialize(ticket?.AccessToken));
+            if (token && window.name === "mx-ticket" && window.opener) {
+                try {
+                    window.opener.postMessage({ type: "mediamtx-ticket", slug: "@stream.WatchSlug", token }, location.origin);
+                    setTimeout(() => window.close(), 1500); // the player on the website takes over
+                } catch { /* opener gone: keep watching here */ }
+            }
         })();
     </script>
 }
@@ -180,6 +214,8 @@ else
     [Parameter] public string Slug { get; set; } = "";
     [SupplyParameterFromQuery(Name = "t")] public string? Token { get; set; }
     [SupplyParameterFromQuery] public string? Error { get; set; }
+    [SupplyParameterFromQuery(Name = "code")] public string? CodeError { get; set; }
+    [CascadingParameter] private HttpContext? HttpContext { get; set; }
 
     private StreamDefinition? stream;
     private bool isLive;
@@ -189,6 +225,7 @@ else
     private IReadOnlyList<StreamEndpoint> ticketUrls = [];
     private List<StreamOffer> offers = [];
     private List<PaymentProvider> providers = [];
+    private string? viewerEmail;
 
     protected override async Task OnInitializedAsync()
     {
@@ -204,7 +241,9 @@ else
 
         if (stream.PaywallEnabled)
         {
-            ticket = await Paywall.ValidTicketAsync(stream.Id, Token);
+            viewerEmail = await ViewerAccounts.EmailAsync(HttpContext);
+            ticket = await Paywall.ValidTicketAsync(stream.Id, Token)
+                ?? await Paywall.ValidTicketForEmailAsync(stream.Id, viewerEmail);
             if (ticket is not null)
             {
                 player = Endpoints.Player(stream, MediaMtxPanel.Endpoints.MediaMtxAuthEndpoint.TicketUser, ticket.AccessToken);

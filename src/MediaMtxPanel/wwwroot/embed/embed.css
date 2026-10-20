@@ -1,0 +1,164 @@
+/* Embedded player (/embed/{slug}). Colours and shape come from the stream's embed settings as CSS variables. */
+* { box-sizing: border-box; }
+html, body, #mx-embed { margin: 0; height: 100%; background: transparent; overflow: hidden; }
+body { font-family: "Inter", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif; color: #fff; -webkit-font-smoothing: antialiased; }
+button, input { font: inherit; }
+
+.mx-notfound { display: grid; place-items: center; height: 100%; background: #0b0f19; color: #cbd5e1; font-size: 15px; }
+
+.mx {
+    --accent: #6366f1;
+    --bg: #0b0f19;
+    --radius: 12px;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: var(--bg);
+    border-radius: var(--radius);
+    overflow: hidden;
+    isolation: isolate;
+    user-select: none;
+}
+.mx video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: var(--bg); }
+.mx-poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity .4s; }
+.mx.is-playing .mx-poster { opacity: 0; pointer-events: none; }
+.mx-status { display: none; }
+
+/* top: title + live badge */
+.mx-top {
+    position: absolute; inset: 0 0 auto 0; z-index: 3;
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 16px 36px;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, .6), transparent);
+    transition: opacity .25s;
+    pointer-events: none;
+}
+.mx-title { font-weight: 600; font-size: clamp(13px, 2.6vw, 17px); text-shadow: 0 1px 2px rgba(0, 0, 0, .5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mx-badge {
+    flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 9px; border-radius: 999px;
+    font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    background: rgba(255, 255, 255, .16); backdrop-filter: blur(6px);
+}
+.mx-badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #94a3b8; }
+.mx.is-live .mx-badge { background: #ef4444; }
+.mx.is-live .mx-badge::before { background: #fff; animation: mx-pulse 1.6s infinite; }
+.mx-badge.preview { background: var(--accent); }
+.mx-badge.preview::before { display: none; }
+@keyframes mx-pulse { 50% { opacity: .35; } }
+
+/* logo */
+.mx-logo { position: absolute; z-index: 4; display: block; line-height: 0; }
+.mx-logo img { width: 100%; height: auto; display: block; filter: drop-shadow(0 1px 3px rgba(0, 0, 0, .35)); }
+.mx-logo.top-left { top: 14px; left: 16px; }
+.mx-logo.top-right { top: 14px; right: 16px; }
+.mx-logo.bottom-left { bottom: 64px; left: 16px; }
+.mx-logo.bottom-right { bottom: 64px; right: 16px; }
+.mx.no-controls .mx-logo.bottom-left, .mx.no-controls .mx-logo.bottom-right { bottom: 16px; }
+.mx.has-title .mx-logo.top-left { top: 48px; }
+
+/* centre: big play button, spinner, offline message */
+.mx-center { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; pointer-events: none; }
+.mx-bigplay {
+    pointer-events: auto; cursor: pointer;
+    width: clamp(56px, 13vw, 84px); height: clamp(56px, 13vw, 84px);
+    border: 0; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    display: grid; place-items: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+    transition: transform .15s;
+}
+.mx-bigplay:hover { transform: scale(1.06); }
+.mx-bigplay svg { width: 42%; height: 42%; margin-left: 6%; }
+.mx-spinner { width: 46px; height: 46px; border-radius: 50%; border: 4px solid rgba(255, 255, 255, .2); border-top-color: var(--accent); animation: mx-spin .9s linear infinite; }
+@keyframes mx-spin { to { transform: rotate(360deg); } }
+.mx-offline { text-align: center; max-width: 80%; display: grid; gap: 10px; justify-items: center; }
+.mx-offline svg { width: 40px; height: 40px; opacity: .8; }
+.mx-offline p { margin: 0; font-size: clamp(13px, 2.4vw, 16px); text-shadow: 0 1px 3px rgba(0, 0, 0, .6); }
+.mx [hidden] { display: none !important; }
+
+.mx-unmute {
+    position: absolute; z-index: 5; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 16px; border: 0; border-radius: 999px; cursor: pointer;
+    background: rgba(15, 23, 42, .78); color: #fff; font-weight: 600; font-size: 14px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, .3);
+}
+.mx-unmute svg { width: 18px; height: 18px; }
+.mx-unmute:hover { background: var(--accent); }
+
+/* control bar */
+.mx-bar {
+    position: absolute; inset: auto 0 0 0; z-index: 4;
+    display: flex; align-items: center; gap: 4px;
+    padding: 28px 10px 10px;
+    background: linear-gradient(to top, rgba(0, 0, 0, .7), transparent);
+    transition: opacity .25s, transform .25s;
+}
+.mx-btn {
+    width: 38px; height: 38px; border: 0; border-radius: 10px; cursor: pointer;
+    background: transparent; color: #fff;
+    display: grid; place-items: center;
+}
+.mx-btn:hover, .mx-btn:focus-visible { background: rgba(255, 255, 255, .14); outline: none; }
+.mx-btn svg { width: 22px; height: 22px; }
+.mx-volume { width: 0; opacity: 0; transition: width .2s, opacity .2s; accent-color: var(--accent); cursor: pointer; }
+.mx-vol:hover .mx-volume, .mx-volume:focus { width: 80px; opacity: 1; }
+.mx-vol { display: flex; align-items: center; gap: 2px; }
+.mx-spacer { flex: 1; }
+.mx-livebtn { display: inline-flex; align-items: center; gap: 6px; padding: 0 8px; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #cbd5e1; }
+.mx-livebtn::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #64748b; }
+.mx.is-live .mx-livebtn { color: #fff; }
+.mx.is-live .mx-livebtn::before { background: #ef4444; }
+
+.mx.idle .mx-bar { opacity: 0; transform: translateY(8px); }
+.mx.idle .mx-top { opacity: 0; }
+.mx.idle { cursor: none; }
+
+/* ticket screen */
+.mx-gate {
+    position: absolute; inset: 0; z-index: 6;
+    display: grid; place-items: center;
+    padding: 16px;
+    background:
+        radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--accent) 35%, transparent), transparent 60%),
+        rgba(8, 11, 20, .78);
+    backdrop-filter: blur(4px);
+    text-align: center;
+    overflow: auto;
+}
+.mx-gate-inner { width: min(420px, 100%); display: grid; gap: 12px; justify-items: center; }
+.mx-gate-icon { width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; background: var(--accent); box-shadow: 0 8px 24px color-mix(in srgb, var(--accent) 45%, transparent); }
+.mx-gate-icon svg { width: 26px; height: 26px; }
+.mx-gate h2 { margin: 0; font-size: clamp(16px, 3vw, 20px); font-weight: 700; }
+.mx-gate .mx-sub { margin: -4px 0 0; color: #cbd5e1; font-size: 13px; }
+.mx-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.mx-primary, .mx-secondary {
+    border: 0; border-radius: 10px; cursor: pointer;
+    padding: 10px 16px; font-weight: 600; font-size: 14px;
+    display: inline-flex; align-items: center; gap: 8px;
+}
+.mx-primary { background: var(--accent); color: #fff; }
+.mx-primary:hover { filter: brightness(1.1); }
+.mx-secondary { background: rgba(255, 255, 255, .12); color: #fff; }
+.mx-secondary:hover { background: rgba(255, 255, 255, .2); }
+.mx-code { display: flex; gap: 6px; width: 100%; max-width: 340px; }
+.mx-code input {
+    flex: 1; min-width: 0;
+    padding: 10px 12px; border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, .2); background: rgba(255, 255, 255, .08); color: #fff;
+    letter-spacing: .12em; text-transform: uppercase; font-weight: 600; text-align: center;
+}
+.mx-code input::placeholder { letter-spacing: normal; text-transform: none; font-weight: 400; color: #94a3b8; }
+.mx-code input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.mx-error { color: #fca5a5; font-size: 13px; margin: 0; }
+.mx-divider { display: flex; align-items: center; gap: 10px; width: 100%; max-width: 340px; color: #94a3b8; font-size: 12px; }
+.mx-divider::before, .mx-divider::after { content: ""; flex: 1; height: 1px; background: rgba(255, 255, 255, .15); }
+
+@media (max-width: 420px) {
+    .mx-btn { width: 34px; height: 34px; }
+    .mx-gate-icon { display: none; }
+}
+.mx .mx-badge.preview { background: var(--accent); }
+.mx-btn:hover, .mx-btn:focus-visible { background: color-mix(in srgb, var(--accent) 55%, transparent); }
