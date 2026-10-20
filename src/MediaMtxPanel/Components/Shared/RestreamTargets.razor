@@ -1,6 +1,7 @@
 @implements IDisposable
 @inject RestreamService Restream
 @inject RestreamManager Manager
+@inject PlatformViewerService PlatformViewers
 
 @if (Manager.FfmpegAvailable == false)
 {
@@ -100,6 +101,57 @@
                             <ValidationMessage For="() => editing.VideoBitrateKbps" />
                         </div>
                     }
+                    @if (PlatformViewerService.Supports(editing.Platform))
+                    {
+                        <div class="col-md-12">
+                            <div class="border rounded-3 p-3">
+                                <div class="fw-semibold mb-1"><i class="bi bi-people me-1"></i>@L["Viewer count on {0} (optional)", info.Label]</div>
+                                <p class="small text-secondary mb-3">
+                                    @(editing.Platform switch
+                                    {
+                                        RestreamPlatform.YouTube => L["Shows how many people watch on YouTube. Create an API key in the Google Cloud console with the YouTube Data API v3 switched on, and enter the ID of your channel (starts with UC, see YouTube Studio → Settings → Channel → Advanced). It uses only a small part of the free daily quota."],
+                                        RestreamPlatform.Twitch => L["Shows how many people watch on Twitch. Register an application in the Twitch developer console (any OAuth redirect URL, e.g. http://localhost) and enter its client ID and a new client secret, plus your channel name."],
+                                        _ => L["Shows how many people watch on Facebook. Only for live videos on a Facebook page: enter the page ID and a long-lived page access token with the pages_read_engagement permission (for example from the Graph API Explorer)."],
+                                    })
+                                    <a class="ms-1" href="@info.ViewerHelpUrl" target="_blank" rel="noopener">@L["Open"] <i class="bi bi-box-arrow-up-right small"></i></a>
+                                </p>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="rs-vchannel">
+                                            @(editing.Platform switch
+                                            {
+                                                RestreamPlatform.YouTube => L["Channel ID"],
+                                                RestreamPlatform.Twitch => L["Channel name"],
+                                                _ => L["Page ID"],
+                                            })
+                                        </label>
+                                        <InputText id="rs-vchannel" class="form-control font-monospace" @bind-Value="editing.ViewerChannel" placeholder="@L["Empty = no viewer count"]" />
+                                    </div>
+                                    @if (editing.Platform == RestreamPlatform.Twitch)
+                                    {
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="rs-vclient">@L["Client ID"]</label>
+                                            <InputText id="rs-vclient" class="form-control font-monospace" @bind-Value="editing.ViewerClientId" />
+                                            <ValidationMessage For="() => editing.ViewerClientId" />
+                                        </div>
+                                    }
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="rs-vsecret">
+                                            @(editing.Platform switch
+                                            {
+                                                RestreamPlatform.YouTube => L["API key"],
+                                                RestreamPlatform.Twitch => L["Client secret"],
+                                                _ => L["Page access token"],
+                                            })
+                                        </label>
+                                        <InputText id="rs-vsecret" type="password" autocomplete="new-password" class="form-control font-monospace" @bind-Value="editing.ViewerSecret"
+                                                   placeholder="@(editing.HasStoredViewerSecret ? L["Stored (encrypted). Leave empty to keep it."] : "")" />
+                                        <ValidationMessage For="() => editing.ViewerSecret" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
                     <div class="col-md-12">
                         <div class="form-check form-switch">
                             <InputCheckbox class="form-check-input" id="rs-enabled" @bind-Value="editing.Enabled" />
@@ -154,6 +206,28 @@ else
                                 @if (st.BitrateKbps is { } kbps)
                                 {
                                     <span class="ms-3"><i class="bi bi-speedometer2 me-1"></i>@kbps.ToString("N0") kbit/s</span>
+                                }
+                                @if (PlatformViewerService.IsConfigured(t))
+                                {
+                                    var pv = PlatformViewers.Get(t.Id);
+                                    <div class="mt-2">
+                                        @if (pv is null)
+                                        {
+                                            <span><i class="bi bi-people me-1"></i>@L["Asking {0} for the viewer count…", info.Label]</span>
+                                        }
+                                        else if (pv.Count is { } n)
+                                        {
+                                            <span class="badge bg-primary-subtle text-primary-emphasis fs-6"><i class="bi bi-people me-1"></i>@L["{0} watching on {1}", n.ToString("N0"), info.Label]</span>
+                                        }
+                                        else if (pv.Error is not null)
+                                        {
+                                            <span class="text-danger-emphasis text-break"><i class="bi bi-people me-1"></i>@L["Viewer count unavailable: {0}", L[pv.Error]]</span>
+                                        }
+                                        else
+                                        {
+                                            <span><i class="bi bi-people me-1"></i>@L["{0} does not report a live broadcast yet.", info.Label]</span>
+                                        }
+                                    </div>
                                 }
                             }
                             else if (st.State == RestreamState.Retrying)

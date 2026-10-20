@@ -20,6 +20,9 @@ public class StreamStatSample
     /// <summary>Viewers connected at the moment of the sample.</summary>
     public int Viewers { get; set; }
 
+    /// <summary>Viewers on the restream platforms (YouTube, Twitch, Facebook) at the moment of the sample, where known.</summary>
+    public int PlatformViewers { get; set; }
+
     /// <summary>Bytes received from the source during the period.</summary>
     public long BytesIn { get; set; }
 

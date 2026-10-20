@@ -83,7 +83,9 @@ public class StreamStatsTests
     [Fact]
     public void Collector_counts_traffic_since_the_previous_round()
     {
-        var collector = new StreamStatsCollector(null!, null!,
+        var platformViewers = new MediaMtxPanel.Services.Restream.PlatformViewerService(null!, null!, null!, null!,
+            NullLogger<MediaMtxPanel.Services.Restream.PlatformViewerService>.Instance);
+        var collector = new StreamStatsCollector(null!, null!, platformViewers,
             Microsoft.Extensions.Options.Options.Create(new MediaMtxOptions { StatisticsIntervalSeconds = 60 }),
             NullLogger<StreamStatsCollector>.Instance);
         MtxPath Path(ulong rx, ulong tx, int viewers) => new()
