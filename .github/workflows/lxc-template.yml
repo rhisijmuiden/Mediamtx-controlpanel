@@ -1,0 +1,108 @@
+name: Proxmox CT template
+
+# Builds the Proxmox VE container template (mediamtx-panel-<version>-debian-13-amd64.tar.zst) with
+# deploy/lxc-template/build-template.sh and attaches it to a GitHub release, so it can be added in
+# Proxmox under <storage> → CT Templates → Download from URL.
+#   - Called by the Release workflow for every new release.
+#   - "Run workflow" by hand builds it for an existing release tag (e.g. v1.4.0).
+#   - Pull requests that change the installers build it as a check, without publishing it.
+on:
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag, e.g. v1.4.0
+        type: string
+        required: true
+  pull_request:
+    paths:
+      - deploy/**
+      - .github/workflows/lxc-template.yml
+
+permissions:
+  contents: write
+
+env:
+  DOTNET_NOLOGO: "1"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+  MEDIAMTX_VERSION: "1.21.2"
+
+jobs:
+  template:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pick the version
+        id: v
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          if [[ -n "$TAG" ]]; then
+            [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] || { echo "::error::'$TAG' is not a release tag."; exit 1; }
+            echo "ref=$TAG" >>"$GITHUB_OUTPUT"
+            echo "version=${TAG#v}" >>"$GITHUB_OUTPUT"
+            channel=stable; [[ "$TAG" == *-* ]] && channel=test
+            echo "channel=$channel" >>"$GITHUB_OUTPUT"
+            echo "publish=true" >>"$GITHUB_OUTPUT"
+          else
+            echo "ref=$GITHUB_SHA" >>"$GITHUB_OUTPUT"
+            echo "version=0.0.0-pr.${{ github.event.number }}" >>"$GITHUB_OUTPUT"
+            echo "channel=stable" >>"$GITHUB_OUTPUT"
+            echo "publish=false" >>"$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.v.outputs.ref }}
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - name: Build the panel
+        run: |
+          dotnet publish src/MediaMtxPanel/MediaMtxPanel.csproj -c Release -o "$RUNNER_TEMP/app" \
+            -p:Version=${{ steps.v.outputs.version }} -p:SourceRevisionId="$(git rev-parse HEAD)"
+      - name: Build the CT template
+        env:
+          NAME: mediamtx-panel-${{ steps.v.outputs.version }}-debian-13-amd64.tar.zst
+        run: |
+          sudo apt-get install -y -qq zstd >/dev/null
+          sudo env MEDIAMTX_VERSION="$MEDIAMTX_VERSION" RELEASE_CHANNEL=${{ steps.v.outputs.channel }} \
+            deploy/lxc-template/build-template.sh --app "$RUNNER_TEMP/app" \
+            --version ${{ steps.v.outputs.version }} --out dist
+          sudo chown -R "$(id -u):$(id -g)" dist
+          # Stable releases also get the file under a fixed name, so
+          # releases/latest/download/mediamtx-panel-debian-13-amd64.tar.zst always points at the newest one.
+          if [[ "${{ steps.v.outputs.channel }}" == "stable" ]]; then
+            cp "dist/$NAME" dist/mediamtx-panel-debian-13-amd64.tar.zst
+            (cd dist && sha256sum mediamtx-panel-debian-13-amd64.tar.zst >mediamtx-panel-debian-13-amd64.tar.zst.sha256)
+          fi
+          ls -lh dist
+      - name: Check the template
+        run: |
+          mkdir check
+          sudo tar --zstd -xpf "dist/mediamtx-panel-${{ steps.v.outputs.version }}-debian-13-amd64.tar.zst" -C check
+          for f in opt/mediamtx-panel/MediaMtxPanel.dll opt/mediamtx/mediamtx etc/mediamtx-panel/firstboot.env \
+                   usr/local/lib/mediamtx-panel/install-in-lxc.sh usr/local/lib/mediamtx-panel/login-banner.sh \
+                   etc/systemd/system/multi-user.target.wants/mediamtx-panel-firstboot.service; do
+            # -L as well: enabled units are absolute symlinks, which point outside check/ on this runner.
+            sudo test -e "check/$f" -o -L "check/$f" || { echo "::error::$f is missing from the template."; exit 1; }
+          done
+          if sudo test -e check/etc/mediamtx-panel/panel.env; then echo "::error::the template must not be configured."; exit 1; fi
+          if sudo test -s check/etc/machine-id; then echo "::error::the template must not have a machine ID."; exit 1; fi
+          sudo rm -rf check
+      - name: Attach to the release
+        if: steps.v.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.v.outputs.ref }}
+        run: |
+          gh release upload "$TAG" dist/* --clobber --repo "$GITHUB_REPOSITORY"
+          {
+            echo "### Proxmox CT template"
+            echo "In Proxmox: *storage* → **CT Templates** → **Download from URL**:"
+            echo '```'
+            echo "https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG/mediamtx-panel-${TAG#v}-debian-13-amd64.tar.zst"
+            echo '```'
+          } >>"$GITHUB_STEP_SUMMARY"

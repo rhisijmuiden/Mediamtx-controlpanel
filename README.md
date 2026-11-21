@@ -18,15 +18,23 @@ A control panel for [MediaMTX](https://github.com/bluenviron/mediamtx), written 
 - **Settings**: application name, default language, web interface port and outgoing mail (any SMTP server).
 - **Languages**: English (default), Dutch, German and French; everyone can pick their own language.
 - **Info and updates**: the current version and build, a changelog of every version, with an update check against GitHub every 24 hours and on demand, on a **Stable** or **Test** release channel, and an **Update now** button that installs the update from the web interface.
-- **Proxmox**: create an LXC container with the panel and MediaMTX using a single command in the Proxmox shell (see [Proxmox LXC](#proxmox-lxc)).
+- **Proxmox**: a ready-made CT template you add under **CT Templates → Download from URL** (see [Proxmox CT template](#proxmox-ct-template)), or one command in the Proxmox shell that creates the container (see [Proxmox LXC](#proxmox-lxc)).
 
-**Install on Proxmox VE** by pasting this into the Proxmox host shell (details in [Proxmox LXC](#proxmox-lxc)):
+After every installation you only get the panel address, the administrator login and a one-time password; everything else is set up in the web interface.
+
+**Install on Proxmox VE from the CT template**: in Proxmox open *your storage* (e.g. `local`) → **CT Templates** → **Download from URL**, paste the URL below, then create a container from it (details in [Proxmox CT template](#proxmox-ct-template)):
+
+```
+https://github.com/rhisijmuiden/Mediamtx-controlpanel/releases/latest/download/mediamtx-panel-debian-13-amd64.tar.zst
+```
+
+**Install on Proxmox VE with a script** by pasting this into the Proxmox host shell (details in [Proxmox LXC](#proxmox-lxc)):
 
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/proxmox/create-lxc.sh)"
 ```
 
-**Install on a Debian 13 machine** (bare metal or a VM) by running this as root (details in [Debian 13 standalone](#debian-13-standalone)):
+**Install on a bare Debian 13 system** (bare metal, a VM or a container with systemd) by running this as root (details in [Debian 13 standalone](#debian-13-standalone)):
 
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/debian/install.sh)"
@@ -350,6 +358,61 @@ Port 8189 carries only media for sessions the panel authorised through the signa
 
 Testing from inside your own network with the public host name needs a router that supports NAT loopback (hairpin NAT); if it does not, test from outside.
 
+## Proxmox CT template
+
+Every release has a Proxmox VE container template attached: a Debian 13 root file system with the panel, .NET 10, ffmpeg and MediaMTX already installed. You add it to Proxmox like any other CT template and create containers from it with the normal **Create CT** wizard. Nothing has to be built or downloaded when the container starts, so it is ready within seconds.
+
+Proxmox's own template list (`pveam`, the **Templates** button) only shows the official Proxmox templates, so the template is added with **Download from URL**.
+
+### Requirements
+
+- Proxmox VE 8 or newer, amd64.
+- Internet access from the Proxmox host to `github.com` to download the template (about 370 MB).
+
+### Download the template
+
+1. In the Proxmox web UI, select a storage that holds container templates, for example **Datacenter → *your node* → local**.
+2. Open **CT Templates** and click **Download from URL**.
+3. Paste this URL and click **Query URL**:
+
+   ```
+   https://github.com/rhisijmuiden/Mediamtx-controlpanel/releases/latest/download/mediamtx-panel-debian-13-amd64.tar.zst
+   ```
+
+   This always gives the newest stable release. For a specific version (or a Test release), copy the link of `mediamtx-panel-<version>-debian-13-amd64.tar.zst` from the [releases page](https://github.com/rhisijmuiden/Mediamtx-controlpanel/releases). Each file has a `.sha256` file next to it whose value you can paste under **Hash algorithm: SHA-256** to check the download.
+4. Click **Download**.
+
+Without the web UI, on the Proxmox host shell:
+
+```bash
+wget -P /var/lib/vz/template/cache/ https://github.com/rhisijmuiden/Mediamtx-controlpanel/releases/latest/download/mediamtx-panel-debian-13-amd64.tar.zst
+```
+
+### Create the container
+
+1. Click **Create CT** (top right).
+2. **General**: choose a hostname and a root password (for the console). Keep *Unprivileged container* and *Nesting* switched on.
+3. **Template**: pick the storage and `mediamtx-panel-…-debian-13-amd64.tar.zst`.
+4. **Disks**: 8 GB or more. **CPU**: 2 cores. **Memory**: 2048 MB, because **Update now** builds the new version inside the container.
+5. **Network**: DHCP or a static IP address on your bridge. Then finish the wizard and start the container.
+6. At the first start the container sets itself up (fresh secrets and a one-time administrator password) and starts the panel and MediaMTX. Open the container's **Console**: it shows only what you need:
+
+   ```
+     MediaMTX Panel
+       Address:   http://192.168.1.50:8080
+       Login:     admin@localhost
+       Password:  <one-time password>
+       (one-time password: the panel asks you to choose your own at the first login)
+   ```
+
+   The same text appears after you log in to the console as root.
+
+7. Open the address in your browser, log in and choose your own password. Everything else (servers, public address, mail, backups, release channel, language) is set up in the web interface. As soon as you have chosen your own password, the one-time password disappears from the console and from the container.
+
+The container is the same as one made by `create-lxc.sh`: same locations, services and **Update now** (see [After installing](#after-installing)). For updates from the command line, use `create-lxc.sh … _ update <CTID>` on the host, or `bash /usr/local/lib/mediamtx-panel/install.sh update` inside the container.
+
+The template is made by `deploy/lxc-template/build-template.sh`, which starts from Proxmox's own `debian-13-standard` template. The [Proxmox CT template workflow](.github/workflows/lxc-template.yml) builds it for every release; run that workflow by hand to build it for an existing release.
+
 ## Proxmox LXC
 
 The script `deploy/proxmox/create-lxc.sh` creates a Debian 13 container on a Proxmox VE host. It installs the panel as a systemd service and, by default, MediaMTX as the first server in the same container.
@@ -377,21 +440,16 @@ The script `deploy/proxmox/create-lxc.sh` creates a Debian 13 container on a Pro
 5. At the end the script prints the details you need:
 
    ```
-   [✓] MediaMTX Panel is installed in container 125 (Debian 13)
+   [✓] MediaMTX Panel is installed in container 125. Open the address below and continue in the web interface.
 
      ┌──────────────────────────────────────────────────────────────
-     │  Address:      http://192.168.1.50:8080
-     │  Login:        admin@localhost
-     │  Password:     <one-time password>
-     │
-     │  This is a one-time password: after your first login
-     │  the panel immediately asks you to choose your own password.
+     │  Address:   http://192.168.1.50:8080
+     │  Login:     admin@localhost
+     │  Password:  <one-time password>
      └──────────────────────────────────────────────────────────────
-
-     Root password of the container: <random password>
    ```
 
-   These passwords are not stored anywhere and are not shown again, so copy them now.
+   The password is not stored anywhere and is not shown again, so copy it now. The container has no root password unless you set one under **Advanced**; `pct enter <CTID>` on the host gives a root shell.
 
 6. Open the address in your browser and log in. The panel immediately asks you to choose a new password.
 
@@ -400,7 +458,7 @@ The script `deploy/proxmox/create-lxc.sh` creates a Debian 13 container on a Pro
 - **Public address**: stream URLs use the container's IP by default. If viewers or encoders connect through a domain name or a NAT address, change it under **Servers** in the panel, or install with `PUBLIC_HOST=…`.
 - **Firewall and port forwarding**: open the MediaMTX ports you use: 8554 (RTSP), 1935 (RTMP), 8890/udp (SRT), 8888 (HLS), 8889 and 8189/udp (WebRTC), plus the panel port (8080).
 - **HTTPS**: for use on the internet, put the panel behind a reverse proxy with HTTPS and switch on **Settings → Web server → The panel is behind a reverse proxy**; see [Behind a reverse proxy (HTTPS)](#behind-a-reverse-proxy-https).
-- **Root password**: if you shared the container's root password anywhere, change it with `pct exec <CTID> -- passwd`.
+- **Root password**: set or change the container's root password with `pct exec <CTID> -- passwd`.
 - **More servers**: other containers or VMs that run only MediaMTX can be added under **Servers** in the panel, optionally set up over SSH (see [Adding a MediaMTX server](#adding-a-mediamtx-server)).
 
 Inside the container:
@@ -448,7 +506,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-co
 | `CT_STORAGE` / `TEMPLATE_STORAGE` | `local-lvm` / `local` | Storage for the disk and for the template |
 | `CT_BRIDGE` / `CT_VLAN` | `vmbr0` / empty | Network |
 | `CT_IP` / `CT_GW` / `CT_DNS` | `dhcp` / empty / empty | IP settings |
-| `CT_PASSWORD` / `CT_SSH_KEY` | random / empty | Root access to the container (`CT_SSH_KEY` is a path to a public key file) |
+| `CT_PASSWORD` / `CT_SSH_KEY` | none / empty | Root access to the container (`CT_SSH_KEY` is a path to a public key file) |
 | `INSTALL_MEDIAMTX` | `yes` | Install MediaMTX in the same container |
 | `MEDIAMTX_VERSION` | `1.21.2` | MediaMTX version (from GitHub releases) |
 | `PANEL_PORT` | `8080` | Panel port |
@@ -467,11 +525,11 @@ The script downloads the source code from GitHub itself. Running `bash deploy/pr
 
 ## Debian 13 standalone
 
-The script `deploy/debian/install.sh` installs the panel directly on a machine running Debian 13 (trixie), such as a bare-metal server or a VM, without Proxmox. It installs everything it needs itself (.NET 10 from Microsoft's package feed, and curl and whiptail when they are missing) and sets up the same systemd services as the Proxmox container. During the installation you choose whether a local MediaMTX is installed too, or only the control panel.
+The script `deploy/debian/install.sh` installs the panel on a bare Debian 13 (trixie) system: a bare-metal server, a VM, or a container that runs systemd (such as an LXC container you made yourself). It installs everything it needs itself (.NET 10 from Microsoft's package feed, and curl and whiptail when they are missing) and sets up the same systemd services as the Proxmox container. By default it installs the panel and a local MediaMTX; under **Advanced** you can choose the panel only.
 
 ### Requirements
 
-- Debian 13 with systemd, amd64 or arm64. Other distributions and Debian versions are refused.
+- Debian 13 with systemd, amd64 or arm64: bare metal, a VM or a container with systemd. Other distributions and Debian versions are refused, and so are containers without systemd (for Docker, use `docker-compose.yml`).
 - Root access (`sudo -i` or `su -`).
 - Internet access to `packages.microsoft.com` (.NET 10), `github.com` (sources and MediaMTX) and the Debian mirrors.
 - About 1.5 GB of memory plus swap, because the panel is built on the machine. The script warns when there is less.
@@ -492,11 +550,23 @@ The script `deploy/debian/install.sh` installs the panel directly on a machine r
    bash -c "$(wget -qO- https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/debian/install.sh)"
    ```
 
-3. Choose what to install:
+3. Choose **Default** (the panel and MediaMTX on this machine, port 8080) or **Advanced**, where you choose:
    - **Panel + MediaMTX**: streams are served from this machine, and this MediaMTX is added to the panel as the first server.
    - **Panel only**: no local MediaMTX. Afterwards you add MediaMTX servers that run elsewhere under **Servers** in the panel, which shows the `mediamtx.yml` settings each server needs.
-4. Choose **Default** settings, or **Advanced** to set the panel port, the administrator's email address, the address of this machine and (with MediaMTX) the public stream address and MediaMTX version.
-5. Check the summary and confirm. At the end the script prints the panel address, the login and a one-time password, just like the Proxmox script. The panel asks you to choose your own password at the first login.
+   - the panel port, the administrator's email address, the address of this machine and (with MediaMTX) the public stream address and MediaMTX version.
+4. Check the summary and confirm. At the end the script shows only the panel address, the login and a one-time password:
+
+   ```
+   [✓] MediaMTX Panel is installed. Open the address below and continue in the web interface.
+
+     ┌──────────────────────────────────────────────────────────────
+     │  Address:   http://192.168.1.50:8080
+     │  Login:     admin@localhost
+     │  Password:  <one-time password>
+     └──────────────────────────────────────────────────────────────
+   ```
+
+5. Open the address, log in and choose your own password. Everything else is set up in the web interface.
 
 The program, configuration, data and service locations are the same as in the Proxmox container (see the table under [After installing](#after-installing)). Logs: `journalctl -u mediamtx-panel -f` and `journalctl -u mediamtx -f`.
 
@@ -731,7 +801,8 @@ src/MediaMtxPanel/
 deploy/mediamtx.yml        MediaMTX configuration for use with the panel
 deploy/mediamtx-panel-station.sh  Station command for Build My TV Station (installed as mediamtx-panel-station)
 deploy/proxmox/            create-lxc.sh (on the Proxmox host) and install-in-lxc.sh (in the container)
-deploy/debian/install.sh   Standalone installer for Debian 13 (bare metal or VM); uses install-in-lxc.sh
+deploy/debian/install.sh   Installer for a bare Debian 13 system (bare metal, VM or container); uses install-in-lxc.sh
+deploy/lxc-template/       build-template.sh: builds the Proxmox CT template (first boot: mediamtx-panel-login-banner.sh)
 tests/MediaMtxPanel.Tests/ Integration tests (xUnit, WebApplicationFactory)
 tools/                     Translation check, screenshot scripts
 .github/workflows/         Build, translation check and README screenshots

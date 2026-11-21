@@ -10,6 +10,16 @@ Added, Changed, Deprecated, Removed, Fixed or Security, and rename Unreleased to
 
 ## [Unreleased]
 
+### Added
+
+- **Proxmox CT template**: every release now has a ready-made Proxmox container template (`mediamtx-panel-<version>-debian-13-amd64.tar.zst`) with the panel, .NET 10, ffmpeg and MediaMTX installed. Add it in Proxmox under *storage* → **CT Templates** → **Download from URL** and create containers from it with **Create CT**. At its first start the container makes its own secrets and one-time administrator password, and its console shows only the panel address, login and password (the password disappears once you have chosen your own). Built by the new *Proxmox CT template* workflow, which the Release workflow runs for every release.
+
+### Changed
+
+- The Debian 13 installer works on any bare Debian 13 system with systemd: bare metal, a VM or a container. In a container without systemd (such as Docker) it explains what to use instead.
+- The installers ask less: one choice between the default settings and *Advanced* (components, port, admin, addresses). After the installation they show only the panel address, the administrator login and the one-time password; everything else is set up in the web interface.
+- Containers made by `create-lxc.sh` no longer get a random root password that was printed at the end; set one under *Advanced* or use `pct enter <CTID>`.
+
 ### Fixed
 
 - The release workflow read the version from a comment in the project file as well, so publishing a release failed.

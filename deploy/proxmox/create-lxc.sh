@@ -35,7 +35,7 @@ CT_VLAN="${CT_VLAN:-}"                             # optional VLAN tag
 CT_IP="${CT_IP:-dhcp}"                             # "dhcp" or e.g. 192.168.1.50/24
 CT_GW="${CT_GW:-}"                                 # gateway when CT_IP is static
 CT_DNS="${CT_DNS:-}"                               # optional DNS server
-CT_PASSWORD="${CT_PASSWORD:-}"                     # root password; empty = random
+CT_PASSWORD="${CT_PASSWORD:-}"                     # root password; empty = none (use 'pct enter <CTID>')
 CT_SSH_KEY="${CT_SSH_KEY:-}"                       # optional path to a public key file
 
 # Panel / MediaMTX settings (passed into the container)
@@ -272,7 +272,7 @@ advanced_settings() {
   fi
   ask_input CT_VLAN "VLAN tag (empty = none)"
   ask_input CT_DNS "DNS server (empty = the Proxmox host's)"
-  ask_input CT_PASSWORD "Root password of the container (empty = random)" --passwordbox
+  ask_input CT_PASSWORD "Root password of the container (empty = none; 'pct enter <CTID>' on the host still works)" --passwordbox
   ask_input CT_SSH_KEY "Path to a public SSH key for root (empty = none)"
 
   ask_yesno INSTALL_MEDIAMTX "Also install MediaMTX in this container?\n\nChoose 'No' if you only want the panel and will add MediaMTX servers later."
@@ -348,7 +348,6 @@ else
 fi
 prepare_sources
 
-[[ -n "$CT_PASSWORD" ]] || CT_PASSWORD="$(random_secret 20)"
 [[ -n "$ADMIN_PASSWORD" ]] || ADMIN_PASSWORD="$(random_secret 16)Aa1"
 
 info "Looking up the $TEMPLATE_NAME template…"
@@ -384,9 +383,9 @@ create_args=(
   --onboot 1
   --ostype debian
   --arch "$host_arch"
-  --password "$CT_PASSWORD"
   --description "MediaMTX Panel"
 )
+[[ -n "$CT_PASSWORD" ]] && create_args+=(--password "$CT_PASSWORD")
 [[ -n "$CT_DNS" ]] && create_args+=(--nameserver "$CT_DNS")
 [[ -n "$CT_SSH_KEY" ]] && create_args+=(--ssh-public-keys "$CT_SSH_KEY")
 
@@ -414,32 +413,16 @@ push_and_install "$CT_ID" \
   PUBLIC_HOST="$PUBLIC_HOST" \
   PANEL_HOST="$ct_ip"
 
-services=""
-if [[ $INSTALL_MEDIAMTX == yes ]]; then
-  services="
-  MediaMTX in the container: RTSP 8554, RTMP 1935, SRT 8890/udp, HLS 8888, WebRTC 8889 + 8189/udp
-  Public address in the stream URLs: ${PUBLIC_HOST} (change it under Servers in the panel)
-"
-fi
-
 cat <<SUMMARY
 
-$(ok "MediaMTX Panel is installed in container $CT_ID (Debian 13)")
+$(ok "MediaMTX Panel is installed in container $CT_ID. Open the address below and continue in the web interface.")
 
   ┌──────────────────────────────────────────────────────────────
-  │  Address:      http://${ct_ip}:${PANEL_PORT}
-  │  Login:        ${ADMIN_EMAIL}
-  │  Password:     ${ADMIN_PASSWORD}
-  │
-  │  This is a one-time password: after your first login
-  │  the panel immediately asks you to choose your own password.
+  │  Address:   http://${ct_ip}:${PANEL_PORT}
+  │  Login:     ${ADMIN_EMAIL}
+  │  Password:  ${ADMIN_PASSWORD}
   └──────────────────────────────────────────────────────────────
 
-  Root password of the container: ${CT_PASSWORD}
-${services}
-  Settings in the container: /etc/mediamtx-panel/panel.env
-  Logs:   pct exec ${CT_ID} -- journalctl -u mediamtx-panel -f
-  Update: bash -c "\$(curl -fsSL https://raw.githubusercontent.com/${REPO}/${REPO_BRANCH}/deploy/proxmox/create-lxc.sh)" _ update ${CT_ID}
-
-These passwords are not stored anywhere and will not be shown again.
+  This one-time password is not stored and will not be shown again;
+  the panel asks you to choose your own password at the first login.
 SUMMARY
