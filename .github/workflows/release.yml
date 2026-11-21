@@ -11,6 +11,7 @@ name: Release
 #              versions always count as newer than the last stable release.
 #   - stable → tag v<Version>, a normal release. Bump <Version> in MediaMtxPanel.csproj first.
 # Pushing a tag by hand works too: a tag with a hyphen (v1.3.0-beta.1) becomes a prerelease.
+# Every release also gets the Proxmox CT template attached (lxc-template.yml).
 on:
   workflow_dispatch:
     inputs:
@@ -36,6 +37,8 @@ env:
 jobs:
   release:
     runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -108,3 +111,10 @@ jobs:
           flags=(--title "$TAG" --generate-notes --notes-file release-notes.md --target "$GITHUB_SHA")
           [[ "$PRERELEASE" == "true" ]] && flags+=(--prerelease) || flags+=(--latest)
           gh release create "$TAG" "${flags[@]}"
+
+  # The Proxmox CT template of this release (Download from URL under CT Templates).
+  lxc-template:
+    needs: release
+    uses: ./.github/workflows/lxc-template.yml
+    with:
+      tag: ${{ needs.release.outputs.tag }}

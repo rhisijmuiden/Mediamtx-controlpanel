@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# Installs the MediaMTX Panel directly on a Debian 13 machine (bare metal or a VM), without Proxmox.
-# Installs everything it needs itself: .NET 10, the panel as a systemd service and, if you want,
-# MediaMTX on the same machine.
+# Installs the MediaMTX Panel on a bare Debian 13 system: bare metal, a VM or a container with systemd
+# (such as a Proxmox LXC container). Installs everything it needs itself: .NET 10, the panel as a
+# systemd service and, unless you choose otherwise, MediaMTX on the same machine.
+# At the end it shows only the panel address and the administrator login; everything else is
+# configured in the web interface.
 #
 # Run as root. Straight from GitHub:
 #     bash -c "$(curl -fsSL https://raw.githubusercontent.com/rhisijmuiden/Mediamtx-controlpanel/main/deploy/debian/install.sh)"
@@ -13,8 +15,8 @@
 # (RELEASE_CHANNEL=stable or test; on update the channel chosen in the panel), or the sources of
 # $REPO_BRANCH while that channel has no release yet.
 #
-# In a terminal the script asks what to install: the panel together with a local MediaMTX, or only
-# the panel (you then add MediaMTX servers that run elsewhere under Servers in the panel).
+# In a terminal the script asks one question: install with the default settings (the panel and a local
+# MediaMTX on port 8080), or choose yourself (only the panel, port, admin login, addresses).
 # Every setting below can also be set with an environment variable or an option; with
 # INTERACTIVE=no (or --yes) nothing is asked, e.g.
 #     bash deploy/debian/install.sh --panel-only --yes
@@ -99,8 +101,16 @@ preflight() {
   . /etc/os-release
   [[ "${ID:-}" == "debian" ]] || die "This installer is made for Debian 13; this machine runs '${PRETTY_NAME:-$ID}'."
   [[ "${VERSION_ID:-}" == "13" ]] || die "This installer is made for Debian 13 (trixie); this machine runs ${PRETTY_NAME:-Debian $VERSION_ID}."
-  [[ -d /run/systemd/system ]] || die "systemd is not running; the panel and MediaMTX are installed as systemd services."
-  command -v pct >/dev/null && warn "This looks like a Proxmox VE host. To run the panel in its own container, use deploy/proxmox/create-lxc.sh instead."
+  local container=""
+  container="$(systemd-detect-virt --container 2>/dev/null || true)"
+  [[ "$container" == "none" ]] && container=""
+  if [[ ! -d /run/systemd/system ]]; then
+    [[ -n "$container" || -f /.dockerenv ]] && die "This container runs without systemd (${container:-docker}). The panel and MediaMTX are installed as systemd services.
+    Use a container with systemd (such as a Proxmox LXC container), or the Docker image (docker-compose.yml) instead."
+    die "systemd is not running; the panel and MediaMTX are installed as systemd services."
+  fi
+  [[ -n "$container" ]] && info "Installing inside a container (${container})."
+  command -v pct >/dev/null && warn "This looks like a Proxmox VE host. To run the panel in its own container, use deploy/proxmox/create-lxc.sh or the CT template instead."
   return 0
 }
 
@@ -266,18 +276,17 @@ ask_settings() {
   whiptail --backtitle "$BACKTITLE" --title "$TITLE" --yesno \
     "This installs the MediaMTX Panel on this machine ($(hostname), ${PANEL_HOST}).\n\nIt adds .NET 10 from packages.microsoft.com and systemd services.\n\nContinue?" 13 72 || cancelled
 
-  local components
-  components="$( [[ $INSTALL_MEDIAMTX == yes ]] && echo full || echo panel )"
-  ask_menu components "What do you want to install on this machine?" \
-    full  "Panel + MediaMTX (streams are served from this machine)" \
-    panel "Panel only (connect MediaMTX servers that run elsewhere)"
-  if [[ "$components" == "full" ]]; then INSTALL_MEDIAMTX=yes; else INSTALL_MEDIAMTX=no; fi
-
   local mode=default
-  ask_menu mode "How do you want to install?" \
-    default "Default settings (port $PANEL_PORT, admin $ADMIN_EMAIL)" \
-    advanced "Configure yourself (port, admin, addresses$( [[ $INSTALL_MEDIAMTX == yes ]] && echo ", MediaMTX version"))"
+  ask_menu mode "How do you want to install? Everything else is set up in the web interface afterwards." \
+    default "Default settings (panel + MediaMTX, port $PANEL_PORT, admin $ADMIN_EMAIL)" \
+    advanced "Configure yourself (components, port, admin, addresses)"
   if [[ "$mode" == "advanced" ]]; then
+    local components
+    components="$( [[ $INSTALL_MEDIAMTX == yes ]] && echo full || echo panel )"
+    ask_menu components "What do you want to install on this machine?" \
+      full  "Panel + MediaMTX (streams are served from this machine)" \
+      panel "Panel only (connect MediaMTX servers that run elsewhere)"
+    if [[ "$components" == "full" ]]; then INSTALL_MEDIAMTX=yes; else INSTALL_MEDIAMTX=no; fi
     ask_input PANEL_PORT "Panel port"
     ask_input ADMIN_EMAIL "Administrator email address (login)"
     ask_input PANEL_HOST "Address at which browsers and MediaMTX servers reach this panel"
@@ -344,35 +353,16 @@ run_installer \
   PUBLIC_HOST="$PUBLIC_HOST" \
   PANEL_HOST="$PANEL_HOST"
 
-if [[ $INSTALL_MEDIAMTX == yes ]]; then
-  services="
-  MediaMTX on this machine: RTSP 8554, RTMP 1935, SRT 8890/udp, HLS 8888, WebRTC 8889 + 8189/udp
-  Public address in the stream URLs: ${PUBLIC_HOST} (change it under Servers in the panel)
-  MediaMTX logs: journalctl -u mediamtx -f
-"
-else
-  services="
-  Only the panel is installed. Add your MediaMTX servers under Servers in the panel;
-  the panel shows the mediamtx.yml settings each server needs.
-"
-fi
-
 cat <<SUMMARY
 
-$(ok "MediaMTX Panel is installed on $(hostname) (${PRETTY_NAME})")
+$(ok "MediaMTX Panel is installed. Open the address below and continue in the web interface.")
 
   ┌──────────────────────────────────────────────────────────────
-  │  Address:      http://${PANEL_HOST}:${PANEL_PORT}
-  │  Login:        ${ADMIN_EMAIL}
-  │  Password:     ${ADMIN_PASSWORD}
-  │
-  │  This is a one-time password: after your first login
-  │  the panel immediately asks you to choose your own password.
+  │  Address:   http://${PANEL_HOST}:${PANEL_PORT}
+  │  Login:     ${ADMIN_EMAIL}
+  │  Password:  ${ADMIN_PASSWORD}
   └──────────────────────────────────────────────────────────────
-${services}
-  Settings: ${CONF_FILE}
-  Logs:     journalctl -u mediamtx-panel -f
-  Update:   bash -c "\$(curl -fsSL https://raw.githubusercontent.com/${REPO}/${REPO_BRANCH}/deploy/debian/install.sh)" _ update
 
-This password is not stored anywhere and will not be shown again.
+  This one-time password is not stored and will not be shown again;
+  the panel asks you to choose your own password at the first login.
 SUMMARY
