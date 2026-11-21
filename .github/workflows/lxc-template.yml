@@ -86,7 +86,8 @@ jobs:
           for f in opt/mediamtx-panel/MediaMtxPanel.dll opt/mediamtx/mediamtx etc/mediamtx-panel/firstboot.env \
                    usr/local/lib/mediamtx-panel/install-in-lxc.sh usr/local/lib/mediamtx-panel/login-banner.sh \
                    etc/systemd/system/multi-user.target.wants/mediamtx-panel-firstboot.service; do
-            sudo test -e "check/$f" || { echo "::error::$f is missing from the template."; exit 1; }
+            # -L as well: enabled units are absolute symlinks, which point outside check/ on this runner.
+            sudo test -e "check/$f" -o -L "check/$f" || { echo "::error::$f is missing from the template."; exit 1; }
           done
           if sudo test -e check/etc/mediamtx-panel/panel.env; then echo "::error::the template must not be configured."; exit 1; fi
           if sudo test -s check/etc/machine-id; then echo "::error::the template must not have a machine ID."; exit 1; fi
